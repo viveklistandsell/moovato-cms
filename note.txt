@@ -1,0 +1,91 @@
+The architecture I recommend
+1. Data model (DB, not Blade files)
+
+pages
+  id, slug (unique, indexed), template, status, published_at
+  meta_title, meta_description, og_image, canonical, schema_org (jsonb)
+
+page_blocks
+  id, page_id, order, type ("hero" | "features" | "cta" | …), data (jsonb)
+Each page stores an ordered array of typed blocks with JSON payloads. No HTML, no Blade strings — just structured data. This is the same pattern Twill, Strapi, Sanity, Payload, and Statamic Bard use.
+
+2. Frontend rendering (Inertia + Vue, no Blade)
+One catch-all route handles SEO pages:
+
+
+Route::get('/{slug}', [PageController::class, 'show'])
+    ->where('slug', '.*')
+    ->name('pages.show');
+Controller returns:
+
+
+return Inertia::render("Templates/{$page->template}", [
+    'page' => $page->only('meta_title', 'meta_description', 'og_image', 'schema_org'),
+    'blocks' => $page->blocks->map(fn ($b) => ['type' => $b->type, 'data' => $b->data]),
+]);
+A single Vue template component iterates blocks and resolves them to components dynamically:
+
+
+<!-- resources/js/Pages/Templates/Default.vue -->
+<script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
+const blockMap = {
+  hero:     defineAsyncComponent(() => import('@/Blocks/Hero.vue')),
+  features: defineAsyncComponent(() => import('@/Blocks/Features.vue')),
+  cta:      defineAsyncComponent(() => import('@/Blocks/Cta.vue')),
+  // ...
+}
+defineProps<{ page: PageMeta; blocks: Block[] }>()
+</script>
+
+<template>
+  <SeoHead :meta="page" />
+  <component
+    v-for="(b, i) in blocks" :key="i"
+    :is="blockMap[b.type]" v-bind="b.data"
+  />
+</template>
+Templates = different Pages/Templates/*.vue files (Default, Landing, Article, Product). The admin picks one per page.
+
+3. SSR is mandatory for SEO
+Enable Inertia SSR (php artisan inertia:start-ssr, composer run dev to run both).
+With SSR, Google receives fully-rendered HTML for all 100+ pages — no client-side hydration delay, no half-empty crawl.
+Without SSR, Inertia is essentially an SPA with poor SEO; the workarounds (server-detect bot UA, prerender.io) are fragile.
+4. SEO essentials per page
+<title>, meta description, canonical, OG tags via @vueuse/head or a <SeoHead> component fed from page props.
+Per-page JSON-LD (schema_org jsonb) injected as <script type="application/ld+json">.
+Auto-generate sitemap.xml from the pages table (use spatie/laravel-sitemap).
+HTTP-cache the public page response (ETag / Cache-Control) and bust on save.
+5. Admin panel (the page builder)
+You have two realistic free paths:
+
+Path A — Build it yourself in Inertia/Vue (recommended for your stack)
+
+Admin pages: Admin/Pages/Index.vue, Edit.vue.
+Use a drag-and-drop list (e.g. vuedraggable@next) to reorder blocks.
+Each block type has a corresponding edit form component (Blocks/Hero.vue for render, Blocks/HeroForm.vue for edit). A registry maps type → { render, form, schema }.
+Save the JSON via Inertia useForm. Validate with a Form Request.
+Action classes per the CLAUDE.md pattern: CreatePage, UpdatePageBlocks, PublishPage.
+This stays consistent with your existing Action-based architecture and avoids dragging in another admin framework.
+
+Path B — Use Twill + Inertia bridge (if you want a ready CMS UI)
+The codivores Twill+Inertia+Vue 3 series is the canonical reference for this exact problem. Twill (free, MIT) gives you the admin UI and block editor; an Inertia adapter ships the block array to your Vue frontend. You skip building the admin UI but inherit Twill's conventions.
+
+There's also the hotmeteor/inertia-statamic adapter if you'd rather use Statamic. Note Statamic 6's own control panel is now built on Inertia + Vue 3 — so it integrates naturally — but it's only free for solo/non-commercial use.
+
+6. Should data come "from API or page components"?
+Neither. With Inertia, the controller is the API — props passed to Inertia::render are the data layer. No separate REST endpoint, no embedded JSON in templates, no Blade variables. This is Inertia's whole point and it's exactly right for a CMS.
+
+For lazy/optional data (related posts, comments), use Inertia v2 deferred props + <WhenVisible> so the initial SSR HTML stays SEO-complete and slow data loads after.
+
+Concrete recommendation for your project
+Given Laravel 13 + Inertia v2 + Vue 3 + your Action pattern:
+
+Build it yourself, Path A. A page CMS is not complex once the data model is right, and it stays inside your existing conventions.
+Turn on Inertia SSR from day one — retrofitting SSR later is painful.
+Block registry as the single source of truth — every block defined once with { type, schema, render, form }. New block = one folder, no other code changes.
+Skip Blade entirely for these pages.
+Generate the sitemap from the pages table; cache rendered SSR HTML with a short TTL and bust on publish.
+If timeline pressure is high and you don't want to build the admin UI, use Twill for the backend and keep your Inertia/Vue frontend — the codivores guide walks through the exact bridge.
+
+Sources:
