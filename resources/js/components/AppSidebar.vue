@@ -40,25 +40,23 @@ import type { NavItem } from '@/types';
 
 const page = usePage();
 
-const platformItems = computed<NavItem[]>(() => {
-    const items: NavItem[] = [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-            icon: LayoutGrid,
-        },
-    ];
+const platformItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: dashboard(),
+        icon: LayoutGrid,
+    },
+];
 
-    if (page.props.auth?.user?.is_admin) {
-        items.push({
-            title: 'Media',
-            href: '/admin/media',
-            icon: ImagePlay,
-        });
-    }
+const isAdmin = computed<boolean>(
+    () => page.props.auth?.user?.is_admin === true,
+);
 
-    return items;
-});
+const mediaItem: NavItem = {
+    title: 'Media',
+    href: '/admin/media',
+    icon: ImagePlay,
+};
 
 const blogItems: NavItem[] = [
     {
@@ -114,9 +112,7 @@ const isBlogSectionActive = computed(() =>
 
         <SidebarContent>
             <NavMain :items="platformItems" label="Platform" />
-
             <SidebarGroup class="px-2 py-0">
-                <SidebarGroupLabel>Content</SidebarGroupLabel>
                 <SidebarMenu>
                     <Collapsible
                         :default-open="isBlogSectionActive"
@@ -153,6 +149,19 @@ const isBlogSectionActive = computed(() =>
                             </CollapsibleContent>
                         </SidebarMenuItem>
                     </Collapsible>
+
+                    <SidebarMenuItem v-if="isAdmin">
+                        <SidebarMenuButton
+                            as-child
+                            :is-active="isCurrentUrl(mediaItem.href)"
+                            :tooltip="mediaItem.title"
+                        >
+                            <Link :href="mediaItem.href">
+                                <component :is="mediaItem.icon" />
+                                <span>{{ mediaItem.title }}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarGroup>
         </SidebarContent>
