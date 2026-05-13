@@ -9,6 +9,8 @@ import {
     Newspaper,
     Tag,
 } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BookOpen, FolderGit2, ImagePlay, LayoutGrid } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -44,6 +46,27 @@ const platformItems: NavItem[] = [
         icon: LayoutGrid,
     },
 ];
+const page = usePage();
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    if (page.props.auth?.user?.is_admin) {
+        items.push({
+            title: 'Media',
+            href: '/admin/media',
+            icon: ImagePlay,
+        });
+    }
+
+    return items;
+});
 
 const blogItems: NavItem[] = [
     {
@@ -84,7 +107,7 @@ const isBlogSectionActive = computed(() =>
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon" variant="sidebar">
         <SidebarHeader>
             <SidebarMenu>
                 <SidebarMenuItem>
@@ -140,6 +163,8 @@ const isBlogSectionActive = computed(() =>
                     </Collapsible>
                 </SidebarMenu>
             </SidebarGroup>
+            <NavMain :items="mainNavItems" />
+
         </SidebarContent>
 
         <SidebarFooter>
