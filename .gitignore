@@ -28,3 +28,9 @@ yarn-error.log
 /.vscode
 /.zed
 note.txt
+project-guides.md
+project-guide.html
+project-guide.pdf
+project-guide.docx
+.claude/
+.github
