@@ -28,9 +28,11 @@ export function useChunkedUpload(options: UseChunkedUploadOptions) {
 
     const resumable = new Resumable({
         target: options.target,
+        testTarget: options.testTarget ?? options.target,
         chunkSize: options.chunkSize ?? 5 * 1024 * 1024,
         simultaneousUploads: 1,
         testChunks: true,
+        throttleProgressCallbacks: 0.5,
         headers: {
             'X-CSRF-TOKEN': csrf,
             Accept: 'application/json',
@@ -38,10 +40,6 @@ export function useChunkedUpload(options: UseChunkedUploadOptions) {
         query: () => ({
             folder_id: options.folderId ?? '',
         }),
-        ...({
-            testTarget: options.testTarget ?? options.target,
-            throttleProgressCallbacks: 0.5,
-        } as Record<string, unknown>),
     });
 
     function findOrCreateFileEntry(rFile: Resumable.ResumableFile): UploaderFile {

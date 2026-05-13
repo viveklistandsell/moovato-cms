@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     BookOpen,
     ChevronRight,
     FolderGit2,
     FolderTree,
+    ImagePlay,
     LayoutGrid,
     Newspaper,
     Tag,
 } from 'lucide-vue-next';
-import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, ImagePlay, LayoutGrid } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -39,16 +38,9 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const platformItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
 const page = usePage();
 
-const mainNavItems = computed<NavItem[]>(() => {
+const platformItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [
         {
             title: 'Dashboard',
@@ -163,8 +155,6 @@ const isBlogSectionActive = computed(() =>
                     </Collapsible>
                 </SidebarMenu>
             </SidebarGroup>
-            <NavMain :items="mainNavItems" />
-
         </SidebarContent>
 
         <SidebarFooter>
