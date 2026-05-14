@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-vue-next';
 import { computed } from 'vue';
 import CategoryFilter from '@/components/frontend/blog/CategoryFilter.vue';
 import FeaturedPost from '@/components/frontend/blog/FeaturedPost.vue';
 import PostCard from '@/components/frontend/blog/PostCard.vue';
 import TagFilter from '@/components/frontend/blog/TagFilter.vue';
+import { localizedUrl } from '@/lib/localizedUrl';
 
 type Category = { id: number; name: string; permalink: string };
 type Tag = { id: number; name: string; permalink: string };
@@ -57,6 +58,14 @@ const t = computed(() => ({
         props.locale === 'de'
             ? 'Keine Beiträge gefunden.'
             : 'No posts found.',
+    'Filter by Category':
+        props.locale === 'de'
+            ? 'Nach Kategorie filtern:'
+            : 'Filter by category:',
+    'Filter by Tag':
+        props.locale === 'de'            
+            ? 'Nach Schlagwort filtern:'
+            : 'Filter by tag:',
 }));
 
 function isPrev(label: string): boolean {
@@ -78,7 +87,7 @@ function cleanLabel(label: string): string {
         <nav
             class="mb-6 flex items-center gap-2 text-lg text-muted-foreground"
         >
-            <Link :href="`/${locale}`" class="hover:text-foreground">
+            <Link :href="localizedUrl(locale, '/')" class="hover:text-foreground">
                 {{ t.home }}
             </Link>
             <span>›</span>
@@ -95,7 +104,7 @@ function cleanLabel(label: string): string {
 
         <!-- Category filter chips -->
         <span v-if="categories.length > 0" class="mb-4 block text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-            >Filter by category:</span >
+            >{{ t['Filter by Category'] }}</span >
         <CategoryFilter
             :categories="categories"
             :active-slug="activeCategory"
@@ -105,7 +114,7 @@ function cleanLabel(label: string): string {
 
         <!-- Tag filter chips -->
         <span v-if="tags.length > 0" class="mb-4 block text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-            >Filter by tag:</span >
+            >{{ t['Filter by Tag'] }}</span >
         <TagFilter
             :tags="tags"
             :active-slug="activeTag"

@@ -5,22 +5,30 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryController;
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
-use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MediaFileController;
 use App\Http\Controllers\Admin\MediaFolderController;
 use App\Http\Controllers\Admin\MediaTrashController;
+use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
-// Route::inertia('/', 'Welcome', [
-//     'canRegister' => Features::enabled(Features::registration()),
-// ])->name('home');
+// Default-locale (DE) routes live at the root with no /de prefix.
+Route::middleware('locale')->group(function (): void {
+    Route::inertia('/', 'Welcome', [
+        'canRegister' => Features::enabled(Features::registration()),
+    ])->name('home');
 
-Route::redirect('/', '/de')->name('home');
+    Route::get('blog', [FrontendBlogController::class, 'index'])
+        ->name('blog.index');
+    Route::get('blog/{permalink}', [FrontendBlogController::class, 'show'])
+        ->where('permalink', '[a-z0-9-]+')
+        ->name('blog.show');
+});
 
+// Non-default locales (EN, ...) keep the /{locale}/ prefix.
 Route::prefix('{locale}')
-    ->where(['locale' => 'de|en'])
+    ->where(['locale' => 'en'])
     ->middleware('locale')
     ->name('localized.')
     ->group(function (): void {
@@ -34,6 +42,14 @@ Route::prefix('{locale}')
             ->where('permalink', '[a-z0-9-]+')
             ->name('blog.show');
     });
+
+// Canonical: old /de/* URLs 301-redirect to the unprefixed root.
+Route::get('/de/{rest?}', function (?string $rest = null) {
+    $target = '/'.($rest ?? '');
+    $query = request()->getQueryString();
+
+    return redirect($query !== null ? "{$target}?{$query}" : $target, 301);
+})->where('rest', '.*');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');

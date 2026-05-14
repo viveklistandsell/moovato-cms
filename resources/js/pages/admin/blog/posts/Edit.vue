@@ -14,6 +14,7 @@ import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
 import MultiSelect from '@/components/common/MultiSelect.vue';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
+import { localizedUrl } from '@/lib/localizedUrl';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -227,7 +228,7 @@ const previewUrl = computed<string | null>(() => {
         props.post.translations[defaultLocale]?.permalink
         ?? Object.values(props.post.translations)[0]?.permalink
         ?? null;
-    return slug ? `/${defaultLocale}/blog/${slug}` : null;
+    return slug ? localizedUrl(defaultLocale, `/blog/${slug}`) : null;
 });
 
 const errorFor = (code: string, field: keyof Translation) =>

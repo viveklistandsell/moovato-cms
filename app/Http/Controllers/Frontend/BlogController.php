@@ -11,14 +11,16 @@ use App\Models\BlogTag;
 use App\Models\BlogTranslation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class BlogController extends Controller
 {
-    public function index(Request $request, string $locale): Response
+    public function index(Request $request): Response
     {
+        $locale = App::getLocale();
         $categorySlug = $request->query('category');
         $tagSlug = $request->query('tag');
         $perPage = 12;
@@ -98,8 +100,11 @@ final class BlogController extends Controller
         ]);
     }
 
-    public function show(string $locale, string $permalink): Response
+    public function show(Request $request): Response
     {
+        $locale = App::getLocale();
+        $permalink = (string) $request->route('permalink');
+
         $translation = BlogTranslation::query()
             ->where('lang', $locale)
             ->where('permalink', $permalink)

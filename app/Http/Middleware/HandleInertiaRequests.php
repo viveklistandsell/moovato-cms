@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
+use App\Models\Language;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
-class HandleInertiaRequests extends Middleware
+final class HandleInertiaRequests extends Middleware
 {
     /**
      * The root template that's loaded on the first page visit.
@@ -41,7 +46,21 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'locale' => App::getLocale(),
+            'defaultLocale' => $this->defaultLocaleCode(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    private function defaultLocaleCode(): string
+    {
+        return Cache::remember(
+            'locales.default.code',
+            300,
+            fn () => Language::query()
+                ->where('lang_is_default', true)
+                ->where('status', true)
+                ->value('code') ?? config('app.locale', 'de'),
+        );
     }
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { localizedUrl } from '@/lib/localizedUrl';
 
 type Tag = { id: number; name: string; permalink: string };
 
@@ -14,7 +15,7 @@ defineProps<{
 <template>
     <div v-if="tags.length > 0" class="flex flex-wrap items-center gap-2">
         <Link
-            :href="`/${locale}/blog`"
+            :href="localizedUrl(locale, '/blog')"
             class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
             :class="
                 activeSlug === null
@@ -27,7 +28,7 @@ defineProps<{
         <Link
             v-for="tag in tags"
             :key="tag.id"
-            :href="`/${locale}/blog?tag=${tag.permalink}`"
+            :href="localizedUrl(locale, `/blog?tag=${tag.permalink}`)"
             class="rounded-full border px-3 py-1 text-xs font-medium transition-colors"
             :class="
                 activeSlug === tag.permalink

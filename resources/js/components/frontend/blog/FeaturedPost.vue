@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { Image as ImageIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { localizedUrl } from '@/lib/localizedUrl';
 
 type Category = { id: number; name: string; permalink: string };
 
@@ -23,8 +24,8 @@ const props = defineProps<{
     label?: string;
 }>();
 
-const detailHref = computed(
-    () => `/${props.locale}/blog/${props.post.permalink}`,
+const detailHref = computed(() =>
+    localizedUrl(props.locale, `/blog/${props.post.permalink}`),
 );
 
 const formattedDate = computed(() => {
@@ -71,7 +72,12 @@ const primaryCategory = computed(() => props.post.categories[0] ?? null);
                     }}</span>
                     <Link
                         v-if="primaryCategory"
-                        :href="`/${locale}/blog?category=${primaryCategory.permalink}`"
+                        :href="
+                            localizedUrl(
+                                locale,
+                                `/blog?category=${primaryCategory.permalink}`,
+                            )
+                        "
                         class="text-rose-600 hover:underline dark:text-rose-400"
                     >
                         {{ primaryCategory.name }}

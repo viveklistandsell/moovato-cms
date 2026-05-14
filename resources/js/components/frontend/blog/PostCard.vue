@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { Image as ImageIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { localizedUrl } from '@/lib/localizedUrl';
 
 type Category = { id: number; name: string; permalink: string };
 
@@ -22,8 +23,8 @@ const props = defineProps<{
     locale: string;
 }>();
 
-const detailHref = computed(
-    () => `/${props.locale}/blog/${props.post.permalink}`,
+const detailHref = computed(() =>
+    localizedUrl(props.locale, `/blog/${props.post.permalink}`),
 );
 
 const formattedDate = computed(() => {

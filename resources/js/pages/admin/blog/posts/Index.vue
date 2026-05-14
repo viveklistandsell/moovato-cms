@@ -464,11 +464,11 @@ function formatDate(iso: string | null): string {
                                 </td>
                                 <td class="px-4 py-3">
                                     <a
-                                        :href="`/de/blog/${row.permalink}`"
+                                        :href="`/blog/${row.permalink}`"
                                         target="_blank"
                                         rel="noopener"
                                         class="inline-flex items-center gap-1 font-medium hover:underline"
-                                        :title="`Open public page: /de/blog/${row.permalink}`"
+                                        :title="`Open public page: /blog/${row.permalink}`"
                                     >
                                         {{ row.name }}
                                         <ExternalLink
