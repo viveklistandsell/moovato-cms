@@ -187,12 +187,9 @@ final class BlogController extends Controller
      */
     private function presentDetail(Blog $blog, string $locale): array
     {
-        $tr = $blog->translation($locale);
         $card = $this->presentCard($blog, $locale, full: true);
 
         return $card + [
-            'meta_title' => $tr?->meta_title ?? null,
-            'meta_description' => $tr?->meta_description ?? null,
             'view_count' => $blog->view_count,
             'tags' => $blog->relationLoaded('tags')
                 ? $blog->tags->map(function ($t) use ($locale): array {

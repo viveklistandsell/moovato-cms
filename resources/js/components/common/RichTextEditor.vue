@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Extension } from '@tiptap/core';
 import { CharacterCount } from '@tiptap/extension-character-count';
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import { Color } from '@tiptap/extension-color';
@@ -63,6 +64,50 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
 const lowlight = createLowlight(common);
 
+// Custom FontSize extension — adds a `fontSize` attribute to the textStyle mark
+// so we can do <span style="font-size: 14px">…</span> via setFontSize() / unsetFontSize().
+const FontSize = Extension.create({
+    name: 'fontSize',
+    addOptions() {
+        return { types: ['textStyle'] };
+    },
+    addGlobalAttributes() {
+        return [
+            {
+                types: this.options.types,
+                attributes: {
+                    fontSize: {
+                        default: null,
+                        parseHTML: (el: HTMLElement) =>
+                            el.style.fontSize?.replace(/['"]+/g, '') || null,
+                        renderHTML: (attrs: { fontSize?: string | null }) =>
+                            attrs.fontSize
+                                ? { style: `font-size: ${attrs.fontSize}` }
+                                : {},
+                    },
+                },
+            },
+        ];
+    },
+    addCommands() {
+        return {
+            setFontSize:
+                (size: string) =>
+                ({ chain }: { chain: () => any }) =>
+                    chain()
+                        .setMark('textStyle', { fontSize: size })
+                        .run(),
+            unsetFontSize:
+                () =>
+                ({ chain }: { chain: () => any }) =>
+                    chain()
+                        .setMark('textStyle', { fontSize: null })
+                        .removeEmptyTextStyle()
+                        .run(),
+        } as Record<string, unknown>;
+    },
+});
+
 const props = withDefaults(
     defineProps<{
         modelValue: string | null;
@@ -98,6 +143,7 @@ const editor = useEditor({
         TextStyle,
         Color,
         FontFamily,
+        FontSize,
         Table.configure({ resizable: true }),
         TableRow,
         TableHeader,
@@ -172,15 +218,30 @@ const FONT_FAMILIES = [
     { label: 'Courier', value: 'Courier New, monospace' },
 ];
 
+const FONT_SIZES = [
+    { label: 'Default', value: '' },
+    { label: '12 px', value: '12px' },
+    { label: '14 px', value: '14px' },
+    { label: '16 px', value: '16px' },
+    { label: '18 px', value: '18px' },
+    { label: '20 px', value: '20px' },
+    { label: '24 px', value: '24px' },
+    { label: '32 px', value: '32px' },
+    { label: '40 px', value: '40px' },
+    { label: '48 px', value: '48px' },
+];
+
 const colorMenuRef = ref<HTMLDivElement | null>(null);
 const highlightMenuRef = ref<HTMLDivElement | null>(null);
 const tableMenuRef = ref<HTMLDivElement | null>(null);
 const fontMenuRef = ref<HTMLDivElement | null>(null);
+const sizeMenuRef = ref<HTMLDivElement | null>(null);
 
 const colorMenuOpen = ref(false);
 const highlightMenuOpen = ref(false);
 const tableMenuOpen = ref(false);
 const fontMenuOpen = ref(false);
+const sizeMenuOpen = ref(false);
 const helpOpen = ref(false);
 const isFullscreen = ref(false);
 const sourceMode = ref(false);
@@ -190,6 +251,7 @@ onClickOutside(colorMenuRef, () => (colorMenuOpen.value = false));
 onClickOutside(highlightMenuRef, () => (highlightMenuOpen.value = false));
 onClickOutside(tableMenuRef, () => (tableMenuOpen.value = false));
 onClickOutside(fontMenuRef, () => (fontMenuOpen.value = false));
+onClickOutside(sizeMenuRef, () => (sizeMenuOpen.value = false));
 
 function setColor(color: string) {
     exec(() => editor.value?.chain().focus().setColor(color).run());
@@ -214,6 +276,14 @@ function setFontFamily(family: string) {
         exec(() => editor.value?.chain().focus().setFontFamily(family).run());
     }
     fontMenuOpen.value = false;
+}
+function setFontSize(size: string) {
+    if (size === '') {
+        exec(() => (editor.value?.chain().focus() as any).unsetFontSize().run());
+    } else {
+        exec(() => (editor.value?.chain().focus() as any).setFontSize(size).run());
+    }
+    sizeMenuOpen.value = false;
 }
 function clearFormat() {
     exec(() =>
@@ -394,6 +464,14 @@ function redo() {
                 <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" title="Font family" @click="fontMenuOpen = !fontMenuOpen"><Type class="size-4" /><ChevronDown class="size-3 opacity-60" /></button>
                 <div v-if="fontMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-48 rounded-md border bg-popover py-1 text-sm shadow-md">
                     <button v-for="f in FONT_FAMILIES" :key="f.label" type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted" :style="f.value ? { fontFamily: f.value } : {}" @click="setFontFamily(f.value)">{{ f.label }}</button>
+                </div>
+            </div>
+
+            <!-- Font size -->
+            <div ref="sizeMenuRef" class="relative">
+                <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" title="Font size" @click="sizeMenuOpen = !sizeMenuOpen"><span class="px-1 text-xs font-semibold">A↕</span><ChevronDown class="size-3 opacity-60" /></button>
+                <div v-if="sizeMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-32 rounded-md border bg-popover py-1 text-sm shadow-md">
+                    <button v-for="s in FONT_SIZES" :key="s.label" type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted" :style="s.value ? { fontSize: s.value } : {}" @click="setFontSize(s.value)">{{ s.label }}</button>
                 </div>
             </div>
 

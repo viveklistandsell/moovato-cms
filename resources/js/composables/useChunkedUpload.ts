@@ -14,7 +14,13 @@ export type UseChunkedUploadOptions = {
     target: string;
     testTarget?: string;
     chunkSize?: number;
-    folderId?: number | null;
+    /**
+     * Folder id to attach uploaded files to. Accepts a static value OR a
+     * getter — when a getter is supplied, Resumable reads the current value
+     * on every chunk POST, so navigating folders mid-session targets the
+     * folder currently visible to the user.
+     */
+    folderId?: number | null | (() => number | null);
     onSuccess?: () => void;
 };
 
@@ -25,6 +31,13 @@ export function useChunkedUpload(options: UseChunkedUploadOptions) {
     const csrf =
         document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
             ?.content ?? '';
+
+    const currentFolderId = (): number | null => {
+        if (typeof options.folderId === 'function') {
+            return options.folderId();
+        }
+        return options.folderId ?? null;
+    };
 
     const resumable = new Resumable({
         target: options.target,
@@ -38,7 +51,7 @@ export function useChunkedUpload(options: UseChunkedUploadOptions) {
             Accept: 'application/json',
         },
         query: () => ({
-            folder_id: options.folderId ?? '',
+            folder_id: currentFolderId() ?? '',
         }),
     });
 

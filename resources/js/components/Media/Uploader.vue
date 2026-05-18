@@ -7,6 +7,10 @@ import { useChunkedUpload } from '@/composables/useChunkedUpload';
 
 const props = defineProps<{
     folderId: number | null;
+    /** Optional callback fired when an upload completes. Defaults to an
+     *  Inertia reload of the page's `files` and `folders` props. Override
+     *  in embedded/modal use to refresh local state instead. */
+    onUploaded?: () => void;
 }>();
 
 const dropzone = ref<HTMLElement | null>(null);
@@ -18,9 +22,16 @@ const { files, uploading, assignBrowse, assignDrop, clearCompleted } =
         target: '/admin/media/files',
         testTarget: '/admin/media/files/upload',
         chunkSize: 5 * 1024 * 1024,
-        folderId: props.folderId,
+        // Read folderId fresh on every chunk POST so folder navigation inside
+        // the picker actually retargets the upload (the prop captured at
+        // setup-time goes stale once the user enters a subfolder).
+        folderId: () => props.folderId,
         onSuccess: () => {
-            router.reload({ only: ['files', 'folders'] });
+            if (props.onUploaded) {
+                props.onUploaded();
+            } else {
+                router.reload({ only: ['files', 'folders'] });
+            }
         },
     });
 

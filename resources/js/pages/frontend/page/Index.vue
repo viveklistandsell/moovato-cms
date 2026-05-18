@@ -1,0 +1,160 @@
+<script setup lang="ts">
+import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import FrontendLayout from '@/layouts/frontend/FrontendLayout.vue';
+import { localizedUrl } from '@/lib/localizedUrl';
+
+type Category = { id: number; title: string; permalink: string };
+
+type Page = {
+    id: number;
+    title: string;
+    permalink: string;
+    content: string | null;
+    image_url: string | null;
+    template: string;
+    is_home: boolean;
+    author: string | null;
+    created_at: string | null;
+    categories: Category[];
+};
+
+const props = defineProps<{
+    locale: string;
+    page: Page;
+}>();
+
+// app.ts skips FrontendLayout for this page — we own the chrome decision
+// here so the "nolayout" template can render bare (no SiteHeader / SiteFooter).
+const t = computed(() => ({
+    home: props.locale === 'de' ? 'Startseite' : 'Home',
+}));
+
+const isFullwidth = computed(() => props.page.template === 'fullwidth');
+const isNolayout = computed(() => props.page.template === 'nolayout');
+// "default" is the implicit fallback.
+</script>
+
+<template>
+    <Head>
+        <title>{{ page.title }}</title>
+        <meta head-key="og:title" property="og:title" :content="page.title" />
+        <meta
+            v-if="page.image_url"
+            head-key="og:image"
+            property="og:image"
+            :content="page.image_url"
+        />
+    </Head>
+
+    <!-- NO LAYOUT: bare content, no header/footer/breadcrumb -->
+    <div
+        v-if="isNolayout"
+        class="min-h-screen bg-background text-foreground"
+    >
+        <div
+            v-if="page.content"
+            class="prose prose-neutral max-w-none dark:prose-invert"
+            v-html="page.content"
+        />
+    </div>
+
+    <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
+    <FrontendLayout v-else>
+        <!-- FULL WIDTH: cover-image hero, edge-to-edge content, wider reading column -->
+        <article v-if="isFullwidth" class="w-full">
+            <div
+                v-if="page.image_url"
+                class="relative h-[60vh] w-full overflow-hidden bg-muted"
+            >
+                <img
+                    :src="page.image_url"
+                    :alt="page.title"
+                    class="size-full object-cover"
+                />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent"
+                />
+                <div
+                    class="absolute inset-x-0 bottom-0 mx-auto max-w-5xl px-4 pb-10"
+                >
+                    <h1
+                        class="text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm sm:text-5xl md:text-6xl"
+                    >
+                        {{ page.title }}
+                    </h1>
+                </div>
+            </div>
+
+            <header v-else class="mx-auto max-w-5xl px-4 pb-2 pt-12">
+                <nav
+                    class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                    <Link
+                        :href="localizedUrl(locale, '/')"
+                        class="hover:text-foreground"
+                    >
+                        {{ t.home }}
+                    </Link>
+                    <span>›</span>
+                    <span class="line-clamp-1 text-foreground">
+                        {{ page.title }}
+                    </span>
+                </nav>
+                <h1
+                    class="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
+                >
+                    {{ page.title }}
+                </h1>
+            </header>
+
+            <div v-if="page.content" class="mx-auto max-w-5xl px-4 py-12">
+                <div
+                    class="prose prose-lg prose-neutral max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-primary prose-img:rounded-xl"
+                    v-html="page.content"
+                />
+            </div>
+        </article>
+
+        <!-- DEFAULT: centered prose with breadcrumb and hero image -->
+        <article v-else class="mx-auto max-w-3xl px-4 py-10">
+            <nav
+                class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
+            >
+                <Link
+                    :href="localizedUrl(locale, '/')"
+                    class="hover:text-foreground"
+                >
+                    {{ t.home }}
+                </Link>
+                <span>›</span>
+                <span class="line-clamp-1 text-foreground">
+                    {{ page.title }}
+                </span>
+            </nav>
+
+            <h1
+                class="mb-6 text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl"
+            >
+                {{ page.title }}
+            </h1>
+
+            <div
+                v-if="page.image_url"
+                class="mb-8 overflow-hidden rounded-xl bg-muted"
+            >
+                <img
+                    :src="page.image_url"
+                    :alt="page.title"
+                    class="aspect-[16/9] w-full object-cover"
+                />
+            </div>
+
+            <div
+                v-if="page.content"
+                class="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-primary prose-img:rounded-md"
+                v-html="page.content"
+            />
+        </article>
+    </FrontendLayout>
+</template>

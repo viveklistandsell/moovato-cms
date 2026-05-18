@@ -16,6 +16,10 @@ createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            // Page renderer handles its own chrome — the "nolayout" template
+            // skips header/footer entirely, so we don't wrap globally here.
+            case name === 'frontend/page/Index':
+                return null;
             case name.startsWith('frontend/'):
                 return FrontendLayout;
             case name.startsWith('settings/'):

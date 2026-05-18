@@ -542,6 +542,15 @@ function formatDate(iso: string | null): string {
                                                 lang.flag
                                             }}</span>
                                             {{ lang.code.toUpperCase() }}
+                                            <span
+                                                v-if="
+                                                    !row.translations[
+                                                        lang.code
+                                                    ]
+                                                "
+                                                class="opacity-50"
+                                                >·missing</span
+                                            >
                                         </Badge>
                                     </div>
                                 </td>

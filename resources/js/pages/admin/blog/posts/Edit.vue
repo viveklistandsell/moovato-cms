@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import MediaPicker from '@/components/common/MediaPicker.vue';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { slugify } from '@/lib/slug';
 
@@ -107,6 +108,7 @@ const initialTranslations: Record<string, Translation> = Object.fromEntries(
 
 const form = useForm({
     image: null as File | null,
+    image_path: (props.post?.image ?? '') as string,
     remove_image: false,
     category_ids: props.post?.category_ids ?? [],
     tag_ids: props.post?.tag_ids ?? [],
@@ -176,32 +178,24 @@ const totalWords = computed(() =>
 );
 
 const imagePreview = ref<string | null>(props.post?.image_url ?? null);
-const imageFileName = ref<string | null>(null);
-
-function onImageChange(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
-    if (!file) {
-        return;
-    }
-    form.image = file;
-    form.remove_image = false;
-    imageFileName.value = file.name;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        imagePreview.value = (e.target?.result as string) ?? null;
-    };
-    reader.readAsDataURL(file);
-}
 
 function removeImage(): void {
     form.image = null;
+    form.image_path = '';
     form.remove_image = true;
     imagePreview.value = null;
-    imageFileName.value = null;
-    const input = document.getElementById('image-input') as HTMLInputElement | null;
-    if (input) {
-        input.value = '';
-    }
+}
+
+// In-form media picker modal. Click "Upload" to open the library popup,
+// pick an existing image or upload a new one, and the chosen file's path
+// is applied to image_path + preview. The form stays open the whole time.
+const pickerOpen = ref(false);
+
+function onMediaPicked(file: { path: string; url: string; name: string }): void {
+    form.image = null;
+    form.image_path = file.path;
+    form.remove_image = false;
+    imagePreview.value = file.url;
 }
 
 function submit(): void {
@@ -219,9 +213,7 @@ function submit(): void {
 }
 
 const previewUrl = computed<string | null>(() => {
-    if (!props.post) {
-        return null;
-    }
+    if (!props.post) return null;
     const defaultLocale =
         props.languages.find((l) => l.is_default)?.code ?? 'de';
     const slug =
@@ -542,32 +534,16 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 class="size-8 text-muted-foreground"
                             />
                         </div>
-                        <input
-                            id="image-input"
-                            type="file"
-                            accept="image/*"
-                            class="hidden"
-                            @change="onImageChange"
-                        />
                         <div class="flex flex-wrap items-center gap-2">
                             <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                as-child
                                 class="flex-1"
+                                @click="pickerOpen = true"
                             >
-                                <label
-                                    for="image-input"
-                                    class="cursor-pointer"
-                                >
-                                    <Upload class="size-4" />
-                                    {{
-                                        imagePreview
-                                            ? 'Replace'
-                                            : 'Upload'
-                                    }}
-                                </label>
+                                <Upload class="size-4" />
+                                {{ imagePreview ? 'Replace' : 'Upload' }}
                             </Button>
                             <Button
                                 v-if="imagePreview"
@@ -581,14 +557,12 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 Remove
                             </Button>
                         </div>
-                        <p
-                            v-if="imageFileName"
-                            class="truncate text-xs text-muted-foreground"
-                            :title="imageFileName"
-                        >
-                            {{ imageFileName }}
+                        <p class="text-xs text-muted-foreground">
+                            Opens the media library — pick an existing image
+                            or upload a new one there.
                         </p>
                         <InputError :message="form.errors.image" />
+                        <InputError :message="form.errors.image_path" />
                     </CardContent>
                 </Card>
 
@@ -730,5 +704,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                 </Card>
             </div>
         </form>
+
+        <MediaPicker v-model:open="pickerOpen" @pick="onMediaPicked" />
     </div>
 </template>

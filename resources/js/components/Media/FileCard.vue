@@ -33,6 +33,7 @@ export type MediaFileItem = {
     medium_url: string | null;
     metadata: Record<string, unknown> | null;
     folder_id?: number | null;
+    path?: string;
     created_at: string | null;
 };
 

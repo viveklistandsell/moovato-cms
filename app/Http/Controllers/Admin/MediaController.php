@@ -116,6 +116,7 @@ final class MediaController extends Controller
                 'medium_url' => $file->medium_url,
                 'metadata' => $file->metadata,
                 'folder_id' => $file->folder_id,
+                'path' => $file->path,
                 'created_at' => $file->created_at?->toIso8601String(),
             ]);
 

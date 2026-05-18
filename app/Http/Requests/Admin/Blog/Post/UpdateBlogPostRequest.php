@@ -32,6 +32,7 @@ final class UpdateBlogPostRequest extends FormRequest
             'tag_ids' => ['nullable', 'array'],
             'tag_ids.*' => ['integer', 'distinct', 'exists:blog_tags,id'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'image_path' => ['nullable', 'string', 'max:1000'],
             'remove_image' => ['boolean'],
             'status' => ['required', Rule::in(['published', 'draft', 'inactive'])],
             'sort_order' => ['integer', 'min:0', 'max:65535'],

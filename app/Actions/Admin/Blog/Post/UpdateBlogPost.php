@@ -50,6 +50,11 @@ final readonly class UpdateBlogPost
                     Storage::disk('public')->delete($imagePath);
                 }
                 $imagePath = $data['image']->store('blog/posts', 'public');
+            } elseif (! empty($data['image_path']) && $data['image_path'] !== $imagePath) {
+                // Picked from media library — adopt path. Don't delete the
+                // previous file: it might be a media-library asset shared
+                // with other entities.
+                $imagePath = $data['image_path'];
             } elseif (! empty($data['remove_image']) && $imagePath !== null) {
                 Storage::disk('public')->delete($imagePath);
                 $imagePath = null;

@@ -251,13 +251,19 @@ final class TagController extends Controller
     private function urlPrefixes(): array
     {
         $base = mb_rtrim((string) config('app.url'), '/');
+        $defaultCode = Language::query()
+            ->where('lang_is_default', true)
+            ->where('status', true)
+            ->value('code') ?? 'de';
 
         return Language::query()
             ->where('status', true)
             ->orderBy('sort_order')
             ->pluck('code')
             ->mapWithKeys(fn (string $code): array => [
-                $code => "{$base}/{$code}/blog/tag/",
+                $code => $code === $defaultCode
+                    ? "{$base}/blog/tag/"
+                    : "{$base}/{$code}/blog/tag/",
             ])
             ->all();
     }

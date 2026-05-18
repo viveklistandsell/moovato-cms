@@ -5,19 +5,21 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryController;
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
+use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MediaFileController;
 use App\Http\Controllers\Admin\MediaFolderController;
+use App\Http\Controllers\Admin\MediaPickerController;
 use App\Http\Controllers\Admin\MediaTrashController;
+use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
+use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
+use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
 // Default-locale (DE) routes live at the root with no /de prefix.
 Route::middleware('locale')->group(function (): void {
-    Route::inertia('/', 'Welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ])->name('home');
+    Route::get('/', [FrontendPageController::class, 'home'])->name('home');
 
     Route::get('blog', [FrontendBlogController::class, 'index'])
         ->name('blog.index');
@@ -32,9 +34,8 @@ Route::prefix('{locale}')
     ->middleware('locale')
     ->name('localized.')
     ->group(function (): void {
-        Route::inertia('/', 'Welcome', [
-            'canRegister' => Features::enabled(Features::registration()),
-        ])->name('welcome');
+
+        Route::get('/', [FrontendPageController::class, 'home'])->name('home');
 
         Route::get('blog', [FrontendBlogController::class, 'index'])
             ->name('blog.index');
@@ -50,6 +51,22 @@ Route::get('/de/{rest?}', function (?string $rest = null) {
 
     return redirect($query !== null ? "{$target}?{$query}" : $target, 301);
 })->where('rest', '.*');
+
+// Public page show — must be registered AFTER all other named routes so it
+// doesn't shadow /blog, /admin, /login, etc. The slug regex blocks reserved
+// segments at the URL boundary.
+Route::middleware('locale')
+    ->get('/{permalink}', [FrontendPageController::class, 'show'])
+    ->where('permalink', '(?!admin|blog|de|en|login|register|dashboard|forgot-password|reset-password|email|user|two-factor-challenge|logout|settings|_boost|storage|build)[a-z0-9-]+')
+    ->name('pages.show');
+
+Route::prefix('{locale}')
+    ->where(['locale' => 'en'])
+    ->middleware('locale')
+    ->name('localized.')
+    ->get('/{permalink}', [FrontendPageController::class, 'show'])
+    ->where('permalink', '(?!blog)[a-z0-9-]+')
+    ->name('pages.show');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
@@ -86,6 +103,30 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
                 ->parameters(['posts' => 'post'])
                 ->except('show');
         });
+
+        Route::resource('languages', AdminLanguageController::class)
+            ->parameters(['languages' => 'language'])
+            ->except('show');
+
+        Route::prefix('pages')->name('pages.')->group(function (): void {
+            // Sub-resource: page categories (under /admin/pages/categories).
+            Route::post('categories/reorder', [AdminPageCategoryController::class, 'reorder'])
+                ->name('categories.reorder');
+            Route::post('categories/bulk-action', [AdminPageCategoryController::class, 'bulkAction'])
+                ->name('categories.bulk-action');
+            Route::resource('categories', AdminPageCategoryController::class)
+                ->parameters(['categories' => 'category'])
+                ->except('show');
+
+            // Top-level resource: pages live at /admin/pages directly.
+            // Numeric constraint on {page} prevents collision with /categories.
+            Route::post('bulk-action', [AdminPageController::class, 'bulkAction'])
+                ->name('bulk-action');
+            Route::resource('/', AdminPageController::class)
+                ->parameters(['' => 'page'])
+                ->except('show')
+                ->where(['page' => '[0-9]+']);
+        });
     });
 });
 
@@ -107,6 +148,17 @@ Route::middleware(['auth', 'verified', 'admin'])
         Route::patch('media/files/{file}', [MediaFileController::class, 'update'])->name('media.files.update');
         Route::delete('media/files/{file}', [MediaFileController::class, 'destroy'])->name('media.files.destroy');
         Route::get('media/files/{file}/download', [MediaFileController::class, 'download'])->name('media.files.download');
+
+        // In-form picker — listing + simple direct upload, image-only.
+        // Same admin gate as the rest of media management.
+        Route::get('media/picker', [MediaPickerController::class, 'index'])->name('media.picker.index');
+        Route::post('media/picker/upload', [MediaPickerController::class, 'upload'])->name('media.picker.upload');
+        Route::post('media/picker/folders', [MediaPickerController::class, 'createFolder'])->name('media.picker.folders.store');
+        Route::delete('media/picker/folders/{folder}', [MediaPickerController::class, 'destroyFolder'])->name('media.picker.folders.destroy');
+        Route::post('media/picker/files/move', [MediaPickerController::class, 'moveFiles'])->name('media.picker.files.move');
+        Route::patch('media/picker/files/{file}', [MediaPickerController::class, 'updateFile'])->name('media.picker.files.update');
+        Route::delete('media/picker/files/{file}', [MediaPickerController::class, 'destroyFile'])->name('media.picker.files.destroy');
+        Route::delete('media/picker/files/{file}/force', [MediaPickerController::class, 'forceDestroyFile'])->name('media.picker.files.force-destroy');
 
         Route::get('media/trash', [MediaTrashController::class, 'index'])->name('media.trash.index');
         Route::post('media/trash/folders/{id}/restore', [MediaTrashController::class, 'restoreFolder'])->name('media.trash.folders.restore');

@@ -44,6 +44,8 @@ final readonly class CreateBlogPost
             $imagePath = null;
             if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
                 $imagePath = $data['image']->store('blog/posts', 'public');
+            } elseif (! empty($data['image_path'])) {
+                $imagePath = $data['image_path'];
             }
 
             $sortOrder = $data['sort_order'] ?? Blog::nextSortOrder();

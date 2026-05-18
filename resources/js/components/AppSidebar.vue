@@ -3,9 +3,11 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     BookOpen,
     ChevronRight,
+    Files,
     FolderGit2,
     FolderTree,
     ImagePlay,
+    Languages,
     LayoutGrid,
     Newspaper,
     Tag,
@@ -58,6 +60,12 @@ const mediaItem: NavItem = {
     icon: ImagePlay,
 };
 
+// const languagesItem: NavItem = {
+//     title: 'Languages',
+//     href: '/admin/languages',
+//     icon: Languages,
+// };
+
 const blogItems: NavItem[] = [
     {
         title: 'Blog Posts',
@@ -73,6 +81,19 @@ const blogItems: NavItem[] = [
         title: 'Blog Tags',
         href: '/admin/blog/tags',
         icon: Tag,
+    },
+];
+
+const pageItems: NavItem[] = [
+    {
+        title: 'Pages',
+        href: '/admin/pages',
+        icon: Files,
+    },
+    {
+        title: 'Page Categories',
+        href: '/admin/pages/categories',
+        icon: FolderTree,
     },
 ];
 
@@ -93,6 +114,10 @@ const { isCurrentUrl } = useCurrentUrl();
 
 const isBlogSectionActive = computed(() =>
     blogItems.some((item) => isCurrentUrl(item.href)),
+);
+
+const isPageSectionActive = computed(() =>
+    pageItems.some((item) => isCurrentUrl(item.href)),
 );
 </script>
 
@@ -121,18 +146,64 @@ const isBlogSectionActive = computed(() =>
                     >
                         <SidebarMenuItem>
                             <CollapsibleTrigger as-child>
-                                <SidebarMenuButton tooltip="Blog Management">
-                                    <Newspaper />
-                                    <span>Blog Management</span>
-                                    <ChevronRight
-                                        class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
-                                    />
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Blog Management"
+                                >
+                                    <Link :href="blogItems[0].href">
+                                        <Newspaper />
+                                        <span>Blog Management</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
                                 </SidebarMenuButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
                                 <SidebarMenuSub>
                                     <SidebarMenuSubItem
                                         v-for="item in blogItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+
+                    <Collapsible
+                        :default-open="isPageSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Page Management"
+                                >
+                                    <Link :href="pageItems[0].href">
+                                        <Files />
+                                        <span>Page Management</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in pageItems"
                                         :key="item.title"
                                     >
                                         <SidebarMenuSubButton
@@ -162,6 +233,19 @@ const isBlogSectionActive = computed(() =>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+
+                    <!-- <SidebarMenuItem>
+                        <SidebarMenuButton
+                            as-child
+                            :is-active="isCurrentUrl(languagesItem.href)"
+                            :tooltip="languagesItem.title"
+                        >
+                            <Link :href="languagesItem.href">
+                                <component :is="languagesItem.icon" />
+                                <span>{{ languagesItem.title }}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem> -->
                 </SidebarMenu>
             </SidebarGroup>
         </SidebarContent>
