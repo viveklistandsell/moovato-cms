@@ -16,7 +16,12 @@ use function is_array;
 
 final readonly class CreatePage
 {
-    public function __construct(private SyncPageWidgets $syncWidgets) {}
+    private SyncPageWidgets $syncWidgets;
+
+    public function __construct(SyncPageWidgets $syncWidgets)
+    {
+        $this->syncWidgets = $syncWidgets;
+    }
 
     /**
      * @param  array{

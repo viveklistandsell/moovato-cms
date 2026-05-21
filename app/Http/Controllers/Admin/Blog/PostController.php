@@ -43,6 +43,14 @@ final class PostController extends Controller
         $sortDir = $request->query('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc';
         $perPage = max(5, min(100, (int) $request->query('per_page', '10')));
 
+        // Filter dimensions — mirrors the Pages dashboard pattern:
+        // status pill (all/published/draft/inactive), Mine toggle on top of
+        // status, category dropdown, and a language dropdown (any | <code> | both).
+        $statusFilter = (string) $request->query('status', 'all');
+        $mineOnly = $request->boolean('mine');
+        $categoryId = (int) $request->query('category_id', '0');
+        $langFilter = (string) $request->query('lang', 'any');
+
         $query = Blog::query()
             ->with(['translations', 'categories:id,name', 'tags:id,name', 'user:id,name']);
 
@@ -55,6 +63,35 @@ final class PostController extends Controller
                         $t->where('name', 'like', $like)->orWhere('permalink', 'like', $like);
                     });
             });
+        }
+
+        if (in_array($statusFilter, ['published', 'draft', 'inactive'], true)) {
+            $query->where('status', $statusFilter);
+        }
+
+        if ($mineOnly && $request->user() !== null) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        if ($categoryId > 0) {
+            $query->whereHas('categories', function (Builder $c) use ($categoryId): void {
+                $c->where('blog_categories.id', $categoryId);
+            });
+        }
+
+        $activeCodes = Language::query()
+            ->where('status', true)
+            ->pluck('code')
+            ->all();
+
+        if ($langFilter !== 'any' && in_array($langFilter, [...$activeCodes, 'both'], true)) {
+            if ($langFilter === 'both' && count($activeCodes) > 0) {
+                foreach ($activeCodes as $code) {
+                    $query->whereHas('translations', fn (Builder $t) => $t->where('lang', $code));
+                }
+            } else {
+                $query->whereHas('translations', fn (Builder $t) => $t->where('lang', $langFilter));
+            }
         }
 
         if (is_string($sortBy) && array_key_exists($sortBy, self::SORTABLE_COLUMNS)) {
@@ -74,11 +111,17 @@ final class PostController extends Controller
         return Inertia::render('admin/blog/posts/Index', [
             'posts' => $posts,
             'languages' => fn (): array => $this->presentLanguages(),
+            'categoryOptions' => fn (): array => $this->categoryOptions(),
+            'statusCounts' => fn (): array => $this->statusCounts($request->user()?->id),
             'filters' => [
                 'q' => $search,
                 'sort_by' => is_string($sortBy) && array_key_exists($sortBy, self::SORTABLE_COLUMNS) ? $sortBy : null,
                 'sort_dir' => $sortDir,
                 'per_page' => $perPage,
+                'status' => in_array($statusFilter, ['all', 'published', 'draft', 'inactive'], true) ? $statusFilter : 'all',
+                'mine' => $mineOnly,
+                'category_id' => $categoryId > 0 ? $categoryId : null,
+                'lang' => $langFilter,
             ],
             'pagination' => [
                 'current_page' => $paginated->currentPage(),
@@ -219,6 +262,25 @@ final class PostController extends Controller
             'type' => 'success',
             'message' => "{$count} post".($count === 1 ? '' : 's')." {$verb}.",
         ]);
+    }
+
+    /**
+     * Per-pill row counts for the filter buttons. Computed against the global
+     * set so numbers don't shrink as the admin clicks through filters.
+     *
+     * @return array{all: int, mine: int, published: int, draft: int, inactive: int}
+     */
+    private function statusCounts(?int $userId): array
+    {
+        return [
+            'all' => Blog::query()->count(),
+            'mine' => $userId !== null
+                ? Blog::query()->where('user_id', $userId)->count()
+                : 0,
+            'published' => Blog::query()->where('status', 'published')->count(),
+            'draft' => Blog::query()->where('status', 'draft')->count(),
+            'inactive' => Blog::query()->where('status', 'inactive')->count(),
+        ];
     }
 
     /**

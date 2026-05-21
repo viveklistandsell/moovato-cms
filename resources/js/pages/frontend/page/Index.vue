@@ -76,53 +76,8 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
 
     <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
     <FrontendLayout v-else>
-        <!-- FULL WIDTH: cover-image hero, edge-to-edge content, wider reading column -->
+        <!-- FULL WIDTH: come with proper header and footer, edge-to-edge content, wider reading column -->
         <article v-if="isFullwidth" class="w-full">
-            <div
-                v-if="page.image_url"
-                class="relative h-[60vh] w-full overflow-hidden bg-muted"
-            >
-                <img
-                    :src="page.image_url"
-                    :alt="page.title"
-                    class="size-full object-cover"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent"
-                />
-                <div
-                    class="absolute inset-x-0 bottom-0 mx-auto max-w-5xl px-4 pb-10"
-                >
-                    <h1
-                        class="text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm sm:text-5xl md:text-6xl"
-                    >
-                        {{ page.title }}
-                    </h1>
-                </div>
-            </div>
-
-            <header v-else class="mx-auto max-w-5xl px-4 pb-2 pt-12">
-                <nav
-                    class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                    <Link
-                        :href="localizedUrl(locale, '/')"
-                        class="hover:text-foreground"
-                    >
-                        {{ t.home }}
-                    </Link>
-                    <span>›</span>
-                    <span class="line-clamp-1 text-foreground">
-                        {{ page.title }}
-                    </span>
-                </nav>
-                <h1
-                    class="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
-                >
-                    {{ page.title }}
-                </h1>
-            </header>
-
             <component
                 :is="row.entry.renderer"
                 v-for="(row, i) in widgetStack"

@@ -12,7 +12,7 @@ import {
     Trash2,
     X,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
     type BulkAction,
@@ -33,6 +33,13 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useDragReorder } from '@/composables/common/useDragReorder';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
@@ -72,16 +79,32 @@ type Language = {
     is_default: boolean;
 };
 
+type CategoryOption = { id: number; name: string };
+
+type StatusCounts = {
+    all: number;
+    mine: number;
+    published: number;
+    draft: number;
+    inactive: number;
+};
+
 type Filters = {
     q: string | null;
     sort_by: string | null;
     sort_dir: 'asc' | 'desc';
     per_page: number;
+    status: 'all' | 'published' | 'draft' | 'inactive';
+    mine: boolean;
+    category_id: number | null;
+    lang: string; // 'any' | <lang code> | 'both'
 };
 
 const props = defineProps<{
     posts: Post[];
     languages: Language[];
+    categoryOptions: CategoryOption[];
+    statusCounts: StatusCounts;
     filters: Filters;
     pagination: PaginationMeta;
 }>();
@@ -111,7 +134,6 @@ const {
     setSearch,
     toggleSort,
     setPerPage,
-    resetAll,
 } = useTableQuery(
     '/admin/blog/posts',
     {
@@ -123,8 +145,153 @@ const {
     { only: ['posts', 'pagination', 'filters'] },
 );
 
+// Local refs for the new filter dimensions. We bypass the table-query composable
+// for these and rebuild the full query string each toggle.
+const statusFilter = ref<Filters['status']>(props.filters.status);
+const mineOnly = ref<boolean>(props.filters.mine);
+const categoryId = ref<number | null>(props.filters.category_id);
+const langFilter = ref<string>(props.filters.lang);
+
+function applyFilters(): void {
+    const params: Record<string, string | number> = {};
+    if (search.value) params.q = search.value;
+    if (sortBy.value) {
+        params.sort_by = sortBy.value;
+        params.sort_dir = sortDir.value;
+    }
+    if (perPage.value && perPage.value !== 10) params.per_page = perPage.value;
+    if (statusFilter.value !== 'all') params.status = statusFilter.value;
+    if (mineOnly.value) params.mine = '1';
+    if (categoryId.value !== null && categoryId.value > 0) {
+        params.category_id = categoryId.value;
+    }
+    if (langFilter.value !== 'any') params.lang = langFilter.value;
+
+    router.get('/admin/blog/posts', params, {
+        only: ['posts', 'pagination', 'filters'],
+        preserveScroll: true,
+        preserveState: true,
+        replace: true,
+    });
+}
+
+function setStatus(next: Filters['status']): void {
+    statusFilter.value = next;
+    applyFilters();
+}
+
+function toggleMine(): void {
+    mineOnly.value = !mineOnly.value;
+    applyFilters();
+}
+
+function onCategoryChange(value: string): void {
+    categoryId.value = value === 'all' ? null : Number(value);
+    applyFilters();
+}
+
+function onLangChange(value: string): void {
+    langFilter.value = value;
+    applyFilters();
+}
+
+function resetAllFilters(): void {
+    statusFilter.value = 'all';
+    mineOnly.value = false;
+    categoryId.value = null;
+    langFilter.value = 'any';
+    search.value = '';
+    sortBy.value = null;
+    sortDir.value = 'asc';
+    perPage.value = 10;
+    router.get('/admin/blog/posts', {}, {
+        only: ['posts', 'pagination', 'filters'],
+        preserveScroll: true,
+        preserveState: true,
+        replace: true,
+    });
+}
+
+// Active state for the "All" pill: no status filter AND not the Mine view.
+const allActive = computed(
+    () => statusFilter.value === 'all' && !mineOnly.value,
+);
+
+type Pill = {
+    key: 'all' | 'mine' | 'published' | 'draft' | 'inactive';
+    label: string;
+    count: number;
+    active: boolean;
+    activeClass: string;
+    idleClass: string;
+    onClick: () => void;
+};
+
+const pills = computed<Pill[]>(() => [
+    {
+        key: 'all',
+        label: 'All',
+        count: props.statusCounts.all,
+        active: allActive.value,
+        activeClass: 'bg-neutral-900 text-white shadow-sm',
+        idleClass:
+            'bg-neutral-200 text-neutral-700 hover:bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700',
+        onClick: () => {
+            statusFilter.value = 'all';
+            mineOnly.value = false;
+            applyFilters();
+        },
+    },
+    {
+        key: 'mine',
+        label: 'Mine',
+        count: props.statusCounts.mine,
+        active: mineOnly.value,
+        activeClass: 'bg-neutral-900 text-white shadow-sm',
+        idleClass:
+            'bg-neutral-200 text-neutral-700 hover:bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700',
+        onClick: toggleMine,
+    },
+    {
+        key: 'published',
+        label: 'Published',
+        count: props.statusCounts.published,
+        active: statusFilter.value === 'published',
+        activeClass: 'bg-emerald-500 text-white shadow-sm',
+        idleClass:
+            'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60',
+        onClick: () => setStatus('published'),
+    },
+    {
+        key: 'draft',
+        label: 'Drafts',
+        count: props.statusCounts.draft,
+        active: statusFilter.value === 'draft',
+        activeClass: 'bg-amber-500 text-white shadow-sm',
+        idleClass:
+            'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:hover:bg-amber-900/60',
+        onClick: () => setStatus('draft'),
+    },
+    {
+        key: 'inactive',
+        label: 'Inactive',
+        count: props.statusCounts.inactive,
+        active: statusFilter.value === 'inactive',
+        activeClass: 'bg-rose-500 text-white shadow-sm',
+        idleClass:
+            'bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/60',
+        onClick: () => setStatus('inactive'),
+    },
+]);
+
 const isFiltered = computed(
-    () => (search.value && search.value.length > 0) || sortBy.value !== null,
+    () =>
+        (search.value && search.value.length > 0) ||
+        sortBy.value !== null ||
+        statusFilter.value !== 'all' ||
+        mineOnly.value ||
+        categoryId.value !== null ||
+        langFilter.value !== 'any',
 );
 const canDrag = computed(() => !isFiltered.value);
 
@@ -264,11 +431,98 @@ function formatDate(iso: string | null): string {
                             v-if="isFiltered"
                             variant="ghost"
                             size="sm"
-                            @click="resetAll"
+                            @click="resetAllFilters"
                         >
                             <X class="size-4" />
                             Clear
                         </Button>
+                    </div>
+                </div>
+
+                <!-- Colored pill filter row + category + language. -->
+                <div
+                    class="mt-4 flex flex-col gap-3 border-t pt-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between"
+                >
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button
+                            v-for="pill in pills"
+                            :key="pill.key"
+                            type="button"
+                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            :class="
+                                pill.active ? pill.activeClass : pill.idleClass
+                            "
+                            @click="pill.onClick"
+                        >
+                            {{ pill.label }}({{ pill.count }})
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-muted-foreground">
+                                Category
+                            </span>
+                            <Select
+                                :model-value="
+                                    categoryId === null
+                                        ? 'all'
+                                        : String(categoryId)
+                                "
+                                @update:model-value="
+                                    (v) => onCategoryChange(v as string)
+                                "
+                            >
+                                <SelectTrigger class="h-9 w-44">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        All categories
+                                    </SelectItem>
+                                    <SelectItem
+                                        v-for="opt in categoryOptions"
+                                        :key="opt.id"
+                                        :value="String(opt.id)"
+                                    >
+                                        {{ opt.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-muted-foreground">
+                                Language
+                            </span>
+                            <Select
+                                :model-value="langFilter"
+                                @update:model-value="
+                                    (v) => onLangChange(v as string)
+                                "
+                            >
+                                <SelectTrigger class="h-9 w-40">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="any">
+                                        Any language
+                                    </SelectItem>
+                                    <SelectItem
+                                        v-for="lang in languages"
+                                        :key="lang.code"
+                                        :value="lang.code"
+                                    >
+                                        {{ lang.native_name }} ({{
+                                            lang.code.toUpperCase()
+                                        }})
+                                    </SelectItem>
+                                    <SelectItem value="both">
+                                        Has both translations
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </div>
             </CardHeader>

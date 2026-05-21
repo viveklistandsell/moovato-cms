@@ -61,6 +61,7 @@ import {
 } from 'lucide-vue-next';
 import { onClickOutside } from '@vueuse/core';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import MediaPicker from '@/components/common/MediaPicker.vue';
 
 const lowlight = createLowlight(common);
 
@@ -332,15 +333,22 @@ function deleteTable() {
     exec(() => editor.value?.chain().focus().deleteTable().run());
     tableMenuOpen.value = false;
 }
-function insertVideo() {
-    if (!editor.value) {
-        return;
-    }
-    const url = window.prompt('YouTube URL or video URL:');
-    if (!url) {
-        return;
-    }
-    editor.value.commands.setYoutubeVideo({ src: url });
+// MediaPicker integration: the image and video toolbar buttons open the
+// in-form media library instead of the native window.prompt(). For images we
+// insert via TipTap's setImage command; for video files we insert a raw
+// <video controls> tag so the picked MP4/WebM file plays inline.
+const imagePickerOpen = ref(false);
+const videoPickerOpen = ref(false);
+
+function onPickImage(file: { path: string; url: string; name: string }): void {
+    if (!editor.value) return;
+    editor.value.chain().focus().setImage({ src: file.url, alt: file.name }).run();
+}
+
+function onPickVideo(file: { path: string; url: string; name: string }): void {
+    if (!editor.value) return;
+    const html = `<video controls preload="metadata" style="max-width:100%;height:auto" src="${file.url}"></video>`;
+    editor.value.chain().focus().insertContent(html).run();
 }
 function setLink() {
     if (!editor.value) {
@@ -363,16 +371,6 @@ function setLink() {
         .extendMarkRange('link')
         .setLink({ href: url })
         .run();
-}
-function insertImage() {
-    if (!editor.value) {
-        return;
-    }
-    const url = window.prompt('Image URL:');
-    if (!url) {
-        return;
-    }
-    editor.value.chain().focus().setImage({ src: url }).run();
 }
 function toggleFullscreen() {
     isFullscreen.value = !isFullscreen.value;
@@ -538,8 +536,8 @@ function redo() {
             </div>
 
             <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('link') }" title="Link (Ctrl+K)" @click="setLink"><LinkIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Insert image" @click="insertImage"><ImageIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Insert YouTube video" @click="insertVideo"><Video class="size-4" /></button>
+            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Insert image from media library" @click="imagePickerOpen = true"><ImageIcon class="size-4" /></button>
+            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Insert video from media library" @click="videoPickerOpen = true"><Video class="size-4" /></button>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
@@ -597,6 +595,10 @@ function redo() {
                 <p class="mt-3 text-xs text-muted-foreground">Typography auto-formats: -- → —, ... → …, "x" → "x"</p>
             </div>
         </div>
+
+        <!-- Media library pickers driven by the image and video toolbar buttons. -->
+        <MediaPicker v-model:open="imagePickerOpen" accept="image" @pick="onPickImage" />
+        <MediaPicker v-model:open="videoPickerOpen" accept="video" @pick="onPickVideo" />
     </div>
 </template>
 

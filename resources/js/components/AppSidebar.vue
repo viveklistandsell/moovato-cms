@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import {
-    BookOpen,
     ChevronRight,
     Files,
-    FolderGit2,
     FolderTree,
     ImagePlay,
     Languages,
     LayoutGrid,
     Newspaper,
+    Settings2Icon,
     Tag,
+    UserRoundCheck,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
@@ -99,14 +99,14 @@ const pageItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
+        title: 'User Management',
+        href: '/admin/users',
+        icon:  UserRoundCheck,
     },
     {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
+        title: 'Settings',
+        href: '/admin/settings',
+        icon: Settings2Icon,
     },
 ];
 

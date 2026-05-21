@@ -78,6 +78,16 @@ const SORT_LABELS: Record<SortKey, string> = {
 
 const open = defineModel<boolean>('open', { required: true });
 
+// `accept` narrows the listing by MIME family. Defaults to 'image' so the
+// many existing image-only callers (page/blog featured image, widget image
+// fields) keep their current behavior.
+const props = withDefaults(
+    defineProps<{
+        accept?: 'image' | 'video' | 'any';
+    }>(),
+    { accept: 'image' },
+);
+
 const emit = defineEmits<{
     (e: 'pick', file: { path: string; url: string; name: string }): void;
 }>();
@@ -325,6 +335,11 @@ async function fetchPage(): Promise<void> {
             params.set('folder', String(folderId.value));
         }
         params.set('sort', sort.value);
+        if (props.accept !== 'image') {
+            // Image is the server default; only send the param when it differs
+            // so URLs stay short for the common case.
+            params.set('accept', props.accept);
+        }
 
         const res = await fetch(`/admin/media/picker?${params.toString()}`, {
             headers: { Accept: 'application/json' },
