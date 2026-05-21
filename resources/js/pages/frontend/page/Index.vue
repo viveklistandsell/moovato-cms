@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import FrontendLayout from '@/layouts/frontend/FrontendLayout.vue';
 import { localizedUrl } from '@/lib/localizedUrl';
+import { getWidgetEntry } from '@/widgets/registry';
 
 type Category = { id: number; title: string; permalink: string };
 
@@ -10,7 +11,6 @@ type Page = {
     id: number;
     title: string;
     permalink: string;
-    content: string | null;
     image_url: string | null;
     template: string;
     is_home: boolean;
@@ -19,10 +19,23 @@ type Page = {
     categories: Category[];
 };
 
+type WidgetPayload = {
+    type: string;
+    settings: Record<string, unknown>;
+    data: Record<string, unknown>;
+};
+
 const props = defineProps<{
     locale: string;
     page: Page;
+    widgets?: WidgetPayload[];
 }>();
+
+const widgetStack = computed(() =>
+    (props.widgets ?? [])
+        .map((w) => ({ widget: w, entry: getWidgetEntry(w.type) }))
+        .filter((row): row is { widget: WidgetPayload; entry: NonNullable<ReturnType<typeof getWidgetEntry>> } => row.entry !== null),
+);
 
 // app.ts skips FrontendLayout for this page — we own the chrome decision
 // here so the "nolayout" template can render bare (no SiteHeader / SiteFooter).
@@ -47,15 +60,17 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
         />
     </Head>
 
-    <!-- NO LAYOUT: bare content, no header/footer/breadcrumb -->
+    <!-- NO LAYOUT: bare widgets, no header/footer/breadcrumb -->
     <div
         v-if="isNolayout"
         class="min-h-screen bg-background text-foreground"
     >
-        <div
-            v-if="page.content"
-            class="prose prose-neutral max-w-none dark:prose-invert"
-            v-html="page.content"
+        <component
+            :is="row.entry.renderer"
+            v-for="(row, i) in widgetStack"
+            :key="i"
+            :settings="row.widget.settings"
+            :data="row.widget.data"
         />
     </div>
 
@@ -108,12 +123,13 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
                 </h1>
             </header>
 
-            <div v-if="page.content" class="mx-auto max-w-5xl px-4 py-12">
-                <div
-                    class="prose prose-lg prose-neutral max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-primary prose-img:rounded-xl"
-                    v-html="page.content"
-                />
-            </div>
+            <component
+                :is="row.entry.renderer"
+                v-for="(row, i) in widgetStack"
+                :key="i"
+                :settings="row.widget.settings"
+                :data="row.widget.data"
+            />
         </article>
 
         <!-- DEFAULT: centered prose with breadcrumb and hero image -->
@@ -149,12 +165,14 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
                     class="aspect-[16/9] w-full object-cover"
                 />
             </div>
-
-            <div
-                v-if="page.content"
-                class="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-primary prose-img:rounded-md"
-                v-html="page.content"
-            />
         </article>
+
+        <component
+            :is="row.entry.renderer"
+            v-for="(row, i) in widgetStack"
+            :key="i"
+            :settings="row.widget.settings"
+            :data="row.widget.data"
+        />
     </FrontendLayout>
 </template>

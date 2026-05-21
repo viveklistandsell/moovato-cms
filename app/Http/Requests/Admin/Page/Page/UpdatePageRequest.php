@@ -62,7 +62,6 @@ final class UpdatePageRequest extends FormRequest
 
             $rules["translations.{$code}.title"] = $titleRules;
             $rules["translations.{$code}.permalink"] = $permalinkRules;
-            $rules["translations.{$code}.content"] = ['nullable', 'string'];
         }
 
         return $rules;

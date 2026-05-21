@@ -13,7 +13,8 @@ import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
 import MultiSelect from '@/components/common/MultiSelect.vue';
-import RichTextEditor from '@/components/common/RichTextEditor.vue';
+import WidgetsCanvas from '@/components/admin/widgets/WidgetsCanvas.vue';
+import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -40,7 +41,6 @@ import { slugify } from '@/lib/slug';
 type Translation = {
     title: string;
     permalink: string;
-    content: string | null;
 };
 
 type Page = {
@@ -74,6 +74,8 @@ const props = defineProps<{
     categoryOptions: CategoryOption[];
     templates: TemplateOption[];
     currentUserId: number | null;
+    availableWidgets: WidgetMeta[];
+    pageWidgets: WidgetInstance[];
 }>();
 
 const isEdit = computed(() => props.page !== null);
@@ -94,13 +96,12 @@ const initialTranslations: Record<string, Translation> = Object.fromEntries(
         props.page?.translations[lang.code] ?? {
             title: '',
             permalink: '',
-            content: '',
         },
     ]),
 );
 
 const form = useForm({
-    image: null as File | null,
+    image: null,
     image_path: (props.page?.image ?? '') as string,
     remove_image: false,
     category_ids: props.page?.category_ids ?? [],
@@ -108,7 +109,16 @@ const form = useForm({
     is_home: props.page?.is_home ?? false,
     status: props.page?.status ?? 'published',
     translations: initialTranslations,
+    // Only populated on CREATE — sent with the main page form so the very
+    // first save can persist page + widgets in one transaction. On EDIT,
+    // widgets live in a sibling ref and sync via their own endpoint.
+    widgets: [],
 });
+
+// On edit, the widget card is controlled by this local ref. Its Save button
+// (rendered by WidgetsCanvas because pageId is provided) syncs widgets
+// independently of the main page form.
+const editWidgets = ref<WidgetInstance[]>(props.pageWidgets ?? []);
 
 const activeLocale = ref(
     props.languages.find((l) => l.is_default)?.code ??
@@ -304,38 +314,39 @@ const errorFor = (code: string, field: keyof Translation) =>
                                         />
                                     </div>
 
-                                    <div class="grid gap-2">
-                                        <Label>
-                                            Page content
-                                            <span
-                                                v-if="
-                                                    languages.find(
-                                                        (l) => l.code === code,
-                                                    )?.is_default
-                                                "
-                                                class="text-destructive"
-                                                >*</span
-                                            >
-                                        </Label>
-                                        <RichTextEditor
-                                            :model-value="
-                                                form.translations[code].content
-                                            "
-                                            :placeholder="`Page content (${code.toUpperCase()})`"
-                                            @update:model-value="
-                                                (v) =>
-                                                    (form.translations[
-                                                        code
-                                                    ].content = v)
-                                            "
-                                        />
-                                        <InputError
-                                            :message="errorFor(code, 'content')"
-                                        />
-                                    </div>
                                 </div>
                             </template>
                         </LocaleTabs>
+                    </CardContent>
+                </Card>
+
+                <!-- Widget Builder: available on BOTH create and edit.
+                     On create, widgets are part of the main page form (no
+                     internal Save button); on edit they have their own
+                     Save button that hits the sync endpoint directly. -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Page Widgets</CardTitle>
+                        <CardDescription>
+                            Compose the page from reusable blocks — hero
+                            sections, banners, features, FAQs, galleries, and
+                            more. Each widget supports per-language content.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <WidgetsCanvas
+                            v-if="isEdit && page"
+                            v-model:widgets="editWidgets"
+                            :page-id="page.id"
+                            :available-widgets="availableWidgets"
+                            :languages="languages"
+                        />
+                        <WidgetsCanvas
+                            v-else
+                            v-model:widgets="form.widgets"
+                            :available-widgets="availableWidgets"
+                            :languages="languages"
+                        />
                     </CardContent>
                 </Card>
             </div>

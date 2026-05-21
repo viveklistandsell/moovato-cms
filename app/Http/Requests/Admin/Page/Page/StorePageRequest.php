@@ -4,15 +4,24 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Page\Page;
 
+use App\Http\Requests\Concerns\ValidatesPageWidgets;
 use App\Models\Language;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 final class StorePageRequest extends FormRequest
 {
+    use ValidatesPageWidgets;
+
     public function authorize(): bool
     {
         return $this->user() !== null;
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after([$this, 'validateWidgetStack']);
     }
 
     /**
@@ -58,9 +67,8 @@ final class StorePageRequest extends FormRequest
 
             $rules["translations.{$code}.title"] = $titleRules;
             $rules["translations.{$code}.permalink"] = $permalinkRules;
-            $rules["translations.{$code}.content"] = ['nullable', 'string'];
         }
 
-        return $rules;
+        return $rules + $this->widgetEnvelopeRules();
     }
 }

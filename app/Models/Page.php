@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'title', 'permalink', 'image', 'content', 'template',
+    'title', 'permalink', 'image', 'template',
     'is_home', 'user_id', 'status',
 ])]
 final class Page extends Model
@@ -43,6 +43,11 @@ final class Page extends Model
     public function translations(): HasMany
     {
         return $this->hasMany(PageTranslation::class);
+    }
+
+    public function widgets(): HasMany
+    {
+        return $this->hasMany(PageWidget::class)->orderBy('position');
     }
 
     public function translation(?string $lang = null): ?PageTranslation

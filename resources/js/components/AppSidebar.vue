@@ -60,11 +60,11 @@ const mediaItem: NavItem = {
     icon: ImagePlay,
 };
 
-// const languagesItem: NavItem = {
-//     title: 'Languages',
-//     href: '/admin/languages',
-//     icon: Languages,
-// };
+const languagesItem: NavItem = {
+    title: 'Languages',
+    href: '/admin/languages',
+    icon: Languages,
+};
 
 const blogItems: NavItem[] = [
     {
@@ -234,7 +234,7 @@ const isPageSectionActive = computed(() =>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
-                    <!-- <SidebarMenuItem>
+                    <SidebarMenuItem>
                         <SidebarMenuButton
                             as-child
                             :is-active="isCurrentUrl(languagesItem.href)"
@@ -245,7 +245,7 @@ const isPageSectionActive = computed(() =>
                                 <span>{{ languagesItem.title }}</span>
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem> -->
+                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarGroup>
         </SidebarContent>

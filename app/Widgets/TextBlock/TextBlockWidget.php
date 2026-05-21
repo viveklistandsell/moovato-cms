@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Widgets\TextBlock;
+
+use App\Widgets\Concerns\ProvidesWidgetDefaults;
+use App\Widgets\Contracts\WidgetContract;
+
+final class TextBlockWidget implements WidgetContract
+{
+    use ProvidesWidgetDefaults;
+
+    public static function type(): string
+    {
+        return 'text_block';
+    }
+
+    public static function label(): string
+    {
+        return 'Text Block';
+    }
+
+    public static function icon(): string
+    {
+        return 'Type';
+    }
+
+    public static function category(): string
+    {
+        return 'content';
+    }
+
+    public static function defaultSettings(): array
+    {
+        return [
+            'width' => 'narrow',  // narrow | wide | full
+            'alignment' => 'left', // left | center | right
+            'background' => 'none', // none | muted | brand
+        ];
+    }
+
+    public static function defaultData(): array
+    {
+        return [
+            'heading' => '',
+            'body' => '',
+        ];
+    }
+
+    public static function settingsRules(): array
+    {
+        return [
+            'width' => ['required', 'in:narrow,wide,full'],
+            'alignment' => ['required', 'in:left,center,right'],
+            'background' => ['required', 'in:none,muted,brand'],
+        ];
+    }
+
+    public static function dataRules(): array
+    {
+        return [
+            'heading' => ['nullable', 'string', 'max:255'],
+            'body' => ['nullable', 'string'],
+        ];
+    }
+}

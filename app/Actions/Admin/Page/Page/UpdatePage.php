@@ -20,7 +20,7 @@ final readonly class UpdatePage
      *   template?: string,
      *   is_home?: bool,
      *   status?: string,
-     *   translations: array<string, array{title?: ?string, permalink?: ?string, content?: ?string}>
+     *   translations: array<string, array{title?: ?string, permalink?: ?string}>
      * }  $data
      */
     public function handle(Page $page, array $data): Page
@@ -46,18 +46,22 @@ final readonly class UpdatePage
                 $page->image = $data['image_path'];
             }
 
+            // Form data arrives as "1"/"true" strings, not real PHP bools, so
+            // a strict `=== true` check below silently skipped the cleanup —
+            // that's why the home icon was sticking on multiple pages.
+            $isHome = filter_var($data['is_home'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
             $page->fill([
                 'title' => $defaultPrimary['title'] ?? $page->title,
                 'permalink' => $defaultPrimary['permalink'] ?? $page->permalink,
-                'content' => $defaultPrimary['content'] ?? $page->content,
                 'template' => $data['template'] ?? $page->template,
-                'is_home' => $data['is_home'] ?? false,
+                'is_home' => $isHome,
                 'status' => $data['status'] ?? $page->status,
             ]);
 
             $page->save();
 
-            if (($data['is_home'] ?? false) === true) {
+            if ($isHome) {
                 Page::clearOtherHomes($page->id);
             }
 
@@ -79,7 +83,6 @@ final readonly class UpdatePage
                     'lang' => $lang,
                     'title' => $translation['title'],
                     'permalink' => $translation['permalink'],
-                    'content' => $translation['content'] ?? null,
                 ]);
             }
 

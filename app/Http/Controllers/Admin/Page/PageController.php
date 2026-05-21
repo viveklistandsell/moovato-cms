@@ -15,6 +15,9 @@ use App\Models\Language;
 use App\Models\Page;
 use App\Models\PageCategory;
 use App\Models\PageTranslation;
+use App\Models\PageWidget;
+use App\Models\PageWidgetTranslation;
+use App\Widgets\Registry\WidgetRegistry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,6 +42,14 @@ final class PageController extends Controller
         $sortDir = $request->query('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc';
         $perPage = max(5, min(100, (int) $request->query('per_page', '10')));
 
+        // Filter tabs: `all` (default), `published`, `draft`, `inactive`, `mine`.
+        // `mine` is layered on top of the status filter — pages I authored AND
+        // matching the active status (or any, if status=all).
+        $statusFilter = (string) $request->query('status', 'all');
+        $mineOnly = $request->boolean('mine');
+        $categoryId = (int) $request->query('category_id', '0');
+        $langFilter = (string) $request->query('lang', 'any'); // any | de | en | both
+
         $query = Page::query()
             ->with(['translations', 'categories:id,title', 'user:id,name']);
 
@@ -51,6 +62,36 @@ final class PageController extends Controller
                         $t->where('title', 'like', $like)->orWhere('permalink', 'like', $like);
                     });
             });
+        }
+
+        if (in_array($statusFilter, ['published', 'draft', 'inactive'], true)) {
+            $query->where('status', $statusFilter);
+        }
+
+        if ($mineOnly && $request->user() !== null) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        if ($categoryId > 0) {
+            $query->whereHas('categories', function (Builder $c) use ($categoryId): void {
+                $c->where('page_categories.id', $categoryId);
+            });
+        }
+
+        $activeCodes = Language::query()
+            ->where('status', true)
+            ->pluck('code')
+            ->all();
+
+        if ($langFilter !== 'any' && in_array($langFilter, [...$activeCodes, 'both'], true)) {
+            if ($langFilter === 'both' && count($activeCodes) > 0) {
+                // Page must have a translation row for EVERY active language.
+                foreach ($activeCodes as $code) {
+                    $query->whereHas('translations', fn (Builder $t) => $t->where('lang', $code));
+                }
+            } else {
+                $query->whereHas('translations', fn (Builder $t) => $t->where('lang', $langFilter));
+            }
         }
 
         if (is_string($sortBy) && array_key_exists($sortBy, self::SORTABLE_COLUMNS)) {
@@ -70,11 +111,17 @@ final class PageController extends Controller
         return Inertia::render('admin/page/pages/Index', [
             'pages' => $pages,
             'languages' => fn (): array => $this->presentLanguages(),
+            'categoryOptions' => fn (): array => $this->categoryOptions(),
+            'statusCounts' => fn (): array => $this->statusCounts($request->user()?->id),
             'filters' => [
                 'q' => $search,
                 'sort_by' => is_string($sortBy) && array_key_exists($sortBy, self::SORTABLE_COLUMNS) ? $sortBy : null,
                 'sort_dir' => $sortDir,
                 'per_page' => $perPage,
+                'status' => in_array($statusFilter, ['all', 'published', 'draft', 'inactive'], true) ? $statusFilter : 'all',
+                'mine' => $mineOnly,
+                'category_id' => $categoryId > 0 ? $categoryId : null,
+                'lang' => $langFilter,
             ],
             'pagination' => [
                 'current_page' => $paginated->currentPage(),
@@ -88,7 +135,7 @@ final class PageController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request, WidgetRegistry $widgets): Response
     {
         return Inertia::render('admin/page/pages/Edit', [
             'page' => null,
@@ -97,6 +144,8 @@ final class PageController extends Controller
             'categoryOptions' => $this->categoryOptions(),
             'templates' => $this->templateOptions(),
             'currentUserId' => $request->user()?->id,
+            'availableWidgets' => $widgets->all(),
+            'pageWidgets' => [],
         ]);
     }
 
@@ -114,9 +163,9 @@ final class PageController extends Controller
             ->with('toast', ['type' => 'success', 'message' => 'Page created.']);
     }
 
-    public function edit(Page $page): Response
+    public function edit(Page $page, WidgetRegistry $widgets): Response
     {
-        $page->load(['translations', 'categories']);
+        $page->load(['translations', 'categories', 'widgets.translations']);
 
         return Inertia::render('admin/page/pages/Edit', [
             'page' => $this->presentPage($page),
@@ -125,6 +174,8 @@ final class PageController extends Controller
             'categoryOptions' => $this->categoryOptions(),
             'templates' => $this->templateOptions(),
             'currentUserId' => $page->user_id,
+            'availableWidgets' => $widgets->all(),
+            'pageWidgets' => $this->presentWidgets($page),
         ]);
     }
 
@@ -205,7 +256,6 @@ final class PageController extends Controller
             'id' => $page->id,
             'title' => $page->title,
             'permalink' => $page->permalink,
-            'content' => $page->content,
             'image' => $page->image,
             'image_url' => $page->image !== null ? '/storage/'.mb_ltrim($page->image, '/') : null,
             'template' => $page->template,
@@ -224,7 +274,6 @@ final class PageController extends Controller
                     $t->lang => [
                         'title' => $t->title,
                         'permalink' => $t->permalink,
-                        'content' => $t->content,
                     ],
                 ])->all(),
             'created_at' => $page->created_at?->toIso8601String(),
@@ -284,6 +333,51 @@ final class PageController extends Controller
             ->get(['id', 'title'])
             ->map(fn (PageCategory $c): array => ['id' => $c->id, 'name' => $c->title])
             ->all();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function presentWidgets(Page $page): array
+    {
+        if (! $page->relationLoaded('widgets')) {
+            return [];
+        }
+
+        return $page->widgets
+            ->map(fn (PageWidget $w): array => [
+                'id' => $w->id,
+                'type' => $w->type,
+                'position' => $w->position,
+                'is_active' => $w->is_active,
+                'settings' => $w->settings ?? [],
+                'translations' => $w->translations
+                    ->mapWithKeys(fn (PageWidgetTranslation $t): array => [
+                        $t->lang => $t->data ?? [],
+                    ])->all(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Per-filter row counts shown next to the colored pill buttons. Computed
+     * against the global page set (NOT the currently filtered view) so the
+     * numbers stay stable as the admin clicks between pills.
+     *
+     * @return array{all: int, mine: int, published: int, draft: int, inactive: int}
+     */
+    private function statusCounts(?int $userId): array
+    {
+        return [
+            'all' => Page::query()->count(),
+            'mine' => $userId !== null
+                ? Page::query()->where('user_id', $userId)->count()
+                : 0,
+            'published' => Page::query()->where('status', 'published')->count(),
+            'draft' => Page::query()->where('status', 'draft')->count(),
+            'inactive' => Page::query()->where('status', 'inactive')->count(),
+        ];
     }
 
     /**

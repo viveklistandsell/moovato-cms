@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'page_id', 'lang', 'title', 'permalink', 'content',
+    'page_id', 'lang', 'title', 'permalink',
 ])]
 final class PageTranslation extends Model
 {

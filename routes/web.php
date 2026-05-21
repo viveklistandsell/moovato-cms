@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\MediaPickerController;
 use App\Http\Controllers\Admin\MediaTrashController;
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
+use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use Illuminate\Support\Facades\Route;
@@ -71,6 +72,10 @@ Route::prefix('{locale}')
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
+    // Bare /admin (and /admin/) has no landing view of its own — redirect to
+    // the dashboard so authenticated visitors don't see a confusing 404.
+    Route::redirect('admin', '/dashboard');
+
     Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::prefix('blog')->name('blog.')->group(function (): void {
             Route::post('categories/reorder', [AdminBlogCategoryController::class, 'reorder'])
@@ -122,6 +127,14 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             // Numeric constraint on {page} prevents collision with /categories.
             Route::post('bulk-action', [AdminPageController::class, 'bulkAction'])
                 ->name('bulk-action');
+
+            // Widget builder sync: full replace-all of the widget stack for a
+            // given page. Must be registered BEFORE the catch-all resource
+            // route so the {page} param resolves to a Page model bound here.
+            Route::post('{page}/widgets', [AdminPageWidgetController::class, 'sync'])
+                ->where('page', '[0-9]+')
+                ->name('widgets.sync');
+
             Route::resource('/', AdminPageController::class)
                 ->parameters(['' => 'page'])
                 ->except('show')
