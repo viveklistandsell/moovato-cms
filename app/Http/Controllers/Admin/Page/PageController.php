@@ -351,6 +351,14 @@ final class PageController extends Controller
                 'position' => $w->position,
                 'is_active' => $w->is_active,
                 'settings' => $w->settings ?? [],
+                // Default missing visibility rows to "show on all" so widgets
+                // created before this column existed don't suddenly disappear.
+                'visibility' => $w->visibility ?? [
+                    'desktop' => true,
+                    'tablet' => true,
+                    'mobile' => true,
+                ],
+                'css_class' => $w->css_class ?? '',
                 'translations' => $w->translations
                     ->mapWithKeys(fn (PageWidgetTranslation $t): array => [
                         $t->lang => $t->data ?? [],

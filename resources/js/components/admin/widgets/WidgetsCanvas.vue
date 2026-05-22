@@ -87,7 +87,21 @@ function normalizeWidget(w: WidgetInstance): WidgetInstance {
     const settingsNeedsDefaults = settingsKeys.some(
         (k) => !(k in (w.settings ?? {})),
     );
-    if (!translationsChanged && !settingsNeedsDefaults && w.id !== undefined && w.is_active !== undefined) {
+    const visibilityMissing =
+        !w.visibility ||
+        w.visibility.desktop === undefined ||
+        w.visibility.tablet === undefined ||
+        w.visibility.mobile === undefined;
+    const cssClassMissing = w.css_class === undefined;
+
+    if (
+        !translationsChanged &&
+        !settingsNeedsDefaults &&
+        !visibilityMissing &&
+        !cssClassMissing &&
+        w.id !== undefined &&
+        w.is_active !== undefined
+    ) {
         return w;
     }
     return {
@@ -96,6 +110,12 @@ function normalizeWidget(w: WidgetInstance): WidgetInstance {
         is_active: w.is_active ?? true,
         settings: { ...(meta?.default_settings ?? {}), ...(w.settings ?? {}) },
         translations,
+        visibility: {
+            desktop: w.visibility?.desktop ?? true,
+            tablet: w.visibility?.tablet ?? true,
+            mobile: w.visibility?.mobile ?? true,
+        },
+        css_class: w.css_class ?? '',
     };
 }
 
@@ -118,6 +138,8 @@ function onPick(meta: WidgetMeta): void {
         is_active: true,
         settings: { ...meta.default_settings },
         translations,
+        visibility: { desktop: true, tablet: true, mobile: true },
+        css_class: '',
     };
     widgets.value = [...widgets.value, instance];
 
@@ -167,14 +189,26 @@ function save(): void {
     saving.value = true;
 
     // Re-number positions based on current order; the server is authoritative
-    // but sending the array index keeps things explicit.
-    const payload = widgets.value.map((w, i) => ({
+    // but sending the array index keeps things explicit. Visibility + css_class
+    // travel with each row so per-device toggles in the drawer actually persist.
+    //
+    // We deep-clone via JSON to strip any Vue reactive proxies — proxies
+    // serialize fine via JSON.stringify in theory, but unwrapping here is the
+    // belt-and-suspenders fix for the "second-save loses the toggle" bug.
+    const snapshot: WidgetInstance[] = JSON.parse(JSON.stringify(widgets.value));
+    const payload = snapshot.map((w, i) => ({
         id: w.id ?? null,
         type: w.type,
         position: i,
         is_active: w.is_active,
         settings: w.settings ?? {},
         translations: w.translations ?? {},
+        visibility: {
+            desktop: w.visibility?.desktop ?? true,
+            tablet: w.visibility?.tablet ?? true,
+            mobile: w.visibility?.mobile ?? true,
+        },
+        css_class: w.css_class ?? '',
     }));
 
     router.post(

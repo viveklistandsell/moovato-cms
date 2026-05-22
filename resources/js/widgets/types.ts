@@ -13,6 +13,13 @@ export type WidgetMeta = {
 /** Translatable payload keyed by language code. */
 export type WidgetTranslations = Record<string, Record<string, unknown>>;
 
+/** Which breakpoints a widget renders on. All three default to true. */
+export type WidgetVisibility = {
+    desktop: boolean;
+    tablet: boolean;
+    mobile: boolean;
+};
+
 /** A widget instance on a page — what the canvas renders and what we save. */
 export type WidgetInstance = {
     id?: number | null;
@@ -21,6 +28,8 @@ export type WidgetInstance = {
     is_active: boolean;
     settings: Record<string, unknown>;
     translations: WidgetTranslations;
+    visibility: WidgetVisibility;
+    css_class: string;
 };
 
 /** Vue component pair (and optional label override) for a single widget type. */

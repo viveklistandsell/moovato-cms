@@ -51,6 +51,18 @@ final readonly class SyncPageWidgets
                 $settings = $row['settings'] ?? [];
                 $isActive = (bool) ($row['is_active'] ?? true);
 
+                // Per-instance display rules. Defaults to "show on all" so
+                // legacy rows + widgets without an explicit toggle stay
+                // visible. css_class is trimmed to drop accidental whitespace.
+                $rawVisibility = is_array($row['visibility'] ?? null) ? $row['visibility'] : [];
+                $visibility = [
+                    'desktop' => filter_var($rawVisibility['desktop'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                    'tablet' => filter_var($rawVisibility['tablet'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                    'mobile' => filter_var($rawVisibility['mobile'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                ];
+                $rawCssClass = $row['css_class'] ?? null;
+                $cssClass = is_string($rawCssClass) ? mb_trim($rawCssClass) : '';
+
                 $widget = (isset($row['id']) && $row['id'] !== null)
                     ? PageWidget::query()
                         ->where('page_id', $page->id)
@@ -66,6 +78,8 @@ final readonly class SyncPageWidgets
                 $widget->position = $position;
                 $widget->settings = $settings;
                 $widget->is_active = $isActive;
+                $widget->visibility = $visibility;
+                $widget->css_class = $cssClass !== '' ? $cssClass : null;
                 $widget->save();
 
                 $keepIds[] = $widget->id;

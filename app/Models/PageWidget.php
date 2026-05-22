@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'page_id', 'type', 'position', 'settings', 'is_active',
+    'page_id', 'type', 'position', 'settings', 'is_active', 'visibility', 'css_class',
 ])]
 final class PageWidget extends Model
 {
@@ -39,6 +39,7 @@ final class PageWidget extends Model
     {
         return [
             'settings' => 'array',
+            'visibility' => 'array',
             'is_active' => 'boolean',
             'position' => 'integer',
         ];

@@ -19,10 +19,18 @@ type Page = {
     categories: Category[];
 };
 
+type WidgetVisibility = {
+    desktop: boolean;
+    tablet: boolean;
+    mobile: boolean;
+};
+
 type WidgetPayload = {
     type: string;
     settings: Record<string, unknown>;
     data: Record<string, unknown>;
+    visibility?: WidgetVisibility;
+    css_class?: string;
 };
 
 const props = defineProps<{
@@ -31,10 +39,37 @@ const props = defineProps<{
     widgets?: WidgetPayload[];
 }>();
 
+// Map per-breakpoint visibility booleans into Tailwind utilities. Tailwind's
+// breakpoints we map onto: mobile = base (< 768px), tablet = md (768-1023px),
+// desktop = lg+ (>= 1024px). We only emit overrides when adjacent breakpoints
+// differ, so "show on all" produces no class at all.
+function visibilityClass(v?: WidgetVisibility): string {
+    if (!v) return '';
+    const { mobile, tablet, desktop } = v;
+    if (mobile && tablet && desktop) return '';
+    const parts: string[] = [];
+    parts.push(mobile ? 'block' : 'hidden');
+    if (tablet !== mobile) parts.push(tablet ? 'md:block' : 'md:hidden');
+    if (desktop !== tablet) parts.push(desktop ? 'lg:block' : 'lg:hidden');
+    return parts.join(' ');
+}
+
 const widgetStack = computed(() =>
     (props.widgets ?? [])
-        .map((w) => ({ widget: w, entry: getWidgetEntry(w.type) }))
-        .filter((row): row is { widget: WidgetPayload; entry: NonNullable<ReturnType<typeof getWidgetEntry>> } => row.entry !== null),
+        .map((w) => ({
+            widget: w,
+            entry: getWidgetEntry(w.type),
+            wrapperClass: [visibilityClass(w.visibility), w.css_class ?? '']
+                .filter(Boolean)
+                .join(' '),
+        }))
+        .filter(
+            (row): row is {
+                widget: WidgetPayload;
+                entry: NonNullable<ReturnType<typeof getWidgetEntry>>;
+                wrapperClass: string;
+            } => row.entry !== null,
+        ),
 );
 
 // app.ts skips FrontendLayout for this page — we own the chrome decision
@@ -65,30 +100,27 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
         v-if="isNolayout"
         class="min-h-screen bg-background text-foreground"
     >
-        <component
-            :is="row.entry.renderer"
+        <div
             v-for="(row, i) in widgetStack"
             :key="i"
-            :settings="row.widget.settings"
-            :data="row.widget.data"
-        />
+            :class="row.wrapperClass || undefined"
+        >
+            <component
+                :is="row.entry.renderer"
+                :settings="row.widget.settings"
+                :data="row.widget.data"
+            />
+        </div>
     </div>
 
     <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
     <FrontendLayout v-else>
-        <!-- FULL WIDTH: come with proper header and footer, edge-to-edge content, wider reading column -->
-        <article v-if="isFullwidth" class="w-full">
-            <component
-                :is="row.entry.renderer"
-                v-for="(row, i) in widgetStack"
-                :key="i"
-                :settings="row.widget.settings"
-                :data="row.widget.data"
-            />
-        </article>
-
-        <!-- DEFAULT: centered prose with breadcrumb and hero image -->
-        <article v-else class="mx-auto max-w-3xl px-4 py-10">
+        <!-- DEFAULT only: centered prose with breadcrumb + page title +
+             hero image. Fullwidth skips this so widgets sit edge-to-edge. -->
+        <article
+            v-if="!isFullwidth"
+            class="mx-auto max-w-3xl px-4 py-10"
+        >
             <nav
                 class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
             >
@@ -122,12 +154,17 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
             </div>
         </article>
 
-        <component
-            :is="row.entry.renderer"
+        <!-- Widgets render once for BOTH templates (default + fullwidth). -->
+        <div
             v-for="(row, i) in widgetStack"
             :key="i"
-            :settings="row.widget.settings"
-            :data="row.widget.data"
-        />
+            :class="row.wrapperClass || undefined"
+        >
+            <component
+                :is="row.entry.renderer"
+                :settings="row.widget.settings"
+                :data="row.widget.data"
+            />
+        </div>
     </FrontendLayout>
 </template>

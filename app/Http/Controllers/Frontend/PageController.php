@@ -110,9 +110,10 @@ final class PageController extends Controller
     /**
      * Flatten active widgets into a render-ready payload keyed to the current
      * locale. Falls back to the first available translation if a widget has
-     * no row for the requested lang.
+     * no row for the requested lang. Visibility and css_class travel with each
+     * widget so the frontend wrapper can hide/style them per breakpoint.
      *
-     * @return array<int, array{type: string, settings: array<string, mixed>, data: array<string, mixed>}>
+     * @return array<int, array{type: string, settings: array<string, mixed>, data: array<string, mixed>, visibility: array{desktop: bool, tablet: bool, mobile: bool}, css_class: string}>
      */
     private function presentWidgetsForLocale(Page $page, string $locale): array
     {
@@ -127,10 +128,18 @@ final class PageController extends Controller
                 $translation = $w->translations->firstWhere('lang', $locale)
                     ?? $w->translations->first();
 
+                $visibility = $w->visibility ?? [];
+
                 return [
                     'type' => $w->type,
                     'settings' => $w->settings ?? [],
                     'data' => $translation?->data ?? [],
+                    'visibility' => [
+                        'desktop' => (bool) ($visibility['desktop'] ?? true),
+                        'tablet' => (bool) ($visibility['tablet'] ?? true),
+                        'mobile' => (bool) ($visibility['mobile'] ?? true),
+                    ],
+                    'css_class' => $w->css_class ?? '',
                 ];
             })
             ->values()
