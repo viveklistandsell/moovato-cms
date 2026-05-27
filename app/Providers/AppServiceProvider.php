@@ -1,35 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Listeners\RecordSuccessfulLogin;
+use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureAuthorization();
+        $this->registerEventListeners();
     }
 
     /**
      * Configure default behaviors for production-ready applications.
      */
-    protected function configureDefaults(): void
+    private function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
 
@@ -46,5 +49,22 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Grant Super Admin role a free pass on every Gate / can() check. This
+     * keeps fine-grained permission checks in controllers and policies clean
+     * — we never have to special-case the super admin downstream.
+     */
+    private function configureAuthorization(): void
+    {
+        Gate::before(static function (User $user, string $ability): ?bool {
+            return $user->isSuperAdmin() ? true : null;
+        });
+    }
+
+    private function registerEventListeners(): void
+    {
+        Event::listen(Login::class, RecordSuccessfulLogin::class);
     }
 }

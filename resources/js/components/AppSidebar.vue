@@ -5,12 +5,16 @@ import {
     Files,
     FolderTree,
     ImagePlay,
+    KeyRound,
     Languages,
     LayoutGrid,
     Newspaper,
     Settings2Icon,
+    ShieldCheck,
     Tag,
+    UserPlus,
     UserRoundCheck,
+    Users,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
@@ -27,7 +31,6 @@ import {
     SidebarContent,
     SidebarFooter,
     SidebarGroup,
-    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -97,12 +100,33 @@ const pageItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
+// User management sub-menu shown under the collapsible "User Management" item.
+// "Add User" jumps to the index page with `?new=1` so Index.vue auto-opens
+// the create drawer — no separate route required.
+const userItems: NavItem[] = [
     {
-        title: 'User Management',
+        title: 'All Users',
         href: '/admin/users',
-        icon:  UserRoundCheck,
+        icon: Users,
     },
+    {
+        title: 'Add User',
+        href: '/admin/users?new=1',
+        icon: UserPlus,
+    },
+    {
+        title: 'Roles',
+        href: '/admin/roles',
+        icon: ShieldCheck,
+    },
+    {
+        title: 'Permissions',
+        href: '/admin/permissions',
+        icon: KeyRound,
+    },
+];
+
+const footerNavItems: NavItem[] = [
     {
         title: 'Settings',
         href: '/admin/settings',
@@ -118,6 +142,13 @@ const isBlogSectionActive = computed(() =>
 
 const isPageSectionActive = computed(() =>
     pageItems.some((item) => isCurrentUrl(item.href)),
+);
+
+const isUserSectionActive = computed(
+    () =>
+        isCurrentUrl('/admin/users') ||
+        isCurrentUrl('/admin/roles') ||
+        isCurrentUrl('/admin/permissions'),
 );
 </script>
 
@@ -221,7 +252,7 @@ const isPageSectionActive = computed(() =>
                         </SidebarMenuItem>
                     </Collapsible>
 
-                    <SidebarMenuItem v-if="isAdmin">
+                    <SidebarMenuItem>
                         <SidebarMenuButton
                             as-child
                             :is-active="isCurrentUrl(mediaItem.href)"
@@ -246,6 +277,47 @@ const isPageSectionActive = computed(() =>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+
+                    <Collapsible
+                        :default-open="isUserSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="User Management"
+                                >
+                                    <Link :href="userItems[0].href">
+                                        <UserRoundCheck />
+                                        <span>User Management</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in userItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
                 </SidebarMenu>
             </SidebarGroup>
         </SidebarContent>

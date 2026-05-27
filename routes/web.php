@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\MediaTrashController;
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\PermissionController as AdminPermissionController;
+use App\Http\Controllers\Admin\RoleController as AdminRoleController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use Illuminate\Support\Facades\Route;
@@ -140,6 +143,61 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
                 ->except('show')
                 ->where(['page' => '[0-9]+']);
         });
+
+        // User management — single-page CRUD via drawer (no separate create/edit
+        // routes). Permission middleware gates each action; the controller's
+        // own actions throw on guard violations (self-delete, last super admin).
+        Route::prefix('users')->name('users.')->group(function (): void {
+            Route::get('/', [AdminUserController::class, 'index'])
+                ->middleware('permission:users.view')
+                ->name('index');
+
+            Route::post('/', [AdminUserController::class, 'store'])
+                ->middleware('permission:users.create')
+                ->name('store');
+
+            Route::post('bulk-action', [AdminUserController::class, 'bulkAction'])
+                ->name('bulk-action');
+
+            Route::post('{user}/reset-password', [AdminUserController::class, 'resetPassword'])
+                ->middleware('permission:users.reset-password')
+                ->where('user', '[0-9]+')
+                ->name('reset-password');
+
+            Route::match(['put', 'patch'], '{user}', [AdminUserController::class, 'update'])
+                ->middleware('permission:users.update')
+                ->where('user', '[0-9]+')
+                ->name('update');
+
+            Route::delete('{user}', [AdminUserController::class, 'destroy'])
+                ->middleware('permission:users.delete')
+                ->where('user', '[0-9]+')
+                ->name('destroy');
+        });
+
+        // Roles — full CRUD with separate create/edit pages (the form needs
+        // more vertical space than the user drawer comfortably allows).
+        // Each verb is gated by its own permission so an admin without
+        // roles.delete still sees the list and edit form.
+        Route::prefix('roles')->name('roles.')->group(function (): void {
+            Route::get('/', [AdminRoleController::class, 'index'])
+                ->middleware('permission:roles.view')->name('index');
+            Route::get('create', [AdminRoleController::class, 'create'])
+                ->middleware('permission:roles.create')->name('create');
+            Route::post('/', [AdminRoleController::class, 'store'])
+                ->middleware('permission:roles.create')->name('store');
+            Route::get('{role}/edit', [AdminRoleController::class, 'edit'])
+                ->middleware('permission:roles.update')->where('role', '[0-9]+')->name('edit');
+            Route::match(['put', 'patch'], '{role}', [AdminRoleController::class, 'update'])
+                ->middleware('permission:roles.update')->where('role', '[0-9]+')->name('update');
+            Route::delete('{role}', [AdminRoleController::class, 'destroy'])
+                ->middleware('permission:roles.delete')->where('role', '[0-9]+')->name('destroy');
+        });
+
+        // Permissions — read-only listing. Editing is done via the role form.
+        Route::get('permissions', [AdminPermissionController::class, 'index'])
+            ->middleware('permission:roles.view')
+            ->name('permissions.index');
     });
 });
 
