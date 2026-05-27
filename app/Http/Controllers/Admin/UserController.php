@@ -20,7 +20,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -189,7 +188,7 @@ final class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'avatar' => $user->avatar,
-            'avatar_url' => $user->avatar !== null ? Storage::disk('public')->url($user->avatar) : null,
+            'avatar_url' => $user->avatar !== null ? '/storage/'.mb_ltrim($user->avatar, '/') : null,
             'status' => $user->status?->value,
             'status_label' => $user->status?->label(),
             'status_color' => $user->status?->color(),
@@ -197,6 +196,7 @@ final class UserController extends Controller
             'role_display_name' => $role?->display_name ?? $role?->name,
             'role_color' => $role?->color,
             'last_login_at' => $user->last_login_at?->toIso8601String(),
+            'last_login_ip' => $user->last_login_ip,
             'created_at' => $user->created_at?->toIso8601String(),
         ];
     }

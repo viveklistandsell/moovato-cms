@@ -35,7 +35,6 @@ final class PermissionController extends Controller
                     'id' => $p->id,
                     'name' => $p->name,
                     'display_name' => $p->display_name ?? $p->name,
-                    'description' => $p->description,
                     'roles' => $p->roles->map(fn (Role $r): array => [
                         'id' => $r->id,
                         'name' => $r->name,

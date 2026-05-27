@@ -340,6 +340,8 @@ final class MediaPickerController
             'name' => $file->name,
             'original_name' => $file->original_name,
             'path' => $file->path,
+            'thumb_path' => $file->thumb_path,
+            'medium_path' => $file->medium_path,
             'url' => $this->relativeUrl($file->path),
             'thumb_url' => $file->thumb_path
                 ? $this->relativeUrl($file->thumb_path)

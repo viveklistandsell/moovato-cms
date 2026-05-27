@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import {
+    Camera,
     Filter,
     Key,
     Pencil,
@@ -49,6 +50,7 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet';
 import InputError from '@/components/InputError.vue';
+import MediaPicker from '@/components/common/MediaPicker.vue';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
 
@@ -68,6 +70,7 @@ type UserRow = {
     role_display_name: string | null;
     role_color: string | null;
     last_login_at: string | null;
+    last_login_ip: string | null;
     created_at: string | null;
 };
 
@@ -295,10 +298,12 @@ const form = useForm({
     status: 'active',
     role: '',
     avatar: null as File | null,
+    avatar_path: '',
     remove_avatar: false,
 });
 
 const avatarPreview = ref<string | null>(null);
+const avatarPickerOpen = ref(false);
 
 function openCreate(): void {
     drawerMode.value = 'create';
@@ -319,20 +324,32 @@ function openEdit(row: UserRow): void {
     form.email = row.email;
     form.status = row.status ?? 'active';
     form.role = row.role ?? '';
+    form.avatar_path = row.avatar ?? '';
     avatarPreview.value = row.avatar_url;
     drawerOpen.value = true;
 }
 
-function onAvatarChange(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
-    form.avatar = file;
+function onAvatarPicked(file: {
+    path: string;
+    url: string;
+    name: string;
+    thumb_path?: string | null;
+    thumb_url?: string | null;
+}): void {
+    form.avatar = null;
+    form.avatar_path = file.thumb_path && file.thumb_path !== '' ? file.thumb_path : file.path;
     form.remove_avatar = false;
-    avatarPreview.value = file ? URL.createObjectURL(file) : (editingUser.value?.avatar_url ?? null);
+    avatarPreview.value = file.thumb_url && file.thumb_url !== '' ? file.thumb_url : file.url;
 }
 
 function removeAvatar(): void {
     form.avatar = null;
+    form.avatar_path = '';
     form.remove_avatar = true;
+    avatarPreview.value = null;
+}
+
+function onAvatarLoadError(): void {
     avatarPreview.value = null;
 }
 
@@ -653,8 +670,15 @@ onMounted(() => {
                                     <div class="text-xs">
                                         {{ relativeTime(row.last_login_at) }}
                                     </div>
-                                    <div class="text-[10px] text-muted-foreground">
+                                    <div class="text-[12px] text-muted-foreground">
                                         {{ fullTime(row.last_login_at) }}
+                                    </div>
+                                    <div
+                                        v-if="row.last_login_ip"
+                                        class="mt-0.5 font-mono text-[12px] text-muted-foreground"
+                                        title="Last login IP"
+                                    >
+                                        {{ row.last_login_ip }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
@@ -717,25 +741,34 @@ onMounted(() => {
 
                 <form class="flex-1 space-y-4 overflow-y-auto px-6 py-5" @submit.prevent="submitDrawer">
                     <div class="flex items-center gap-4">
-                        <div class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+                        <button
+                            type="button"
+                            class="group relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-base font-semibold text-muted-foreground transition-colors hover:border-primary"
+                            :title="avatarPreview ? 'Change avatar' : 'Upload avatar'"
+                            @click="avatarPickerOpen = true"
+                        >
                             <img
                                 v-if="avatarPreview"
                                 :src="avatarPreview"
                                 alt=""
                                 class="size-full object-cover"
+                                @error="onAvatarLoadError"
                             />
                             <span v-else>{{ initials(form.name || '?') }}</span>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="cursor-pointer text-xs font-medium text-primary hover:underline">
+                            <span
+                                class="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            >
+                                <Camera class="size-5" />
+                            </span>
+                        </button>
+                        <div class="flex flex-col gap-1">
+                            <button
+                                type="button"
+                                class="text-left text-xs font-medium text-primary hover:underline"
+                                @click="avatarPickerOpen = true"
+                            >
                                 {{ avatarPreview ? 'Change avatar' : 'Upload avatar' }}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    class="sr-only"
-                                    @change="onAvatarChange"
-                                />
-                            </label>
+                            </button>
                             <button
                                 v-if="avatarPreview"
                                 type="button"
@@ -744,7 +777,11 @@ onMounted(() => {
                             >
                                 Remove
                             </button>
+                            <p class="text-[11px] text-muted-foreground">
+                                Pick an image from the media library.
+                            </p>
                             <InputError :message="form.errors.avatar" />
+                            <InputError :message="form.errors.avatar_path" />
                         </div>
                     </div>
 
@@ -892,5 +929,8 @@ onMounted(() => {
                 </SheetFooter>
             </SheetContent>
         </Sheet>
+
+        <!-- Avatar picker: opens from the user drawer; image-only listing. -->
+        <MediaPicker v-model:open="avatarPickerOpen" accept="image" @pick="onAvatarPicked" />
     </div>
 </template>

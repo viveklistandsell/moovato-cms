@@ -122,14 +122,14 @@ final class RoleController extends Controller
      * via the PermissionSeeder definition order (we re-sort by id within
      * each group so seeded order is stable across runs).
      *
-     * @return array<int, array{group: string, items: array<int, array{id: int, name: string, display_name: string, description: ?string}>}>
+     * @return array<int, array{group: string, items: array<int, array{id: int, name: string, display_name: string}>}>
      */
     private function permissionGroups(): array
     {
         $perms = Permission::query()
             ->orderBy('group')
             ->orderBy('id')
-            ->get(['id', 'name', 'display_name', 'group', 'description']);
+            ->get(['id', 'name', 'display_name', 'group']);
 
         return $perms
             ->groupBy(fn (Permission $p): string => $p->group ?? 'Other')
@@ -139,7 +139,6 @@ final class RoleController extends Controller
                     'id' => $p->id,
                     'name' => $p->name,
                     'display_name' => $p->display_name ?? $p->name,
-                    'description' => $p->description,
                 ])->values()->all(),
             ])
             ->values()

@@ -27,7 +27,6 @@ final class PermissionSeeder extends Seeder
                 [
                     'display_name' => $definition['display_name'],
                     'group' => $definition['group'],
-                    'description' => $definition['description'] ?? null,
                 ],
             );
         }
@@ -42,7 +41,7 @@ final class PermissionSeeder extends Seeder
      * or rename permissions — `php artisan db:seed --class=PermissionSeeder`
      * applies the diff (no destructive deletes; remove rows manually if needed).
      *
-     * @return list<array{name: string, display_name: string, group: string, description?: string}>
+     * @return list<array{name: string, display_name: string, group: string}>
      */
     private static function definitions(): array
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\Language;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -44,11 +45,42 @@ final class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $this->presentAuthUser($request->user()),
             ],
             'locale' => App::getLocale(),
             'defaultLocale' => $this->defaultLocaleCode(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        ];
+    }
+
+    /**
+     * Shape the auth user for Inertia. We trim the raw User model to the
+     * fields the frontend actually consumes:
+     *
+     *   - avatar          → AppHeader avatar fallback
+     *   - avatar_url      → UserInfo (bottom sidebar widget) avatar src
+     *   - role_display_name → UserInfo role line (e.g. "Super Admin")
+     *   - email_verified_at → Profile.vue "verify your email" banner
+     *
+     * @return array<string, mixed>|null
+     */
+    private function presentAuthUser(?User $user): ?array
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        $user->loadMissing('roles:id,name,display_name');
+        $role = $user->roles->first();
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'email_verified_at' => $user->email_verified_at?->toIso8601String(),
+            'avatar' => $user->avatar,
+            'avatar_url' => $user->avatar !== null ? '/storage/'.mb_ltrim($user->avatar, '/') : null,
+            'role_display_name' => $role?->display_name ?? $role?->name,
         ];
     }
 

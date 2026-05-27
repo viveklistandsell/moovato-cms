@@ -23,7 +23,6 @@ type PermissionItem = {
     id: number;
     name: string;
     display_name: string;
-    description: string | null;
     roles: RoleRef[];
 };
 
@@ -114,12 +113,6 @@ function badgeClasses(color: string): string {
                             >
                                 <td class="px-4 py-3">
                                     <div class="font-medium">{{ perm.display_name }}</div>
-                                    <div
-                                        v-if="perm.description"
-                                        class="text-xs text-muted-foreground"
-                                    >
-                                        {{ perm.description }}
-                                    </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <code class="rounded bg-muted px-1.5 py-0.5 text-[11px]">

@@ -40,6 +40,8 @@ type PickerFile = {
     name: string;
     original_name: string;
     path: string;
+    thumb_path: string | null;
+    medium_path: string | null;
     url: string;
     thumb_url: string | null;
     medium_url: string | null;
@@ -89,7 +91,16 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-    (e: 'pick', file: { path: string; url: string; name: string }): void;
+    (
+        e: 'pick',
+        file: {
+            path: string;
+            url: string;
+            name: string;
+            thumb_path?: string | null;
+            thumb_url?: string | null;
+        },
+    ): void;
 }>();
 
 const search = ref('');
@@ -265,10 +276,13 @@ function onDetailsDeleted(deleted: DetailFile): void {
 }
 
 function onDetailsUse(file: DetailFile): void {
+    const f = file as PickerFile;
     emit('pick', {
-        path: file.path,
-        url: file.url,
-        name: file.alt_text ?? file.title ?? file.name,
+        path: f.path,
+        url: f.url,
+        name: f.alt_text ?? f.title ?? f.name,
+        thumb_path: f.thumb_path,
+        thumb_url: f.thumb_url,
     });
     open.value = false;
 }
@@ -410,7 +424,13 @@ function jumpToCrumb(idx: number): void {
 }
 
 function pickFile(f: PickerFile): void {
-    emit('pick', { path: f.path, url: f.url, name: f.name });
+    emit('pick', {
+        path: f.path,
+        url: f.url,
+        name: f.name,
+        thumb_path: f.thumb_path,
+        thumb_url: f.thumb_url,
+    });
     open.value = false;
 }
 

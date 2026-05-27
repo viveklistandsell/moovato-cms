@@ -38,6 +38,7 @@ final class UpdateUserRequest extends FormRequest
             'status' => ['required', Rule::in(UserStatus::values())],
             'role' => ['nullable', 'string', Rule::in(Role::query()->pluck('name')->all())],
             'avatar' => ['nullable', 'image', 'max:2048'],
+            'avatar_path' => ['nullable', 'string', 'max:1000'],
             'remove_avatar' => ['nullable', 'boolean'],
         ];
     }

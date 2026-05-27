@@ -22,6 +22,7 @@ final readonly class UpdateUser
      *   status: string,
      *   role?: ?string,
      *   avatar?: UploadedFile|null,
+     *   avatar_path?: ?string,
      *   remove_avatar?: bool|null,
      * }  $data
      */
@@ -49,6 +50,8 @@ final readonly class UpdateUser
                     Storage::disk('public')->delete($user->avatar);
                 }
                 $user->avatar = $data['avatar']->store('avatars', 'public');
+            } elseif (! empty($data['avatar_path']) && $data['avatar_path'] !== $user->avatar) {
+                $user->avatar = $data['avatar_path'];
             } elseif (filter_var($data['remove_avatar'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
                 if ($user->avatar !== null) {
                     Storage::disk('public')->delete($user->avatar);

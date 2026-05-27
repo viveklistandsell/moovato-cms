@@ -15,24 +15,36 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { getInitials } = useInitials();
 
-// Compute whether we should show the avatar image
-const showAvatar = computed(
-    () => props.user.avatar && props.user.avatar !== '',
+const avatarSrc = computed<string | null>(
+    () => props.user.avatar_url ?? props.user.avatar ?? null,
 );
 </script>
 
 <template>
-    <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-        <AvatarImage v-if="showAvatar" :src="user.avatar!" :alt="user.name" />
-        <AvatarFallback class="rounded-lg text-black dark:text-white">
-            {{ getInitials(user.name) }}
-        </AvatarFallback>
-    </Avatar>
+    <div class="relative">
+        <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
+            <AvatarImage v-if="avatarSrc" :src="avatarSrc" :alt="user.name" />
+            <AvatarFallback class="rounded-lg text-black dark:text-white">
+                {{ getInitials(user.name) }}
+            </AvatarFallback>
+        </Avatar>
+        <!-- Online dot pinned to the bottom-right of the avatar. -->
+        <span
+            class="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-sidebar"
+            title="Online"
+        />
+    </div>
 
     <div class="grid flex-1 text-left text-sm leading-tight">
         <span class="truncate font-medium">{{ user.name }}</span>
-        <span v-if="showEmail" class="truncate text-xs text-muted-foreground">{{
-            user.email
-        }}</span>
+        <span
+            v-if="user.role_display_name"
+            class="truncate text-xs text-muted-foreground"
+        >
+            {{ user.role_display_name }}
+        </span>
+        <span v-if="showEmail" class="truncate text-xs text-muted-foreground">
+            {{ user.email }}
+        </span>
     </div>
 </template>

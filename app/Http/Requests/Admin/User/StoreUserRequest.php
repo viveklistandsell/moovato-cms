@@ -32,6 +32,7 @@ final class StoreUserRequest extends FormRequest
             // area by EnsureUserIsAdmin.
             'role' => ['nullable', 'string', Rule::in(Role::query()->pluck('name')->all())],
             'avatar' => ['nullable', 'image', 'max:2048'],
+            'avatar_path' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

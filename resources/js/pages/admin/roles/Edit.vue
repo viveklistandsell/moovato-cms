@@ -29,7 +29,6 @@ type PermissionItem = {
     id: number;
     name: string;
     display_name: string;
-    description: string | null;
 };
 
 type PermissionGroup = {

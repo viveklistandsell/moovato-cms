@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import {
     ChevronRight,
     Files,
@@ -43,8 +43,6 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const page = usePage();
-
 const platformItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -52,10 +50,6 @@ const platformItems: NavItem[] = [
         icon: LayoutGrid,
     },
 ];
-
-const isAdmin = computed<boolean>(
-    () => page.props.auth?.user?.is_admin === true,
-);
 
 const mediaItem: NavItem = {
     title: 'Media',
