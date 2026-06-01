@@ -80,9 +80,16 @@ final class PermissionSeeder extends Seeder
             ['name' => 'media.upload', 'display_name' => 'Upload files', 'group' => 'Media'],
             ['name' => 'media.delete', 'display_name' => 'Delete media', 'group' => 'Media'],
 
+            // Navigation / menus
+            ['name' => 'menus.view', 'display_name' => 'View menus', 'group' => 'Menus'],
+            ['name' => 'menus.create', 'display_name' => 'Create menu items', 'group' => 'Menus'],
+            ['name' => 'menus.update', 'display_name' => 'Update menu items', 'group' => 'Menus'],
+            ['name' => 'menus.delete', 'display_name' => 'Delete menu items', 'group' => 'Menus'],
+
             // Languages + global settings
             ['name' => 'settings.languages', 'display_name' => 'Manage languages', 'group' => 'Settings'],
             ['name' => 'settings.activity', 'display_name' => 'View activity log', 'group' => 'Settings'],
+            ['name' => 'settings.site', 'display_name' => 'Manage site settings (footer, contact)', 'group' => 'Settings'],
         ];
     }
 }

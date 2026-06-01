@@ -12,10 +12,10 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call([
             LanguageSeeder::class,
-            // Order matters: permissions must exist before roles attach to them,
-            // and roles must exist before legacy is_admin users are promoted.
             PermissionSeeder::class,
             RoleSeeder::class,
+            MenuSeeder::class,
+            SiteSettingSeeder::class,
         ]);
     }
 }

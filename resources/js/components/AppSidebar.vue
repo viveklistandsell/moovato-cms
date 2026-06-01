@@ -8,6 +8,8 @@ import {
     KeyRound,
     Languages,
     LayoutGrid,
+    Menu as MenuIcon,
+    Navigation,
     Newspaper,
     Settings2Icon,
     ShieldCheck,
@@ -63,6 +65,12 @@ const languagesItem: NavItem = {
     icon: Languages,
 };
 
+const siteSettingsItem: NavItem = {
+    title: 'Site Settings',
+    href: '/admin/site-settings',
+    icon: Settings2Icon,
+};
+
 const blogItems: NavItem[] = [
     {
         title: 'Blog Posts',
@@ -91,6 +99,19 @@ const pageItems: NavItem[] = [
         title: 'Page Categories',
         href: '/admin/pages/categories',
         icon: FolderTree,
+    },
+];
+
+const navigationItems: NavItem[] = [
+    {
+        title: 'Header Menu',
+        href: '/admin/menus/header',
+        icon: MenuIcon,
+    },
+    {
+        title: 'Footer Menu',
+        href: '/admin/menus/footer',
+        icon: MenuIcon,
     },
 ];
 
@@ -136,6 +157,10 @@ const isBlogSectionActive = computed(() =>
 
 const isPageSectionActive = computed(() =>
     pageItems.some((item) => isCurrentUrl(item.href)),
+);
+
+const isNavigationSectionActive = computed(() =>
+    navigationItems.some((item) => isCurrentUrl(item.href)),
 );
 
 const isUserSectionActive = computed(
@@ -246,6 +271,47 @@ const isUserSectionActive = computed(
                         </SidebarMenuItem>
                     </Collapsible>
 
+                    <Collapsible
+                        :default-open="isNavigationSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Navigation Management"
+                                >
+                                    <Link :href="navigationItems[0].href">
+                                        <Navigation />
+                                        <span>Navigation Management</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in navigationItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             as-child
@@ -268,6 +334,19 @@ const isUserSectionActive = computed(
                             <Link :href="languagesItem.href">
                                 <component :is="languagesItem.icon" />
                                 <span>{{ languagesItem.title }}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            as-child
+                            :is-active="isCurrentUrl(siteSettingsItem.href)"
+                            :tooltip="siteSettingsItem.title"
+                        >
+                            <Link :href="siteSettingsItem.href">
+                                <component :is="siteSettingsItem.icon" />
+                                <span>{{ siteSettingsItem.title }}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
