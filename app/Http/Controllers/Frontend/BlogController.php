@@ -23,6 +23,7 @@ final class BlogController extends Controller
         $locale = App::getLocale();
         $categorySlug = $request->query('category');
         $tagSlug = $request->query('tag');
+        $search = mb_trim((string) $request->query('q', ''));
         $perPage = 12;
 
         $query = Blog::query()
@@ -49,11 +50,32 @@ final class BlogController extends Controller
             });
         }
 
-        /** @var Blog|null $featured */
-        $featured = (clone $query)
-            ->orderByDesc('is_sticky')
-            ->orderByDesc('is_featured')
-            ->first();
+        // Free-text search hits the base columns plus translation columns so a
+        // visitor browsing in DE can still find an EN-only short_description.
+        if ($search !== '') {
+            $like = "%{$search}%";
+            $query->where(function (Builder $q) use ($like): void {
+                $q->where('name', 'like', $like)
+                    ->orWhere('permalink', 'like', $like)
+                    ->orWhere('short_description', 'like', $like)
+                    ->orWhere('content', 'like', $like)
+                    ->orWhereHas('translations', function (Builder $t) use ($like): void {
+                        $t->where('name', 'like', $like)
+                            ->orWhere('permalink', 'like', $like)
+                            ->orWhere('short_description', 'like', $like)
+                            ->orWhere('content', 'like', $like);
+                    });
+            });
+        }
+
+        // Hide the "featured" hero strip while searching — visitors expect
+        // every search hit to live in the grid, not a separate slot above it.
+        $featured = $search === ''
+            ? (clone $query)
+                ->orderByDesc('is_sticky')
+                ->orderByDesc('is_featured')
+                ->first()
+            : null;
 
         $paginator = $query
             ->when($featured !== null, fn (Builder $q) => $q->where('id', '!=', $featured->id))
@@ -91,6 +113,7 @@ final class BlogController extends Controller
             'tags' => $tags,
             'activeCategory' => $categorySlug,
             'activeTag' => $tagSlug,
+            'searchTerm' => $search,
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),

@@ -1,22 +1,11 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import {
-    ArrowRight,
-    ClipboardList,
-    Clock,
-    Facebook,
-    Home,
-    Instagram,
-    Linkedin,
-    Mail,
-    Menu,
-    Phone,
-    Truck,
-    Twitter,
-    X,
-} from 'lucide-vue-next';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { Menu, X } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import { getDefaultLocale, localizedUrl } from '@/lib/localizedUrl';
+import HeaderMenuNode from './HeaderMenuNode.vue';
+import HeaderMobileMenuNode from './HeaderMobileMenuNode.vue';
+import type { MenuNode } from './menu-types';
 
 const props = defineProps<{
     locale: string;
@@ -24,13 +13,14 @@ const props = defineProps<{
 
 const page = usePage();
 const open = ref(false);
+const openDropdownId = ref<number | null>(null);
 
 const otherLocale = computed(() => (props.locale === 'de' ? 'en' : 'de'));
 const otherLocaleLabel = computed(() => (props.locale === 'de' ? 'EN' : 'DE'));
 
-// Build the equivalent URL in the other locale. Strip any existing locale
-// prefix (/de, /en), then re-add the locale segment only when the target is
-// not the default locale.
+// Build the equivalent URL in the other locale.
+// Strip ANY existing locale prefix (/de, /en) — including legacy /de paths —
+// then re-add the locale segment only when the target is not the default locale.
 const switchHref = computed(() => {
     const url = page.url ?? '/';
     const [pathOnly, query = ''] = url.split('?');
@@ -40,90 +30,23 @@ const switchHref = computed(() => {
 });
 
 const home = computed(() => localizedUrl(props.locale, '/'));
-
-// Dynamic, locale-aware navigation.
 const navItems = computed(() => [
-    { label: props.locale === 'de' ? 'Startseite' : 'Home', href: home.value },
-    { label: 'Blog', href: localizedUrl(props.locale, '/blog') },
+    {
+        label: props.locale === 'de' ? 'Startseite' : 'Home',
+        href: home.value,
+    },
+    {
+        label: 'Blog',
+        href: localizedUrl(props.locale, '/blog'),
+    },
     {
         label: props.locale === 'de' ? 'Seiten' : 'Pages',
         href: localizedUrl(props.locale, '/pages'),
     },
 ]);
 
-// Locale-aware chrome copy for the top bar, CTA and the offcanvas.
-const t = computed(() =>
-    props.locale === 'de'
-        ? {
-              emailLabel: 'E-Mail',
-              callLabel: 'Anrufen',
-              hours: 'Mo–Fr 8–18 Uhr',
-              cta: 'Angebot anfordern',
-              sendMessage: 'Nachricht senden',
-              callUs: 'Anrufen',
-              openingHours: 'Öffnungszeiten',
-              visitUs: 'Besuchen Sie uns',
-              letsTalk: 'Kontakt aufnehmen',
-              home: 'Startseite',
-              services: 'Leistungen',
-              menu: 'Menü',
-          }
-        : {
-              emailLabel: 'Email',
-              callLabel: 'Call',
-              hours: 'Mon–Fri 8am–6pm',
-              cta: 'Get a quote',
-              sendMessage: 'Send a message',
-              callUs: 'Call us',
-              openingHours: 'Opening hours',
-              visitUs: 'Visit Us',
-              letsTalk: "Let's talk",
-              home: 'Home',
-              services: 'Services',
-              menu: 'Menu',
-          },
-);
-
-const socials = [
-    { label: 'Facebook', icon: Facebook, href: '#' },
-    { label: 'Instagram', icon: Instagram, href: '#' },
-    { label: 'Twitter', icon: Twitter, href: '#' },
-    { label: 'LinkedIn', icon: Linkedin, href: '#' },
-];
-
-const socialLinks = [
-    { abbr: 'FB', label: 'Facebook', href: '#' },
-    { abbr: 'X', label: 'Twitter', href: '#' },
-    { abbr: 'IN', label: 'Instagram', href: '#' },
-    { abbr: 'LN', label: 'LinkedIn', href: '#' },
-];
-
-const emails = ['kontakt@moovato.de'];
-const phones = [{ display: '+49 (0)30 2353 8660', tel: '+493023538660' }];
-const address = 'Moovato HQ, Friedrichstraße 1, 10117 Berlin';
-
-// Lock body scroll while the offcanvas is open + close on Escape.
-watch(open, (isOpen) => {
-    if (typeof document !== 'undefined') {
-        document.body.style.overflow = isOpen ? 'hidden' : '';
-    }
-});
-
-function onKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Escape') {
-        open.value = false;
-    }
-}
-
-onMounted(() => window.addEventListener('keydown', onKeydown));
-onBeforeUnmount(() => {
-    window.removeEventListener('keydown', onKeydown);
-    if (typeof document !== 'undefined') {
-        document.body.style.overflow = '';
-    }
-});
-
-// Keep the cached default locale in sync with whatever the server shares.
+// Keep the cached default locale in sync with whatever the server shares,
+// in case the project ever changes the default away from "de".
 const sharedDefault = (page.props as Record<string, unknown>).defaultLocale;
 if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     import('@/lib/localizedUrl').then((m) => m.setDefaultLocale(sharedDefault));
@@ -131,65 +54,28 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 </script>
 
 <template>
-    <header class="mv-header">
-        <!-- ===== TOP BAR ===== -->
-        <div class="topbar">
-            <div
-                class="topbar-inner relative z-[1] container-xl flex flex-wrap items-center justify-between gap-6"
+    <header
+        class="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur"
+    >
+        <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4">
+            <Link
+                :href="home"
+                class="flex items-center gap-2 text-lg font-semibold tracking-tight"
             >
-                <div class="topbar-welcome inline-flex items-center gap-2">
-                    <span class="ico"><Clock :size="12" /></span>
-                    <strong>{{ t.openingHours }}:</strong> {{ t.hours }}
-                    <div class="topbar-socials">
-                        <a
-                            v-for="s in socials"
-                            :key="s.label"
-                            :href="s.href"
-                            :aria-label="s.label"
-                        >
-                            <component :is="s.icon" :size="12" />
-                        </a>
-                    </div>
-                </div>
-                <div class="topbar-contacts">
-                    <div class="item">
-                        <span class="ico"><Mail :size="12" /></span>
-                        {{ t.emailLabel }}:
-                        <a href="mailto:kontakt@moovato.de"
-                            >kontakt@moovato.de</a
-                        >
-                    </div>
-                    <div class="item">
-                        <span class="ico"><Phone :size="12" /></span>
-                        {{ t.callLabel }}:
-                        <a href="tel:+493023538660">+49 (0)30 2353 8660</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+                <span class="inline-flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">M</span>
+                <span>Moovato</span>
+            </Link>
 
-        <!-- ===== NAVIGATION (sticky) ===== -->
-        <nav
-            class="sticky top-0 z-40 border-b border-[rgba(15,23,42,0.06)] bg-white py-[12px]"
-        >
-            <div class="container-xl flex items-center justify-between gap-8">
-                <Link :href="home" class="flex items-center no-underline">
-                    <img
-                        src="/logo.svg"
-                        alt="Moovato"
-                        class=""
-                        width="300"
-                        height="36"
-                    />
+            <nav class="hidden items-center gap-6 text-lg md:flex">
+                <Link
+                    v-for="item in navItems"
+                    :key="item.href"
+                    :href="item.href"
+                    class="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                    {{ item.label }}
                 </Link>
-
-                <ul class="hidden list-none gap-9 lg:flex">
-                    <li v-for="item in navItems" :key="item.href">
-                        <Link :href="item.href" class="mv-nav-link">
-                            {{ item.label }}
-                        </Link>
-                    </li>
-                </ul>
+            </nav>
 
                 <div class="flex items-center gap-4">
                     <Link
@@ -277,91 +163,28 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                         </div>
                     </div>
 
-                    <!-- Big nav -->
-                    <nav class="mv-offcanvas__nav">
-                        <Link
-                            v-for="item in navItems"
-                            :key="item.href"
-                            :href="item.href"
-                            @click="open = false"
-                        >
-                            {{ item.label }}
-                        </Link>
-                        <a href="#angebot" @click="open = false">{{
-                            t.letsTalk
-                        }}</a>
-                    </nav>
-                </div>
-
-                <!-- Footer row: language switch + socials -->
-                <div class="mv-offcanvas__foot">
-                    <Link
-                        :href="switchHref"
-                        class="mv-offcanvas__lang"
-                        @click="open = false"
-                    >
-                        {{ props.locale.toUpperCase() }} /
-                        {{ otherLocaleLabel }}
-                    </Link>
-                    <div class="mv-offcanvas__socials">
-                        <a
-                            v-for="s in socialLinks"
-                            :key="s.abbr"
-                            :href="s.href"
-                            :aria-label="s.label"
-                        >
-                            {{ s.abbr }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </Teleport>
-
-        <nav
-            class="fixed inset-x-0 bottom-0 z-50 flex items-end justify-around border-t border-[rgba(15,23,42,0.08)] bg-white px-2 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-6px_24px_rgba(15,23,42,0.08)] md:hidden"
-            aria-label="Mobile"
+        <div
+            v-if="open"
+            class="border-t border-border/60 bg-background md:hidden"
         >
-            <Link
-                :href="home"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
-            >
-                <Home :size="20" />
-                <span>{{ t.home }}</span>
-            </Link>
-            <a
-                href="tel:+493023538660"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
-            >
-                <Phone :size="20" />
-                <span>{{ t.callLabel }}</span>
-            </a>
-            <a
-                href="#angebot"
-                class="flex flex-1 flex-col items-center"
-                :aria-label="t.cta"
-            >
-                <span
-                    class="-mt-[65px] flex size-14 items-center justify-center rounded-full border-4 border-white bg-[var(--orange)] text-white shadow-[0_8px_24px_rgba(255,87,34,0.45)]"
+            <nav class="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 text-sm">
+                <Link
+                    v-for="item in navItems"
+                    :key="item.href"
+                    :href="item.href"
+                    class="rounded-md px-2 py-2 hover:bg-muted"
+                    @click="open = false"
                 >
-                    <ClipboardList :size="24" />
-                </span>
-            </a>
-            <a
-                href="#leistungen"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
-            >
-                <Truck :size="20" />
-                <span>{{ t.services }}</span>
-            </a>
-            <button
-                type="button"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
-                @click="open = true"
-            >
-                <Menu :size="20" />
-                <span>{{ t.menu }}</span>
-            </button>
-        </nav>
+                    {{ item.label }}
+                </Link>
+                <Link
+                    :href="switchHref"
+                    class="rounded-md px-2 py-2 text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted"
+                    @click="open = false"
+                >
+                    Switch to {{ otherLocaleLabel }}
+                </Link>
+            </nav>
+        </div>
     </header>
 </template>

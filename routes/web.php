@@ -5,18 +5,21 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryController;
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MediaFileController;
 use App\Http\Controllers\Admin\MediaFolderController;
 use App\Http\Controllers\Admin\MediaPickerController;
 use App\Http\Controllers\Admin\MediaTrashController;
+use App\Http\Controllers\Admin\Navigation\MenuController as AdminMenuController;
+use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
-use App\Http\Controllers\Admin\PermissionController as AdminPermissionController;
-use App\Http\Controllers\Admin\RoleController as AdminRoleController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\User\PermissionController as AdminPermissionController;
+use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
+use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use Illuminate\Support\Facades\Route;
@@ -73,7 +76,7 @@ Route::prefix('{locale}')
     ->name('pages.show');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     // Bare /admin (and /admin/) has no landing view of its own — redirect to
     // the dashboard so authenticated visitors don't see a confusing 404.
@@ -130,6 +133,11 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             // Numeric constraint on {page} prevents collision with /categories.
             Route::post('bulk-action', [AdminPageController::class, 'bulkAction'])
                 ->name('bulk-action');
+
+            // Clone a page; same numeric constraint as the catch-all resource.
+            Route::post('{page}/duplicate', [AdminPageController::class, 'duplicate'])
+                ->where('page', '[0-9]+')
+                ->name('duplicate');
 
             // Widget builder sync: full replace-all of the widget stack for a
             // given page. Must be registered BEFORE the catch-all resource
@@ -198,6 +206,30 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('permissions', [AdminPermissionController::class, 'index'])
             ->middleware('permission:roles.view')
             ->name('permissions.index');
+
+        Route::prefix('site-settings')->name('site-settings.')->group(function (): void {
+            Route::get('/', [AdminSiteSettingController::class, 'edit'])
+                ->middleware('permission:settings.site')->name('edit');
+            Route::match(['put', 'patch'], '/', [AdminSiteSettingController::class, 'update'])
+                ->middleware('permission:settings.site')->name('update');
+        });
+
+        Route::prefix('menus')->name('menus.')->group(function (): void {
+            Route::get('/', [AdminMenuController::class, 'index'])
+                ->middleware('permission:menus.view')->name('index');
+            Route::get('{menu:key}', [AdminMenuController::class, 'edit'])
+                ->middleware('permission:menus.view')->name('edit');
+            Route::post('{menu:key}/items', [AdminMenuController::class, 'storeItem'])
+                ->middleware('permission:menus.create')->name('items.store');
+            Route::post('{menu:key}/items/bulk-add', [AdminMenuController::class, 'bulkAddItems'])
+                ->middleware('permission:menus.create')->name('items.bulk-add');
+            Route::match(['put', 'patch'], '{menu:key}/items/{item}', [AdminMenuController::class, 'updateItem'])
+                ->middleware('permission:menus.update')->where('item', '[0-9]+')->name('items.update');
+            Route::delete('{menu:key}/items/{item}', [AdminMenuController::class, 'destroyItem'])
+                ->middleware('permission:menus.delete')->where('item', '[0-9]+')->name('items.destroy');
+            Route::post('{menu:key}/items/reorder', [AdminMenuController::class, 'reorder'])
+                ->middleware('permission:menus.update')->name('items.reorder');
+        });
     });
 });
 

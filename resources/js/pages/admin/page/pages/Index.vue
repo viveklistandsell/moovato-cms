@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
+    Copy,
     ExternalLink,
+    Eye,
     Home,
     Image as ImageIcon,
     Pencil,
@@ -298,6 +300,10 @@ const isFiltered = computed(
 
 function confirmDelete(p: Page): boolean {
     return confirm(`Delete page "${p.title}"?`);
+}
+
+function confirmDuplicate(p: Page): boolean {
+    return confirm(`Duplicate page "${p.title}"? A draft copy will be created.`);
 }
 
 const selection = useRowSelection();
@@ -732,6 +738,21 @@ function applyBulkAction(action: string): void {
                                             as-child
                                             variant="ghost"
                                             size="sm"
+                                            :title="`View ${row.title}`"
+                                        >
+                                            <a
+                                                :href="`/${row.permalink}`"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                <Eye class="size-4" />
+                                            </a>
+                                        </Button>
+                                        <Button
+                                            as-child
+                                            variant="ghost"
+                                            size="sm"
+                                            :title="`Edit ${row.title}`"
                                         >
                                             <Link
                                                 :href="`/admin/pages/${row.id}/edit`"
@@ -743,7 +764,26 @@ function applyBulkAction(action: string): void {
                                             as-child
                                             variant="ghost"
                                             size="sm"
+                                            :title="`Duplicate ${row.title}`"
+                                        >
+                                            <Link
+                                                :href="`/admin/pages/${row.id}/duplicate`"
+                                                method="post"
+                                                as="button"
+                                                preserve-scroll
+                                                :on-before="
+                                                    () => confirmDuplicate(row)
+                                                "
+                                            >
+                                                <Copy class="size-4" />
+                                            </Link>
+                                        </Button>
+                                        <Button
+                                            as-child
+                                            variant="ghost"
+                                            size="sm"
                                             class="text-destructive hover:text-destructive"
+                                            :title="`Delete ${row.title}`"
                                         >
                                             <Link
                                                 :href="`/admin/pages/${row.id}`"

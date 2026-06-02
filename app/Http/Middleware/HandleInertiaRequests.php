@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\Language;
+use App\Models\Menu;
+use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\MenuResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -50,6 +53,32 @@ final class HandleInertiaRequests extends Middleware
             'locale' => App::getLocale(),
             'defaultLocale' => $this->defaultLocaleCode(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'headerMenu' => fn (): array => app(MenuResolver::class)
+                ->resolve(Menu::HEADER, App::getLocale()),
+            'footerMenu' => fn (): array => app(MenuResolver::class)
+                ->resolve(Menu::FOOTER, App::getLocale()),
+            'siteSettings' => fn (): array => $this->presentSiteSettings(),
+        ];
+    }
+
+    /**
+     * @return array<string, ?string>
+     */
+    private function presentSiteSettings(): array
+    {
+        $s = SiteSetting::current();
+        $tr = $s->translation(App::getLocale());
+
+        return [
+            'about_text' => $tr?->about_text,
+            'address' => $s->address,
+            'phone' => $s->phone,
+            'email' => $s->email,
+            'whatsapp' => $s->whatsapp,
+            'facebook_url' => $s->facebook_url,
+            'twitter_url' => $s->twitter_url,
+            'linkedin_url' => $s->linkedin_url,
+            'instagram_url' => $s->instagram_url,
         ];
     }
 

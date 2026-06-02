@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { ChevronLeft, ChevronRight, Filter } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { useDebounceFn } from '@vueuse/core';
+import { ChevronLeft, ChevronRight, Search, X } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 import CategoryFilter from '@/components/frontend/blog/CategoryFilter.vue';
 import FeaturedPost from '@/components/frontend/blog/FeaturedPost.vue';
 import PostCard from '@/components/frontend/blog/PostCard.vue';
@@ -39,6 +40,7 @@ const props = defineProps<{
     tags: Tag[];
     activeCategory: string | null;
     activeTag: string | null;
+    searchTerm: string;
     pagination: {
         current_page: number;
         last_page: number;
@@ -61,7 +63,9 @@ const t = computed(() => ({
             ? 'Nach Kategorie filtern:'
             : 'Filter by category:',
     'Filter by Tag':
-        props.locale === 'de' ? 'Nach Schlagwort filtern:' : 'Filter by tag:',
+        props.locale === 'de'            
+            ? 'Nach Schlagwort filtern:'
+            : 'Filter by tag:',
 }));
 
 function isPrev(label: string): boolean {
@@ -100,6 +104,40 @@ function cleanLabel(label: string): string {
             :locale="locale"
             class="mb-10"
         />
+        <!-- Search input -->
+        <div class="flex items-center justify-end">
+            <div class="relative w-full max-w-sm">
+                <Search
+                    class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <input
+                    :value="searchInput"
+                    type="text"
+                    :placeholder="t.searchPlaceholder"
+                    class="h-10 w-full rounded-md border border-input bg-background pl-9 pr-9 text-sm shadow-sm transition placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    @input="onSearchInput"
+                />
+                <button
+                    v-if="searchInput.length > 0"
+                    type="button"
+                    class="absolute right-2 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                    :aria-label="t.empty"
+                    @click="clearSearch"
+                >
+                    <X class="size-3.5" />
+                </button>
+            </div>
+        </div>
+
+        <!-- Search-results header (replaces hero while ?q= is active) -->
+        <div v-if="searchTerm" class="mb-8">
+            <h2 class="text-2xl font-bold tracking-tight">
+                {{ t.searchResultsFor }}: “{{ searchTerm }}”
+            </h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+                {{ pagination.total }}
+            </p>
+        </div>
 
         <!-- Category filter chips -->
         <span
