@@ -58,7 +58,10 @@ function captionFor(index: number): string {
 }
 
 function setCaption(index: number, value: string): void {
-    data.value.captions = { ...(data.value.captions ?? {}), [String(index)]: value };
+    data.value.captions = {
+        ...(data.value.captions ?? {}),
+        [String(index)]: value,
+    };
 }
 </script>
 
@@ -73,7 +76,9 @@ function setCaption(index: number, value: string): void {
                 <Label>Layout</Label>
                 <Select
                     :model-value="settings.layout"
-                    @update:model-value="(v) => (settings.layout = v as Settings['layout'])"
+                    @update:model-value="
+                        (v) => (settings.layout = v as Settings['layout'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -87,7 +92,12 @@ function setCaption(index: number, value: string): void {
                 <Label>Columns</Label>
                 <Select
                     :model-value="String(settings.columns)"
-                    @update:model-value="(v) => (settings.columns = Number(v) as Settings['columns'])"
+                    @update:model-value="
+                        (v) =>
+                            (settings.columns = Number(
+                                v,
+                            ) as Settings['columns'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -101,7 +111,9 @@ function setCaption(index: number, value: string): void {
                 <Label>Gap</Label>
                 <Select
                     :model-value="settings.gap"
-                    @update:model-value="(v) => (settings.gap = v as Settings['gap'])"
+                    @update:model-value="
+                        (v) => (settings.gap = v as Settings['gap'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -154,7 +166,8 @@ function setCaption(index: number, value: string): void {
             </div>
         </div>
         <p v-else class="text-sm text-muted-foreground">
-            No images yet — click <strong>Add image</strong> to pick from the media library.
+            No images yet — click <strong>Add image</strong> to pick from the
+            media library.
         </p>
 
         <MediaPicker v-model:open="pickerOpen" @pick="onPick" />

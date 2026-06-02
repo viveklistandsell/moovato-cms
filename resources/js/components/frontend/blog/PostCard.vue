@@ -41,9 +41,7 @@ const categoryLabel = computed(() => {
     if (props.post.categories.length === 0) {
         return null;
     }
-    return props.post.categories
-        .map((c) => c.name.toUpperCase())
-        .join(' — ');
+    return props.post.categories.map((c) => c.name.toUpperCase()).join(' — ');
 });
 </script>
 
@@ -67,12 +65,12 @@ const categoryLabel = computed(() => {
         <div class="flex flex-col gap-2 px-1 pt-4">
             <p
                 v-if="categoryLabel"
-                class="text-xs font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400"
+                class="text-xs font-semibold tracking-wider text-rose-600 uppercase dark:text-rose-400"
             >
                 {{ categoryLabel }}
             </p>
             <h3
-                class="text-lg font-bold leading-tight text-foreground group-hover:underline"
+                class="text-lg leading-tight font-bold text-foreground group-hover:underline"
             >
                 {{ post.title }}
             </h3>

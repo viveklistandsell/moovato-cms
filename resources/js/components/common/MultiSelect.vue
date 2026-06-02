@@ -94,7 +94,10 @@ function isSelected(id: number): boolean {
                     <ChevronsUpDown class="size-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent class="w-[--reka-popover-trigger-width] p-0" align="start">
+            <PopoverContent
+                class="w-[--reka-popover-trigger-width] p-0"
+                align="start"
+            >
                 <div class="border-b p-2">
                     <input
                         v-model="search"
@@ -125,10 +128,7 @@ function isSelected(id: number): boolean {
                                     : 'opacity-50'
                             "
                         >
-                            <Check
-                                v-if="isSelected(opt.id)"
-                                class="size-3"
-                            />
+                            <Check v-if="isSelected(opt.id)" class="size-3" />
                         </span>
                         <span>{{ opt.name }}</span>
                     </button>
@@ -151,10 +151,7 @@ function isSelected(id: number): boolean {
             </PopoverContent>
         </Popover>
 
-        <div
-            v-if="selectedOptions.length > 0"
-            class="flex flex-wrap gap-1"
-        >
+        <div v-if="selectedOptions.length > 0" class="flex flex-wrap gap-1">
             <Badge
                 v-for="opt in selectedOptions"
                 :key="opt.id"

@@ -204,12 +204,16 @@ function resetAllFilters(): void {
     sortBy.value = null;
     sortDir.value = 'asc';
     perPage.value = 10;
-    router.get('/admin/blog/posts', {}, {
-        only: ['posts', 'pagination', 'filters'],
-        preserveScroll: true,
-        preserveState: true,
-        replace: true,
-    });
+    router.get(
+        '/admin/blog/posts',
+        {},
+        {
+            only: ['posts', 'pagination', 'filters'],
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        },
+    );
 }
 
 // Active state for the "All" pill: no status filter AND not the Mine view.
@@ -330,8 +334,7 @@ const allOnPageSelected = computed(() =>
     selection.areAllSelected(visibleIds.value),
 );
 const someOnPageSelected = computed(
-    () =>
-        !allOnPageSelected.value && selection.someSelected(visibleIds.value),
+    () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
 const bulkActions: BulkAction[] = [
@@ -448,7 +451,7 @@ function formatDate(iso: string | null): string {
                             v-for="pill in pills"
                             :key="pill.key"
                             type="button"
-                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                             :class="
                                 pill.active ? pill.activeClass : pill.idleClass
                             "
@@ -539,11 +542,7 @@ function formatDate(iso: string | null): string {
                                 : 'No posts yet.'
                         }}
                     </p>
-                    <Button
-                        v-if="!isFiltered"
-                        as-child
-                        variant="outline"
-                    >
+                    <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/blog/posts/create">
                             <Plus class="size-4" />
                             Create your first post
@@ -588,7 +587,9 @@ function formatDate(iso: string | null): string {
                                         @sort="toggleSort"
                                     />
                                 </th>
-                                <th class="w-16 px-2 py-3 font-medium uppercase tracking-wide text-muted-foreground">
+                                <th
+                                    class="w-16 px-2 py-3 font-medium tracking-wide text-muted-foreground uppercase"
+                                >
                                     Image
                                 </th>
                                 <th class="px-4 py-3">
@@ -600,10 +601,14 @@ function formatDate(iso: string | null): string {
                                         @sort="toggleSort"
                                     />
                                 </th>
-                                <th class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground">
+                                <th
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
+                                >
                                     Blog categories / tags
                                 </th>
-                                <th class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground">
+                                <th
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
+                                >
                                     Translations
                                 </th>
                                 <th class="px-4 py-3">
@@ -615,7 +620,9 @@ function formatDate(iso: string | null): string {
                                         @sort="toggleSort"
                                     />
                                 </th>
-                                <th class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground">
+                                <th
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
+                                >
                                     Flags
                                 </th>
                                 <th class="px-4 py-3">
@@ -637,7 +644,7 @@ function formatDate(iso: string | null): string {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Actions
                                 </th>
@@ -654,8 +661,7 @@ function formatDate(iso: string | null): string {
                                     '!border-t-2 !border-primary':
                                         isDropTarget(row),
                                     'hover:bg-muted/30':
-                                        !isDragging(row) &&
-                                        !isDropTarget(row),
+                                        !isDragging(row) && !isDropTarget(row),
                                 }"
                                 @dragstart="canDrag && onDragStart($event, row)"
                                 @dragover="canDrag && onDragOver($event, row)"
@@ -664,7 +670,9 @@ function formatDate(iso: string | null): string {
                                 @dragend="onDragEnd"
                             >
                                 <td class="px-2 py-3">
-                                    <div class="flex items-center justify-center">
+                                    <div
+                                        class="flex items-center justify-center"
+                                    >
                                         <Checkbox
                                             :model-value="
                                                 selection.isSelected(row.id)
@@ -695,7 +703,7 @@ function formatDate(iso: string | null): string {
                                 </td>
                                 <td class="px-2 py-3 text-center">
                                     <span
-                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 text-xs font-mono font-medium"
+                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 font-mono text-xs font-medium"
                                     >
                                         {{ row.sort_order }}
                                     </span>
@@ -751,7 +759,9 @@ function formatDate(iso: string | null): string {
                                             class="flex flex-wrap gap-1"
                                         >
                                             <Badge
-                                                v-for="(name, i) in row.category_names"
+                                                v-for="(
+                                                    name, i
+                                                ) in row.category_names"
                                                 :key="`c-${i}`"
                                                 variant="secondary"
                                                 class="text-[10px]"
@@ -771,7 +781,9 @@ function formatDate(iso: string | null): string {
                                             class="flex flex-wrap gap-1"
                                         >
                                             <Badge
-                                                v-for="(name, i) in row.tag_names"
+                                                v-for="(
+                                                    name, i
+                                                ) in row.tag_names"
                                                 :key="`t-${i}`"
                                                 variant="outline"
                                                 class="text-[10px]"
@@ -798,9 +810,7 @@ function formatDate(iso: string | null): string {
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="
-                                                    !row.translations[
-                                                        lang.code
-                                                    ]
+                                                    !row.translations[lang.code]
                                                 "
                                                 class="opacity-50"
                                                 >·missing</span
@@ -854,7 +864,7 @@ function formatDate(iso: string | null): string {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(row.created_at) }}
                                     </span>

@@ -13,7 +13,9 @@ const props = defineProps<{
 const Resolved = computed<FunctionalComponent | null>(() => {
     const name = props.name && props.name !== '' ? props.name : props.fallback;
     if (!name) return null;
-    const icon = (Icons as unknown as Record<string, FunctionalComponent>)[name];
+    const icon = (Icons as unknown as Record<string, FunctionalComponent>)[
+        name
+    ];
     return icon ?? null;
 });
 </script>

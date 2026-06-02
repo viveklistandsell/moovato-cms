@@ -106,8 +106,12 @@ function readableSize(bytes: number): string {
             </header>
 
             <section v-if="folders.length > 0" class="flex flex-col gap-2">
-                <h2 class="text-sm font-medium">Folders ({{ folders.length }})</h2>
-                <ul class="divide-y divide-border rounded-lg border border-border">
+                <h2 class="text-sm font-medium">
+                    Folders ({{ folders.length }})
+                </h2>
+                <ul
+                    class="divide-y divide-border rounded-lg border border-border"
+                >
                     <li
                         v-for="folder in folders"
                         :key="folder.id"
@@ -164,7 +168,7 @@ function readableSize(bytes: number): string {
                         />
                         <div
                             v-else
-                            class="flex h-12 w-12 items-center justify-center rounded bg-muted text-xs uppercase text-muted-foreground"
+                            class="flex h-12 w-12 items-center justify-center rounded bg-muted text-xs text-muted-foreground uppercase"
                         >
                             file
                         </div>
@@ -173,7 +177,8 @@ function readableSize(bytes: number): string {
                                 file.name
                             }}</span>
                             <span class="text-xs text-muted-foreground">
-                                {{ file.mime_type }} · {{ readableSize(file.size) }}
+                                {{ file.mime_type }} ·
+                                {{ readableSize(file.size) }}
                             </span>
                         </div>
                         <div class="flex items-center gap-2">

@@ -43,7 +43,9 @@ const data = defineModel<Data>('data', { required: true });
             <Label>Width</Label>
             <Select
                 :model-value="settings.width"
-                @update:model-value="(v) => (settings.width = v as Settings['width'])"
+                @update:model-value="
+                    (v) => (settings.width = v as Settings['width'])
+                "
             >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -57,7 +59,9 @@ const data = defineModel<Data>('data', { required: true });
             <Label>Alignment</Label>
             <Select
                 :model-value="settings.alignment"
-                @update:model-value="(v) => (settings.alignment = v as Settings['alignment'])"
+                @update:model-value="
+                    (v) => (settings.alignment = v as Settings['alignment'])
+                "
             >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -71,7 +75,9 @@ const data = defineModel<Data>('data', { required: true });
             <Label>Background</Label>
             <Select
                 :model-value="settings.background"
-                @update:model-value="(v) => (settings.background = v as Settings['background'])"
+                @update:model-value="
+                    (v) => (settings.background = v as Settings['background'])
+                "
             >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>

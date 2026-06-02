@@ -55,7 +55,12 @@ function removeItem(index: number): void {
                 <Label>Columns</Label>
                 <Select
                     :model-value="String(settings.columns)"
-                    @update:model-value="(v) => (settings.columns = Number(v) as Settings['columns'])"
+                    @update:model-value="
+                        (v) =>
+                            (settings.columns = Number(
+                                v,
+                            ) as Settings['columns'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -69,7 +74,10 @@ function removeItem(index: number): void {
                 <Label>Icon style</Label>
                 <Select
                     :model-value="settings.icon_style"
-                    @update:model-value="(v) => (settings.icon_style = v as Settings['icon_style'])"
+                    @update:model-value="
+                        (v) =>
+                            (settings.icon_style = v as Settings['icon_style'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>

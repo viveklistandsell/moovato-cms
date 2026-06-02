@@ -64,7 +64,9 @@ const widgetStack = computed(() =>
                 .join(' '),
         }))
         .filter(
-            (row): row is {
+            (
+                row,
+            ): row is {
                 widget: WidgetPayload;
                 entry: NonNullable<ReturnType<typeof getWidgetEntry>>;
                 wrapperClass: string;
@@ -96,31 +98,22 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
     </Head>
 
     <!-- NO LAYOUT: bare widgets, no header/footer/breadcrumb -->
-    <div
-        v-if="isNolayout"
-        class="min-h-screen bg-background text-foreground"
-    >
-        <div
+    <div v-if="isNolayout" class="min-h-screen bg-background text-foreground">
+        <component
+            :is="row.entry.renderer"
             v-for="(row, i) in widgetStack"
             :key="i"
             :class="row.wrapperClass || undefined"
-        >
-            <component
-                :is="row.entry.renderer"
-                :settings="row.widget.settings"
-                :data="row.widget.data"
-            />
-        </div>
+            :settings="row.widget.settings"
+            :data="row.widget.data"
+        />
     </div>
 
     <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
     <FrontendLayout v-else>
         <!-- DEFAULT only: centered prose with breadcrumb + page title +
              hero image. Fullwidth skips this so widgets sit edge-to-edge. -->
-        <article
-            v-if="!isFullwidth"
-            class="mx-auto max-w-3xl px-4 py-10"
-        >
+        <article v-if="!isFullwidth" class="mx-auto max-w-3xl px-4 py-10">
             <nav
                 class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
             >
@@ -155,16 +148,13 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
         </article>
 
         <!-- Widgets render once for BOTH templates (default + fullwidth). -->
-        <div
+        <component
+            :is="row.entry.renderer"
             v-for="(row, i) in widgetStack"
             :key="i"
             :class="row.wrapperClass || undefined"
-        >
-            <component
-                :is="row.entry.renderer"
-                :settings="row.widget.settings"
-                :data="row.widget.data"
-            />
-        </div>
+            :settings="row.widget.settings"
+            :data="row.widget.data"
+        />
     </FrontendLayout>
 </template>

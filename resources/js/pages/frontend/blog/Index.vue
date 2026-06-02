@@ -55,21 +55,19 @@ const t = computed(() => ({
             ? 'Blog-Artikel in der Übersicht:'
             : 'Blog articles overview:',
     empty:
-        props.locale === 'de'
-            ? 'Keine Beiträge gefunden.'
-            : 'No posts found.',
+        props.locale === 'de' ? 'Keine Beiträge gefunden.' : 'No posts found.',
     'Filter by Category':
         props.locale === 'de'
             ? 'Nach Kategorie filtern:'
             : 'Filter by category:',
     'Filter by Tag':
-        props.locale === 'de'            
-            ? 'Nach Schlagwort filtern:'
-            : 'Filter by tag:',
+        props.locale === 'de' ? 'Nach Schlagwort filtern:' : 'Filter by tag:',
 }));
 
 function isPrev(label: string): boolean {
-    return label.toLowerCase().includes('previous') || label.includes('&laquo;');
+    return (
+        label.toLowerCase().includes('previous') || label.includes('&laquo;')
+    );
 }
 function isNext(label: string): boolean {
     return label.toLowerCase().includes('next') || label.includes('&raquo;');
@@ -84,10 +82,11 @@ function cleanLabel(label: string): string {
 
     <div class="mx-auto max-w-6xl px-4 py-8">
         <!-- Breadcrumb -->
-        <nav
-            class="mb-6 flex items-center gap-2 text-lg text-muted-foreground"
-        >
-            <Link :href="localizedUrl(locale, '/')" class="hover:text-foreground">
+        <nav class="mb-6 flex items-center gap-2 text-lg text-muted-foreground">
+            <Link
+                :href="localizedUrl(locale, '/')"
+                class="hover:text-foreground"
+            >
                 {{ t.home }}
             </Link>
             <span>›</span>
@@ -103,8 +102,11 @@ function cleanLabel(label: string): string {
         />
 
         <!-- Category filter chips -->
-        <span v-if="categories.length > 0" class="mb-4 block text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-            >{{ t['Filter by Category'] }}</span >
+        <span
+            v-if="categories.length > 0"
+            class="mb-4 block text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+            >{{ t['Filter by Category'] }}</span
+        >
         <CategoryFilter
             :categories="categories"
             :active-slug="activeCategory"
@@ -113,8 +115,11 @@ function cleanLabel(label: string): string {
         />
 
         <!-- Tag filter chips -->
-        <span v-if="tags.length > 0" class="mb-4 block text-sm font-semibold uppercase tracking-wide text-muted-foreground"
-            >{{ t['Filter by Tag'] }}</span >
+        <span
+            v-if="tags.length > 0"
+            class="mb-4 block text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+            >{{ t['Filter by Tag'] }}</span
+        >
         <TagFilter
             :tags="tags"
             :active-slug="activeTag"
@@ -136,10 +141,7 @@ function cleanLabel(label: string): string {
         </div>
 
         <!-- Grid -->
-        <div
-            v-else
-            class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
-        >
+        <div v-else class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             <PostCard
                 v-for="post in posts"
                 :key="post.id"

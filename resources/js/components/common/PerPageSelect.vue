@@ -29,9 +29,7 @@ defineEmits<{
         <span class="whitespace-nowrap">{{ label }}</span>
         <Select
             :model-value="String(modelValue)"
-            @update:model-value="
-                (v) => $emit('update:modelValue', Number(v))
-            "
+            @update:model-value="(v) => $emit('update:modelValue', Number(v))"
         >
             <SelectTrigger class="h-9 w-[72px]">
                 <SelectValue />

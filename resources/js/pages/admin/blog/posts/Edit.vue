@@ -151,7 +151,9 @@ function onPermalinkInput(code: string) {
 const wordCounts = ref<Record<string, number>>(
     Object.fromEntries(props.languages.map((l) => [l.code, 0])),
 );
-const readingTimeTouched = ref(props.post?.reading_time !== undefined && props.post.reading_time > 0);
+const readingTimeTouched = ref(
+    props.post?.reading_time !== undefined && props.post.reading_time > 0,
+);
 
 function recomputeReadingTime(): void {
     if (readingTimeTouched.value) {
@@ -191,7 +193,11 @@ function removeImage(): void {
 // is applied to image_path + preview. The form stays open the whole time.
 const pickerOpen = ref(false);
 
-function onMediaPicked(file: { path: string; url: string; name: string }): void {
+function onMediaPicked(file: {
+    path: string;
+    url: string;
+    name: string;
+}): void {
     form.image = null;
     form.image_path = file.path;
     form.remove_image = false;
@@ -217,9 +223,9 @@ const previewUrl = computed<string | null>(() => {
     const defaultLocale =
         props.languages.find((l) => l.is_default)?.code ?? 'de';
     const slug =
-        props.post.translations[defaultLocale]?.permalink
-        ?? Object.values(props.post.translations)[0]?.permalink
-        ?? null;
+        props.post.translations[defaultLocale]?.permalink ??
+        Object.values(props.post.translations)[0]?.permalink ??
+        null;
     return slug ? localizedUrl(defaultLocale, `/blog/${slug}`) : null;
 });
 
@@ -278,8 +284,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             <span
                                                 v-if="
                                                     languages.find(
-                                                        (l) =>
-                                                            l.code === code,
+                                                        (l) => l.code === code,
                                                     )?.is_default
                                                 "
                                                 class="text-destructive"
@@ -304,17 +309,14 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             <span
                                                 v-if="
                                                     languages.find(
-                                                        (l) =>
-                                                            l.code === code,
+                                                        (l) => l.code === code,
                                                     )?.is_default
                                                 "
                                                 class="text-destructive"
                                                 >*</span
                                             >
                                         </Label>
-                                        <div
-                                            class="flex w-full items-stretch"
-                                        >
+                                        <div class="flex w-full items-stretch">
                                             <span
                                                 class="inline-flex shrink-0 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground"
                                             >
@@ -327,10 +329,8 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                         .permalink
                                                 "
                                                 placeholder="your-permalink"
-                                                class="placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:text-sm"
-                                                @input="
-                                                    onPermalinkInput(code)
-                                                "
+                                                class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+                                                @input="onPermalinkInput(code)"
                                             />
                                         </div>
                                         <p
@@ -383,8 +383,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             <span
                                                 v-if="
                                                     languages.find(
-                                                        (l) =>
-                                                            l.code === code,
+                                                        (l) => l.code === code,
                                                     )?.is_default
                                                 "
                                                 class="text-destructive"
@@ -393,8 +392,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                         </Label>
                                         <RichTextEditor
                                             :model-value="
-                                                form.translations[code]
-                                                    .content
+                                                form.translations[code].content
                                             "
                                             :placeholder="`Blog Content (${code.toUpperCase()})`"
                                             @update:model-value="
@@ -414,14 +412,12 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             words
                                             <span v-if="!readingTimeTouched">
                                                 · est.
-                                                {{ form.reading_time }} min
-                                                read (auto)
+                                                {{ form.reading_time }} min read
+                                                (auto)
                                             </span>
                                         </p>
                                         <InputError
-                                            :message="
-                                                errorFor(code, 'content')
-                                            "
+                                            :message="errorFor(code, 'content')"
                                         />
                                     </div>
                                 </div>
@@ -558,8 +554,8 @@ const errorFor = (code: string, field: keyof Translation) =>
                             </Button>
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            Opens the media library — pick an existing image
-                            or upload a new one there.
+                            Opens the media library — pick an existing image or
+                            upload a new one there.
                         </p>
                         <InputError :message="form.errors.image" />
                         <InputError :message="form.errors.image_path" />
@@ -583,9 +579,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     (v) => (form.category_ids = v)
                                 "
                             />
-                            <InputError
-                                :message="form.errors.category_ids"
-                            />
+                            <InputError :message="form.errors.category_ids" />
                         </div>
 
                         <div class="grid gap-2">
@@ -596,9 +590,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 placeholder="Select tags…"
                                 search-placeholder="Search tags"
                                 empty-text="No tags"
-                                @update:model-value="
-                                    (v) => (form.tag_ids = v)
-                                "
+                                @update:model-value="(v) => (form.tag_ids = v)"
                             />
                             <InputError :message="form.errors.tag_ids" />
                         </div>
@@ -642,7 +634,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 Reading time (min)
                                 <span
                                     v-if="!readingTimeTouched"
-                                    class="ml-1 text-[10px] font-normal uppercase tracking-wide text-muted-foreground"
+                                    class="ml-1 text-[10px] font-normal tracking-wide text-muted-foreground uppercase"
                                     >auto</span
                                 >
                             </Label>
@@ -660,9 +652,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 Auto-calculated from content ({{ totalWords }}
                                 words ÷ 200 wpm). Edit to override.
                             </p>
-                            <InputError
-                                :message="form.errors.reading_time"
-                            />
+                            <InputError :message="form.errors.reading_time" />
                         </div>
 
                         <div class="grid gap-2">
@@ -676,9 +666,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             <p class="text-xs text-muted-foreground">
                                 Set to 1 to put on top.
                             </p>
-                            <InputError
-                                :message="form.errors.sort_order"
-                            />
+                            <InputError :message="form.errors.sort_order" />
                         </div>
                     </CardContent>
                 </Card>

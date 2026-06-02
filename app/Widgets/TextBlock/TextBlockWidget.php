@@ -43,8 +43,8 @@ final class TextBlockWidget implements WidgetContract
     public static function defaultData(): array
     {
         return [
-            'heading' => '',
-            'body' => '',
+            'heading' => 'Ihr Umzugsunternehmen in Berlin',
+            'body' => '<p>Moovato ist Ihr moderner Partner für stressfreie Umzüge in Berlin und Umgebung. Ob Privatumzug, Büroumzug oder Fernumzug – wir kümmern uns um alles: vom sorgfältigen Verpacken über den sicheren Transport bis zur Möbelmontage am neuen Ort.</p><p>Profitieren Sie von unserer <strong>Festpreisgarantie</strong>, versicherten Transporten und einem eingespielten Team erfahrener Umzugsprofis.</p>',
         ];
     }
 

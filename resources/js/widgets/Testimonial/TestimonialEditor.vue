@@ -37,7 +37,13 @@ const data = defineModel<Data>('data', { required: true });
 function addItem(): void {
     data.value.items = [
         ...(data.value.items ?? []),
-        { quote: '', author: '', role: '', avatar_path: null, avatar_url: null },
+        {
+            quote: '',
+            author: '',
+            role: '',
+            avatar_path: null,
+            avatar_url: null,
+        },
     ];
 }
 
@@ -57,7 +63,9 @@ function removeItem(index: number): void {
                 <Label>Layout</Label>
                 <Select
                     :model-value="settings.layout"
-                    @update:model-value="(v) => (settings.layout = v as Settings['layout'])"
+                    @update:model-value="
+                        (v) => (settings.layout = v as Settings['layout'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -71,7 +79,12 @@ function removeItem(index: number): void {
                 <Label>Columns (grid only)</Label>
                 <Select
                     :model-value="String(settings.columns)"
-                    @update:model-value="(v) => (settings.columns = Number(v) as Settings['columns'])"
+                    @update:model-value="
+                        (v) =>
+                            (settings.columns = Number(
+                                v,
+                            ) as Settings['columns'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -86,7 +99,12 @@ function removeItem(index: number): void {
         <div class="space-y-3">
             <div class="flex items-center justify-between">
                 <Label class="text-sm font-semibold">Testimonials</Label>
-                <Button type="button" variant="outline" size="sm" @click="addItem">
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="addItem"
+                >
                     <Plus class="size-4" />
                     Add testimonial
                 </Button>
@@ -100,16 +118,30 @@ function removeItem(index: number): void {
                     :path="item.avatar_path"
                     :url="item.avatar_url"
                     aspect-class="size-24 rounded-full mx-auto"
-                    @update="(v) => { item.avatar_path = v.path; item.avatar_url = v.url; }"
+                    @update="
+                        (v) => {
+                            item.avatar_path = v.path;
+                            item.avatar_url = v.url;
+                        }
+                    "
                 />
                 <div class="space-y-2">
-                    <Textarea v-model="item.quote" :rows="3" placeholder="Quote" />
+                    <Textarea
+                        v-model="item.quote"
+                        :rows="3"
+                        placeholder="Quote"
+                    />
                     <div class="grid grid-cols-2 gap-2">
                         <Input v-model="item.author" placeholder="Author" />
                         <Input v-model="item.role" placeholder="Role" />
                     </div>
                 </div>
-                <Button type="button" variant="ghost" size="icon" @click="removeItem(i)">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    @click="removeItem(i)"
+                >
                     <Trash2 class="size-4 text-destructive" />
                 </Button>
             </div>

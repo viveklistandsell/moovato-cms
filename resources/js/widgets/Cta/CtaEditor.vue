@@ -70,7 +70,9 @@ const data = defineModel<Data>('data', { required: true });
                 <Label>Variant</Label>
                 <Select
                     :model-value="settings.variant"
-                    @update:model-value="(v) => (settings.variant = v as Settings['variant'])"
+                    @update:model-value="
+                        (v) => (settings.variant = v as Settings['variant'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -84,7 +86,9 @@ const data = defineModel<Data>('data', { required: true });
                 <Label>Alignment</Label>
                 <Select
                     :model-value="settings.alignment"
-                    @update:model-value="(v) => (settings.alignment = v as Settings['alignment'])"
+                    @update:model-value="
+                        (v) => (settings.alignment = v as Settings['alignment'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>

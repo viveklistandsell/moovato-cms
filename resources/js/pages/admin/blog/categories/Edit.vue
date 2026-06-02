@@ -156,9 +156,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                     </Link>
                 </Button>
                 <Heading
-                    :title="
-                        isEdit ? 'Edit category' : 'Create a new category'
-                    "
+                    :title="isEdit ? 'Edit category' : 'Create a new category'"
                     :description="
                         isEdit
                             ? 'Update translations, parent, and visibility.'
@@ -194,8 +192,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             <span
                                                 v-if="
                                                     languages.find(
-                                                        (l) =>
-                                                            l.code === code,
+                                                        (l) => l.code === code,
                                                     )?.is_default
                                                 "
                                                 class="text-destructive"
@@ -220,17 +217,14 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             <span
                                                 v-if="
                                                     languages.find(
-                                                        (l) =>
-                                                            l.code === code,
+                                                        (l) => l.code === code,
                                                     )?.is_default
                                                 "
                                                 class="text-destructive"
                                                 >*</span
                                             >
                                         </Label>
-                                        <div
-                                            class="flex w-full items-stretch"
-                                        >
+                                        <div class="flex w-full items-stretch">
                                             <span
                                                 class="inline-flex shrink-0 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground"
                                             >
@@ -243,10 +237,8 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                         .permalink
                                                 "
                                                 placeholder="your-permalink"
-                                                class="placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:text-sm"
-                                                @input="
-                                                    onPermalinkInput(code)
-                                                "
+                                                class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+                                                @input="onPermalinkInput(code)"
                                             />
                                         </div>
                                         <p
@@ -349,9 +341,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     class="cursor-pointer font-medium"
                                     >Is default?</Label
                                 >
-                                <p
-                                    class="mt-1 text-xs text-muted-foreground"
-                                >
+                                <p class="mt-1 text-xs text-muted-foreground">
                                     Use as the fallback category. Only one
                                     default allowed at a time.
                                 </p>
@@ -372,9 +362,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 @update:model-value="
                                     (v) =>
                                         (form.icon =
-                                            v === 'none'
-                                                ? ''
-                                                : (v as string))
+                                            v === 'none' ? '' : (v as string))
                                 "
                             >
                                 <SelectTrigger id="icon" class="w-full">
@@ -413,9 +401,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     class="cursor-pointer font-medium"
                                     >Is featured?</Label
                                 >
-                                <p
-                                    class="mt-1 text-xs text-muted-foreground"
-                                >
+                                <p class="mt-1 text-xs text-muted-foreground">
                                     Highlight this category in listings.
                                 </p>
                             </div>
@@ -437,10 +423,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 min="1"
                             />
                             <p class="text-xs text-muted-foreground">
-                                Auto-filled with next available position
-                                ({{ nextSortOrder }}). Set to
-                                <span class="font-medium">1</span> to make
-                                this the top priority — others shift down.
+                                Auto-filled with next available position ({{
+                                    nextSortOrder
+                                }}). Set to
+                                <span class="font-medium">1</span> to make this
+                                the top priority — others shift down.
                             </p>
                             <InputError :message="form.errors.sort_order" />
                         </div>

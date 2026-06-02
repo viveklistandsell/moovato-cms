@@ -30,7 +30,10 @@ function trigger(action: BulkAction): void {
     if (props.count === 0) {
         return;
     }
-    if (action.confirm && !confirm(action.confirm.replace('{count}', String(props.count)))) {
+    if (
+        action.confirm &&
+        !confirm(action.confirm.replace('{count}', String(props.count)))
+    ) {
         return;
     }
     emit('action', action.value);
@@ -54,7 +57,11 @@ function trigger(action: BulkAction): void {
         <DropdownMenuContent align="start">
             <template v-for="(action, idx) in actions" :key="action.value">
                 <DropdownMenuSeparator
-                    v-if="idx > 0 && action.destructive && !actions[idx - 1].destructive"
+                    v-if="
+                        idx > 0 &&
+                        action.destructive &&
+                        !actions[idx - 1].destructive
+                    "
                 />
                 <DropdownMenuItem
                     :class="

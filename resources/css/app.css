@@ -5,7 +5,30 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+@source inline("{p,px,py,pt,pr,pb,pl}-{0,1,2,3,4,5,6,8,10,12,16,20,24}");
+@source inline("{mt,mb,my}-{0,1,2,3,4,5,6,8,10,12,16,20,24}");
+
 @custom-variant dark (&:is(.dark *));
+
+@utility container-xl {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 80rem;
+    padding-inline: 1rem;
+    @media (width >= 40rem) {
+        padding-inline: 1.5rem;
+    }
+    @media (width >= 64rem) {
+        padding-inline: 2rem;
+    }
+}
+
+@utility section-py {
+    padding-block: 4rem;
+    @media (width >= 40rem) {
+        padding-block: 5rem;
+    }
+}
 
 @theme inline {
     --font-sans:
@@ -61,14 +84,6 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
     *,
     ::after,

@@ -29,24 +29,40 @@ const isVideo = computed(
 const isAudio = computed(
     () => props.file?.mime_type.startsWith('audio/') ?? false,
 );
-const isPdf = computed(
-    () => props.file?.mime_type.includes('pdf') ?? false,
-);
+const isPdf = computed(() => props.file?.mime_type.includes('pdf') ?? false);
 
 const SPREADSHEET_EXTS = ['xlsx', 'xls', 'csv', 'ods', 'tsv'];
-const TEXT_EXTS = ['txt', 'md', 'json', 'log', 'xml', 'yml', 'yaml', 'html', 'css', 'js', 'ts', 'php', 'py'];
+const TEXT_EXTS = [
+    'txt',
+    'md',
+    'json',
+    'log',
+    'xml',
+    'yml',
+    'yaml',
+    'html',
+    'css',
+    'js',
+    'ts',
+    'php',
+    'py',
+];
 
 const isSpreadsheet = computed(() => {
     const ext = (props.file?.extension ?? '').toLowerCase();
-    return SPREADSHEET_EXTS.includes(ext)
-        || (props.file?.mime_type.includes('spreadsheet') ?? false)
-        || (props.file?.mime_type === 'text/csv');
+    return (
+        SPREADSHEET_EXTS.includes(ext) ||
+        (props.file?.mime_type.includes('spreadsheet') ?? false) ||
+        props.file?.mime_type === 'text/csv'
+    );
 });
 
 const isText = computed(() => {
     const ext = (props.file?.extension ?? '').toLowerCase();
-    return TEXT_EXTS.includes(ext)
-        || (props.file?.mime_type.startsWith('text/') ?? false);
+    return (
+        TEXT_EXTS.includes(ext) ||
+        (props.file?.mime_type.startsWith('text/') ?? false)
+    );
 });
 
 const dialogSizeClass = computed(() => {
@@ -123,7 +139,9 @@ async function loadSpreadsheet(): Promise<void> {
 
         sheets.value = workbook.SheetNames.map((name) => ({
             name,
-            html: utils.sheet_to_html(workbook.Sheets[name], { editable: false }),
+            html: utils.sheet_to_html(workbook.Sheets[name], {
+                editable: false,
+            }),
         }));
         activeSheetIndex.value = 0;
     } catch (e) {
@@ -145,9 +163,10 @@ async function loadText(): Promise<void> {
             throw new Error('Failed to fetch file');
         }
         const text = await response.text();
-        textContent.value = text.length > 100_000
-            ? text.slice(0, 100_000) + '\n\n…(truncated)'
-            : text;
+        textContent.value =
+            text.length > 100_000
+                ? text.slice(0, 100_000) + '\n\n…(truncated)'
+                : text;
     } catch (e) {
         previewError.value = e instanceof Error ? e.message : 'Preview failed';
     } finally {
@@ -253,7 +272,7 @@ async function loadText(): Promise<void> {
                     </p>
                     <pre
                         v-else
-                        class="overflow-auto p-4 font-mono text-xs whitespace-pre-wrap break-words text-black"
+                        class="overflow-auto p-4 font-mono text-xs break-words whitespace-pre-wrap text-black"
                         >{{ textContent }}</pre
                     >
                 </div>

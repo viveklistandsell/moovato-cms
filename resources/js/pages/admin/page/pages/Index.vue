@@ -199,12 +199,16 @@ function resetAllFilters(): void {
     sortBy.value = null;
     sortDir.value = 'asc';
     perPage.value = 10;
-    router.get('/admin/pages', {}, {
-        only: ['pages', 'pagination', 'filters'],
-        preserveScroll: true,
-        preserveState: true,
-        replace: true,
-    });
+    router.get(
+        '/admin/pages',
+        {},
+        {
+            only: ['pages', 'pagination', 'filters'],
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        },
+    );
 }
 
 // Active state for the "All" pill: no status filter AND not the Mine view.
@@ -402,7 +406,7 @@ function applyBulkAction(action: string): void {
                             v-for="pill in pills"
                             :key="pill.key"
                             type="button"
-                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                             :class="
                                 pill.active ? pill.activeClass : pill.idleClass
                             "
@@ -538,17 +542,17 @@ function applyBulkAction(action: string): void {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Categories
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Translations
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Template
                                 </th>
@@ -571,7 +575,7 @@ function applyBulkAction(action: string): void {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Actions
                                 </th>
@@ -652,7 +656,9 @@ function applyBulkAction(action: string): void {
                                         class="flex flex-wrap gap-1"
                                     >
                                         <Badge
-                                            v-for="(name, i) in row.category_names"
+                                            v-for="(
+                                                name, i
+                                            ) in row.category_names"
                                             :key="i"
                                             variant="secondary"
                                             class="text-[10px]"
@@ -684,9 +690,7 @@ function applyBulkAction(action: string): void {
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="
-                                                    !row.translations[
-                                                        lang.code
-                                                    ]
+                                                    !row.translations[lang.code]
                                                 "
                                                 class="opacity-50"
                                                 >·missing</span
@@ -715,7 +719,7 @@ function applyBulkAction(action: string): void {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(row.created_at) }}
                                     </span>

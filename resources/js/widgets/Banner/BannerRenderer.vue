@@ -36,7 +36,7 @@ const variantClass = computed(() => {
 <template>
     <section v-if="!dismissed && data.message" class="w-full">
         <div
-            class="mx-auto flex max-w-6xl items-center gap-3 border-y px-4 py-3 sm:px-6 lg:px-8"
+            class="container-xl flex items-center gap-3 border-y py-3"
             :class="variantClass"
         >
             <p class="flex-1 text-sm sm:text-base">{{ data.message }}</p>

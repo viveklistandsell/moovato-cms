@@ -16,7 +16,12 @@ import type { FolderNode } from '@/components/Media/FolderTreeNode.vue';
 
 type Target =
     | { type: 'file'; id: number; name: string; currentFolderId: number | null }
-    | { type: 'folder'; id: number; name: string; currentFolderId: number | null }
+    | {
+          type: 'folder';
+          id: number;
+          name: string;
+          currentFolderId: number | null;
+      }
     | {
           type: 'bulk-files';
           ids: number[];
@@ -128,8 +133,7 @@ function submit(): void {
                     type="button"
                     class="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm hover:bg-accent"
                     :class="{
-                        'bg-primary/10 font-medium':
-                            selectedFolderId === null,
+                        'bg-primary/10 font-medium': selectedFolderId === null,
                     }"
                     :disabled="target?.currentFolderId === null"
                     @click="selectedFolderId = null"
@@ -153,7 +157,8 @@ function submit(): void {
                     v-if="tree.length === 0"
                     class="px-3 py-4 text-center text-xs text-muted-foreground"
                 >
-                    No folders yet — pick "All media" to leave files at the root.
+                    No folders yet — pick "All media" to leave files at the
+                    root.
                 </p>
             </div>
 

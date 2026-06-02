@@ -53,7 +53,9 @@ function submit(): void {
                 <DialogTitle>New folder</DialogTitle>
                 <DialogDescription>
                     Create a folder
-                    {{ parentId ? 'inside the current folder' : 'at the root' }}.
+                    {{
+                        parentId ? 'inside the current folder' : 'at the root'
+                    }}.
                 </DialogDescription>
             </DialogHeader>
 

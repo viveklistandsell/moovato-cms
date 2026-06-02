@@ -85,7 +85,7 @@ const visibilityHidden = computed(() => {
                     </span>
                     <span
                         v-if="!widget.is_active"
-                        class="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                        class="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Hidden
                     </span>
@@ -94,9 +94,15 @@ const visibilityHidden = computed(() => {
                         class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
                         :title="`Hidden on: ${[visibilityHidden.mobile ? 'mobile' : null, visibilityHidden.tablet ? 'tablet' : null, visibilityHidden.desktop ? 'desktop' : null].filter(Boolean).join(', ')}`"
                     >
-                        <Smartphone v-if="visibilityHidden.mobile" class="size-3" />
+                        <Smartphone
+                            v-if="visibilityHidden.mobile"
+                            class="size-3"
+                        />
                         <Tablet v-if="visibilityHidden.tablet" class="size-3" />
-                        <Monitor v-if="visibilityHidden.desktop" class="size-3" />
+                        <Monitor
+                            v-if="visibilityHidden.desktop"
+                            class="size-3"
+                        />
                         hidden
                     </span>
                 </div>

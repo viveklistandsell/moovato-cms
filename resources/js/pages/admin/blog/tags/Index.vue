@@ -145,8 +145,7 @@ const allOnPageSelected = computed(() =>
     selection.areAllSelected(visibleIds.value),
 );
 const someOnPageSelected = computed(
-    () =>
-        !allOnPageSelected.value && selection.someSelected(visibleIds.value),
+    () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
 const bulkActions: BulkAction[] = [
@@ -267,11 +266,7 @@ function formatDate(iso: string | null): string {
                                 : 'No tags yet.'
                         }}
                     </p>
-                    <Button
-                        v-if="!isFiltered"
-                        as-child
-                        variant="outline"
-                    >
+                    <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/blog/tags/create">
                             <Plus class="size-4" />
                             Create your first tag
@@ -301,9 +296,7 @@ function formatDate(iso: string | null): string {
                                             "
                                             aria-label="Select all on this page"
                                             @update:model-value="
-                                                selection.toggleAll(
-                                                    visibleIds,
-                                                )
+                                                selection.toggleAll(visibleIds)
                                             "
                                         />
                                     </div>
@@ -355,7 +348,7 @@ function formatDate(iso: string | null): string {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Actions
                                 </th>
@@ -372,8 +365,7 @@ function formatDate(iso: string | null): string {
                                     '!border-t-2 !border-primary':
                                         isDropTarget(row),
                                     'hover:bg-muted/30':
-                                        !isDragging(row) &&
-                                        !isDropTarget(row),
+                                        !isDragging(row) && !isDropTarget(row),
                                 }"
                                 @dragstart="canDrag && onDragStart($event, row)"
                                 @dragover="canDrag && onDragOver($event, row)"
@@ -415,7 +407,7 @@ function formatDate(iso: string | null): string {
                                 </td>
                                 <td class="px-2 py-3 text-center">
                                     <span
-                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 text-xs font-mono font-medium"
+                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 font-mono text-xs font-medium"
                                     >
                                         {{ row.sort_order }}
                                     </span>
@@ -451,9 +443,7 @@ function formatDate(iso: string | null): string {
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="
-                                                    !row.translations[
-                                                        lang.code
-                                                    ]
+                                                    !row.translations[lang.code]
                                                 "
                                                 class="opacity-50"
                                                 >·missing</span
@@ -477,7 +467,7 @@ function formatDate(iso: string | null): string {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(row.created_at) }}
                                     </span>

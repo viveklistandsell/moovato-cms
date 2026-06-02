@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Blog;
 use App\Models\Page;
 use App\Models\PageTranslation;
 use App\Models\PageWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
@@ -130,9 +132,15 @@ final class PageController extends Controller
 
                 $visibility = $w->visibility ?? [];
 
+                $settings = $w->settings ?? [];
+
+                if ($w->type === 'blog') {
+                    $settings['posts'] = $this->resolveBlogPosts($settings, $locale);
+                }
+
                 return [
                     'type' => $w->type,
-                    'settings' => $w->settings ?? [],
+                    'settings' => $settings,
                     'data' => $translation?->data ?? [],
                     'visibility' => [
                         'desktop' => (bool) ($visibility['desktop'] ?? true),
@@ -144,5 +152,73 @@ final class PageController extends Controller
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * Resolve the latest published posts for a Blog widget, honouring its
+     * count and optional category-permalink filter. Injected into the widget's
+     * settings at render time — never persisted.
+     *
+     * @param  array<string, mixed>  $settings
+     * @return array<int, array{title: string, href: string, excerpt: ?string, image_url: ?string, created_at: ?string, reading_time: ?int, category: ?string}>
+     */
+    private function resolveBlogPosts(array $settings, string $locale): array
+    {
+        $count = (int) ($settings['count'] ?? 3);
+        $count = max(1, min(12, $count));
+        $categorySlug = is_string($settings['category'] ?? null) ? $settings['category'] : '';
+
+        $query = Blog::query()
+            ->published()
+            ->with(['translations', 'categories.translations'])
+            ->orderByDesc('is_sticky')
+            ->orderByDesc('created_at');
+
+        if ($categorySlug !== '') {
+            $query->whereHas('categories', function (Builder $q) use ($categorySlug, $locale): void {
+                $q->where('blog_categories.permalink', $categorySlug)
+                    ->orWhereHas('translations', function (Builder $t) use ($categorySlug, $locale): void {
+                        $t->where('lang', $locale)->where('permalink', $categorySlug);
+                    });
+            });
+        }
+
+        return $query
+            ->limit($count)
+            ->get()
+            ->map(function (Blog $blog) use ($locale): array {
+                $tr = $blog->translation($locale);
+                $permalink = $tr?->permalink ?? $blog->permalink;
+                $category = $blog->categories->first();
+                $ctr = $category?->translation($locale);
+
+                return [
+                    'title' => $tr?->name ?? $blog->name,
+                    'href' => $this->localizedPath($locale, '/blog/'.$permalink),
+                    'excerpt' => $tr?->short_description ?? $blog->short_description,
+                    'image_url' => $blog->image !== null
+                        ? '/storage/'.mb_ltrim($blog->image, '/')
+                        : null,
+                    'created_at' => $blog->created_at?->toIso8601String(),
+                    'reading_time' => $blog->reading_time,
+                    'category' => $category !== null ? ($ctr?->name ?? $category->name) : null,
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * Mirror of the frontend localizedUrl() helper: the default locale lives at
+     * the root, other locales keep their /<locale>/ prefix.
+     */
+    private function localizedPath(string $locale, string $path): string
+    {
+        $normalized = str_starts_with($path, '/') ? $path : '/'.$path;
+
+        if ($locale === config('app.locale')) {
+            return $normalized;
+        }
+
+        return '/'.$locale.$normalized;
     }
 }

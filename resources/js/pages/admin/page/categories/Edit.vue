@@ -207,9 +207,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                 >*</span
                                             >
                                         </Label>
-                                        <div
-                                            class="flex w-full items-stretch"
-                                        >
+                                        <div class="flex w-full items-stretch">
                                             <span
                                                 class="inline-flex shrink-0 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground"
                                             >
@@ -222,7 +220,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                         .permalink
                                                 "
                                                 placeholder="your-permalink"
-                                                class="placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:text-sm"
+                                                class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
                                                 @input="onPermalinkInput(code)"
                                             />
                                         </div>
@@ -354,9 +352,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     <SelectItem value="published"
                                         >Published</SelectItem
                                     >
-                                    <SelectItem value="draft"
-                                        >Draft</SelectItem
-                                    >
+                                    <SelectItem value="draft">Draft</SelectItem>
                                     <SelectItem value="inactive"
                                         >Inactive</SelectItem
                                     >

@@ -71,27 +71,44 @@ const kind = computed<Kind>(() => {
     if (mime.startsWith('audio/')) return 'audio';
     if (mime.includes('pdf') || ext === 'pdf') return 'pdf';
     if (
-        ['doc', 'docx', 'odt', 'rtf'].includes(ext)
-        || mime.includes('msword')
-        || mime.includes('wordprocessingml')
+        ['doc', 'docx', 'odt', 'rtf'].includes(ext) ||
+        mime.includes('msword') ||
+        mime.includes('wordprocessingml')
     ) {
         return 'word';
     }
     if (
-        ['xls', 'xlsx', 'csv', 'tsv', 'ods'].includes(ext)
-        || mime.includes('spreadsheet')
-        || mime === 'text/csv'
+        ['xls', 'xlsx', 'csv', 'tsv', 'ods'].includes(ext) ||
+        mime.includes('spreadsheet') ||
+        mime === 'text/csv'
     ) {
         return 'excel';
     }
     if (
-        ['ppt', 'pptx', 'odp', 'key'].includes(ext)
-        || mime.includes('presentation')
+        ['ppt', 'pptx', 'odp', 'key'].includes(ext) ||
+        mime.includes('presentation')
     ) {
         return 'powerpoint';
     }
     if (['zip', 'tar', 'gz', '7z', 'rar'].includes(ext)) return 'archive';
-    if (mime.startsWith('text/') || ['md', 'txt', 'json', 'log', 'xml', 'yml', 'yaml', 'js', 'ts', 'css', 'html', 'php', 'py'].includes(ext)) {
+    if (
+        mime.startsWith('text/') ||
+        [
+            'md',
+            'txt',
+            'json',
+            'log',
+            'xml',
+            'yml',
+            'yaml',
+            'js',
+            'ts',
+            'css',
+            'html',
+            'php',
+            'py',
+        ].includes(ext)
+    ) {
         return 'text';
     }
     return 'other';
@@ -167,7 +184,7 @@ function readableSize(bytes: number): string {
         :class="{ 'border-primary ring-2 ring-primary': selected }"
     >
         <label
-            class="absolute left-2 top-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-border bg-background/80 text-foreground shadow-sm transition-opacity"
+            class="absolute top-2 left-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-border bg-background/80 text-foreground shadow-sm transition-opacity"
             :class="
                 selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             "
@@ -182,7 +199,7 @@ function readableSize(bytes: number): string {
         </label>
 
         <div
-            class="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+            class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
         >
             <button
                 type="button"
@@ -262,13 +279,11 @@ function readableSize(bytes: number): string {
                 <FileIcon v-else class="h-12 w-12" />
 
                 <span
-                    class="absolute bottom-2 right-2 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm"
+                    class="absolute right-2 bottom-2 rounded px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white uppercase shadow-sm"
                     :class="badgeClasses"
                 >
                     {{
-                        file.extension ||
-                        file.mime_type.split('/')[1] ||
-                        'file'
+                        file.extension || file.mime_type.split('/')[1] || 'file'
                     }}
                 </span>
             </div>

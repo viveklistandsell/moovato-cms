@@ -42,12 +42,19 @@ final class TestimonialWidget implements WidgetContract
     public static function defaultData(): array
     {
         return [
-            'heading' => '',
+            'heading' => 'Das sagen unsere Kunden',
             'items' => [
                 [
-                    'quote' => '',
-                    'author' => '',
-                    'role' => '',
+                    'quote' => 'Pünktlich, freundlich und top organisiert. Unser Wohnungsumzug in Berlin lief völlig stressfrei – absolute Empfehlung!',
+                    'author' => 'Sarah M.',
+                    'role' => 'Privatumzug, Berlin-Mitte',
+                    'avatar_path' => null,
+                    'avatar_url' => null,
+                ],
+                [
+                    'quote' => 'Moovato hat unseren Büroumzug am Wochenende erledigt, sodass montags alles bereit war. Eingespieltes Team!',
+                    'author' => 'Daniel K.',
+                    'role' => 'Büroumzug, Berlin-Kreuzberg',
                     'avatar_path' => null,
                     'avatar_url' => null,
                 ],

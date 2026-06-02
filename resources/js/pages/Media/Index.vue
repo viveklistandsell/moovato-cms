@@ -24,9 +24,7 @@ import type { FolderNode } from '@/components/Media/FolderTreeNode.vue';
 import FolderCard, {
     type MediaFolderItem,
 } from '@/components/Media/FolderCard.vue';
-import FileCard, {
-    type MediaFileItem,
-} from '@/components/Media/FileCard.vue';
+import FileCard, { type MediaFileItem } from '@/components/Media/FileCard.vue';
 import MediaBreadcrumbs from '@/components/Media/MediaBreadcrumbs.vue';
 import Uploader from '@/components/Media/Uploader.vue';
 import NewFolderDialog from '@/components/Media/NewFolderDialog.vue';
@@ -82,7 +80,12 @@ const bulkDeleteCount = ref(0);
 
 type MoveTarget =
     | { type: 'file'; id: number; name: string; currentFolderId: number | null }
-    | { type: 'folder'; id: number; name: string; currentFolderId: number | null }
+    | {
+          type: 'folder';
+          id: number;
+          name: string;
+          currentFolderId: number | null;
+      }
     | {
           type: 'bulk-files';
           ids: number[];
@@ -106,14 +109,16 @@ const totalSelected = computed(
 );
 const allOnPageSelected = computed(() => {
     const allFilesSelected =
-        props.files.data.length === 0
-        || props.files.data.every((f) => selectedIds.value.includes(f.id));
+        props.files.data.length === 0 ||
+        props.files.data.every((f) => selectedIds.value.includes(f.id));
     const allFoldersSelected =
-        props.folders.length === 0
-        || props.folders.every((f) => selectedFolderIds.value.includes(f.id));
-    return allFilesSelected
-        && allFoldersSelected
-        && (props.files.data.length > 0 || props.folders.length > 0);
+        props.folders.length === 0 ||
+        props.folders.every((f) => selectedFolderIds.value.includes(f.id));
+    return (
+        allFilesSelected &&
+        allFoldersSelected &&
+        (props.files.data.length > 0 || props.folders.length > 0)
+    );
 });
 
 function toggleSelect(file: MediaFileItem): void {
@@ -230,7 +235,8 @@ function changeSort(sort: string): void {
 function readableSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes < 1024 * 1024 * 1024)
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
@@ -369,20 +375,20 @@ function deleteFromPreview(file: MediaFileItem): void {
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="relative">
                         <Search
-                            class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                            class="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                         />
                         <Input
                             v-model="searchInput"
                             type="search"
                             placeholder="Search files…"
-                            class="h-9 w-56 pl-8 pr-8"
+                            class="h-9 w-56 pr-8 pl-8"
                             @input="onSearchInput"
                             @keydown.enter.prevent="applySearch"
                         />
                         <button
                             v-if="searchInput"
                             type="button"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-accent"
+                            class="absolute top-1/2 right-2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-accent"
                             @click="clearSearch"
                         >
                             <X class="h-3.5 w-3.5" />
@@ -454,7 +460,10 @@ function deleteFromPreview(file: MediaFileItem): void {
                     <span class="h-2 w-2 rounded-full bg-amber-500"></span>
                     {{ folders.length }} folder(s)
                 </span>
-                <span v-if="totalSize > 0" class="inline-flex items-center gap-1.5">
+                <span
+                    v-if="totalSize > 0"
+                    class="inline-flex items-center gap-1.5"
+                >
                     <span class="h-2 w-2 rounded-full bg-blue-500"></span>
                     {{ readableSize(totalSize) }} total
                 </span>
@@ -517,7 +526,7 @@ function deleteFromPreview(file: MediaFileItem): void {
             <div class="flex flex-1 flex-col gap-4 md:flex-row md:gap-6">
                 <aside class="shrink-0 md:w-64">
                     <p
-                        class="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        class="mb-2 px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Folders
                     </p>
@@ -529,109 +538,111 @@ function deleteFromPreview(file: MediaFileItem): void {
 
                 <main class="flex min-w-0 flex-1 flex-col gap-4">
                     <div
-                    v-if="!currentFolder && folders.length === 0 && files.total === 0"
-                    class="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center"
-                >
-                    <FolderPlus class="h-8 w-8 text-muted-foreground" />
-                    <div class="flex flex-col gap-1">
-                        <p class="text-sm font-medium">
-                            Create your first album
+                        v-if="
+                            !currentFolder &&
+                            folders.length === 0 &&
+                            files.total === 0
+                        "
+                        class="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center"
+                    >
+                        <FolderPlus class="h-8 w-8 text-muted-foreground" />
+                        <div class="flex flex-col gap-1">
+                            <p class="text-sm font-medium">
+                                Create your first album
+                            </p>
+                            <p class="text-xs text-muted-foreground">
+                                Start by creating a folder, then upload images,
+                                PDFs, video, or any other file type into it.
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            size="sm"
+                            @click="newFolderOpen = true"
+                        >
+                            <FolderPlus class="h-4 w-4" />
+                            New folder
+                        </Button>
+                    </div>
+
+                    <Uploader v-else :folder-id="currentFolder?.id ?? null" />
+
+                    <section
+                        v-if="folders.length > 0"
+                        class="flex flex-col gap-2"
+                    >
+                        <h3
+                            class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                        >
+                            Folders
+                        </h3>
+                        <div
+                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                        >
+                            <FolderCard
+                                v-for="folder in folders"
+                                :key="folder.id"
+                                :folder="folder"
+                                :selected="isFolderSelected(folder.id)"
+                                @rename="openRenameFolder"
+                                @move="openMoveFolder"
+                                @delete="openDeleteFolder"
+                                @toggle-select="toggleSelectFolder"
+                            />
+                        </div>
+                    </section>
+
+                    <section class="flex flex-col gap-2">
+                        <h3
+                            class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                        >
+                            Files ({{ files.total }})
+                        </h3>
+                        <div
+                            v-if="files.data.length > 0"
+                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                        >
+                            <FileCard
+                                v-for="file in files.data"
+                                :key="file.id"
+                                :file="file"
+                                :selected="isSelected(file.id)"
+                                @open="openFile"
+                                @toggle-select="toggleSelect"
+                                @rename="openRenameFile"
+                                @move="openMoveFile"
+                                @delete="openDeleteFile"
+                            />
+                        </div>
+                        <p
+                            v-else
+                            class="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground"
+                        >
+                            No files in this folder yet. Drop files above to
+                            upload.
                         </p>
-                        <p class="text-xs text-muted-foreground">
-                            Start by creating a folder, then upload images,
-                            PDFs, video, or any other file type into it.
-                        </p>
-                    </div>
-                    <Button
-                        type="button"
-                        size="sm"
-                        @click="newFolderOpen = true"
-                    >
-                        <FolderPlus class="h-4 w-4" />
-                        New folder
-                    </Button>
-                </div>
 
-                <Uploader
-                    v-else
-                    :folder-id="currentFolder?.id ?? null"
-                />
-
-                <section
-                    v-if="folders.length > 0"
-                    class="flex flex-col gap-2"
-                >
-                    <h3
-                        class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                    >
-                        Folders
-                    </h3>
-                    <div
-                        class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                    >
-                        <FolderCard
-                            v-for="folder in folders"
-                            :key="folder.id"
-                            :folder="folder"
-                            :selected="isFolderSelected(folder.id)"
-                            @rename="openRenameFolder"
-                            @move="openMoveFolder"
-                            @delete="openDeleteFolder"
-                            @toggle-select="toggleSelectFolder"
-                        />
-                    </div>
-                </section>
-
-                <section class="flex flex-col gap-2">
-                    <h3
-                        class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                    >
-                        Files ({{ files.total }})
-                    </h3>
-                    <div
-                        v-if="files.data.length > 0"
-                        class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                    >
-                        <FileCard
-                            v-for="file in files.data"
-                            :key="file.id"
-                            :file="file"
-                            :selected="isSelected(file.id)"
-                            @open="openFile"
-                            @toggle-select="toggleSelect"
-                            @rename="openRenameFile"
-                            @move="openMoveFile"
-                            @delete="openDeleteFile"
-                        />
-                    </div>
-                    <p
-                        v-else
-                        class="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground"
-                    >
-                        No files in this folder yet. Drop files above to upload.
-                    </p>
-
-                    <nav
-                        v-if="files.last_page > 1"
-                        class="flex flex-wrap items-center justify-center gap-1 pt-2 text-sm"
-                    >
-                        <Link
-                            v-for="link in files.links"
-                            :key="link.label"
-                            :href="link.url ?? ''"
-                            :class="[
-                                'rounded px-3 py-1',
-                                link.active
-                                    ? 'bg-primary text-primary-foreground'
-                                    : link.url
-                                      ? 'hover:bg-accent'
-                                      : 'cursor-default text-muted-foreground',
-                            ]"
-                            v-html="link.label"
-                            preserve-scroll
-                        />
-                    </nav>
-                </section>
+                        <nav
+                            v-if="files.last_page > 1"
+                            class="flex flex-wrap items-center justify-center gap-1 pt-2 text-sm"
+                        >
+                            <Link
+                                v-for="link in files.links"
+                                :key="link.label"
+                                :href="link.url ?? ''"
+                                :class="[
+                                    'rounded px-3 py-1',
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : link.url
+                                          ? 'hover:bg-accent'
+                                          : 'cursor-default text-muted-foreground',
+                                ]"
+                                v-html="link.label"
+                                preserve-scroll
+                            />
+                        </nav>
+                    </section>
                 </main>
             </div>
         </div>

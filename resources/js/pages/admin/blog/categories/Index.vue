@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import {
-    GripVertical,
-    Pencil,
-    Plus,
-    Star,
-    Trash2,
-    X,
-} from 'lucide-vue-next';
+import { GripVertical, Pencil, Plus, Star, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
@@ -176,8 +169,7 @@ const allOnPageSelected = computed(() =>
     selection.areAllSelected(visibleIds.value),
 );
 const someOnPageSelected = computed(
-    () =>
-        !allOnPageSelected.value && selection.someSelected(visibleIds.value),
+    () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
 const bulkActions: BulkAction[] = [
@@ -188,7 +180,8 @@ const bulkActions: BulkAction[] = [
         value: 'delete',
         label: 'Delete',
         destructive: true,
-        confirm: 'Delete {count} selected categor(y/ies)? Children will be re-parented.',
+        confirm:
+            'Delete {count} selected categor(y/ies)? Children will be re-parented.',
     },
 ];
 
@@ -287,11 +280,7 @@ function applyBulkAction(action: string): void {
                                 : 'No categories yet.'
                         }}
                     </p>
-                    <Button
-                        v-if="!isFiltered"
-                        as-child
-                        variant="outline"
-                    >
+                    <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/blog/categories/create">
                             <Plus class="size-4" />
                             Create your first category
@@ -308,7 +297,9 @@ function applyBulkAction(action: string): void {
                         <thead class="bg-muted/50 text-left text-xs">
                             <tr>
                                 <th class="w-10 px-2 py-3">
-                                    <div class="flex items-center justify-center">
+                                    <div
+                                        class="flex items-center justify-center"
+                                    >
                                         <Checkbox
                                             :model-value="
                                                 allOnPageSelected
@@ -319,9 +310,7 @@ function applyBulkAction(action: string): void {
                                             "
                                             aria-label="Select all on this page"
                                             @update:model-value="
-                                                selection.toggleAll(
-                                                    visibleIds,
-                                                )
+                                                selection.toggleAll(visibleIds)
                                             "
                                         />
                                     </div>
@@ -355,7 +344,7 @@ function applyBulkAction(action: string): void {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Icon
                                 </th>
@@ -405,7 +394,7 @@ function applyBulkAction(action: string): void {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Actions
                                 </th>
@@ -426,14 +415,18 @@ function applyBulkAction(action: string): void {
                                         !isDragging(node) &&
                                         !isDropTarget(node),
                                 }"
-                                @dragstart="canDrag && onDragStart($event, node)"
+                                @dragstart="
+                                    canDrag && onDragStart($event, node)
+                                "
                                 @dragover="canDrag && onDragOver($event, node)"
                                 @dragleave="canDrag && onDragLeave(node)"
                                 @drop="canDrag && onDrop($event, node)"
                                 @dragend="onDragEnd"
                             >
                                 <td class="px-2 py-3">
-                                    <div class="flex items-center justify-center">
+                                    <div
+                                        class="flex items-center justify-center"
+                                    >
                                         <Checkbox
                                             :model-value="
                                                 selection.isSelected(node.id)
@@ -464,7 +457,7 @@ function applyBulkAction(action: string): void {
                                 </td>
                                 <td class="px-2 py-3 text-center">
                                     <span
-                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 text-xs font-mono font-medium"
+                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 font-mono text-xs font-medium"
                                     >
                                         {{ node.sort_order }}
                                     </span>
@@ -592,7 +585,7 @@ function applyBulkAction(action: string): void {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(node.created_at) }}
                                     </span>

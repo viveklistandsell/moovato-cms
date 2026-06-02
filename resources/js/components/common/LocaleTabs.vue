@@ -36,7 +36,7 @@ defineEmits<{
                 <span class="font-medium">{{ lang.native_name }}</span>
                 <span
                     v-if="lang.is_default"
-                    class="text-[10px] uppercase tracking-wide text-muted-foreground"
+                    class="text-[10px] tracking-wide text-muted-foreground uppercase"
                     >(default)</span
                 >
             </TabsTrigger>

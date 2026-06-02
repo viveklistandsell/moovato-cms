@@ -37,7 +37,7 @@ const emit = defineEmits<{
         :class="{ 'border-primary ring-2 ring-primary': selected }"
     >
         <label
-            class="absolute left-2 top-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-border bg-background/80 text-foreground shadow-sm transition-opacity"
+            class="absolute top-2 left-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-border bg-background/80 text-foreground shadow-sm transition-opacity"
             :class="
                 selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             "
@@ -87,15 +87,14 @@ const emit = defineEmits<{
                     class="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
                 >
                     {{
-                        (folder.file_count ?? 0) +
-                        (folder.subfolder_count ?? 0)
+                        (folder.file_count ?? 0) + (folder.subfolder_count ?? 0)
                     }}
                 </span>
             </div>
         </Link>
 
         <div
-            class="absolute right-2 top-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+            class="absolute top-2 right-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
         >
             <Link
                 :href="`/admin/media?folder=${folder.id}`"

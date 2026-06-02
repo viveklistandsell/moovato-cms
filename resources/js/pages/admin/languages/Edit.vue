@@ -228,10 +228,7 @@ function submit(): void {
                         </p>
 
                         <div class="flex items-center justify-between">
-                            <Label
-                                for="lang_is_default"
-                                class="cursor-pointer"
-                            >
+                            <Label for="lang_is_default" class="cursor-pointer">
                                 Default language
                             </Label>
                             <Switch
@@ -244,8 +241,8 @@ function submit(): void {
                         </div>
                         <p class="text-xs text-muted-foreground">
                             The default locale renders at the URL root (no
-                            <code>/code/</code> prefix). Enabling this unsets
-                            it on every other language.
+                            <code>/code/</code> prefix). Enabling this unsets it
+                            on every other language.
                         </p>
 
                         <div class="grid gap-2">
@@ -257,8 +254,8 @@ function submit(): void {
                                 min="0"
                             />
                             <p class="text-xs text-muted-foreground">
-                                Controls the order language tabs appear in
-                                Edit forms.
+                                Controls the order language tabs appear in Edit
+                                forms.
                             </p>
                             <InputError :message="form.errors.sort_order" />
                         </div>

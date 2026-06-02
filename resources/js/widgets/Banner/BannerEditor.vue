@@ -50,7 +50,9 @@ const data = defineModel<Data>('data', { required: true });
                 <Label>Variant</Label>
                 <Select
                     :model-value="settings.variant"
-                    @update:model-value="(v) => (settings.variant = v as Settings['variant'])"
+                    @update:model-value="
+                        (v) => (settings.variant = v as Settings['variant'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>

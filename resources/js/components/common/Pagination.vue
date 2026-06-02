@@ -80,10 +80,7 @@ function cleanLabel(label: string): string {
             <template v-else>No results</template>
         </p>
 
-        <div
-            v-if="pagination.last_page > 1"
-            class="flex items-center gap-1"
-        >
+        <div v-if="pagination.last_page > 1" class="flex items-center gap-1">
             <template v-for="(link, idx) in pagination.links" :key="idx">
                 <template v-if="isPrev(link.label) || isNext(link.label)">
                     <Button
@@ -93,10 +90,7 @@ function cleanLabel(label: string): string {
                         disabled
                         class="h-8 px-2"
                     >
-                        <ChevronLeft
-                            v-if="isPrev(link.label)"
-                            class="size-4"
-                        />
+                        <ChevronLeft v-if="isPrev(link.label)" class="size-4" />
                         <ChevronRight v-else class="size-4" />
                     </Button>
                     <Button
@@ -130,9 +124,7 @@ function cleanLabel(label: string): string {
                         :disabled="!link.url || link.active"
                         class="h-8 min-w-8 px-2"
                     >
-                        <span
-                            v-html="cleanLabel(link.label) || link.label"
-                        />
+                        <span v-html="cleanLabel(link.label) || link.label" />
                     </Button>
                     <Button
                         v-else
@@ -149,9 +141,7 @@ function cleanLabel(label: string): string {
                             replace
                         >
                             <span
-                                v-html="
-                                    cleanLabel(link.label) || link.label
-                                "
+                                v-html="cleanLabel(link.label) || link.label"
                             />
                         </Link>
                     </Button>

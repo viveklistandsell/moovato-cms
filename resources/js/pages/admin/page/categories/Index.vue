@@ -297,12 +297,12 @@ function applyBulkAction(action: string): void {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Parent
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Translations
                                 </th>
@@ -334,7 +334,7 @@ function applyBulkAction(action: string): void {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Actions
                                 </th>
@@ -487,7 +487,7 @@ function applyBulkAction(action: string): void {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(node.created_at) }}
                                     </span>

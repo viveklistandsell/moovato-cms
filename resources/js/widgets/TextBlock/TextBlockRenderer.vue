@@ -46,9 +46,9 @@ const bgClass = computed(() => {
 </script>
 
 <template>
-    <section class="w-full py-12 sm:py-16" :class="bgClass">
-        <div class="mx-auto px-4 sm:px-6 lg:px-8" :class="widthClass">
-            <div :class="alignClass">
+    <section class="w-full section-py" :class="bgClass">
+        <div class="container-xl">
+            <div class="mx-auto" :class="[widthClass, alignClass]">
                 <h2
                     v-if="data.heading"
                     class="mb-6 text-3xl font-bold tracking-tight sm:text-4xl"
@@ -57,7 +57,7 @@ const bgClass = computed(() => {
                 </h2>
                 <div
                     v-if="data.body"
-                    class="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-primary prose-img:rounded-md"
+                    class="prose prose-neutral dark:prose-invert prose-headings:font-bold prose-a:text-primary prose-img:rounded-md max-w-none"
                     v-html="data.body"
                 />
             </div>

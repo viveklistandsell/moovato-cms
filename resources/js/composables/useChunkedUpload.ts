@@ -55,7 +55,9 @@ export function useChunkedUpload(options: UseChunkedUploadOptions) {
         }),
     });
 
-    function findOrCreateFileEntry(rFile: Resumable.ResumableFile): UploaderFile {
+    function findOrCreateFileEntry(
+        rFile: Resumable.ResumableFile,
+    ): UploaderFile {
         let entry = files.value.find((f) => f.id === rFile.uniqueIdentifier);
         if (!entry) {
             entry = {

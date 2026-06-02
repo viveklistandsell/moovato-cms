@@ -45,13 +45,14 @@ final class HeroWidget implements WidgetContract
     public static function defaultData(): array
     {
         return [
-            'eyebrow' => '',
-            'title' => '',
-            'subtitle' => '',
-            'primary_label' => '',
-            'primary_url' => '',
-            'secondary_label' => '',
-            'secondary_url' => '',
+            'eyebrow' => 'Umzugsunternehmen in Berlin',
+            'title' => 'Stressfrei umziehen mit Moovato',
+            'subtitle' => 'Ihr moderner Umzugspartner in Berlin – versichert, pünktlich und zum Festpreis. Privatumzug, Büroumzug und mehr.',
+            'image_alt' => 'Moovato Umzugswagen und Umzugsteam in Berlin',
+            'primary_label' => 'Kostenloses Angebot',
+            'primary_url' => '#angebot',
+            'secondary_label' => 'Unsere Leistungen',
+            'secondary_url' => '#leistungen',
         ];
     }
 
@@ -72,6 +73,7 @@ final class HeroWidget implements WidgetContract
             'eyebrow' => ['nullable', 'string', 'max:120'],
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:500'],
+            'image_alt' => ['nullable', 'string', 'max:160'],
             'primary_label' => ['nullable', 'string', 'max:80'],
             'primary_url' => ['nullable', 'string', 'max:2000'],
             'secondary_label' => ['nullable', 'string', 'max:80'],

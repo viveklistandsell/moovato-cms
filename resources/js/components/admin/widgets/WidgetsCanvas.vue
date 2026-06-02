@@ -65,11 +65,15 @@ const metaByType = computed<Record<string, WidgetMeta>>(() => {
 });
 
 const editingWidget = computed<WidgetInstance | null>(() =>
-    editingIndex.value !== null ? widgets.value[editingIndex.value] ?? null : null,
+    editingIndex.value !== null
+        ? (widgets.value[editingIndex.value] ?? null)
+        : null,
 );
 
 const editingMeta = computed<WidgetMeta | null>(() =>
-    editingWidget.value ? metaByType.value[editingWidget.value.type] ?? null : null,
+    editingWidget.value
+        ? (metaByType.value[editingWidget.value.type] ?? null)
+        : null,
 );
 
 /** Ensure every active language has a translation slot for editing. */
@@ -195,7 +199,9 @@ function save(): void {
     // We deep-clone via JSON to strip any Vue reactive proxies — proxies
     // serialize fine via JSON.stringify in theory, but unwrapping here is the
     // belt-and-suspenders fix for the "second-save loses the toggle" bug.
-    const snapshot: WidgetInstance[] = JSON.parse(JSON.stringify(widgets.value));
+    const snapshot: WidgetInstance[] = JSON.parse(
+        JSON.stringify(widgets.value),
+    );
     const payload = snapshot.map((w, i) => ({
         id: w.id ?? null,
         type: w.type,
@@ -222,7 +228,9 @@ function save(): void {
                 toast.success('Widgets saved.');
             },
             onError: () => {
-                toast.error('Could not save widgets. Check the form for errors.');
+                toast.error(
+                    'Could not save widgets. Check the form for errors.',
+                );
             },
             onFinish: () => {
                 saving.value = false;

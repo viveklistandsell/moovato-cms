@@ -184,12 +184,12 @@ function confirmDelete(l: Language): boolean {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Native
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Locale
                                 </th>
@@ -203,7 +203,7 @@ function confirmDelete(l: Language): boolean {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Default
                                 </th>
@@ -226,7 +226,7 @@ function confirmDelete(l: Language): boolean {
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
                                     Actions
                                 </th>
@@ -278,9 +278,7 @@ function confirmDelete(l: Language): boolean {
                                             row.status ? 'default' : 'outline'
                                         "
                                     >
-                                        {{
-                                            row.status ? 'Active' : 'Inactive'
-                                        }}
+                                        {{ row.status ? 'Active' : 'Inactive' }}
                                     </Badge>
                                 </td>
                                 <td class="px-4 py-3">
@@ -305,7 +303,7 @@ function confirmDelete(l: Language): boolean {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(row.created_at) }}
                                     </span>

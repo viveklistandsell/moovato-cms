@@ -62,7 +62,7 @@ function choose(widget: WidgetMeta): void {
             <div class="max-h-[60vh] space-y-6 overflow-y-auto pr-1">
                 <div v-for="category in categoriesSorted" :key="category">
                     <h3
-                        class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                        class="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                     >
                         {{ categoryLabel(category) }}
                     </h3>

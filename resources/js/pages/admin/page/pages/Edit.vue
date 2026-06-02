@@ -161,7 +161,11 @@ function removeImage(): void {
 // is applied to image_path + preview. The form stays open the whole time.
 const pickerOpen = ref(false);
 
-function onMediaPicked(file: { path: string; url: string; name: string }): void {
+function onMediaPicked(file: {
+    path: string;
+    url: string;
+    name: string;
+}): void {
     form.image = null;
     form.image_path = file.path;
     form.remove_image = false;
@@ -184,9 +188,9 @@ const previewUrl = computed<string | null>(() => {
     const defaultLocale =
         props.languages.find((l) => l.is_default)?.code ?? 'de';
     const slug =
-        props.page.translations[defaultLocale]?.permalink
-        ?? Object.values(props.page.translations)[0]?.permalink
-        ?? null;
+        props.page.translations[defaultLocale]?.permalink ??
+        Object.values(props.page.translations)[0]?.permalink ??
+        null;
     return slug ? localizedUrl(defaultLocale, `/${slug}`) : null;
 });
 
@@ -290,7 +294,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                         .permalink
                                                 "
                                                 placeholder="your-permalink"
-                                                class="placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:text-sm"
+                                                class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
                                                 @input="onPermalinkInput(code)"
                                             />
                                         </div>
@@ -313,7 +317,6 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             "
                                         />
                                     </div>
-
                                 </div>
                             </template>
                         </LocaleTabs>
@@ -359,10 +362,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                     </CardHeader>
                     <CardContent>
                         <div class="flex flex-wrap items-center gap-2">
-                            <Button
-                                type="submit"
-                                :disabled="form.processing"
-                            >
+                            <Button type="submit" :disabled="form.processing">
                                 <Save class="size-4" />
                                 Save
                             </Button>
@@ -381,11 +381,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     Preview
                                 </a>
                             </Button>
-                            <Button
-                                as-child
-                                type="button"
-                                variant="outline"
-                            >
+                            <Button as-child type="button" variant="outline">
                                 <Link href="/admin/pages">
                                     <X class="size-4" />
                                     Cancel
@@ -490,9 +486,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             :options="categoryOptions"
                             placeholder="Pick categories…"
                             empty-message="No categories yet."
-                            @update:model-value="
-                                (v) => (form.category_ids = v)
-                            "
+                            @update:model-value="(v) => (form.category_ids = v)"
                         />
                         <InputError
                             class="mt-2"
@@ -546,8 +540,8 @@ const errorFor = (code: string, field: keyof Translation) =>
                             </Button>
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            Opens the media library — pick an existing image
-                            or upload a new one there.
+                            Opens the media library — pick an existing image or
+                            upload a new one there.
                         </p>
                         <InputError :message="form.errors.image" />
                         <InputError :message="form.errors.image_path" />

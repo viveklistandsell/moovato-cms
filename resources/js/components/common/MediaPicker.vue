@@ -154,7 +154,10 @@ function onDragEnd(): void {
     dropTargetFolderId.value = null;
 }
 
-async function moveFiles(ids: number[], targetFolderId: number | null): Promise<void> {
+async function moveFiles(
+    ids: number[],
+    targetFolderId: number | null,
+): Promise<void> {
     // Optimistic removal — drop the moved files from the current view
     // immediately so the user sees instant feedback. fetchPage() will
     // reconcile (folder thumb_url and file_count for the target folder).
@@ -206,18 +209,15 @@ async function deleteFolderFromCard(folder: PickerFolder): Promise<void> {
         return;
     }
     try {
-        const res = await fetch(
-            `/admin/media/picker/folders/${folder.id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken.value,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
+        const res = await fetch(`/admin/media/picker/folders/${folder.id}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value,
+                'X-Requested-With': 'XMLHttpRequest',
             },
-        );
+            credentials: 'same-origin',
+        });
         if (!res.ok) return;
         folders.value = folders.value.filter((f) => f.id !== folder.id);
         stats.value = {
@@ -296,18 +296,15 @@ async function deleteFromCard(file: PickerFile): Promise<void> {
         return;
     }
     try {
-        const res = await fetch(
-            `/admin/media/picker/files/${file.id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken.value,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
+        const res = await fetch(`/admin/media/picker/files/${file.id}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value,
+                'X-Requested-With': 'XMLHttpRequest',
             },
-        );
+            credentials: 'same-origin',
+        });
         if (!res.ok) return;
         files.value = files.value.filter((f) => f.id !== file.id);
         stats.value = {
@@ -333,8 +330,7 @@ async function handleUploaded(): Promise<void> {
 const csrfToken = computed(() => {
     if (typeof document === 'undefined') return '';
     return (
-        document
-            .querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
             ?.content ?? ''
     );
 });
@@ -470,15 +466,12 @@ async function submitNewFolder(): Promise<void> {
         });
         if (!res.ok) {
             const body = await res.json().catch(() => null);
-            throw new Error(
-                body?.message ?? `Create failed (${res.status})`,
-            );
+            throw new Error(body?.message ?? `Create failed (${res.status})`);
         }
         newFolderOpen.value = false;
         await fetchPage();
     } catch (e) {
-        newFolderError.value =
-            e instanceof Error ? e.message : 'Create failed';
+        newFolderError.value = e instanceof Error ? e.message : 'Create failed';
     } finally {
         creatingFolder.value = false;
     }
@@ -504,7 +497,7 @@ const folderLabel = computed(() =>
         >
             <!-- Header -->
             <DialogHeader
-                class="flex flex-row items-start justify-between gap-3 border-b px-6 pb-4 pt-6"
+                class="flex flex-row items-start justify-between gap-3 border-b px-6 pt-6 pb-4"
             >
                 <div class="space-y-1">
                     <DialogTitle class="flex items-center gap-2 text-base">
@@ -512,14 +505,14 @@ const folderLabel = computed(() =>
                         Pick image — {{ folderLabel }}
                     </DialogTitle>
                     <DialogDescription class="text-xs">
-                        Browse the media library or upload a new file. Click
-                        any image to use it as the featured image.
+                        Browse the media library or upload a new file. Click any
+                        image to use it as the featured image.
                     </DialogDescription>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="relative">
                         <Search
-                            class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                            class="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
                         />
                         <Input
                             v-model="search"
@@ -658,7 +651,7 @@ const folderLabel = computed(() =>
                         Up one level
                         <span
                             v-if="dropTargetFolderId === 'up'"
-                            class="ml-1 text-[10px] uppercase tracking-wider text-primary"
+                            class="ml-1 text-[10px] tracking-wider text-primary uppercase"
                             >Drop to move</span
                         >
                     </Button>
@@ -666,7 +659,7 @@ const folderLabel = computed(() =>
 
                 <section v-if="folders.length > 0" class="mb-6">
                     <h3
-                        class="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Folders
                     </h3>
@@ -688,7 +681,7 @@ const folderLabel = computed(() =>
                         >
                             <!-- Hover actions: open + delete -->
                             <div
-                                class="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+                                class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
                             >
                                 <button
                                     type="button"
@@ -753,7 +746,7 @@ const folderLabel = computed(() =>
 
                 <section>
                     <h3
-                        class="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Files ({{ stats.file_count }})
                     </h3>
@@ -780,9 +773,7 @@ const folderLabel = computed(() =>
                             :key="file.id"
                             class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
                             :class="
-                                draggedFileId === file.id
-                                    ? 'opacity-40'
-                                    : ''
+                                draggedFileId === file.id ? 'opacity-40' : ''
                             "
                             draggable="true"
                             @dragstart="onFileDragStart($event, file)"
@@ -790,7 +781,7 @@ const folderLabel = computed(() =>
                         >
                             <!-- Hover actions: preview + delete -->
                             <div
-                                class="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+                                class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
                             >
                                 <button
                                     type="button"
@@ -830,9 +821,7 @@ const folderLabel = computed(() =>
                                         class="size-8 text-muted-foreground/50"
                                     />
                                 </div>
-                                <div
-                                    class="flex flex-col gap-0.5 px-2.5 py-2"
-                                >
+                                <div class="flex flex-col gap-0.5 px-2.5 py-2">
                                     <p
                                         class="truncate text-xs font-medium"
                                         :title="file.title ?? file.name"
@@ -888,10 +877,7 @@ const folderLabel = computed(() =>
                     autocomplete="off"
                     @keydown.enter.prevent="submitNewFolder"
                 />
-                <p
-                    v-if="newFolderError"
-                    class="text-xs text-destructive"
-                >
+                <p v-if="newFolderError" class="text-xs text-destructive">
                     {{ newFolderError }}
                 </p>
             </div>

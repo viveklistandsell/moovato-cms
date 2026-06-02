@@ -29,7 +29,10 @@ const settings = defineModel<Settings>('settings', { required: true });
 const data = defineModel<Data>('data', { required: true });
 
 function addItem(): void {
-    data.value.items = [...(data.value.items ?? []), { question: '', answer: '' }];
+    data.value.items = [
+        ...(data.value.items ?? []),
+        { question: '', answer: '' },
+    ];
 }
 
 function removeItem(index: number): void {
@@ -48,7 +51,9 @@ function removeItem(index: number): void {
                 <Label>Layout</Label>
                 <Select
                     :model-value="settings.layout"
-                    @update:model-value="(v) => (settings.layout = v as Settings['layout'])"
+                    @update:model-value="
+                        (v) => (settings.layout = v as Settings['layout'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -70,7 +75,12 @@ function removeItem(index: number): void {
         <div class="space-y-3">
             <div class="flex items-center justify-between">
                 <Label class="text-sm font-semibold">Questions</Label>
-                <Button type="button" variant="outline" size="sm" @click="addItem">
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    @click="addItem"
+                >
                     <Plus class="size-4" />
                     Add question
                 </Button>
@@ -81,12 +91,25 @@ function removeItem(index: number): void {
                 class="grid gap-2 rounded-md border bg-muted/30 p-3"
             >
                 <div class="flex items-center gap-2">
-                    <Input v-model="item.question" placeholder="Question" class="flex-1" />
-                    <Button type="button" variant="ghost" size="icon" @click="removeItem(i)">
+                    <Input
+                        v-model="item.question"
+                        placeholder="Question"
+                        class="flex-1"
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        @click="removeItem(i)"
+                    >
                         <Trash2 class="size-4 text-destructive" />
                     </Button>
                 </div>
-                <Textarea v-model="item.answer" :rows="3" placeholder="Answer" />
+                <Textarea
+                    v-model="item.answer"
+                    :rows="3"
+                    placeholder="Answer"
+                />
             </div>
         </div>
     </div>
