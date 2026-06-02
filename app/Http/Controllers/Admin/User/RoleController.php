@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin\User;
 
 use App\Actions\Admin\Role\CreateRole;
 use App\Actions\Admin\Role\DeleteRole;

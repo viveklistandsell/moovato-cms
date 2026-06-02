@@ -72,9 +72,23 @@ const phoneHref = computed<string | null>(() => {
     return digits.length > 0 ? `tel:${digits}` : null;
 });
 
+// Gmail compose URL instead of mailto: so clicking goes directly to the user's
+// Gmail inbox in a new tab (per spec). If you ever want to fall back to the
+// system mail client, swap this for `mailto:${e}`.
 const emailHref = computed<string | null>(() => {
     const e = settings.value.email;
-    return e ? `mailto:${e}` : null;
+    return e
+        ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(e)}`
+        : null;
+});
+
+// Address becomes a Google Maps search link. We URL-encode the full address so
+// commas/spaces survive the round-trip and the maps page lands on the right pin.
+const addressHref = computed<string | null>(() => {
+    const a = settings.value.address;
+    return a
+        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a)}`
+        : null;
 });
 
 // Social icons: only render the ones the admin has actually filled in.
@@ -156,9 +170,14 @@ const socials = computed(() => {
                         {{ labels.contactInfo }}
                     </h3>
                     <ul class="mt-4 space-y-3 text-sm">
-                        <li v-if="settings.address" class="flex items-start gap-3">
+                        <li v-if="addressHref" class="flex items-start gap-3">
                             <MapPin class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                            <span class="text-muted-foreground">{{ settings.address }}</span>
+                            <a
+                                :href="addressHref"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="text-muted-foreground transition hover:text-foreground"
+                            >{{ settings.address }}</a>
                         </li>
                         <li v-if="phoneHref" class="flex items-start gap-3">
                             <Phone class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
@@ -171,6 +190,8 @@ const socials = computed(() => {
                             <Mail class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             <a
                                 :href="emailHref"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 class="text-muted-foreground transition hover:text-foreground"
                             >{{ settings.email }}</a>
                         </li>

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Page;
 
 use App\Actions\Admin\Page\Page\CreatePage;
 use App\Actions\Admin\Page\Page\DeletePage;
+use App\Actions\Admin\Page\Page\DuplicatePage;
 use App\Actions\Admin\Page\Page\UpdatePage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Page\Page\BulkActionPagesRequest;
@@ -202,6 +203,20 @@ final class PageController extends Controller
         return redirect()
             ->route('admin.pages.index')
             ->with('toast', ['type' => 'success', 'message' => 'Page deleted.']);
+    }
+
+    /**
+     * Clone a page (translations + categories + widget stack). The copy is
+     * always created as a draft so it never goes live before the admin has
+     * had a chance to review it.
+     */
+    public function duplicate(Page $page, DuplicatePage $action): RedirectResponse
+    {
+        $copy = $action->handle($page);
+
+        return redirect()
+            ->route('admin.pages.edit', $copy)
+            ->with('toast', ['type' => 'success', 'message' => 'Page duplicated.']);
     }
 
     public function bulkAction(BulkActionPagesRequest $request): RedirectResponse

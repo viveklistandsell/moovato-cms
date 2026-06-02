@@ -867,6 +867,20 @@ function formatDate(iso: string | null): string {
                                             as-child
                                             variant="ghost"
                                             size="sm"
+                                            :title="`View ${row.name}`"
+                                        >
+                                            <a
+                                                :href="`/blog/${row.permalink}`"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                <Eye class="size-4" />
+                                            </a>
+                                        </Button>
+                                        <Button
+                                            as-child
+                                            variant="ghost"
+                                            size="sm"
                                         >
                                             <Link
                                                 :href="`/admin/blog/posts/${row.id}/edit`"
