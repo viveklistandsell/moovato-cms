@@ -45,7 +45,7 @@ const visiblePills = computed(() =>
 
         <div class="hero">
             <div
-                class="hero-inner container-xl grid grid-cols-1 items-center gap-y-10 lg:grid-cols-[55fr_45fr] lg:gap-x-10"
+                class="hero-inner container-xl grid grid-cols-1 items-center gap-y-10 lg:grid-cols-[60fr_40fr] lg:gap-x-10"
             >
                 <!-- LEFT -->
                 <div class="hero-content">

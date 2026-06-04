@@ -74,7 +74,7 @@ function edgeClass(value: number | undefined): string {
             </div>
 
             <div
-                class="mv-map-canvas mx-auto mt-12 max-w-5xl"
+                class="mv-map-canvas mx-auto max-w-5xl"
                 :class="{ 'mv-map-canvas--empty': !settings.image_url }"
             >
                 <img

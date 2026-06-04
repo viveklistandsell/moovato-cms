@@ -81,9 +81,11 @@ defineProps<{ settings: Settings; data: Data }>();
                                 loading="lazy"
                                 decoding="async"
                             />
-                            <span v-else class="mv-partner-name">{{
-                                partner.name
-                            }}</span>
+                            <span
+                                v-if="partner.name"
+                                class="mv-partner-name"
+                                >{{ partner.name }}</span
+                            >
                         </component>
                     </li>
                 </ul>

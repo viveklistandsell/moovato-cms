@@ -1,15 +1,37 @@
 import AboutEditor from './About/AboutEditor.vue';
 import AboutRenderer from './About/AboutRenderer.vue';
+import AboutExperienceEditor from './AboutExperience/AboutExperienceEditor.vue';
+import AboutExperienceRenderer from './AboutExperience/AboutExperienceRenderer.vue';
+import AboutStatsEditor from './AboutStats/AboutStatsEditor.vue';
+import AboutStatsRenderer from './AboutStats/AboutStatsRenderer.vue';
 import BannerEditor from './Banner/BannerEditor.vue';
 import BannerRenderer from './Banner/BannerRenderer.vue';
 import BlogEditor from './Blog/BlogEditor.vue';
 import BlogRenderer from './Blog/BlogRenderer.vue';
 import CompanyDirectoryEditor from './CompanyDirectory/CompanyDirectoryEditor.vue';
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
+import ContentCollageEditor from './ContentCollage/ContentCollageEditor.vue';
+import ContentCollageRenderer from './ContentCollage/ContentCollageRenderer.vue';
 import ComparisonEditor from './Comparison/ComparisonEditor.vue';
 import ComparisonRenderer from './Comparison/ComparisonRenderer.vue';
 import CtaEditor from './Cta/CtaEditor.vue';
 import CtaRenderer from './Cta/CtaRenderer.vue';
+import DarkFeatureEditor from './DarkFeature/DarkFeatureEditor.vue';
+import DarkFeatureRenderer from './DarkFeature/DarkFeatureRenderer.vue';
+import ExpertsChoiceEditor from './ExpertsChoice/ExpertsChoiceEditor.vue';
+import ExpertsChoiceRenderer from './ExpertsChoice/ExpertsChoiceRenderer.vue';
+import MediaChecklistEditor from './MediaChecklist/MediaChecklistEditor.vue';
+import MediaChecklistRenderer from './MediaChecklist/MediaChecklistRenderer.vue';
+import SplitMediaEditor from './SplitMedia/SplitMediaEditor.vue';
+import SplitMediaRenderer from './SplitMedia/SplitMediaRenderer.vue';
+import StatFeaturesEditor from './StatFeatures/StatFeaturesEditor.vue';
+import StatFeaturesRenderer from './StatFeatures/StatFeaturesRenderer.vue';
+import StatsBandEditor from './StatsBand/StatsBandEditor.vue';
+import StatsBandRenderer from './StatsBand/StatsBandRenderer.vue';
+import TeamCtaEditor from './TeamCta/TeamCtaEditor.vue';
+import TeamCtaRenderer from './TeamCta/TeamCtaRenderer.vue';
+import TextColumnsEditor from './TextColumns/TextColumnsEditor.vue';
+import TextColumnsRenderer from './TextColumns/TextColumnsRenderer.vue';
 import FaqEditor from './Faq/FaqEditor.vue';
 import FaqRenderer from './Faq/FaqRenderer.vue';
 import FaqMediaEditor from './FaqMedia/FaqMediaEditor.vue';
@@ -30,6 +52,10 @@ import MapEditor from './Map/MapEditor.vue';
 import MapRenderer from './Map/MapRenderer.vue';
 import MarqueeEditor from './Marquee/MarqueeEditor.vue';
 import MarqueeRenderer from './Marquee/MarqueeRenderer.vue';
+import OrbitBannerEditor from './OrbitBanner/OrbitBannerEditor.vue';
+import OrbitBannerRenderer from './OrbitBanner/OrbitBannerRenderer.vue';
+import PageBannerEditor from './PageBanner/PageBannerEditor.vue';
+import PageBannerRenderer from './PageBanner/PageBannerRenderer.vue';
 import PartnersEditor from './Partners/PartnersEditor.vue';
 import PartnersRenderer from './Partners/PartnersRenderer.vue';
 import PricingEditor from './Pricing/PricingEditor.vue';
@@ -61,6 +87,8 @@ export const widgetRegistry: WidgetRegistry = {
     hero: { editor: HeroEditor, renderer: HeroRenderer },
     heronew: { editor: HeronewEditor, renderer: HeronewRenderer },
     banner: { editor: BannerEditor, renderer: BannerRenderer },
+    page_banner: { editor: PageBannerEditor, renderer: PageBannerRenderer },
+    orbit_banner: { editor: OrbitBannerEditor, renderer: OrbitBannerRenderer },
     text_block: { editor: TextBlockEditor, renderer: TextBlockRenderer },
     image: { editor: ImageEditor, renderer: ImageRenderer },
     features: { editor: FeaturesEditor, renderer: FeaturesRenderer },
@@ -91,6 +119,56 @@ export const widgetRegistry: WidgetRegistry = {
     map: { editor: MapEditor, renderer: MapRenderer },
     promo_cta: { editor: PromoCtaEditor, renderer: PromoCtaRenderer },
     about: { editor: AboutEditor, renderer: AboutRenderer },
+    about_stats: { editor: AboutStatsEditor, renderer: AboutStatsRenderer },
+    about_experience: {
+        editor: AboutExperienceEditor,
+        renderer: AboutExperienceRenderer,
+    },
+    experts_choice: {
+        editor: ExpertsChoiceEditor,
+        renderer: ExpertsChoiceRenderer,
+    },
+    media_checklist: {
+        editor: MediaChecklistEditor,
+        renderer: MediaChecklistRenderer,
+    },
+    text_columns: {
+        editor: TextColumnsEditor,
+        renderer: TextColumnsRenderer,
+    },
+    dark_feature: { editor: DarkFeatureEditor, renderer: DarkFeatureRenderer },
+    team_cta: { editor: TeamCtaEditor, renderer: TeamCtaRenderer },
+    stat_features: {
+        editor: StatFeaturesEditor,
+        renderer: StatFeaturesRenderer,
+    },
+    stats_band: { editor: StatsBandEditor, renderer: StatsBandRenderer },
+    why_choose_media: {
+        editor: MediaChecklistEditor,
+        renderer: MediaChecklistRenderer,
+    },
+    supporting_media: {
+        editor: MediaChecklistEditor,
+        renderer: MediaChecklistRenderer,
+    },
+    dark_intro: { editor: DarkFeatureEditor, renderer: DarkFeatureRenderer },
+    content_style_1: {
+        editor: MediaChecklistEditor,
+        renderer: MediaChecklistRenderer,
+    },
+    content_style_2: {
+        editor: MediaChecklistEditor,
+        renderer: MediaChecklistRenderer,
+    },
+    split_media: { editor: SplitMediaEditor, renderer: SplitMediaRenderer },
+    split_media_left: {
+        editor: SplitMediaEditor,
+        renderer: SplitMediaRenderer,
+    },
+    content_collage: {
+        editor: ContentCollageEditor,
+        renderer: ContentCollageRenderer,
+    },
     comparison: { editor: ComparisonEditor, renderer: ComparisonRenderer },
     company_directory: {
         editor: CompanyDirectoryEditor,

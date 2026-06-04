@@ -71,7 +71,8 @@ const active = ref(0);
                 v-for="(tab, ti) in data.tabs ?? []"
                 v-show="active === ti"
                 :key="ti"
-                class="mx-auto max-w-3xl"
+                class="mx-auto max-w-3xl pt-3 rounded-3xl border border-[rgba(15,23,42,0.06)] shadow-[0_18px_50px_-24px_rgba(15,23,42,0.25)] overflow-hidden
+                "
             >
                 <div
                     class="grid grid-cols-[1fr_6rem_7rem] items-end gap-x-4 px-6 pb-4 sm:px-7"
@@ -99,7 +100,7 @@ const active = ref(0);
                 </div>
 
                 <div
-                    class="overflow-hidden rounded-3xl border border-[rgba(15,23,42,0.06)] bg-white shadow-[0_18px_50px_-24px_rgba(15,23,42,0.25)]"
+                    class="overflow-hidden bg-white border border-[rgba(15,23,42,0.06)]"
                 >
                     <div
                         v-for="(row, ri) in tab.rows ?? []"
