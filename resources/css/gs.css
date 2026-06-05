@@ -4751,18 +4751,45 @@ body {
     position: relative;
     overflow: hidden;
     color: var(--white);
-    background:
-        radial-gradient(
-            110% 140% at 100% 0%,
-            rgba(255, 87, 34, 0.22),
-            transparent 55%
-        ),
-        radial-gradient(
-            90% 120% at 0% 100%,
-            rgba(30, 41, 59, 0.9),
-            transparent 65%
-        ),
-        var(--midnight);
+    background:#111111;
+}
+
+.mv-orbitbanner::after {
+    content: '';
+    position: absolute;
+    top: 9%;
+    right: -19px;
+    width: 420px;
+    height: 420px;
+    border-radius: 20% 100%;
+    background: radial-gradient(50% 50% at 50% 50%, #ff9831 0%, #fe330a 100%);
+    filter: blur(55px);
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+    transform: translate(10%, 2%);
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.mv-orbitbanner::before {
+    content: '';
+    position: absolute;
+    bottom: 0%;
+    left: 0;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 50%, #ff9831 0%, #fe330a 100%);
+    filter: blur(70px);
+    opacity: 0.4;
+    transform: translate(-45%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    @media (max-width: 768px) {
+        display: none;
+    }
 }
 
 .mv-orbitbanner .rotate-center {
@@ -4819,8 +4846,20 @@ body {
 }
 
 .mv-orbitbanner-highlight {
+    display: inline-block;
     font-weight: 600;
-    color: var(--orange);
+    background: var(--orange);
+    color: var(--white);
+    padding: 0 14px;
+    border-radius: 8px;
+    transform: skew(-4deg);
+    position: relative;
+    box-shadow: 0 6px 0 var(--yellow-dark);
+}
+
+.mv-orbitbanner-highlight span {
+    display: inline-block;
+    transform: skew(4deg);
 }
 
 .mv-orbitbanner-desc {

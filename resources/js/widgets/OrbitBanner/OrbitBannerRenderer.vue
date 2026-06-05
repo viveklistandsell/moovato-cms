@@ -26,7 +26,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-orbitbanner">
+    <section class="mv-orbitbanner section-py">
         <div
             class="pointer-events-none absolute inset-0 z-[3] overflow-hidden max-lg:hidden"
             aria-hidden="true"
@@ -59,7 +59,7 @@ defineProps<{ settings: Settings; data: Data }>();
         </div>
 
         <div
-            class="container-xl relative z-[4] grid grid-cols-1 items-center gap-12 py-16 lg:grid-cols-[1.15fr_1fr] lg:py-24"
+            class="container-xl relative z-[4] grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr]"
         >
             <div>
                 <nav
