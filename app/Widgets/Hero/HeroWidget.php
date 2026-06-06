@@ -47,7 +47,7 @@ final class HeroWidget implements WidgetContract
         return [
             'eyebrow' => 'Umzugsunternehmen in Berlin',
             'title' => 'Stressfrei umziehen mit Moovato',
-            'subtitle' => 'Ihr moderner Umzugspartner in Berlin – versichert, pünktlich und zum Festpreis. Privatumzug, Büroumzug und mehr.',
+            'subtitle' => 'Ihr moderner Umzugspartner in Berlin – versichert, pünktlich und zum Festpreis. Privatumzug, Gewerbeumzug, Fernumzug und Spezialtransport.',
             'image_alt' => 'Moovato Umzugswagen und Umzugsteam in Berlin',
             'primary_label' => 'Kostenloses Angebot',
             'primary_url' => '#angebot',

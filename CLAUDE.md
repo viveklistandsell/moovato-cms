@@ -237,6 +237,7 @@ These are standing rules for this project. Follow them without being reminded.
 ## Brand & content (Moovato)
 
 - The site/brand is **Moovato**, a modern moving company (**Umzugsunternehmen**) based in **Berlin**, serving Berlin and all its districts/surrounding cities.
+- Moovato's booking forms offer exactly these four service categories: **Privat**, **Gewerbe**, **Fernumzug**, **Spezialtransport**. Use this as the canonical service list whenever a widget presents Moovato's services.
 - The **primary locale is German (`de`)**. All default/placeholder/demo content for widgets MUST be written in natural German (never lorem ipsum or generic English), themed around Moovato's moving services: Privatumzug, Firmen-/Büroumzug, Fernumzug, Entrümpelung, Möbelmontage, Einlagerung, Verpackungsservice, etc., referencing Berlin.
 - When asked to **create a widget**, auto-fill its default content with realistic German Moovato copy (and matching `en` copy where the widget is bilingual, following the existing `locale === 'de' ? … : …` pattern in `SiteHeader`/`SiteFooter`).
 

@@ -46,11 +46,11 @@ final class PageBannerWidget implements WidgetContract
                 ['label' => 'Startseite', 'url' => '/'],
                 ['label' => 'Über uns', 'url' => ''],
             ],
-            'heading' => 'Vertrauensvolle Umzugs- und Entrümpelungsprofis in Berlin',
+            'heading' => 'Ihr zuverlässiges Umzugsunternehmen in Berlin',
             'primary_label' => 'Kostenloses Angebot anfordern',
             'primary_url' => '#angebot',
             'points' => [
-                'Erfahrene Profis für Umzug und Entrümpelung',
+                'Privat, Gewerbe, Fernumzug & Spezialtransport',
                 'Engagierter, zuverlässiger und stressfreier Service',
                 'Kundenorientiert mit transparenter Kommunikation',
                 'Für Privatkunden und Unternehmen mit Sorgfalt',

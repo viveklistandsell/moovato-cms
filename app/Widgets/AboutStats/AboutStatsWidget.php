@@ -47,7 +47,7 @@ final class AboutStatsWidget implements WidgetContract
             'eyebrow' => 'Über uns',
             'heading' => 'Erleben Sie einen besseren Umzug',
             'heading_accent' => 'mit einem Team, das wirklich anpackt',
-            'body' => 'Von der ersten Beratung bis zur Möbelmontage steht Moovato für termintreue, faire Festpreise und ein erfahrenes Team. So wird Ihr Umzug in Berlin von Anfang bis Ende planbar und stressfrei.',
+            'body' => 'Von Privatumzug über Gewerbeumzug und Fernumzug bis Spezialtransport steht Moovato für Termintreue, faire Festpreise und ein erfahrenes Team. So wird Ihr Umzug in Berlin von Anfang bis Ende planbar und stressfrei.',
             'reviews_label' => 'Basierend auf 204 Bewertungen',
             'avatars' => ['M', 'T', 'A', 'S'],
             'image_alt' => 'Moovato Team verpackt Umzugskartons in einer Berliner Wohnung',

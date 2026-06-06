@@ -44,8 +44,8 @@ final class DarkIntroWidget implements WidgetContract
     {
         return [
             'eyebrow' => '',
-            'heading' => 'Ihr zuverlässiger Partner für Umzug & Entrümpelung',
-            'body' => "Moovato unterstützt Kundinnen und Kunden in ganz Berlin – zuverlässig bei Umzug, Entsorgung und Montage. Unser Ziel ist einfach: ein professioneller Service vom ersten Kontakt bis zum letzten Karton.\n\nWir setzen auf Sorgfalt, Sauberkeit, transparente Kommunikation und Ihre Zufriedenheit bei jedem Projekt.",
+            'heading' => 'Ihr zuverlässiger Partner für jeden Umzug',
+            'body' => "Moovato unterstützt Kundinnen und Kunden in ganz Berlin – von Privatumzug über Gewerbeumzug und Fernumzug bis Spezialtransport. Unser Ziel ist einfach: ein professioneller Service vom ersten Kontakt bis zum letzten Karton.\n\nWir setzen auf Sorgfalt, Sauberkeit, transparente Kommunikation und Ihre Zufriedenheit bei jedem Projekt.",
             'list_title' => '',
             'points' => [],
             'button_label' => 'Mehr erfahren',

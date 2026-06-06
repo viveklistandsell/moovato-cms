@@ -44,7 +44,7 @@ final class TextBlockWidget implements WidgetContract
     {
         return [
             'heading' => 'Ihr Umzugsunternehmen in Berlin',
-            'body' => '<p>Moovato ist Ihr moderner Partner für stressfreie Umzüge in Berlin und Umgebung. Ob Privatumzug, Büroumzug oder Fernumzug – wir kümmern uns um alles: vom sorgfältigen Verpacken über den sicheren Transport bis zur Möbelmontage am neuen Ort.</p><p>Profitieren Sie von unserer <strong>Festpreisgarantie</strong>, versicherten Transporten und einem eingespielten Team erfahrener Umzugsprofis.</p>',
+            'body' => '<p>Moovato ist Ihr moderner Partner für stressfreie Umzüge in Berlin und Umgebung. Von Privatumzug über Gewerbeumzug und Fernumzug bis hin zum Spezialtransport kümmern wir uns um alles: vom sorgfältigen Verpacken über den sicheren Transport bis zur Übergabe am neuen Ort.</p><p>Profitieren Sie von unserer <strong>Festpreisgarantie</strong>, versicherten Transporten und einem eingespielten Team erfahrener Umzugsprofis.</p>',
         ];
     }
 

@@ -48,9 +48,9 @@ final class ContentStyle1Widget implements WidgetContract
     {
         return [
             'eyebrow' => '',
-            'heading' => 'Warum Berliner Kunden uns ihren Möbelaufbau anvertrauen',
-            'body' => "Vertrauen entsteht durch saubere Arbeit. Unsere geschulten Teams demontieren und montieren Ihre Möbel sorgfältig – von der Einbauküche bis zum Kleiderschrank, schnell und ohne Beschädigungen.\n\nMit Moovato wissen Sie genau, woran Sie sind: feste Ansprechpartner, klare Absprachen und ein Ergebnis, das hält. So wird der Möbelaufbau in Berlin zur Nebensache.",
-            'image_alt' => 'Moovato Monteur baut eine Küche in einer Berliner Wohnung auf',
+            'heading' => 'Warum Berliner Kunden ihren Umzug uns anvertrauen',
+            'body' => "Vertrauen entsteht durch saubere Arbeit. Ob Privatumzug, Gewerbeumzug, Fernumzug oder Spezialtransport – unsere geschulten Teams in Berlin packen, transportieren und montieren sorgfältig, schnell und ohne Beschädigungen.\n\nMit Moovato wissen Sie genau, woran Sie sind: feste Ansprechpartner, klare Absprachen und ein Ergebnis, das hält. So wird Ihr Umzug in Berlin zur Nebensache.",
+            'image_alt' => 'Moovato Umzugsteam bei einem Umzug in einer Berliner Wohnung',
             'points' => [],
             'button_label' => '',
             'button_url' => '',

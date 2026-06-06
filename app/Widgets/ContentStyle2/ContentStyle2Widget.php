@@ -48,8 +48,8 @@ final class ContentStyle2Widget implements WidgetContract
     {
         return [
             'eyebrow' => '',
-            'heading' => 'Von Berlin aus für Sie in ganz Europa da',
-            'body' => 'Unser Zuhause ist Berlin, aber unser Einsatzgebiet endet längst nicht an der Stadtgrenze. Wir begleiten Sie bei Regionalumzügen innerhalb der Hauptstadtregion genauso zuverlässig wie bei einem Fernumzug quer durch Deutschland oder einem Umzug ins europäische Ausland. Egal wohin es Sie verschlägt – wir kennen die Abläufe, die Wege und die Anforderungen.',
+            'heading' => 'Von Berlin aus für jeden Umzug an Ihrer Seite',
+            'body' => 'Unser Zuhause ist Berlin, aber unser Leistungsspektrum reicht weit: vom Privatumzug über den Gewerbeumzug und den Fernumzug quer durch Deutschland bis zum Spezialtransport empfindlicher Güter. Egal welches Projekt Sie planen – wir kennen die Abläufe, die Wege und die Anforderungen und bringen Ihr Hab und Gut sicher ans Ziel.',
             'image_alt' => 'Moovato Mitarbeiter mit Umzugskartons',
             'points' => [],
             'button_label' => '',

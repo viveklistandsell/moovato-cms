@@ -54,23 +54,23 @@ final class ReviewsWidget implements WidgetContract
             'cta_url' => '#',
             'testimonials' => [
                 [
-                    'quote' => 'Der Umzug lief absolut reibungslos – pünktlich, freundlich und sorgfältig. Nichts ist zu Bruch gegangen.',
+                    'quote' => 'Unser Privatumzug lief absolut reibungslos – pünktlich, freundlich und sorgfältig. Nichts ist zu Bruch gegangen.',
                     'author' => 'Sarah M.',
-                    'role' => 'Privatumzug · Berlin-Mitte',
+                    'role' => 'Privat · Berlin-Mitte',
                     'avatar_url' => null,
                     'rating' => 5,
                 ],
                 [
                     'quote' => 'Unser Büroumzug am Wochenende war perfekt organisiert. Am Montag konnten wir direkt weiterarbeiten.',
                     'author' => 'Daniel K.',
-                    'role' => 'Gewerbeumzug · Berlin-Kreuzberg',
+                    'role' => 'Gewerbe · Berlin-Kreuzberg',
                     'avatar_url' => null,
                     'rating' => 5,
                 ],
                 [
-                    'quote' => 'Faires Festpreis-Angebot und ein eingespieltes Team. Vom Erstkontakt bis zum Aufbau alles top. Klare Empfehlung!',
+                    'quote' => 'Mein Flügel kam dank Spezialtransport ohne einen Kratzer an. Faires Festpreis-Angebot und ein eingespieltes Team. Klare Empfehlung!',
                     'author' => 'Mehmet Y.',
-                    'role' => 'Fernumzug · Berlin → München',
+                    'role' => 'Spezialtransport · Berlin → München',
                     'avatar_url' => null,
                     'rating' => 5,
                 ],

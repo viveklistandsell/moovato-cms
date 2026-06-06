@@ -44,15 +44,14 @@ final class DarkFeatureWidget implements WidgetContract
     {
         return [
             'eyebrow' => '',
-            'heading' => 'Professionelle Küchenmontage & -demontage',
-            'body' => "Egal ob Sie in eine neue Wohnung ziehen oder eine alte Küche ersetzen: Unser erfahrenes Team sorgt für eine sichere und professionelle Montage und Demontage Ihrer Küche.\n\nWir bauen bestehende Küchen sorgfältig ab, transportieren die Komponenten bei Bedarf und installieren Ihre Küche effizient – mit Liebe zum Detail und Sauberkeit.",
-            'list_title' => 'Enthaltene Leistungen',
+            'heading' => 'Ein Umzugspartner für jede Anforderung',
+            'body' => "Egal ob privater Wohnungswechsel, Firmenumzug, Umzug in eine andere Stadt oder der Transport empfindlicher Güter: Unser erfahrenes Berliner Team plant jedes Projekt sorgfältig und führt es zuverlässig aus.\n\nWir packen, transportieren und montieren effizient – mit Liebe zum Detail, voll versichert und zum Festpreis.",
+            'list_title' => 'Unsere Leistungen',
             'points' => [
-                'Küchendemontage',
-                'Küchenmontage',
-                'Wiederaufbau beim Umzug',
-                'Geräteanschluss',
-                'Sicherer Umgang mit Bauteilen',
+                'Privatumzug',
+                'Gewerbeumzug',
+                'Fernumzug',
+                'Spezialtransport',
             ],
             'button_label' => 'Service anfragen',
             'button_url' => '#kontakt',

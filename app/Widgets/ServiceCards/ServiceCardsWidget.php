@@ -37,7 +37,7 @@ final class ServiceCardsWidget implements WidgetContract
     public static function defaultSettings(): array
     {
         return [
-            'columns' => 3,
+            'columns' => 4,
         ];
     }
 
@@ -47,13 +47,13 @@ final class ServiceCardsWidget implements WidgetContract
     public static function defaultData(): array
     {
         return [
-            'eyebrow' => 'Warum Moovato',
-            'heading' => 'Ihre Vorteile auf einen Blick',
+            'eyebrow' => 'Unsere Leistungen',
+            'heading' => 'Umzugsservices für jeden Bedarf',
             'items' => [
-                ['icon' => 'Tag', 'title' => 'Festpreisgarantie', 'description' => 'Ihr Preis steht fest – keine versteckten Kosten und keine bösen Überraschungen.'],
-                ['icon' => 'ShieldCheck', 'title' => 'Versichert & geprüft', 'description' => 'Alle Transporte sind versichert und werden von geprüften Profis durchgeführt.'],
-                ['icon' => 'Clock', 'title' => 'Pünktlich & zuverlässig', 'description' => 'Wir kommen zum vereinbarten Termin und halten unsere Zusagen ein.'],
-                ['icon' => 'Users', 'title' => 'Erfahrenes Team', 'description' => 'Eingespielte Umzugsprofis mit über 1.200 erfolgreichen Umzügen in Berlin.'],
+                ['icon' => 'Home', 'title' => 'Privat', 'description' => 'Stressfreier Privatumzug in Berlin – von der Einzimmerwohnung bis zum Familienhaus, sorgfältig geplant und zuverlässig durchgeführt.'],
+                ['icon' => 'Building2', 'title' => 'Gewerbe', 'description' => 'Büro- und Firmenumzüge mit minimaler Ausfallzeit – wir bringen Ihr Unternehmen strukturiert an den neuen Standort.'],
+                ['icon' => 'Route', 'title' => 'Fernumzug', 'description' => 'Deutschland- und europaweite Fernumzüge ab Berlin – sicher verpackt, versichert transportiert und pünktlich geliefert.'],
+                ['icon' => 'PackageOpen', 'title' => 'Spezialtransport', 'description' => 'Klaviere, Antiquitäten und empfindliche Güter – unser Spezialtransport bringt auch das Außergewöhnliche sicher ans Ziel.'],
             ],
         ];
     }

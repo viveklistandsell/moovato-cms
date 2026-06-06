@@ -52,9 +52,9 @@ final class TestimonialWidget implements WidgetContract
                     'avatar_url' => null,
                 ],
                 [
-                    'quote' => 'Moovato hat unseren Büroumzug am Wochenende erledigt, sodass montags alles bereit war. Eingespieltes Team!',
+                    'quote' => 'Moovato hat unseren Gewerbeumzug am Wochenende erledigt, sodass montags alles bereit war. Eingespieltes Team!',
                     'author' => 'Daniel K.',
-                    'role' => 'Büroumzug, Berlin-Kreuzberg',
+                    'role' => 'Gewerbeumzug, Berlin-Kreuzberg',
                     'avatar_path' => null,
                     'avatar_url' => null,
                 ],

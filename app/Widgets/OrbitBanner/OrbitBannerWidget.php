@@ -50,7 +50,7 @@ final class OrbitBannerWidget implements WidgetContract
             ],
             'highlight' => 'Ihr zuverlässiges',
             'heading' => 'Umzugsunternehmen in Berlin',
-            'description' => 'Wir planen Ihren Umzug gemeinsam mit Ihnen – vom Privatumzug über den Büroumzug bis zur Entrümpelung. Mit Festpreis, geschultem Team und transparenter Kommunikation wird Ihr Umzug in Berlin stressfrei.',
+            'description' => 'Wir planen Ihren Umzug gemeinsam mit Ihnen – Privat, Gewerbe, Fernumzug und Spezialtransport. Mit Festpreis, geschultem Team und transparenter Kommunikation wird Ihr Umzug in Berlin stressfrei.',
             'primary_label' => 'Mehr erfahren',
             'primary_url' => '#angebot',
             'image_alt' => 'Moovato Umzugsteam in Berlin',

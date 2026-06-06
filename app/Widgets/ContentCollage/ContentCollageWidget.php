@@ -47,10 +47,10 @@ final class ContentCollageWidget implements WidgetContract
             'heading' => 'Zuverlässige Umzugslösungen für Privat & Gewerbe',
             'body' => 'Umzüge können stressig sein – müssen es aber nicht. Wir nehmen Ihnen die Last ab: mit erfahrenen Teams, klarer Planung und einem Service, der genau auf Ihre Bedürfnisse zugeschnitten ist.',
             'points' => [
-                'Lokale & Fernumzüge',
-                'Professionelle Verpackung',
-                'Sichere Möbelmontage',
-                'Sorgfältiger & zuverlässiger Service',
+                'Privatumzug',
+                'Gewerbeumzug',
+                'Fernumzug',
+                'Spezialtransport',
             ],
             'alts' => [
                 'Moovato Team belädt einen Umzugswagen',
