@@ -362,15 +362,17 @@ const errorFor = (code: string, field: keyof Translation) =>
                             <Button
                                 type="submit"
                                 :disabled="form.processing"
+                                class="flex-1"
                             >
                                 <Save class="size-4" />
-                                Save
+                                Save & Exit
                             </Button>
                             <Button
                                 v-if="previewUrl"
                                 as-child
                                 type="button"
                                 variant="default"
+                                class="flex-1"
                             >
                                 <a
                                     :href="previewUrl"
@@ -385,6 +387,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 as-child
                                 type="button"
                                 variant="outline"
+                                class="flex-1"
                             >
                                 <Link href="/admin/pages">
                                     <X class="size-4" />

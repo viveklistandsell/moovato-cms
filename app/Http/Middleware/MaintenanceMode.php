@@ -48,16 +48,13 @@ final class MaintenanceMode
             return $next($request);
         }
 
-        // Admin preview escape hatch — anyone with `settings.site` (the same
-        // permission used to edit Maintenance Mode) can append
-        // `?_admin_preview=1` to view the live site while it's down. This is
-        // explicit, opt-in, and won't accidentally hide the holding page
-        // from a logged-in admin who's just browsing the public site to
-        // verify it.
-        if (
-            $request->boolean('_admin_preview')
-            && $request->user()?->can('settings.site') === true
-        ) {
+        // Admins always see the live site so they can verify content,
+        // navigate as a normal visitor, and flip the toggle off from any
+        // page. "Admin" mirrors EnsureUserIsAdmin: Super Admin OR any user
+        // with at least one assigned role. Everyone else — anonymous OR
+        // authenticated but role-less — sees the holding page.
+        $user = $request->user();
+        if ($user !== null && ($user->isSuperAdmin() || $user->roles()->exists())) {
             return $next($request);
         }
 

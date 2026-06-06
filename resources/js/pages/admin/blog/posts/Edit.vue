@@ -445,7 +445,23 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 class="flex-1"
                             >
                                 <Save class="size-4" />
-                                Save
+                                Save & Exit
+                            </Button>
+                            <Button
+                                v-if="previewUrl"
+                                as-child
+                                type="button"
+                                variant="default"
+                            >
+                                <a
+                                    :href="previewUrl"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="flex-1"
+                                >
+                                    <ExternalLink class="size-4" />
+                                    Preview
+                                </a>
                             </Button>
                             <Button
                                 as-child
@@ -459,16 +475,6 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 </Link>
                             </Button>
                         </div>
-                        <a
-                            v-if="previewUrl"
-                            :href="previewUrl"
-                            target="_blank"
-                            rel="noopener"
-                            class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-                        >
-                            <ExternalLink class="size-3.5" />
-                            Preview on site
-                        </a>
                         <p
                             v-if="form.progress"
                             class="mt-3 text-xs text-muted-foreground"
