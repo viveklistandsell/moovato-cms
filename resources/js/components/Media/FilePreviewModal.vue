@@ -33,6 +33,14 @@ const isPdf = computed(
     () => props.file?.mime_type.includes('pdf') ?? false,
 );
 
+const previewImageFailed = ref(false);
+watch(
+    () => props.file?.id,
+    () => {
+        previewImageFailed.value = false;
+    },
+);
+
 const SPREADSHEET_EXTS = ['xlsx', 'xls', 'csv', 'ods', 'tsv'];
 const TEXT_EXTS = ['txt', 'md', 'json', 'log', 'xml', 'yml', 'yaml', 'html', 'css', 'js', 'ts', 'php', 'py'];
 
@@ -175,10 +183,21 @@ async function loadText(): Promise<void> {
                     class="flex flex-1 items-center justify-center"
                 >
                     <img
+                        v-if="!previewImageFailed"
                         :src="file.medium_url ?? file.url"
                         :alt="file.name"
                         class="max-h-[80vh] max-w-full object-contain"
+                        @error="previewImageFailed = true"
                     />
+                    <div
+                        v-else
+                        class="flex flex-col items-center justify-center gap-2 p-12 text-center text-sm text-muted-foreground"
+                    >
+                        <span class="text-base">Preview unavailable</span>
+                        <span class="text-xs">
+                            The file may have been moved or deleted on disk.
+                        </span>
+                    </div>
                 </div>
                 <video
                     v-else-if="isVideo"

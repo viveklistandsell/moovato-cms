@@ -90,6 +90,9 @@ final class PermissionSeeder extends Seeder
             ['name' => 'settings.languages', 'display_name' => 'Manage languages', 'group' => 'Settings'],
             ['name' => 'settings.activity', 'display_name' => 'View activity log', 'group' => 'Settings'],
             ['name' => 'settings.site', 'display_name' => 'Manage site settings (footer, contact)', 'group' => 'Settings'],
+            
+            // System (cache, queue, logs)
+            ['name' => 'system.cache', 'display_name' => 'Clear application caches', 'group' => 'System'],
         ];
     }
 }

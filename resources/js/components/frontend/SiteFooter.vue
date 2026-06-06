@@ -11,7 +11,6 @@ import {
     TwitterIcon,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { localizedUrl } from '@/lib/localizedUrl';
 import type { MenuNode } from './menu-types';
 
 const props = defineProps<{
@@ -32,10 +31,13 @@ const labels = computed(() => {
             : 'All rights reserved.',
         privacy: de ? 'Datenschutzerklärung' : 'Privacy Policy',
         terms: de ? 'AGB' : 'Terms & Conditions',
+        imprint: de ? 'Impressum' : 'Imprint',
     };
 });
 
 type SiteSettings = {
+    site_name: string | null;
+    site_tagline: string | null;
     about_text: string | null;
     address: string | null;
     phone: string | null;
@@ -48,7 +50,6 @@ type SiteSettings = {
 };
 
 const page = usePage();
-const year = new Date().getFullYear();
 
 const footerColumns = computed<MenuNode[]>(() => {
     const m = (page.props as Record<string, unknown>).footerMenu;
@@ -60,6 +61,32 @@ const settings = computed<SiteSettings>(() => {
     return (s ?? {}) as SiteSettings;
 });
 
+type SiteLayout = {
+    header_sticky?: boolean;
+    show_language_switcher?: boolean;
+    show_back_to_top?: boolean;
+    footer_copyright_auto_year?: boolean;
+};
+const layout = computed<SiteLayout>(
+    () => ((page.props as Record<string, unknown>).siteLayout ?? {}) as SiteLayout,
+);
+
+type SiteLegal = {
+    privacy_url?: string | null;
+    terms_url?: string | null;
+    imprint_url?: string | null;
+};
+const legal = computed<SiteLegal>(
+    () => ((page.props as Record<string, unknown>).siteLegal ?? {}) as SiteLegal,
+);
+
+const currentYear = new Date().getFullYear();
+const year = computed<number>(() =>
+    layout.value.footer_copyright_auto_year === false ? 2026 : currentYear,
+);
+
+const brandName = computed<string>(() => settings.value.site_name || 'Moovato');
+
 const whatsappHref = computed<string | null>(() => {
     const w = settings.value.whatsapp;
     return w && w.length > 0 ? `https://wa.me/${w}` : null;
@@ -68,13 +95,10 @@ const whatsappHref = computed<string | null>(() => {
 const phoneHref = computed<string | null>(() => {
     const p = settings.value.phone;
     if (!p) return null;
-    const digits = p.replace(/[^\d+]/g, '');
-    return digits.length > 0 ? `tel:${digits}` : null;
+    const digits = p.replace(/\D/g, '');
+    return digits.length > 0 ? `tel:00${digits}` : null;
 });
 
-// Gmail compose URL instead of mailto: so clicking goes directly to the user's
-// Gmail inbox in a new tab (per spec). If you ever want to fall back to the
-// system mail client, swap this for `mailto:${e}`.
 const emailHref = computed<string | null>(() => {
     const e = settings.value.email;
     return e
@@ -82,8 +106,6 @@ const emailHref = computed<string | null>(() => {
         : null;
 });
 
-// Address becomes a Google Maps search link. We URL-encode the full address so
-// commas/spaces survive the round-trip and the maps page lands on the right pin.
 const addressHref = computed<string | null>(() => {
     const a = settings.value.address;
     return a
@@ -91,7 +113,6 @@ const addressHref = computed<string | null>(() => {
         : null;
 });
 
-// Social icons: only render the ones the admin has actually filled in.
 const socials = computed(() => {
     const s = settings.value;
     const out: Array<{ label: string; href: string; icon: typeof FacebookIcon }> = [];
@@ -112,6 +133,12 @@ const socials = computed(() => {
                     <h3 class="text-base font-semibold text-foreground">
                         {{ labels.aboutUs }}
                     </h3>
+                    <p
+                        v-if="settings.site_tagline"
+                        class="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground/80"
+                    >
+                        {{ settings.site_tagline }}
+                    </p>
                     <p
                         v-if="settings.about_text"
                         class="mt-4 text-sm leading-relaxed text-muted-foreground"
@@ -211,17 +238,31 @@ const socials = computed(() => {
             <div
                 class="mt-10 flex flex-col items-start justify-between gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center"
             >
-                <p>© {{ year }} Moovato. {{ labels.copyright }}</p>
+                <p>© {{ year }} {{ brandName }}. {{ labels.copyright }}</p>
                 <nav class="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <Link
-                        :href="localizedUrl(locale, '/privacy-policy')"
-                        class="transition hover:text-foreground"
-                    >{{ labels.privacy }}</Link>
-                    <span class="text-border">|</span>
-                    <Link
-                        :href="localizedUrl(locale, '/terms-and-conditions')"
-                        class="transition hover:text-foreground"
-                    >{{ labels.terms }}</Link>
+                    <template v-if="legal.privacy_url">
+                        <Link
+                            :href="legal.privacy_url"
+                            class="transition hover:text-foreground"
+                        >{{ labels.privacy }}</Link>
+                    </template>
+                    <template v-if="legal.terms_url">
+                        <span v-if="legal.privacy_url" class="text-border">|</span>
+                        <Link
+                            :href="legal.terms_url"
+                            class="transition hover:text-foreground"
+                        >{{ labels.terms }}</Link>
+                    </template>
+                    <template v-if="legal.imprint_url">
+                        <span
+                            v-if="legal.privacy_url || legal.terms_url"
+                            class="text-border"
+                        >|</span>
+                        <Link
+                            :href="legal.imprint_url"
+                            class="transition hover:text-foreground"
+                        >{{ labels.imprint }}</Link>
+                    </template>
                 </nav>
             </div>
         </div>

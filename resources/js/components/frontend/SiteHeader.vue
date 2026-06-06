@@ -35,6 +35,30 @@ const headerMenu = computed<MenuNode[]>(() => {
     return Array.isArray(m) ? (m as MenuNode[]) : [];
 });
 
+type SiteSettingsLite = {
+    site_name?: string | null;
+    logo_light_url?: string | null;
+    logo_dark_url?: string | null;
+};
+const siteSettings = computed<SiteSettingsLite>(
+    () => ((page.props as Record<string, unknown>).siteSettings ?? {}) as SiteSettingsLite,
+);
+const siteName = computed<string>(() => siteSettings.value.site_name || 'Moovato');
+const logoUrl = computed<string | null>(() => siteSettings.value.logo_light_url ?? null);
+const brandInitial = computed<string>(() => siteName.value.charAt(0).toUpperCase());
+
+type SiteLayout = {
+    header_sticky?: boolean;
+    show_language_switcher?: boolean;
+};
+const layout = computed<SiteLayout>(
+    () => ((page.props as Record<string, unknown>).siteLayout ?? {}) as SiteLayout,
+);
+const headerSticky = computed<boolean>(() => layout.value.header_sticky !== false);
+const showLanguageSwitcher = computed<boolean>(
+    () => layout.value.show_language_switcher !== false,
+);
+
 const sharedDefault = (page.props as Record<string, unknown>).defaultLocale;
 if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     import('@/lib/localizedUrl').then((m) => m.setDefaultLocale(sharedDefault));
@@ -43,7 +67,8 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
 <template>
     <header
-        class="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur"
+        class="z-40 border-b border-border/60 bg-background/80 backdrop-blur"
+        :class="headerSticky ? 'sticky top-0' : ''"
     >
         <div
             class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4"
@@ -52,10 +77,17 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 :href="home"
                 class="flex items-center gap-2 text-lg font-semibold tracking-tight"
             >
+                <img
+                    v-if="logoUrl"
+                    :src="logoUrl"
+                    alt="Moovato logo"
+                    class="h-8 w-auto object-contain"
+                />
                 <span
+                    v-else
                     class="inline-flex size-8 items-center justify-center rounded-md bg-primary font-bold text-primary-foreground"
-                >M</span>
-                <span>Moovato</span>
+                >{{ brandInitial }}</span>
+                <span>{{ siteName }}</span>
             </Link>
 
             <nav class="hidden items-center gap-6 text-base md:flex">
@@ -142,6 +174,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
             <div class="flex items-center gap-2">
                 <Link
+                    v-if="showLanguageSwitcher"
                     :href="switchHref"
                     class="hidden rounded-md border border-border px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground hover:border-foreground hover:text-foreground sm:inline-flex"
                 >
@@ -170,6 +203,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                     @navigate="open = false"
                 />
                 <Link
+                    v-if="showLanguageSwitcher"
                     :href="switchHref"
                     class="rounded-md px-2 py-2 text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted"
                     @click="open = false"

@@ -6,6 +6,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Language;
 use App\Models\Menu;
+use App\Models\Page;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Services\MenuResolver;
@@ -58,6 +59,8 @@ final class HandleInertiaRequests extends Middleware
             'footerMenu' => fn (): array => app(MenuResolver::class)
                 ->resolve(Menu::FOOTER, App::getLocale()),
             'siteSettings' => fn (): array => $this->presentSiteSettings(),
+            'siteLayout' => fn (): array => $this->presentLayout(),
+            'siteLegal' => fn (): array => $this->presentLegalLinks(),
         ];
     }
 
@@ -70,6 +73,11 @@ final class HandleInertiaRequests extends Middleware
         $tr = $s->translation(App::getLocale());
 
         return [
+            'site_name' => $s->site_name,
+            'site_tagline' => $tr?->site_tagline,
+            'logo_light_url' => $this->storageUrl($s->logo_light_path),
+            'logo_dark_url' => $this->storageUrl($s->logo_dark_path),
+            'theme_color' => $s->theme_color,
             'about_text' => $tr?->about_text,
             'address' => $s->address,
             'phone' => $s->phone,
@@ -80,6 +88,86 @@ final class HandleInertiaRequests extends Middleware
             'linkedin_url' => $s->linkedin_url,
             'instagram_url' => $s->instagram_url,
         ];
+    }
+    private function storageUrl(?string $path): ?string
+    {
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        return '/storage/'.mb_ltrim($path, '/');
+    }
+
+    /**
+     * Layout toggles consumed by SiteHeader / SiteFooter / FrontendLayout.
+     * Defaults match the historic public-site behaviour so an upgrade
+     * doesn't suddenly hide UI elements.
+     *
+     * @return array<string, bool>
+     */
+    private function presentLayout(): array
+    {
+        $s = SiteSetting::current();
+
+        return [
+            'header_sticky' => (bool) ($s->header_sticky ?? true),
+            'show_language_switcher' => (bool) ($s->show_language_switcher ?? true),
+            'show_back_to_top' => (bool) ($s->show_back_to_top ?? true),
+            'footer_copyright_auto_year' => (bool) ($s->footer_copyright_auto_year ?? true),
+        ];
+    }
+
+    /**
+     * Resolve the privacy / terms / imprint page picks into per-locale URLs
+     * the footer can link to. Returns null entries when the admin hasn't
+     * chosen a page yet so the frontend can hide / show the link as
+     * appropriate.
+     *
+     * @return array<string, ?string>
+     */
+    private function presentLegalLinks(): array
+    {
+        $s = SiteSetting::current();
+        $locale = App::getLocale();
+        $defaultLocale = $this->defaultLocaleCode();
+
+        return [
+            'privacy_url' => $this->pagePermalinkUrl($s->privacy_page_id, $locale, $defaultLocale),
+            'terms_url' => $this->pagePermalinkUrl($s->terms_page_id, $locale, $defaultLocale),
+            'imprint_url' => $this->pagePermalinkUrl($s->imprint_page_id, $locale, $defaultLocale),
+        ];
+    }
+
+    /**
+     * Build the public URL for the given page id. Per-locale permalink wins;
+     * falls back to the default-locale permalink (then the page's canonical
+     * permalink) so a half-translated page still has somewhere to link.
+     */
+    private function pagePermalinkUrl(?int $pageId, string $locale, string $defaultLocale): ?string
+    {
+        if ($pageId === null) {
+            return null;
+        }
+
+        $page = Page::query()
+            ->with('translations:id,page_id,lang,permalink')
+            ->find($pageId, ['id', 'permalink']);
+
+        if ($page === null) {
+            return null;
+        }
+
+        $translation = $page->translations->firstWhere('lang', $locale)
+            ?? $page->translations->firstWhere('lang', $defaultLocale);
+        $permalink = $translation?->permalink ?? $page->permalink;
+
+        if ($permalink === null || $permalink === '') {
+            return null;
+        }
+
+        $prefix = $locale === $defaultLocale ? '' : "/{$locale}";
+
+        return $prefix.'/'.mb_ltrim($permalink, '/');
     }
 
     /**

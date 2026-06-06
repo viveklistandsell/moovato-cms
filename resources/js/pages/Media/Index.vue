@@ -33,7 +33,9 @@ import NewFolderDialog from '@/components/Media/NewFolderDialog.vue';
 import RenameDialog from '@/components/Media/RenameDialog.vue';
 import DeleteConfirmDialog from '@/components/Media/DeleteConfirmDialog.vue';
 import MoveDialog from '@/components/Media/MoveDialog.vue';
-import FilePreviewModal from '@/components/Media/FilePreviewModal.vue';
+import MediaDetailsModal, {
+    type PickerFile,
+} from '@/components/common/MediaDetailsModal.vue';
 
 type CurrentFolder = {
     id: number;
@@ -95,6 +97,79 @@ const moveTarget = ref<MoveTarget | null>(null);
 
 const previewOpen = ref(false);
 const previewFile = ref<MediaFileItem | null>(null);
+const draggedFileIds = ref<number[]>([]);
+const dropTargetFolderId = ref<number | null>(null);
+const dropTargetUp = ref(false);
+const isDragging = computed(() => draggedFileIds.value.length > 0);
+
+function onFileDragStart(file: MediaFileItem): void {
+    draggedFileIds.value = selectedIds.value.includes(file.id)
+        ? [...selectedIds.value]
+        : [file.id];
+}
+
+function onFileDragEnd(): void {
+    draggedFileIds.value = [];
+    dropTargetFolderId.value = null;
+    dropTargetUp.value = false;
+}
+
+function onFolderDragOver(folder: MediaFolderItem, event: DragEvent): void {
+    if (!isDragging.value) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTargetFolderId.value = folder.id;
+}
+
+function onFolderDragLeave(folder: MediaFolderItem): void {
+    if (dropTargetFolderId.value === folder.id) {
+        dropTargetFolderId.value = null;
+    }
+}
+
+function onFolderDrop(folder: MediaFolderItem, event: DragEvent): void {
+    event.preventDefault();
+    const ids = [...draggedFileIds.value];
+    onFileDragEnd();
+    if (ids.length === 0) return;
+    moveFilesTo(ids, folder.id);
+}
+
+function onUpDragOver(event: DragEvent): void {
+    if (!isDragging.value || props.currentFolder === null) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTargetUp.value = true;
+}
+
+function onUpDragLeave(): void {
+    dropTargetUp.value = false;
+}
+
+function onUpDrop(event: DragEvent): void {
+    event.preventDefault();
+    const ids = [...draggedFileIds.value];
+    const target = props.currentFolder?.parent_id ?? null;
+    onFileDragEnd();
+    if (ids.length === 0) return;
+    moveFilesTo(ids, target);
+}
+
+function moveFilesTo(ids: number[], folderId: number | null): void {
+    const movedSet = new Set(ids);
+    props.files.data = props.files.data.filter((f) => !movedSet.has(f.id));
+    selectedIds.value = selectedIds.value.filter((id) => !movedSet.has(id));
+
+    router.post(
+        '/admin/media/files/bulk-move',
+        { ids, folder_id: folderId },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => router.reload({ only: ['files', 'folders'] }),
+        },
+    );
+}
 
 const selectedIds = ref<number[]>([]);
 const selectedFolderIds = ref<number[]>([]);
@@ -350,12 +425,26 @@ function openFile(file: MediaFileItem): void {
     previewOpen.value = true;
 }
 
-function deleteFromPreview(file: MediaFileItem): void {
-    deleteTarget.value = { id: file.id, name: file.name };
-    deleteType.value = 'file';
-    deleteIsBulk.value = false;
-    deleteOpen.value = true;
-    previewOpen.value = false;
+function onFileUpdated(updated: PickerFile): void {
+    const idx = props.files.data.findIndex((f) => f.id === updated.id);
+    if (idx !== -1) {
+        props.files.data[idx] = {
+            ...props.files.data[idx],
+            ...(updated as unknown as MediaFileItem),
+        };
+    }
+    previewFile.value = props.files.data[idx] ?? null;
+}
+
+function onFileDeleted(): void {
+    router.reload({ only: ['files'] });
+}
+
+function onNavigate(target: PickerFile): void {
+    const found = props.files.data.find((f) => f.id === target.id);
+    if (found) {
+        previewFile.value = found;
+    }
 }
 </script>
 
@@ -557,6 +646,23 @@ function deleteFromPreview(file: MediaFileItem): void {
                     :folder-id="currentFolder?.id ?? null"
                 />
 
+                <!-- Drop-here-to-go-up tile: only rendered mid-drag and only
+                     when we have a parent folder to move things into. -->
+                <div
+                    v-if="isDragging && currentFolder"
+                    class="flex items-center justify-center rounded-lg border-2 border-dashed p-4 text-sm font-medium transition-colors"
+                    :class="
+                        dropTargetUp
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                            : 'border-border bg-muted/40 text-muted-foreground'
+                    "
+                    @dragover="onUpDragOver"
+                    @dragleave="onUpDragLeave"
+                    @drop="onUpDrop"
+                >
+                    ↑ Drop here to move to parent folder
+                </div>
+
                 <section
                     v-if="folders.length > 0"
                     class="flex flex-col gap-2"
@@ -574,10 +680,15 @@ function deleteFromPreview(file: MediaFileItem): void {
                             :key="folder.id"
                             :folder="folder"
                             :selected="isFolderSelected(folder.id)"
+                            :droppable="isDragging"
+                            :is-drop-target="dropTargetFolderId === folder.id"
                             @rename="openRenameFolder"
                             @move="openMoveFolder"
                             @delete="openDeleteFolder"
                             @toggle-select="toggleSelectFolder"
+                            @dragover="onFolderDragOver"
+                            @dragleave="onFolderDragLeave"
+                            @drop="onFolderDrop"
                         />
                     </div>
                 </section>
@@ -597,11 +708,14 @@ function deleteFromPreview(file: MediaFileItem): void {
                             :key="file.id"
                             :file="file"
                             :selected="isSelected(file.id)"
+                            :dragging="draggedFileIds.includes(file.id)"
                             @open="openFile"
                             @toggle-select="toggleSelect"
                             @rename="openRenameFile"
                             @move="openMoveFile"
                             @delete="openDeleteFile"
+                            @dragstart="onFileDragStart"
+                            @dragend="onFileDragEnd"
                         />
                     </div>
                     <p
@@ -691,10 +805,14 @@ function deleteFromPreview(file: MediaFileItem): void {
             @moved="clearSelection"
         />
 
-        <FilePreviewModal
+        <MediaDetailsModal
             v-model:open="previewOpen"
-            :file="previewFile"
-            @delete="deleteFromPreview"
+            :file="previewFile as unknown as PickerFile | null"
+            :siblings="files.data as unknown as PickerFile[]"
+            :selectable="false"
+            @updated="onFileUpdated"
+            @deleted="onFileDeleted"
+            @navigate="onNavigate"
         />
     </MediaLayout>
 </template>

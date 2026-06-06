@@ -118,7 +118,7 @@ function errorForTranslation(lang: string): string | undefined {
                                 <Textarea
                                     :id="`about_text_${code}`"
                                     v-model="form.translations[props.languages.findIndex((l) => l.code === code)].about_text"
-                                    rows="4"
+                                    :rows="4"
                                     placeholder="We deliver creative solutions to help your business grow…"
                                 />
                                 <InputError :message="errorForTranslation(code)" />

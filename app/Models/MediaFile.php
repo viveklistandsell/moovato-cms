@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Database\Factories\MediaFileFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 final class MediaFile extends Model
 {
-    /** @use HasFactory<MediaFileFactory> */
     use HasFactory, SoftDeletes;
 
     /** @var list<string> */
@@ -59,21 +56,42 @@ final class MediaFile extends Model
         ];
     }
 
-    /** @return Attribute<string, never> */
+    /**
+     * A relative URL resolves against whatever 
+     * host the page was served from and matches
+     * what MediaPickerController does.
+     *
+     * @return Attribute<string, never>
+     */
     protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn (): string => Storage::disk($this->disk)->url($this->path),
+            get: fn (): string => $this->relativeUrl($this->path),
         );
     }
 
-    /** @return Attribute<?string, never> */
+    /**
+     * Thumb URL with a sensible fallback. For images the resized variant may
+     * never have been generated (uploads from the legacy chunked endpoint
+     * don't run the variant pipeline) — in that case fall back to the
+     * original so the grid still shows a preview instead of a broken icon.
+     * For non-images (PDF, video, etc.) we keep returning null so the UI can
+     * render a file-type icon instead.
+     *
+     * @return Attribute<?string, never>
+     */
     protected function thumbUrl(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => $this->thumb_path
-                ? Storage::disk($this->disk)->url($this->thumb_path)
-                : null,
+            get: function (): ?string {
+                if ($this->thumb_path) {
+                    return $this->relativeUrl($this->thumb_path);
+                }
+
+                return $this->isImage() && $this->path
+                    ? $this->relativeUrl($this->path)
+                    : null;
+            },
         );
     }
 
@@ -82,8 +100,12 @@ final class MediaFile extends Model
     {
         return Attribute::make(
             get: fn (): ?string => $this->medium_path
-                ? Storage::disk($this->disk)->url($this->medium_path)
+                ? $this->relativeUrl($this->medium_path)
                 : null,
         );
+    }
+    private function relativeUrl(string $path): string
+    {
+        return '/storage/'.mb_ltrim($path, '/');
     }
 }

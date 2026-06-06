@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import {
+    Bot,
     ChevronRight,
+    Database,
     Files,
     FolderTree,
     ImagePlay,
     KeyRound,
     Languages,
     LayoutGrid,
+    ListTree,
     Menu as MenuIcon,
     Navigation,
     Newspaper,
+    Server,
     Settings2Icon,
     ShieldCheck,
     Tag,
@@ -20,7 +24,6 @@ import {
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -65,11 +68,23 @@ const languagesItem: NavItem = {
     icon: Languages,
 };
 
-const siteSettingsItem: NavItem = {
-    title: 'Site Settings',
-    href: '/admin/site-settings',
-    icon: Settings2Icon,
-};
+const settingsItems: NavItem[] = [
+    { title: 'Site/Social Settings', href: '/admin/site-settings', icon: Settings2Icon },
+    { title: 'Site Identity', href: '/admin/settings/identity', icon: Settings2Icon },
+    { title: 'Branding', href: '/admin/settings/branding', icon: Settings2Icon },
+    { title: 'SEO Defaults', href: '/admin/settings/seo', icon: Settings2Icon },
+    { title: 'Legal Pages', href: '/admin/settings/legal', icon: Settings2Icon },
+    { title: 'Analytics & Tracking', href: '/admin/settings/analytics', icon: Settings2Icon },
+    { title: 'Maintenance Mode', href: '/admin/settings/maintenance', icon: Settings2Icon },
+    { title: 'Layout Toggles', href: '/admin/settings/layout', icon: Settings2Icon },
+    { title: 'Security', href: '/admin/settings/security', icon: Settings2Icon },
+];
+
+const systemItems: NavItem[] = [
+    { title: 'Cache Management', href: '/admin/system/cache', icon: Database },
+    { title: 'Sitemap', href: '/admin/system/sitemap', icon: ListTree },
+    { title: 'Robots.txt', href: '/admin/system/robots', icon: Bot },
+];
 
 const blogItems: NavItem[] = [
     {
@@ -141,14 +156,6 @@ const userItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Settings',
-        href: '/admin/settings',
-        icon: Settings2Icon,
-    },
-];
-
 const { isCurrentUrl } = useCurrentUrl();
 
 const isBlogSectionActive = computed(() =>
@@ -161,6 +168,14 @@ const isPageSectionActive = computed(() =>
 
 const isNavigationSectionActive = computed(() =>
     navigationItems.some((item) => isCurrentUrl(item.href)),
+);
+
+const isSettingsSectionActive = computed(() =>
+    settingsItems.some((item) => isCurrentUrl(item.href)),
+);
+
+const isSystemSectionActive = computed(() =>
+    systemItems.some((item) => isCurrentUrl(item.href)),
 );
 
 const isUserSectionActive = computed(
@@ -338,18 +353,81 @@ const isUserSectionActive = computed(
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            as-child
-                            :is-active="isCurrentUrl(siteSettingsItem.href)"
-                            :tooltip="siteSettingsItem.title"
-                        >
-                            <Link :href="siteSettingsItem.href">
-                                <component :is="siteSettingsItem.icon" />
-                                <span>{{ siteSettingsItem.title }}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    <Collapsible
+                        :default-open="isSettingsSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton as-child tooltip="Settings">
+                                    <Link :href="settingsItems[0].href">
+                                        <Settings2Icon />
+                                        <span>Settings</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in settingsItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+
+                    <Collapsible
+                        :default-open="isSystemSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton as-child tooltip="System">
+                                    <Link :href="systemItems[0].href">
+                                        <Server />
+                                        <span>System</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in systemItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
 
                     <Collapsible
                         :default-open="isUserSectionActive"
@@ -396,7 +474,6 @@ const isUserSectionActive = computed(
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

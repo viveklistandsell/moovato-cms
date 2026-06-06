@@ -17,12 +17,22 @@ use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSett
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\Settings\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\System\CacheController as AdminCacheController;
+use App\Http\Controllers\Admin\System\SeoController as AdminSeoSystemController;
 use App\Http\Controllers\Admin\User\PermissionController as AdminPermissionController;
 use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
+use App\Http\Controllers\Frontend\RobotsController;
+use App\Http\Controllers\Frontend\SitemapController;
 use Illuminate\Support\Facades\Route;
+
+
+
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('robots.txt', RobotsController::class)->name('robots');
 
 // Default-locale (DE) routes live at the root with no /de prefix.
 Route::middleware('locale')->group(function (): void {
@@ -212,6 +222,50 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
                 ->middleware('permission:settings.site')->name('edit');
             Route::match(['put', 'patch'], '/', [AdminSiteSettingController::class, 'update'])
                 ->middleware('permission:settings.site')->name('update');
+        });
+        Route::prefix('settings')
+            ->name('settings.')
+            ->middleware('permission:settings.site')
+            ->group(function (): void {
+                foreach ([
+                    'identity' => 'identity',
+                    'branding' => 'branding',
+                    'seo' => 'seo',
+                    'legal' => 'legal',
+                    'analytics' => 'analytics',
+                    'maintenance' => 'maintenance',
+                    'layout' => 'layout',
+                    'security' => 'security',
+                ] as $slug => $method) {
+                    Route::get($slug, [AdminSettingsController::class, $method])
+                        ->name($slug);
+                    Route::match(['put', 'patch'], $slug, [
+                        AdminSettingsController::class,
+                        'update'.ucfirst($method),
+                    ])->name($slug.'.update');
+                }
+            });
+
+        Route::prefix('system')->name('system.')->group(function (): void {
+            Route::get('cache', [AdminCacheController::class, 'index'])
+                ->middleware('permission:system.cache')
+                ->name('cache');
+            Route::post('cache/clear', [AdminCacheController::class, 'clear'])
+                ->middleware('permission:system.cache')
+                ->name('cache.clear');
+            Route::get('sitemap', [AdminSeoSystemController::class, 'sitemap'])
+                ->middleware('permission:system.cache')
+                ->name('sitemap');
+            Route::post('sitemap/flush', [AdminSeoSystemController::class, 'flushSitemap'])
+                ->middleware('permission:system.cache')
+                ->name('sitemap.flush');
+            Route::get('sitemap/download', [AdminSeoSystemController::class, 'downloadSitemap'])
+                ->middleware('permission:system.cache')
+                ->name('sitemap.download');
+
+            Route::get('robots', [AdminSeoSystemController::class, 'robots'])
+                ->middleware('permission:system.cache')
+                ->name('robots');
         });
 
         Route::prefix('menus')->name('menus.')->group(function (): void {
