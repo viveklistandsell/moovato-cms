@@ -1,0 +1,135 @@
+<script setup lang="ts">
+import { Head, useForm } from '@inertiajs/vue3';
+import { Save } from 'lucide-vue-next';
+import Heading from '@/components/Heading.vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+
+type Settings = {
+    google_analytics_id: string | null;
+    google_tag_manager_id: string | null;
+    meta_pixel_id: string | null;
+    custom_head_code: string | null;
+    cookie_consent_required: boolean;
+};
+
+const props = defineProps<{ settings: Settings }>();
+
+defineOptions({
+    layout: {
+        breadcrumbs: [
+            { title: 'Dashboard', href: '/dashboard' },
+            { title: 'Settings', href: '/admin/settings/identity' },
+            { title: 'Analytics & tracking', href: '/admin/settings/analytics' },
+        ],
+    },
+});
+
+const form = useForm({
+    google_analytics_id: props.settings.google_analytics_id ?? '',
+    google_tag_manager_id: props.settings.google_tag_manager_id ?? '',
+    meta_pixel_id: props.settings.meta_pixel_id ?? '',
+    custom_head_code: props.settings.custom_head_code ?? '',
+    cookie_consent_required: props.settings.cookie_consent_required,
+});
+
+function submit(): void {
+    form.put('/admin/settings/analytics', { preserveScroll: true });
+}
+</script>
+
+<template>
+    <Head title="Analytics & tracking" />
+
+    <div class="flex flex-col gap-6 p-4">
+        <Heading
+            title="Analytics & tracking"
+            description="GA4, GTM, Meta Pixel IDs plus a free-form &lt;head&gt; snippet for anything custom."
+        />
+
+        <form class="flex flex-col gap-4" @submit.prevent="submit">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Tracking IDs</CardTitle>
+                </CardHeader>
+                <CardContent class="grid gap-3 sm:grid-cols-3">
+                    <div class="space-y-1">
+                        <Label for="google_analytics_id">Google Analytics ID</Label>
+                        <Input
+                            id="google_analytics_id"
+                            v-model="form.google_analytics_id"
+                            placeholder="G-XXXXXXXXXX"
+                        />
+                        <InputError :message="form.errors.google_analytics_id" />
+                    </div>
+                    <div class="space-y-1">
+                        <Label for="google_tag_manager_id">GTM container</Label>
+                        <Input
+                            id="google_tag_manager_id"
+                            v-model="form.google_tag_manager_id"
+                            placeholder="GTM-XXXXXX"
+                        />
+                        <InputError :message="form.errors.google_tag_manager_id" />
+                    </div>
+                    <div class="space-y-1">
+                        <Label for="meta_pixel_id">Meta Pixel ID</Label>
+                        <Input
+                            id="meta_pixel_id"
+                            v-model="form.meta_pixel_id"
+                            placeholder="123456789"
+                        />
+                        <InputError :message="form.errors.meta_pixel_id" />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Custom &lt;head&gt; code</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Textarea
+                        id="custom_head_code"
+                        v-model="form.custom_head_code"
+                        :rows="6"
+                        class="font-mono text-xs"
+                        placeholder="<script>/* your snippet */</script>"
+                    />
+                    <p class="mt-1 text-xs text-muted-foreground">
+                        Injected verbatim into every page's &lt;head&gt;. Admin-only field.
+                    </p>
+                    <InputError :message="form.errors.custom_head_code" />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardContent class="pt-6">
+                    <label class="flex cursor-pointer items-center gap-3 rounded-md border p-3 text-sm">
+                        <Switch
+                            :model-value="form.cookie_consent_required"
+                            @update:model-value="(v) => (form.cookie_consent_required = v as boolean)"
+                        />
+                        <span class="flex-1">
+                            <span class="block font-medium">Require cookie consent</span>
+                            <span class="block text-xs text-muted-foreground">
+                                Defers GA / GTM / Pixel injection until the visitor accepts (GDPR / TTDSG).
+                            </span>
+                        </span>
+                    </label>
+                </CardContent>
+            </Card>
+
+            <div class="flex justify-end">
+                <Button type="submit" :disabled="form.processing">
+                    <Save class="size-4" />
+                    Save analytics
+                </Button>
+            </div>
+        </form>
+    </div>
+</template>

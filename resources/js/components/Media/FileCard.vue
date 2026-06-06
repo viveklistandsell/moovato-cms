@@ -13,7 +13,7 @@ import {
     Presentation,
     Trash2,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -34,12 +34,19 @@ export type MediaFileItem = {
     metadata: Record<string, unknown> | null;
     folder_id?: number | null;
     path?: string;
+    uploader?: string | null;
     created_at: string | null;
+    updated_at?: string | null;
+    alt_text?: string | null;
+    title?: string | null;
+    caption?: string | null;
+    description?: string | null;
 };
 
 const props = defineProps<{
     file: MediaFileItem;
     selected?: boolean;
+    dragging?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -48,7 +55,23 @@ const emit = defineEmits<{
     (e: 'rename', file: MediaFileItem): void;
     (e: 'move', file: MediaFileItem): void;
     (e: 'delete', file: MediaFileItem): void;
+    (e: 'dragstart', file: MediaFileItem, event: DragEvent): void;
+    (e: 'dragend'): void;
 }>();
+
+function onDragStart(event: DragEvent): void {
+    if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', String(props.file.id));
+    }
+    emit('dragstart', props.file, event);
+}
+
+function onDragEnd(): void {
+    emit('dragend');
+}
+
+const imageFailed = ref(false);
 
 type Kind =
     | 'image'
@@ -181,7 +204,13 @@ function readableSize(bytes: number): string {
 <template>
     <div
         class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
-        :class="{ 'border-primary ring-2 ring-primary': selected }"
+        :class="{
+            'border-primary ring-2 ring-primary': selected,
+            'opacity-40': dragging,
+        }"
+        draggable="true"
+        @dragstart="onDragStart"
+        @dragend="onDragEnd"
     >
         <label
             class="absolute top-2 left-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-border bg-background/80 text-foreground shadow-sm transition-opacity"
@@ -255,11 +284,12 @@ function readableSize(bytes: number): string {
                 :class="tileClasses"
             >
                 <img
-                    v-if="kind === 'image' && file.thumb_url"
+                    v-if="kind === 'image' && file.thumb_url && !imageFailed"
                     :src="file.thumb_url"
                     :alt="file.name"
                     class="h-full w-full object-cover"
                     loading="lazy"
+                    @error="imageFailed = true"
                 />
                 <ImageIcon v-else-if="kind === 'image'" class="h-12 w-12" />
                 <FileVideo v-else-if="kind === 'video'" class="h-12 w-12" />

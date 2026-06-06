@@ -17,13 +17,19 @@ const locale = computed<string>(() => {
     return match ? match[1] : 'de';
 });
 
+type SiteLayout = { show_back_to_top?: boolean };
+const layout = computed<SiteLayout>(
+    () => ((page.props as Record<string, unknown>).siteLayout ?? {}) as SiteLayout,
+);
+const showBackToTop = computed<boolean>(
+    () => layout.value.show_back_to_top !== false,
+);
+
 // Public frontend is always light — admin owns the theme toggle.
 onMounted(() => {
     document.documentElement.classList.remove('dark');
 });
 onUnmounted(() => {
-    // When leaving the frontend (e.g. navigating into admin), restore saved
-    // appearance so the admin's chosen theme reapplies.
     const saved = localStorage.getItem('appearance');
     const prefersDark = window.matchMedia(
         '(prefers-color-scheme: dark)',
@@ -42,7 +48,7 @@ onUnmounted(() => {
             <slot />
         </main>
         <SiteFooter :locale="locale" />
-        <BackToTop />
+        <BackToTop v-if="showBackToTop" />
         <SiteCursor />
     </div>
 </template>

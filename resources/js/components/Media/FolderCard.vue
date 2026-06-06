@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { Eye, Folder, MoreVertical, Trash2 } from 'lucide-vue-next';
+import { ref } from 'vue';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,9 +19,11 @@ export type MediaFolderItem = {
     subfolder_count?: number;
 };
 
-defineProps<{
+const props = defineProps<{
     folder: MediaFolderItem;
     selected?: boolean;
+    isDropTarget?: boolean;
+    droppable?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -28,13 +31,40 @@ const emit = defineEmits<{
     (e: 'move', folder: MediaFolderItem): void;
     (e: 'delete', folder: MediaFolderItem): void;
     (e: 'toggle-select', folder: MediaFolderItem): void;
+    (e: 'dragover', folder: MediaFolderItem, event: DragEvent): void;
+    (e: 'dragleave', folder: MediaFolderItem): void;
+    (e: 'drop', folder: MediaFolderItem, event: DragEvent): void;
 }>();
+
+const coverFailed = ref(false);
+
+function onDragOver(event: DragEvent): void {
+    if (props.droppable === false) return;
+    emit('dragover', props.folder, event);
+}
+
+function onDragLeave(): void {
+    if (props.droppable === false) return;
+    emit('dragleave', props.folder);
+}
+
+function onDrop(event: DragEvent): void {
+    if (props.droppable === false) return;
+    emit('drop', props.folder, event);
+}
 </script>
 
 <template>
     <div
         class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
-        :class="{ 'border-primary ring-2 ring-primary': selected }"
+        :class="{
+            'border-primary ring-2 ring-primary': selected,
+            '!border-emerald-500 ring-2 ring-emerald-500 scale-[1.02]':
+                isDropTarget,
+        }"
+        @dragover="onDragOver"
+        @dragleave="onDragLeave"
+        @drop="onDrop"
     >
         <label
             class="absolute top-2 left-2 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-md border border-border bg-background/80 text-foreground shadow-sm transition-opacity"
@@ -59,11 +89,12 @@ const emit = defineEmits<{
                 class="relative flex aspect-video items-center justify-center bg-amber-50 dark:bg-amber-950/30"
             >
                 <img
-                    v-if="folder.thumb_url"
+                    v-if="folder.thumb_url && !coverFailed"
                     :src="folder.thumb_url"
                     :alt="folder.name"
                     class="h-full w-full object-cover"
                     loading="lazy"
+                    @error="coverFailed = true"
                 />
                 <Folder
                     v-else
