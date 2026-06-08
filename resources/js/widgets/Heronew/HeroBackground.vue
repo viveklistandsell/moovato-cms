@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Shader, Swirl, ChromaFlow, FlutedGlass, FilmGrain } from 'shaders/vue';
 /**
  * Full-screen animated shader stack for the hero (Vue adapter of `shaders`).
  * A single <Shader> root owns the renderer. The two texture generators
