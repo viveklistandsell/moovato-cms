@@ -31,4 +31,21 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/vue/') || id.includes('node_modules/@vue/')) {
+                        return 'vue';
+                    }
+                    if (id.includes('node_modules/@vueuse/')) {
+                        return 'vueuse';
+                    }
+                    if (id.includes('node_modules/reka-ui/')) {
+                        return 'reka-ui';
+                    }
+                },
+            },
+        },
+    },
 });
