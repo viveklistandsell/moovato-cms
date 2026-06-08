@@ -28,7 +28,7 @@ const stats = computed(() => props.data.stats ?? []);
         class="trust-bar section-py"
         :class="`trust-bar--${settings.theme}`"
     >
-        <div class="container-xl flex flex-wrap items-center gap-9 md:gap-14">
+    <div class="container-xl flex flex-wrap items-center gap-9 md:gap-14">
             <dl
                 v-if="stats.length"
                 class="m-0 flex flex-1 flex-wrap gap-10 md:gap-18"
