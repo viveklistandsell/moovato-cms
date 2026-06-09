@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     ChevronsRight,
     Clock,
     Facebook,
+    Instagram,
     Linkedin,
     Mail,
     MapPin,
@@ -12,6 +13,8 @@ import {
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { localizedUrl } from '@/lib/localizedUrl';
+
+const page = usePage();
 
 const props = defineProps<{
     locale: string;
@@ -49,45 +52,110 @@ const t = computed(() =>
           },
 );
 
-// Useful links — labels from the design, mapped to real routes where they exist.
-const usefulLinks = computed(() => [
-    {
-        label: props.locale === 'de' ? 'Hilfe-Center' : 'Help Center',
-        href: '#',
-    },
-    {
-        label: props.locale === 'de' ? 'Über uns' : 'About Us',
-        href: localizedUrl(props.locale, '/pages'),
-    },
-    { label: props.locale === 'de' ? 'Kontakt' : 'Contact Us', href: '#' },
-    {
-        label: props.locale === 'de' ? 'Partner werden' : 'Become A Partner',
-        href: '#',
-    },
-    { label: 'Blog', href: localizedUrl(props.locale, '/blog') },
-    {
-        label: props.locale === 'de' ? 'Privatumzug' : 'Private Moving',
-        href: '#',
-    },
-    { label: props.locale === 'de' ? 'Büroumzug' : 'Office Moving', href: '#' },
-    {
-        label: props.locale === 'de' ? 'Möbelmontage' : 'Furniture Assembly',
-        href: '#',
-    },
-    { label: props.locale === 'de' ? 'Einlagerung' : 'Storage', href: '#' },
-]);
+// Footer columns — top-level items in the admin-managed `footer` menu
+// become column headings; their children are the actual links. Mirrors
+// the pattern used in Navigation Management. When the admin hasn't
+// configured a footer menu at all we fall back to a single column built
+// from sensible defaults so the layout doesn't visually collapse.
+type FooterMenuItem = {
+    id: number;
+    label: string;
+    url: string | null;
+    open_in_new_tab: boolean;
+    css_class: string | null;
+    children: FooterMenuItem[];
+};
 
-const socials = [
-    { label: 'Twitter', icon: Twitter, href: '#' },
-    { label: 'Facebook', icon: Facebook, href: '#' },
-    { label: 'LinkedIn', icon: Linkedin, href: '#' },
-];
+const footerMenu = computed<FooterMenuItem[]>(
+    () => (page.props.footerMenu as FooterMenuItem[] | undefined) ?? [],
+);
+
+type FooterColumn = {
+    heading: string;
+    links: Array<{ label: string; href: string; newTab: boolean }>;
+};
+
+const footerColumns = computed<FooterColumn[]>(() => {
+    if (footerMenu.value.length === 0) {
+        return [
+            {
+                heading: props.locale === 'de' ? 'Schnelllinks' : 'Quick Links',
+                links: [
+                    {
+                        label: props.locale === 'de' ? 'Startseite' : 'Home',
+                        href: localizedUrl(props.locale, '/'),
+                        newTab: false,
+                    },
+                    {
+                        label: 'Blog',
+                        href: localizedUrl(props.locale, '/blog'),
+                        newTab: false,
+                    },
+                ],
+            },
+        ];
+    }
+
+    return footerMenu.value.map((column) => ({
+        heading: column.label,
+        links: (column.children ?? []).map((child) => ({
+            label: child.label,
+            href: child.url ?? '#',
+            newTab: child.open_in_new_tab,
+        })),
+    }));
+});
+
+// Admin-managed settings shipped by HandleInertiaRequests::share().
+// Brand, phone, email, address, socials and the logo all derive from
+// these fields so the admin form fully controls the footer.
+type SiteSettings = {
+    site_name?: string | null;
+    logo_light_url?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    address?: string | null;
+    facebook_url?: string | null;
+    twitter_url?: string | null;
+    linkedin_url?: string | null;
+    instagram_url?: string | null;
+};
+const siteSettings = computed<SiteSettings>(
+    () => (page.props.siteSettings as SiteSettings | undefined) ?? {},
+);
+
+const brandName = computed<string>(() => siteSettings.value.site_name || 'Moovato');
+const logoUrl = computed<string | null>(() => siteSettings.value.logo_light_url ?? null);
+
+const phone = computed<{ display: string; tel: string } | null>(() => {
+    const p = siteSettings.value.phone;
+    if (!p) return null;
+    return { display: p, tel: p.replace(/[^\d+]/g, '') };
+});
+const email = computed<string | null>(() => siteSettings.value.email ?? null);
+const address = computed<string | null>(() => siteSettings.value.address ?? null);
+
+// Only render the social icons the admin has actually configured.
+const socials = computed<Array<{ label: string; icon: typeof Facebook; href: string }>>(() => {
+    const s = siteSettings.value;
+    const out: Array<{ label: string; icon: typeof Facebook; href: string }> = [];
+    if (s.twitter_url) out.push({ label: 'Twitter', icon: Twitter, href: s.twitter_url });
+    if (s.facebook_url) out.push({ label: 'Facebook', icon: Facebook, href: s.facebook_url });
+    if (s.instagram_url) out.push({ label: 'Instagram', icon: Instagram, href: s.instagram_url });
+    if (s.linkedin_url) out.push({ label: 'LinkedIn', icon: Linkedin, href: s.linkedin_url });
+    return out;
+});
 </script>
 
 <template>
     <footer class="mv-footer">
         <div
-            class="container-xl hidden gap-y-10 pt-16 pb-12 md:grid md:grid-cols-2 lg:grid-cols-[1.2fr_1.4fr_1fr] lg:gap-x-14"
+            :class="[
+                'container-xl hidden gap-y-10 pt-16 pb-12 md:grid md:grid-cols-2 lg:gap-x-14',
+                footerColumns.length >= 2
+                    ? 'lg:grid-cols-[1.2fr_1fr_1fr_1.2fr]'
+                    : 'lg:grid-cols-[1.2fr_1.4fr_1fr]',
+            ]"
         >
             <!-- Brand -->
             <div class="mv-footer__col">
@@ -96,8 +164,8 @@ const socials = [
                     class="mv-footer__brand-logo"
                 >
                     <img
-                        src="/logo.svg"
-                        alt="Moovato"
+                        :src="logoUrl ?? '/logo.svg'"
+                        :alt="brandName"
                         class="mv-footer__logo"
                         width="166"
                         height="80"
@@ -123,19 +191,45 @@ const socials = [
                 </div>
             </div>
 
-            <!-- Useful Links -->
-            <div class="mv-footer__col">
-                <h2 class="mv-footer__heading">{{ t.usefulLinks }}</h2>
+            <!-- Footer columns (driven by the admin's Navigation Management
+                 → Footer Menu — top-level items become column headings, their
+                 children are the links). New-tab items get a plain <a>; SPA
+                 paths use <Link>; anything else (mailto:, tel:, #anchor,
+                 absolute URLs) also falls back to <a>. -->
+            <div
+                v-for="column in footerColumns"
+                :key="column.heading"
+                class="mv-footer__col"
+            >
+                <h2 class="mv-footer__heading">{{ column.heading }}</h2>
                 <ul class="mv-footer__links">
-                    <li v-for="item in usefulLinks" :key="item.label">
-                        <component
-                            :is="item.href.startsWith('#') ? 'a' : Link"
-                            :href="item.href"
+                    <li v-for="link in column.links" :key="link.label">
+                        <a
+                            v-if="link.newTab"
+                            :href="link.href"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             class="mv-footer__link"
                         >
                             <ChevronsRight class="ico" :size="16" />
-                            {{ item.label }}
-                        </component>
+                            {{ link.label }}
+                        </a>
+                        <Link
+                            v-else-if="link.href.startsWith('/') && !link.href.startsWith('//')"
+                            :href="link.href"
+                            class="mv-footer__link"
+                        >
+                            <ChevronsRight class="ico" :size="16" />
+                            {{ link.label }}
+                        </Link>
+                        <a
+                            v-else
+                            :href="link.href"
+                            class="mv-footer__link"
+                        >
+                            <ChevronsRight class="ico" :size="16" />
+                            {{ link.label }}
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -144,7 +238,7 @@ const socials = [
             <div class="mv-footer__col">
                 <h2 class="mv-footer__heading">{{ t.getInTouch }}</h2>
                 <ul class="mv-footer__contact">
-                    <li>
+                    <li v-if="phone">
                         <span class="mv-footer__contact-ico"
                             ><Phone :size="18"
                         /></span>
@@ -152,10 +246,10 @@ const socials = [
                             <span class="mv-footer__contact-label">{{
                                 t.mobile
                             }}</span>
-                            <a href="tel:+493023538660">+49 (0)30 2353 8660</a>
+                            <a :href="`tel:${phone.tel}`">{{ phone.display }}</a>
                         </span>
                     </li>
-                    <li>
+                    <li v-if="email">
                         <span class="mv-footer__contact-ico"
                             ><Mail :size="18"
                         /></span>
@@ -163,9 +257,7 @@ const socials = [
                             <span class="mv-footer__contact-label">{{
                                 t.email
                             }}</span>
-                            <a href="mailto:kontakt@moovato.de"
-                                >kontakt@moovato.de</a
-                            >
+                            <a :href="`mailto:${email}`">{{ email }}</a>
                         </span>
                     </li>
                     <li>
@@ -181,7 +273,7 @@ const socials = [
                             }}</span>
                         </span>
                     </li>
-                    <li>
+                    <li v-if="address">
                         <span class="mv-footer__contact-ico"
                             ><MapPin :size="18"
                         /></span>
@@ -190,7 +282,7 @@ const socials = [
                                 t.address
                             }}</span>
                             <span class="mv-footer__contact-text">
-                                Friedrichstraße 1, 10117 Berlin
+                                {{ address }}
                             </span>
                         </span>
                     </li>
@@ -204,7 +296,7 @@ const socials = [
                 class="container-xl flex flex-col items-center justify-between gap-5 py-3 text-center sm:flex-row sm:items-center sm:text-left"
             >
                 <p class="mv-footer__copy">
-                    © Copyrights {{ year }} - <strong>Moovato</strong>
+                    © Copyrights {{ year }} - <strong>{{ brandName }}</strong>
                     {{ t.rights }}
                 </p>
                 <a

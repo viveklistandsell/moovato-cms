@@ -41,7 +41,7 @@ onUnmounted(() => {
 
 <template>
     <div
-        class="flex min-h-screen flex-col bg-background pb-[72px] text-foreground md:pb-0"
+        class="mv-public-frame flex min-h-screen flex-col bg-background pb-[72px] text-foreground md:pb-0"
     >
         <SiteHeader :locale="locale" />
         <main class="flex-1">

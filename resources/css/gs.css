@@ -1,4 +1,10 @@
-body {
+/* Theme tokens are available globally so any component that uses
+   var(--midnight)/var(--orange)/... keeps working on admin + auth pages too.
+   The visual body styling (gradient background, prose colour, font) is moved
+   into .mv-public-frame and only applied on the public frontend — otherwise
+   it bleeds into the login/admin shell and makes text inherit `--midnight`
+   on top of the dark theme background, which is unreadable. */
+:root {
     --midnight: #0f172a;
     --midnight-soft: #1e293b;
     --orange: #ff5d2c;
@@ -9,7 +15,9 @@ body {
     --slate-light: #94a3b8;
     --paper: #fafaf7;
     --white: #ffffff;
+}
 
+.mv-public-frame {
     position: relative;
     overflow-x: clip;
     background:

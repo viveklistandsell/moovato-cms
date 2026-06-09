@@ -141,25 +141,58 @@ const t = computed(() =>
           },
 );
 
-const socials = [
-    { label: 'Facebook', icon: Facebook, href: '#' },
-    { label: 'Instagram', icon: Instagram, href: '#' },
-    { label: 'Twitter', icon: Twitter, href: '#' },
-    { label: 'LinkedIn', icon: Linkedin, href: '#' },
-];
+type SiteSettings = {
+    site_name?: string | null;
+    logo_light_url?: string | null;
+    logo_dark_url?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    address?: string | null;
+    whatsapp?: string | null;
+    facebook_url?: string | null;
+    twitter_url?: string | null;
+    linkedin_url?: string | null;
+    instagram_url?: string | null;
+};
+const siteSettings = computed<SiteSettings>(
+    () => (page.props.siteSettings as SiteSettings | undefined) ?? {},
+);
 
-const socialLinks = [
-    { abbr: 'FB', label: 'Facebook', href: '#' },
-    { abbr: 'X', label: 'Twitter', href: '#' },
-    { abbr: 'IN', label: 'Instagram', href: '#' },
-    { abbr: 'LN', label: 'LinkedIn', href: '#' },
-];
+const siteName = computed<string>(() => siteSettings.value.site_name || 'Moovato');
+const logoUrl = computed<string | null>(() => siteSettings.value.logo_light_url ?? null);
 
-const emails = ['kontakt@moovato.de'];
-const phones = [{ display: '+49 (0)30 2353 8660', tel: '+493023538660' }];
-const address = 'Moovato HQ, Friedrichstraße 1, 10117 Berlin';
+const emails = computed<string[]>(() => {
+    const e = siteSettings.value.email;
+    return e ? [e] : [];
+});
+const phones = computed<Array<{ display: string; tel: string }>>(() => {
+    const p = siteSettings.value.phone;
+    if (!p) return [];
+    return [{ display: p, tel: p.replace(/[^\d+]/g, '') }];
+});
+const address = computed<string>(() => siteSettings.value.address || '');
 
-// Lock body scroll while the offcanvas is open + close on Escape.
+// Social icon row — only show entries the admin has actually filled in.
+const socials = computed<Array<{ label: string; icon: typeof Facebook; href: string }>>(() => {
+    const s = siteSettings.value;
+    const out: Array<{ label: string; icon: typeof Facebook; href: string }> = [];
+    if (s.facebook_url) out.push({ label: 'Facebook', icon: Facebook, href: s.facebook_url });
+    if (s.instagram_url) out.push({ label: 'Instagram', icon: Instagram, href: s.instagram_url });
+    if (s.twitter_url) out.push({ label: 'Twitter', icon: Twitter, href: s.twitter_url });
+    if (s.linkedin_url) out.push({ label: 'LinkedIn', icon: Linkedin, href: s.linkedin_url });
+    return out;
+});
+
+const socialLinks = computed<Array<{ abbr: string; label: string; href: string }>>(() => {
+    const s = siteSettings.value;
+    const out: Array<{ abbr: string; label: string; href: string }> = [];
+    if (s.facebook_url) out.push({ abbr: 'FB', label: 'Facebook', href: s.facebook_url });
+    if (s.twitter_url) out.push({ abbr: 'X', label: 'Twitter', href: s.twitter_url });
+    if (s.instagram_url) out.push({ abbr: 'IN', label: 'Instagram', href: s.instagram_url });
+    if (s.linkedin_url) out.push({ abbr: 'LN', label: 'LinkedIn', href: s.linkedin_url });
+    return out;
+});
+
 watch(open, (isOpen) => {
     if (typeof document !== 'undefined') {
         document.body.style.overflow = isOpen ? 'hidden' : '';
@@ -209,17 +242,19 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                     </div>
                 </div>
                 <div class="topbar-contacts">
-                    <div class="item">
+                    <div v-for="email in emails" :key="email" class="item">
                         <span class="ico"><Mail :size="12" /></span>
                         {{ t.emailLabel }}:
-                        <a href="mailto:kontakt@moovato.de"
-                            >kontakt@moovato.de</a
-                        >
+                        <a :href="`mailto:${email}`">{{ email }}</a>
                     </div>
-                    <div class="item">
+                    <div
+                        v-for="phone in phones"
+                        :key="phone.tel"
+                        class="item"
+                    >
                         <span class="ico"><Phone :size="12" /></span>
                         {{ t.callLabel }}:
-                        <a href="tel:+493023538660">+49 (0)30 2353 8660</a>
+                        <a :href="`tel:${phone.tel}`">{{ phone.display }}</a>
                     </div>
                 </div>
             </div>
@@ -232,8 +267,8 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
             <div class="container-xl flex items-center justify-between gap-8">
                 <Link :href="home" class="flex items-center no-underline">
                     <img
-                        src="/logo.svg"
-                        alt="Moovato"
+                        :src="logoUrl ?? '/logo.svg'"
+                        :alt="siteName"
                         class=""
                         width="300"
                         height="36"
@@ -442,7 +477,8 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 <span>{{ t.home }}</span>
             </Link>
             <a
-                href="tel:+493023538660"
+                v-if="phones.length > 0"
+                :href="`tel:${phones[0].tel}`"
                 class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
             >
                 <Phone :size="20" />
