@@ -162,12 +162,17 @@ const siteSettings = computed<SiteSettings>(
 // upgrade that doesn't ship this prop yet keeps the historic behaviour.
 type SiteLayout = {
     show_language_switcher?: boolean;
+    header_sticky?: boolean;
 };
 const siteLayout = computed<SiteLayout>(
     () => (page.props.siteLayout as SiteLayout | undefined) ?? {},
 );
 const showLanguageSwitcher = computed<boolean>(
     () => siteLayout.value.show_language_switcher !== false,
+);
+
+const headerSticky = computed<boolean>(
+    () => siteLayout.value.header_sticky !== false,
 );
 
 const siteName = computed<string>(() => siteSettings.value.site_name || 'Moovato');
@@ -233,7 +238,10 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 </script>
 
 <template>
-    <header class="mv-header">
+    <header
+        class="mv-header"
+        :class="headerSticky ? 'sticky top-0 z-40' : ''"
+    >
         <!-- ===== TOP BAR ===== -->
         <div class="topbar">
             <div
@@ -274,7 +282,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
         <!-- ===== NAVIGATION (sticky) ===== -->
         <nav
-            class="sticky top-0 z-40 border-b border-[rgba(15,23,42,0.06)] bg-white py-[12px]"
+            class="border-b border-[rgba(15,23,42,0.06)] bg-white py-[12px]"
         >
             <div class="container-xl flex items-center justify-between gap-8">
                 <Link :href="home" class="flex items-center no-underline">
