@@ -363,6 +363,11 @@ function deleteFromPreview(file: MediaFileItem): void {
     deleteOpen.value = true;
     previewOpen.value = false;
 }
+
+function onPreviewUpdated(file: MediaFileItem): void {
+    previewFile.value = file;
+    router.reload({ only: ['files'], preserveScroll: true, preserveState: true });
+}
 </script>
 
 <template>
@@ -706,6 +711,7 @@ function deleteFromPreview(file: MediaFileItem): void {
             v-model:open="previewOpen"
             :file="previewFile"
             @delete="deleteFromPreview"
+            @updated="onPreviewUpdated"
         />
     </MediaLayout>
 </template>
