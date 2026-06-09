@@ -97,7 +97,7 @@
 
         @vite(['resources/css/app.css', 'resources/css/gs.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
-            <title>{{ $siteSetting->site_name ?: config('app.name', 'Laravel') }}</title>
+            <title>{{ $siteSetting->site_name ?: config('app.name', 'Moovato') }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

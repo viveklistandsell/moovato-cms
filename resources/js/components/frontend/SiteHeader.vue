@@ -158,6 +158,18 @@ const siteSettings = computed<SiteSettings>(
     () => (page.props.siteSettings as SiteSettings | undefined) ?? {},
 );
 
+// Layout toggles from Settings → Layout Toggles. Default `true` so an
+// upgrade that doesn't ship this prop yet keeps the historic behaviour.
+type SiteLayout = {
+    show_language_switcher?: boolean;
+};
+const siteLayout = computed<SiteLayout>(
+    () => (page.props.siteLayout as SiteLayout | undefined) ?? {},
+);
+const showLanguageSwitcher = computed<boolean>(
+    () => siteLayout.value.show_language_switcher !== false,
+);
+
 const siteName = computed<string>(() => siteSettings.value.site_name || 'Moovato');
 const logoUrl = computed<string | null>(() => siteSettings.value.logo_light_url ?? null);
 
@@ -269,9 +281,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                     <img
                         :src="logoUrl ?? '/logo.svg'"
                         :alt="siteName"
-                        class=""
-                        width="300"
-                        height="36"
+                        class="h-8 w-auto"
                     />
                 </Link>
 
@@ -319,6 +329,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
                 <div class="flex items-center gap-4">
                     <Link
+                        v-if="showLanguageSwitcher"
                         :href="switchHref"
                         class="mv-lang-switch hidden sm:inline-flex"
                     >
@@ -443,6 +454,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 <!-- Footer row: language switch + socials -->
                 <div class="mv-offcanvas__foot">
                     <Link
+                        v-if="showLanguageSwitcher"
                         :href="switchHref"
                         class="mv-offcanvas__lang"
                         @click="open = false"
