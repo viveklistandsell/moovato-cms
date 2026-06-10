@@ -366,7 +366,7 @@ function deleteFromPreview(file: MediaFileItem): void {
 
 function onPreviewUpdated(file: MediaFileItem): void {
     previewFile.value = file;
-    router.reload({ only: ['files'], preserveScroll: true, preserveState: true });
+    router.reload({ only: ['files'] });
 }
 </script>
 

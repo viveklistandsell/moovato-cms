@@ -9,7 +9,7 @@ type Testimonial = {
     quote: string;
     author: string;
     role: string;
-    avatar_url: string | null;
+    avatar_url: string;
     rating: number;
 };
 
@@ -30,7 +30,7 @@ const data = defineModel<Data>('data', { required: true });
 function addItem(): void {
     data.value.testimonials = [
         ...(data.value.testimonials ?? []),
-        { quote: '', author: '', role: '', avatar_url: null, rating: 5 },
+        { quote: '', author: '', role: '', avatar_url: '', rating: 5 },
     ];
 }
 

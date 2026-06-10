@@ -362,9 +362,12 @@ const errorFor = (code: string, field: keyof Translation) =>
                     </CardHeader>
                     <CardContent>
                         <div class="flex flex-wrap items-center gap-2">
-                            <Button type="submit" :disabled="form.processing">
-                                <Save class="size-4" />
-                                Save
+                            <Button 
+                                type="submit" 
+                                :disabled="form.processing"
+                                class="flex-1"
+                            >
+                                Save & Exit
                             </Button>
                             <Button
                                 v-if="previewUrl"
@@ -376,12 +379,18 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     :href="previewUrl"
                                     target="_blank"
                                     rel="noopener"
+                                    class="flex-1"
                                 >
                                     <ExternalLink class="size-4" />
                                     Preview
                                 </a>
                             </Button>
-                            <Button as-child type="button" variant="outline">
+                            <Button 
+                                as-child 
+                                type="button" 
+                                variant="outline"
+                                class="flex-1"
+                            >
                                 <Link href="/admin/pages">
                                     <X class="size-4" />
                                     Cancel
