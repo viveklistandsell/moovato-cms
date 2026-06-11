@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import { ArrowDown } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { localizedUrl } from '@/lib/localizedUrl';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Settings = {
@@ -12,7 +15,6 @@ type Settings = {
 type Crumb = { label?: string; url?: string };
 
 type Data = {
-    crumbs?: Crumb[];
     highlight?: string;
     heading?: string;
     description?: string;
@@ -23,57 +25,81 @@ type Data = {
 };
 
 defineProps<{ settings: Settings; data: Data }>();
+
+type FrontendPageProps = {
+    locale?: string;
+    page?: { title?: string; is_home?: boolean };
+};
+
+const page = usePage<FrontendPageProps>();
+
+const crumbs = computed<Crumb[]>(() => {
+    const locale = page.props.locale ?? 'de';
+    const current = page.props.page;
+
+    if (!current?.title || current.is_home) {
+        return [];
+    }
+
+    return [
+        {
+            label: locale === 'de' ? 'Startseite' : 'Home',
+            url: localizedUrl(locale, '/'),
+        },
+        { label: current.title },
+    ];
+});
 </script>
 
 <template>
     <section class="mv-orbitbanner section-py">
+        <div class="mv-orbitbanner-fade-top" aria-hidden="true"></div>
+        <div class="mv-orbitbanner-glow-top" aria-hidden="true"></div>
         <div
-            class="pointer-events-none absolute inset-0 z-[3] overflow-hidden max-lg:hidden"
+            class="pointer-events-none absolute inset-0 z-[1] overflow-hidden max-lg:hidden"
             aria-hidden="true"
         >
             <div class="absolute top-1/2 right-0 size-175 -translate-y-1/2">
                 <div
-                    class="rotate-center animate-rotate-center absolute z-2 -right-4/5"
+                    class="rotate-center animate-rotate-center absolute -right-4/5 z-2"
                 >
                     <span
-                        class="relative block size-175 rounded-full border border-white/30 after:absolute after:top-1/4 after:right-8.75 after:z-10 after:size-3.5 after:rounded-full after:bg-white"
+                        class="relative block size-175 rounded-full border border-black after:absolute after:top-2/5 after:left-0 after:z-10 after:size-3.5 after:rounded-full after:bg-[var(--orange)]"
                     ></span>
                 </div>
             </div>
-            <div class="absolute top-1/2 right-0 size-225 -translate-y-1/2">
-                <div
-                    class="animate-rotate-center absolute right-[-70%] z-2"
-                >
+            <div class="absolute top-1/2 right-0 size-200 -translate-y-1/2">
+                <div class="animate-rotate-center absolute right-[-70%] z-2">
                     <span
-                        class="relative block size-225 rounded-full border border-white/30 after:absolute after:right-18.75 after:bottom-1/5 after:z-10 after:size-3.5 after:rounded-full after:bg-[var(--orange)]"
+                        class="relative block size-200 rounded-full border border-black after:absolute after:top-3/5 after:left-0.75 after:z-10 after:size-3.5 after:rounded-full after:bg-[var(--midnight)]"
                     ></span>
                 </div>
             </div>
-            <div class="absolute top-1/2 right-0 size-275 -translate-y-1/2">
-                <div class="animate-rotate-center absolute z-2 -right-3/5">
+            <div class="absolute top-1/2 right-0 size-215 -translate-y-1/2">
+                <div class="animate-rotate-center absolute -right-3/5 z-2">
                     <span
-                        class="relative block size-275 rounded-full border border-white/30 after:absolute after:top-2/5 after:left-0.75 after:z-10 after:size-3.5 after:rounded-full after:bg-[var(--linen)]"
+                        class="relative block size-215 rounded-full border border-black after:absolute after:top-2/5 after:left-0 after:z-10 after:size-3.5 after:rounded-full after:bg-[var(--orange)]"
                     ></span>
                 </div>
             </div>
         </div>
 
         <div
-            class="container-xl relative z-[4] grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr]"
+            class="relative z-[6] container-xl grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.15fr_1fr]"
         >
             <div>
                 <nav
-                    v-if="data.crumbs?.length"
+                    v-if="crumbs.length"
                     class="mv-pagebanner-crumbs mb-5"
                     aria-label="Breadcrumb"
                 >
-                    <template v-for="(crumb, i) in data.crumbs" :key="i">
+                    <template v-for="(crumb, i) in crumbs" :key="i">
                         <a v-if="crumb.url" :href="crumb.url">{{
                             crumb.label
                         }}</a>
                         <span v-else class="is-current">{{ crumb.label }}</span>
                         <span
-                            v-if="i < data.crumbs.length - 1"
+                            v-if="i < crumbs.length - 1"
                             class="sep"
                             aria-hidden="true"
                             >›</span
@@ -128,7 +154,10 @@ defineProps<{ settings: Settings; data: Data }>();
                     loading="lazy"
                     decoding="async"
                 />
+                <span class="mv-orbitbanner-star" aria-hidden="true"></span>
             </div>
         </div>
+
+        <div class="mv-orbitbanner-fade" aria-hidden="true"></div>
     </section>
 </template>

@@ -281,7 +281,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                     <img
                         :src="logoUrl ?? '/logo.svg'"
                         :alt="siteName"
-                        class="h-8 w-auto"
+                        class="h-18 w-auto"
                     />
                 </Link>
 

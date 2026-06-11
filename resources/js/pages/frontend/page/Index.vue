@@ -44,13 +44,27 @@ const props = defineProps<{
 // desktop = lg+ (>= 1024px). We only emit overrides when adjacent breakpoints
 // differ, so "show on all" produces no class at all.
 function visibilityClass(v?: WidgetVisibility): string {
-    if (!v) return '';
+    if (!v) {
+        return '';
+    }
+
     const { mobile, tablet, desktop } = v;
-    if (mobile && tablet && desktop) return '';
+
+    if (mobile && tablet && desktop) {
+        return '';
+    }
+
     const parts: string[] = [];
     parts.push(mobile ? 'block' : 'hidden');
-    if (tablet !== mobile) parts.push(tablet ? 'md:block' : 'md:hidden');
-    if (desktop !== tablet) parts.push(desktop ? 'lg:block' : 'lg:hidden');
+
+    if (tablet !== mobile) {
+        parts.push(tablet ? 'md:block' : 'md:hidden');
+    }
+
+    if (desktop !== tablet) {
+        parts.push(desktop ? 'lg:block' : 'lg:hidden');
+    }
+
     return parts.join(' ');
 }
 
@@ -83,6 +97,12 @@ const t = computed(() => ({
 const isFullwidth = computed(() => props.page.template === 'fullwidth');
 const isNolayout = computed(() => props.page.template === 'nolayout');
 // "default" is the implicit fallback.
+
+// Banner widgets render their own breadcrumb, so suppress the layout-level
+// breadcrumb when one is present to avoid showing it twice.
+const hasOwnBreadcrumb = computed(() =>
+    (props.widgets ?? []).some((w) => w.type === 'orbit_banner'),
+);
 </script>
 
 <template>
@@ -115,11 +135,14 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
              the default and fullwidth templates. Fullwidth gets its own thin
              breadcrumb bar since it skips the prose article below. -->
         <nav
-            v-if="isFullwidth && !page.is_home"
+            v-if="isFullwidth && !page.is_home && !hasOwnBreadcrumb"
             class="container-xl flex items-center gap-2 pt-8 text-sm text-muted-foreground"
             aria-label="Breadcrumb"
         >
-            <Link :href="localizedUrl(locale, '/')" class="hover:text-foreground">
+            <Link
+                :href="localizedUrl(locale, '/')"
+                class="hover:text-foreground"
+            >
                 {{ t.home }}
             </Link>
             <span>›</span>
@@ -130,7 +153,7 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
              hero image. Fullwidth skips this so widgets sit edge-to-edge. -->
         <article v-if="!isFullwidth" class="container-xl py-10">
             <nav
-                v-if="!page.is_home"
+                v-if="!page.is_home && !hasOwnBreadcrumb"
                 class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
                 aria-label="Breadcrumb"
             >

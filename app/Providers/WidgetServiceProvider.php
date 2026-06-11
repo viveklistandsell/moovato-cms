@@ -16,6 +16,7 @@ use App\Widgets\ContentStyle1\ContentStyle1Widget;
 use App\Widgets\ContentStyle2\ContentStyle2Widget;
 use App\Widgets\Contracts\WidgetContract;
 use App\Widgets\Cta\CtaWidget;
+use App\Widgets\CtaBanner\CtaBannerWidget;
 use App\Widgets\DarkFeature\DarkFeatureWidget;
 use App\Widgets\DarkIntro\DarkIntroWidget;
 use App\Widgets\ExpertsChoice\ExpertsChoiceWidget;
@@ -67,6 +68,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         BannerWidget::class,
         PageBannerWidget::class,
         OrbitBannerWidget::class,
+        CtaBannerWidget::class,
         TextBlockWidget::class,
         ImageWidget::class,
         FeaturesWidget::class,

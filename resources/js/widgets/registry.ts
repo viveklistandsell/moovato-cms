@@ -16,6 +16,8 @@ import ComparisonEditor from './Comparison/ComparisonEditor.vue';
 import ComparisonRenderer from './Comparison/ComparisonRenderer.vue';
 import CtaEditor from './Cta/CtaEditor.vue';
 import CtaRenderer from './Cta/CtaRenderer.vue';
+import CtaBannerEditor from './CtaBanner/CtaBannerEditor.vue';
+import CtaBannerRenderer from './CtaBanner/CtaBannerRenderer.vue';
 import DarkFeatureEditor from './DarkFeature/DarkFeatureEditor.vue';
 import DarkFeatureRenderer from './DarkFeature/DarkFeatureRenderer.vue';
 import ExpertsChoiceEditor from './ExpertsChoice/ExpertsChoiceEditor.vue';
@@ -89,6 +91,7 @@ export const widgetRegistry: WidgetRegistry = {
     banner: { editor: BannerEditor, renderer: BannerRenderer },
     page_banner: { editor: PageBannerEditor, renderer: PageBannerRenderer },
     orbit_banner: { editor: OrbitBannerEditor, renderer: OrbitBannerRenderer },
+    cta_banner: { editor: CtaBannerEditor, renderer: CtaBannerRenderer },
     text_block: { editor: TextBlockEditor, renderer: TextBlockRenderer },
     image: { editor: ImageEditor, renderer: ImageRenderer },
     features: { editor: FeaturesEditor, renderer: FeaturesRenderer },
