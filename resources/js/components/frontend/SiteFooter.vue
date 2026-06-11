@@ -16,11 +16,21 @@ import { localizedUrl } from '@/lib/localizedUrl';
 
 const page = usePage();
 
+type SiteLayout = { footer_copyright_auto_year?: boolean };
+const siteLayout = computed<SiteLayout>(
+    () => (page.props.siteLayout as SiteLayout | undefined) ?? {},
+);
+
 const props = defineProps<{
     locale: string;
 }>();
 
-const year = new Date().getFullYear();
+const LAUNCH_YEAR = 2026;
+const year = computed<number>(() =>
+    siteLayout.value.footer_copyright_auto_year === false
+        ? LAUNCH_YEAR
+        : new Date().getFullYear(),
+);
 
 const t = computed(() =>
     props.locale === 'de'

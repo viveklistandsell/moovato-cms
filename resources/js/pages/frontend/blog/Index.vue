@@ -63,10 +63,50 @@ const t = computed(() => ({
             ? 'Nach Kategorie filtern:'
             : 'Filter by category:',
     'Filter by Tag':
-        props.locale === 'de'            
+        props.locale === 'de'
             ? 'Nach Schlagwort filtern:'
             : 'Filter by tag:',
+    searchPlaceholder:
+        props.locale === 'de'
+            ? 'Artikel durchsuchen…'
+            : 'Search articles…',
+    searchResultsFor:
+        props.locale === 'de' ? 'Suchergebnisse für' : 'Search results for',
 }));
+
+const searchInput = ref<string>(props.searchTerm ?? '');
+
+watch(
+    () => props.searchTerm,
+    (val) => {
+        searchInput.value = val ?? '';
+    },
+);
+
+function applySearch(): void {
+    const term = searchInput.value.trim();
+    const params: Record<string, string> = {};
+    if (term !== '') params.q = term;
+    if (props.activeCategory) params.category = props.activeCategory;
+    if (props.activeTag) params.tag = props.activeTag;
+
+    router.get(localizedUrl(props.locale, '/blog'), params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}
+
+const onSearchInput = useDebounceFn((e: Event) => {
+    const target = e.target as HTMLInputElement;
+    searchInput.value = target.value;
+    applySearch();
+}, 300);
+
+function clearSearch(): void {
+    searchInput.value = '';
+    applySearch();
+}
 
 function isPrev(label: string): boolean {
     return (
