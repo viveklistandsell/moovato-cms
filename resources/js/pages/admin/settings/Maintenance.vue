@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { Save } from 'lucide-vue-next';
+import { Check, Plus, Save } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -26,6 +26,7 @@ type Settings = {
 const props = defineProps<{
     settings: Settings;
     languages: LocaleOption[];
+    currentIp: string | null;
 }>();
 
 defineOptions({
@@ -60,6 +61,26 @@ const form = useForm({
 
 function submit(): void {
     form.put('/admin/settings/maintenance', { preserveScroll: true });
+}
+
+function parseBypassList(csv: string): string[] {
+    return csv
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter((entry) => entry !== '');
+}
+
+const currentIpAlreadyListed = computed<boolean>(() => {
+    if (!props.currentIp) return false;
+    return parseBypassList(form.maintenance_bypass_ips).includes(props.currentIp);
+});
+
+function addCurrentIp(): void {
+    if (!props.currentIp || currentIpAlreadyListed.value) return;
+
+    const existing = parseBypassList(form.maintenance_bypass_ips);
+    existing.push(props.currentIp);
+    form.maintenance_bypass_ips = existing.join(', ');
 }
 
 function errorFor(
@@ -141,19 +162,58 @@ function errorFor(
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Bypass IPs</CardTitle>
+                    <CardTitle>Bypass IPs &amp; redirect URL</CardTitle>
                 </CardHeader>
-                <CardContent class="space-y-1">
-                    <Input
-                        id="maintenance_bypass_ips"
-                        v-model="form.maintenance_bypass_ips"
-                        placeholder="1.2.3.4, 5.6.7.8"
-                    />
+                <CardContent class="space-y-2">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <Input
+                            id="maintenance_bypass_ips"
+                            v-model="form.maintenance_bypass_ips"
+                            placeholder="1.2.3.4, 5.6.7.8, flipkart.com"
+                            class="flex-1"
+                        />
+                        <Button
+                            v-if="currentIp"
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            :disabled="currentIpAlreadyListed"
+                            class="sm:w-auto"
+                            @click="addCurrentIp"
+                        >
+                            <Check
+                                v-if="currentIpAlreadyListed"
+                                class="size-4 text-emerald-600"
+                            />
+                            <Plus v-else class="size-4" />
+                            <span class="font-mono text-xs">
+                                {{
+                                    currentIpAlreadyListed
+                                        ? `${currentIp} already added`
+                                        : `Add my IP (${currentIp})`
+                                }}
+                            </span>
+                        </Button>
+                    </div>
                     <p class="text-xs text-muted-foreground">
-                        Comma-separated. These IPs see the site even while
-                        maintenance is on — useful for previewing your own
-                        traffic.
+                        Comma-separated, mixed. Entries are routed by shape:
                     </p>
+                    <ul
+                        class="ml-4 list-disc space-y-0.5 text-xs text-muted-foreground"
+                    >
+                        <li>
+                            <strong>IP addresses</strong>
+                            (<code class="font-mono">1.2.3.4</code>) bypass
+                            maintenance — visitors from these IPs see the live
+                            site.
+                        </li>
+                        <li>
+                            <strong>URLs or hostnames</strong>
+                            (<code class="font-mono">flipkart.com</code>,
+                            <code class="font-mono">https://amazon.com</code>)
+                            redirect everyone else. First URL in the list wins.
+                        </li>
+                    </ul>
                     <InputError :message="form.errors.maintenance_bypass_ips" />
                 </CardContent>
             </Card>

@@ -58,8 +58,16 @@ final class MaintenanceMode
             return $next($request);
         }
 
-        if ($this->ipIsAllowed($request, (string) ($settings->maintenance_bypass_ips ?? ''))) {
+        [$bypassIps, $redirectUrl] = $this->parseBypassList(
+            (string) ($settings->maintenance_bypass_ips ?? '')
+        );
+
+        if ($this->ipIsAllowed($request, $bypassIps)) {
             return $next($request);
+        }
+
+        if ($redirectUrl !== null) {
+            return redirect()->away($redirectUrl, 302);
         }
 
         // Resolve locale ourselves — this middleware runs in the global web
@@ -84,6 +92,61 @@ final class MaintenanceMode
             'logoUrl' => $logoUrl,
             'themeColor' => $settings->theme_color ?: '#0f172a',
         ], 503);
+    }
+
+    /**
+     *
+     * The FIRST URL in the
+     * list wins — additional URLs after it are silently ignored, since
+     * there's no useful interpretation of "redirect to two places at once".
+     *
+     * @return array{0: list<string>, 1: ?string}
+     */
+    private function parseBypassList(string $csv): array
+    {
+        if ($csv === '') {
+            return [[], null];
+        }
+
+        $ips = [];
+        $redirectUrl = null;
+
+        foreach (explode(',', $csv) as $raw) {
+            $entry = mb_trim($raw);
+            if ($entry === '') {
+                continue;
+            }
+
+            // 1) Explicit URL with scheme — pass through as-is.
+            if (preg_match('~^https?://~i', $entry) === 1) {
+                $redirectUrl ??= $entry;
+
+                continue;
+            }
+
+            // 2) Valid IPv4 / IPv6 — add to bypass list.
+            if (filter_var($entry, FILTER_VALIDATE_IP) !== false) {
+                $ips[] = $entry;
+
+                continue;
+            }
+
+            // 3) Bare host like "flipkart.com" — treat as https:// URL.
+            //    Heuristic: contains a dot AND has only domain-safe chars
+            //    (letters, digits, dots, hyphens). Keeps us from
+            //    accidentally promoting partial IPs like "10.0.0" to URLs.
+            if (str_contains($entry, '.') && preg_match('~^[a-zA-Z0-9.\-]+(/.*)?$~', $entry) === 1) {
+                $redirectUrl ??= 'https://'.$entry;
+
+                continue;
+            }
+
+            // 4) Unrecognised — drop silently. The admin will see the
+            //    holding page (not a redirect, not a bypass) which is the
+            //    safe default.
+        }
+
+        return [$ips, $redirectUrl];
     }
 
     private function detectLocale(Request $request): string
@@ -117,12 +180,11 @@ final class MaintenanceMode
     }
 
     /**
-     * Comma-separated allow-list, whitespace tolerant. Empty / unset
-     * matches nothing.
+     * @param  list<string>  $bypassIps  Parsed by parseBypassList().
      */
-    private function ipIsAllowed(Request $request, string $csv): bool
+    private function ipIsAllowed(Request $request, array $bypassIps): bool
     {
-        if ($csv === '') {
+        if ($bypassIps === []) {
             return false;
         }
 
@@ -131,12 +193,6 @@ final class MaintenanceMode
             return false;
         }
 
-        foreach (explode(',', $csv) as $allowed) {
-            if (mb_trim($allowed) === $ip) {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array($ip, $bypassIps, true);
     }
 }

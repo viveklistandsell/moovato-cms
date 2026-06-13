@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Listeners\RecordSuccessfulLogin;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
@@ -14,12 +15,32 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Throwable;
 
 final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->overrideSessionLifetime();
+    }
+    private function overrideSessionLifetime(): void
+    {
+        try {
+            $configured = SiteSetting::current()->session_lifetime_minutes ?? null;
+        } catch (Throwable) {
+            return;
+        }
+
+        $value = (int) $configured;
+
+        // 5 minutes minimum (anything shorter logs admins out mid-task);
+        // 1 week ceiling (going beyond invites security audit findings on
+        // "session lifetime exceeds policy"). Out-of-range → ignore.
+        if ($value < 5 || $value > 10_080) {
+            return;
+        }
+
+        config(['session.lifetime' => $value]);
     }
 
     public function boot(): void

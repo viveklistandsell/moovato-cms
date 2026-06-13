@@ -8,6 +8,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\LoginResponse;
 use App\Http\Responses\LogoutResponse;
+use App\Models\SiteSetting;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -18,6 +19,7 @@ use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Throwable;
 
 final class FortifyServiceProvider extends ServiceProvider
 {
@@ -84,10 +86,6 @@ final class FortifyServiceProvider extends ServiceProvider
 
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/ConfirmPassword'));
     }
-
-    /**
-     * Configure rate limiting.
-     */
     private function configureRateLimiting(): void
     {
         RateLimiter::for('two-factor', function (Request $request) {
@@ -95,9 +93,22 @@ final class FortifyServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(
+                Str::lower($request->input(Fortify::username())).'|'.$request->ip(),
+            );
 
-            return Limit::perMinute(5)->by($throttleKey);
+            return Limit::perMinute($this->loginAttemptsPerMinute())->by($throttleKey);
         });
+    }
+    private function loginAttemptsPerMinute(): int
+    {
+        try {
+            $configured = SiteSetting::current()->login_throttle_attempts ?? null;
+        } catch (Throwable) {
+            return 5;
+        }
+
+        $value = (int) $configured;
+        return $value >= 1 && $value <= 60 ? $value : 5;
     }
 }

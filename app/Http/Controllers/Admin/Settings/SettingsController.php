@@ -161,6 +161,7 @@ final class SettingsController extends Controller
                 'translations' => $this->translationsMap($s, ['maintenance_heading', 'maintenance_message']),
             ],
             'languages' => $this->presentLanguages(),
+            'currentIp' => request()->ip(),
         ]);
     }
 

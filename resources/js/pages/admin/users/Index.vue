@@ -93,6 +93,9 @@ const props = defineProps<{
     currentUserId: number | null;
     filters: Filters;
     pagination: PaginationMeta;
+    // Sent by the dedicated /admin/users/create route — tells the page to
+    // auto-open the create drawer without the legacy `?new=1` hack.
+    openCreate?: boolean;
 }>();
 
 defineOptions({
@@ -409,16 +412,33 @@ function destroyUser(row: UserRow): void {
 // Reset row selection if the page data changes underneath us (filters etc).
 watch(() => props.users, () => selection.clear());
 
-// The sidebar's "Add User" link lands here with ?new=1 — auto-open the
-// create drawer and strip the param so a refresh doesn't keep re-opening it.
+const arrivedViaCreateRoute = ref(false);
+
 onMounted(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('new') === '1') {
+    const fromQueryParam = params.get('new') === '1';
+
+    if (props.openCreate || fromQueryParam) {
+        arrivedViaCreateRoute.value = true;
         openCreate();
+    }
+
+    if (fromQueryParam) {
         params.delete('new');
         const query = params.toString();
         const url = window.location.pathname + (query !== '' ? `?${query}` : '');
         window.history.replaceState({}, '', url);
+    }
+});
+
+watch(drawerOpen, (isOpen) => {
+    if (
+        !isOpen &&
+        arrivedViaCreateRoute.value &&
+        window.location.pathname.endsWith('/admin/users/create')
+    ) {
+        window.history.replaceState({}, '', '/admin/users');
+        arrivedViaCreateRoute.value = false;
     }
 });
 </script>

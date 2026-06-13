@@ -33,8 +33,17 @@ final class UserController extends Controller
         'created_at' => 'created_at',
         'last_login_at' => 'last_login_at',
     ];
+    public function create(Request $request): Response
+    {
+        return $this->renderIndex($request, openCreate: true);
+    }
 
     public function index(Request $request): Response
+    {
+        return $this->renderIndex($request);
+    }
+
+    private function renderIndex(Request $request, bool $openCreate = false): Response
     {
         $search = mb_trim((string) $request->query('q', ''));
         $sortBy = $request->query('sort_by');
@@ -75,6 +84,7 @@ final class UserController extends Controller
             'statusOptions' => fn (): array => $this->statusOptions(),
             'stats' => fn (): array => $this->stats(),
             'currentUserId' => $request->user()?->id,
+            'openCreate' => $openCreate,
             'filters' => [
                 'q' => $search,
                 'sort_by' => is_string($sortBy) && array_key_exists($sortBy, self::SORTABLE_COLUMNS) ? $sortBy : null,

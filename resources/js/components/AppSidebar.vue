@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import {
+    Activity,
     Bot,
     ChevronRight,
     Database,
+    Download,
+    HeartPulse,
     Files,
     FolderTree,
     ImagePlay,
@@ -81,9 +84,12 @@ const settingsItems: NavItem[] = [
 ];
 
 const systemItems: NavItem[] = [
+    { title: 'Health', href: '/admin/system/health', icon: HeartPulse },
     { title: 'Cache Management', href: '/admin/system/cache', icon: Database },
     { title: 'Sitemap', href: '/admin/system/sitemap', icon: ListTree },
     { title: 'Robots.txt', href: '/admin/system/robots', icon: Bot },
+    { title: 'Activity Log', href: '/admin/system/activity', icon: Activity },
+    { title: 'Export & Backup', href: '/admin/system/export', icon: Download },
 ];
 
 const blogItems: NavItem[] = [
@@ -141,7 +147,7 @@ const userItems: NavItem[] = [
     },
     {
         title: 'Add User',
-        href: '/admin/users?new=1',
+        href: '/admin/users/create',
         icon: UserPlus,
     },
     {
