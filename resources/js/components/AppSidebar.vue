@@ -7,6 +7,7 @@ import {
     Database,
     Download,
     HeartPulse,
+    Mail as MailIcon,
     Files,
     FolderTree,
     ImagePlay,
@@ -89,6 +90,7 @@ const systemItems: NavItem[] = [
     { title: 'Sitemap', href: '/admin/system/sitemap', icon: ListTree },
     { title: 'Robots.txt', href: '/admin/system/robots', icon: Bot },
     { title: 'Activity Log', href: '/admin/system/activity', icon: Activity },
+    { title: 'Email Log', href: '/admin/system/email-log', icon: MailIcon },
     { title: 'Export & Backup', href: '/admin/system/export', icon: Download },
 ];
 

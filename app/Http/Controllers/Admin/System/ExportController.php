@@ -148,38 +148,53 @@ final class ExportController extends Controller
 
         $filename = "database-backup-{$database}-".now()->format('Y-m-d-His').'.sql';
 
-        return new StreamedResponse(function () use ($dump, $host, $port, $database, $username, $password): void {
+        $credsFile = tempnam(sys_get_temp_dir(), 'mysqldump_');
+        if ($credsFile === false) {
+            abort(500, 'Unable to allocate temp file for mysqldump credentials.');
+        }
+        @chmod($credsFile, 0600);
+        file_put_contents(
+            $credsFile,
+            "[client]\npassword=\"".str_replace('"', '\"', $password)."\"\n",
+        );
+
+        return new StreamedResponse(function () use ($dump, $credsFile, $host, $port, $database, $username): void {
             while (ob_get_level() > 0) {
                 ob_end_clean();
             }
 
-            $process = new SymfonyProcess([
-                $dump,
-                "--host={$host}",
-                "--port={$port}",
-                "--user={$username}",
-                '--single-transaction',
-                '--quick',
-                '--lock-tables=false',
-                '--no-tablespaces',
-                '--default-character-set=utf8mb4',
-                $database,
-            ], null, ['MYSQL_PWD' => $password]);
+            try {
+                $process = new SymfonyProcess([
+                    $dump,
+                    '--defaults-extra-file='.$credsFile,
+                    "--host={$host}",
+                    "--port={$port}",
+                    "--user={$username}",
+                    '--single-transaction',
+                    '--quick',
+                    '--lock-tables=false',
+                    '--no-tablespaces',
+                    '--default-character-set=utf8mb4',
+                    $database,
+                ], null, $this->subprocessEnv());
 
-            $process->setTimeout(600);
-            $process->start();
+                $process->setTimeout(600);
+                $process->start();
 
-            foreach ($process as $type => $chunk) {
-                if ($type === SymfonyProcess::OUT) {
-                    echo $chunk;
-                } else {
-                    foreach (preg_split('/\r?\n/', $chunk) ?: [] as $line) {
-                        if ($line !== '') {
-                            echo "-- mysqldump stderr: {$line}\n";
+                foreach ($process as $type => $chunk) {
+                    if ($type === SymfonyProcess::OUT) {
+                        echo $chunk;
+                    } else {
+                        foreach (preg_split('/\r?\n/', $chunk) ?: [] as $line) {
+                            if ($line !== '') {
+                                echo "-- mysqldump stderr: {$line}\n";
+                            }
                         }
                     }
+                    flush();
                 }
-                flush();
+            } finally {
+                @unlink($credsFile);
             }
         }, 200, [
             'Content-Type' => 'application/sql',
@@ -187,6 +202,37 @@ final class ExportController extends Controller
             'X-Accel-Buffering' => 'no',
             'Cache-Control' => 'no-cache, no-store, must-revalidate',
         ]);
+    }
+
+    /**
+     * Explicit subprocess environment.
+     *
+     * Apache + PHP-FPM under XAMPP scrub most of the parent environment
+     * by default. mysqldump on Windows needs SystemRoot / WINDIR for
+     * Winsock to initialise.
+     *
+     * @return array<string, string>
+     */
+    private function subprocessEnv(): array
+    {
+        if (PHP_OS_FAMILY !== 'Windows') {
+            return [
+                'PATH' => (string) (getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin'),
+                'HOME' => (string) (getenv('HOME') ?: sys_get_temp_dir()),
+                'LANG' => (string) (getenv('LANG') ?: 'C.UTF-8'),
+            ];
+        }
+
+        return [
+            'SystemRoot' => (string) (getenv('SystemRoot') ?: 'C:\\Windows'),
+            'WINDIR' => (string) (getenv('WINDIR') ?: 'C:\\Windows'),
+            'TEMP' => (string) (getenv('TEMP') ?: sys_get_temp_dir()),
+            'TMP' => (string) (getenv('TMP') ?: sys_get_temp_dir()),
+            'PATH' => (string) (getenv('PATH') ?: 'C:\\Windows\\system32;C:\\Windows'),
+            'PATHEXT' => (string) (getenv('PATHEXT') ?: '.COM;.EXE;.BAT;.CMD'),
+            'SYSTEMDRIVE' => (string) (getenv('SYSTEMDRIVE') ?: 'C:'),
+            'COMSPEC' => (string) (getenv('COMSPEC') ?: 'C:\\Windows\\system32\\cmd.exe'),
+        ];
     }
 
     /**

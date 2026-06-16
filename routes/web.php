@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetContr
 use App\Http\Controllers\Admin\Settings\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\System\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\System\CacheController as AdminCacheController;
+use App\Http\Controllers\Admin\System\EmailLogController as AdminEmailLogController;
 use App\Http\Controllers\Admin\System\ExportController as AdminExportController;
 use App\Http\Controllers\Admin\System\HealthController as AdminHealthController;
 use App\Http\Controllers\Admin\System\SeoController as AdminSeoSystemController;
@@ -277,6 +278,13 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('activity', [AdminActivityLogController::class, 'index'])
                 ->middleware('permission:settings.activity')
                 ->name('activity');
+            Route::get('email-log', [AdminEmailLogController::class, 'index'])
+                ->middleware('permission:settings.activity')
+                ->name('email-log.index');
+            Route::get('email-log/{emailLog}', [AdminEmailLogController::class, 'show'])
+                ->middleware('permission:settings.activity')
+                ->where('emailLog', '[0-9]+')
+                ->name('email-log.show');
             Route::get('export', [AdminExportController::class, 'index'])
                 ->middleware('permission:system.cache')
                 ->name('export');
