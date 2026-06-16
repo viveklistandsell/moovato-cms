@@ -86,7 +86,6 @@
             width: 2.25rem;
             height: 2.25rem;
             border-radius: 0.625rem;
-            background: var(--accent);
             color: white;
             font-weight: 700;
             font-size: 1rem;

@@ -71,34 +71,47 @@ function submit(): void {
                 </CardHeader>
                 <CardContent class="grid gap-3 sm:grid-cols-2">
                     <div class="space-y-1">
-                        <Label for="session_lifetime_minutes">Session lifetime (minutes)</Label>
+                        <Label for="session_lifetime_minutes">
+                            Session lifetime (minutes)
+                        </Label>
                         <Input
                             id="session_lifetime_minutes"
-                            :v-model.number="form.session_lifetime_minutes"
+                            v-model.number="form.session_lifetime_minutes"
                             type="number"
-                            min="1"
-                            max="65535"
+                            min="5"
+                            max="10080"
+                            step="5"
                             placeholder="120"
                         />
                         <p class="text-xs text-muted-foreground">
-                            Default falls back to <code>SESSION_LIFETIME</code> in .env.
+                            Accepted range: <strong>5 – 10 080 min</strong>
+                            (5 min to 1 week). Leave empty to fall back to
+                            <code>SESSION_LIFETIME</code> in .env.
                         </p>
-                        <InputError :message="form.errors.session_lifetime_minutes" />
+                        <InputError
+                            :message="form.errors.session_lifetime_minutes"
+                        />
                     </div>
                     <div class="space-y-1">
-                        <Label for="login_throttle_attempts">Login throttle (attempts)</Label>
+                        <Label for="login_throttle_attempts">
+                            Login throttle (attempts per minute)
+                        </Label>
                         <Input
                             id="login_throttle_attempts"
-                            :v-model.number="form.login_throttle_attempts"
+                            v-model.number="form.login_throttle_attempts"
                             type="number"
                             min="1"
-                            max="1000"
+                            max="60"
                             placeholder="5"
                         />
                         <p class="text-xs text-muted-foreground">
-                            Failed logins per minute before lockout.
+                            Accepted range: <strong>1 – 60 attempts/min</strong>
+                            before the IP + email combo is locked out. Leave
+                            empty for Fortify's default of 5.
                         </p>
-                        <InputError :message="form.errors.login_throttle_attempts" />
+                        <InputError
+                            :message="form.errors.login_throttle_attempts"
+                        />
                     </div>
                 </CardContent>
             </Card>

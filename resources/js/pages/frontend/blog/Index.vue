@@ -188,6 +188,8 @@ function cleanLabel(label: string): string {
         <CategoryFilter
             :categories="categories"
             :active-slug="activeCategory"
+            :active-tag="activeTag"
+            :search-term="searchTerm"
             :locale="locale"
             class="mb-4"
         />
@@ -201,6 +203,8 @@ function cleanLabel(label: string): string {
         <TagFilter
             :tags="tags"
             :active-slug="activeTag"
+            :active-category="activeCategory"
+            :search-term="searchTerm"
             :locale="locale"
             class="mb-8 border-b border-border/60 pb-6"
         />

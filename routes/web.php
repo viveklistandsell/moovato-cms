@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryContr
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MediaFileController;
@@ -18,7 +19,11 @@ use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryContr
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
 use App\Http\Controllers\Admin\Settings\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\System\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\System\CacheController as AdminCacheController;
+use App\Http\Controllers\Admin\System\EmailLogController as AdminEmailLogController;
+use App\Http\Controllers\Admin\System\ExportController as AdminExportController;
+use App\Http\Controllers\Admin\System\HealthController as AdminHealthController;
 use App\Http\Controllers\Admin\System\SeoController as AdminSeoSystemController;
 use App\Http\Controllers\Admin\User\PermissionController as AdminPermissionController;
 use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
@@ -93,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::redirect('admin', '/dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('search', AdminSearchController::class)->name('search');
         Route::prefix('blog')->name('blog.')->group(function (): void {
             Route::post('categories/reorder', [AdminBlogCategoryController::class, 'reorder'])
                 ->name('categories.reorder');
@@ -169,6 +175,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('/', [AdminUserController::class, 'index'])
                 ->middleware('permission:users.view')
                 ->name('index');
+            Route::get('create', [AdminUserController::class, 'create'])
+                ->middleware('permission:users.create')
+                ->name('create');
 
             Route::post('/', [AdminUserController::class, 'store'])
                 ->middleware('permission:users.create')
@@ -266,6 +275,31 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('robots', [AdminSeoSystemController::class, 'robots'])
                 ->middleware('permission:system.cache')
                 ->name('robots');
+            Route::get('activity', [AdminActivityLogController::class, 'index'])
+                ->middleware('permission:settings.activity')
+                ->name('activity');
+            Route::get('email-log', [AdminEmailLogController::class, 'index'])
+                ->middleware('permission:settings.activity')
+                ->name('email-log.index');
+            Route::get('email-log/{emailLog}', [AdminEmailLogController::class, 'show'])
+                ->middleware('permission:settings.activity')
+                ->where('emailLog', '[0-9]+')
+                ->name('email-log.show');
+            Route::get('export', [AdminExportController::class, 'index'])
+                ->middleware('permission:system.cache')
+                ->name('export');
+            Route::get('export/pages', [AdminExportController::class, 'pages'])
+                ->middleware('permission:system.cache')
+                ->name('export.pages');
+            Route::get('export/posts', [AdminExportController::class, 'posts'])
+                ->middleware('permission:system.cache')
+                ->name('export.posts');
+            Route::get('export/database', [AdminExportController::class, 'database'])
+                ->middleware('permission:system.cache')
+                ->name('export.database');
+            Route::get('health', [AdminHealthController::class, 'index'])
+                ->middleware('permission:system.cache')
+                ->name('health');
         });
 
         Route::prefix('menus')->name('menus.')->group(function (): void {
