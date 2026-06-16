@@ -114,16 +114,6 @@ defineProps<{ settings: Settings; data: Data }>();
                         v-if="data.founder_name"
                         class="flex items-center gap-3"
                     >
-                        <span class="ax-founder-avatar">
-                            <img
-                                v-if="settings.founder_url"
-                                :src="settings.founder_url"
-                                :alt="data.founder_alt || data.founder_name"
-                                loading="lazy"
-                                decoding="async"
-                            />
-                            <ImageIcon v-else class="size-5" />
-                        </span>
                         <span class="leading-tight">
                             <span
                                 class="block font-semibold text-[var(--midnight)]"
