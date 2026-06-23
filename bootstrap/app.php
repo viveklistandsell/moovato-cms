@@ -11,6 +11,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -23,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->preventRequestForgery(except: ['cookie-consent']);
 
         $middleware->web(append: [
             MaintenanceMode::class,
@@ -42,5 +46,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->respond(function (Response $response, \Throwable $exception, Request $request): Response {
+            if (! in_array($response->getStatusCode(), [404, 405], true)) {
+                return $response;
+            }
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return $response;
+            }
+            if ($request->is('admin/*') || $request->is('admin')) {
+                return $response;
+            }
+            return Inertia::render('frontend/NotFound', [
+                'locale' => app()->getLocale(),
+            ])->toResponse($request)->setStatusCode(404);
+        });
     })->create();

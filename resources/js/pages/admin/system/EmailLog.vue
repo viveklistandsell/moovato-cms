@@ -2,14 +2,16 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertCircle,
+    AlertTriangle,
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
     Clock,
-    Filter,
+    Eye,
     Mail,
     Paperclip,
     Search,
+    Trash2,
     X,
 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
@@ -22,6 +24,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 type EmailLogRow = {
@@ -133,6 +143,15 @@ return '—';
     return new Date(iso).toLocaleString();
 }
 
+function senderLabel(row: EmailLogRow): string {
+    if (!row.from_address) {
+        return '—';
+    }
+    return row.from_name
+        ? `${row.from_name} <${row.from_address}>`
+        : row.from_address;
+}
+
 function recipientLabel(row: EmailLogRow): string {
     if (row.to_addresses.length === 0) {
 return '—';
@@ -156,6 +175,32 @@ const STATUS_ICON: Record<EmailLogRow['status'], typeof CheckCircle2> = {
     pending: Clock,
     failed: AlertCircle,
 };
+
+const deleteTarget = ref<EmailLogRow | null>(null);
+const deleting = ref<boolean>(false);
+
+function askDelete(row: EmailLogRow): void {
+    deleteTarget.value = row;
+}
+
+function cancelDelete(): void {
+    deleteTarget.value = null;
+}
+
+function confirmDelete(): void {
+    if (!deleteTarget.value) {
+        return;
+    }
+    const id = deleteTarget.value.id;
+    deleting.value = true;
+    router.delete(`/admin/system/email-log/${id}`, {
+        preserveScroll: true,
+        onFinish: () => {
+            deleting.value = false;
+            deleteTarget.value = null;
+        },
+    });
+}
 
 function isPrev(label: string): boolean {
     return label.toLowerCase().includes('previous') || label.includes('&laquo;');
@@ -269,7 +314,7 @@ function cleanLabel(label: string): string {
                                 class="border-t"
                             >
                                 <td
-                                    colspan="7"
+                                    colspan="8"
                                     class="px-4 py-12 text-center text-muted-foreground"
                                 >
                                     <Mail class="mx-auto mb-2 size-6 opacity-40" />
@@ -298,11 +343,11 @@ function cleanLabel(label: string): string {
                                         {{ row.status }}
                                     </span>
                                 </td>
-                                 <td
+                                <td
                                     class="max-w-[280px] truncate px-4 py-3 text-xs"
-                                    :title="recipientLabel(row)"
+                                    :title="senderLabel(row)"
                                 >
-                                    {{ recipientLabel(row) }}
+                                    {{ senderLabel(row) }}
                                 </td>
                                 <td
                                     class="max-w-[280px] truncate px-4 py-3 text-xs"
@@ -339,12 +384,23 @@ function cleanLabel(label: string): string {
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <Link
-                                        :href="`/admin/system/email-log/${row.id}`"
-                                        class="text-xs text-primary underline-offset-4 hover:underline"
-                                    >
-                                        View
-                                    </Link>
+                                    <div class="flex items-center justify-end gap-1">
+                                        <Link
+                                            :href="`/admin/system/email-log/${row.id}`"
+                                            class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                                            title="View"
+                                        >
+                                            <Eye class="size-4" />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400"
+                                            title="Delete"
+                                            @click="askDelete(row)"
+                                        >
+                                            <Trash2 class="size-4" />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -410,5 +466,55 @@ function cleanLabel(label: string): string {
                 </span>
             </template>
         </div>
+
+        <Dialog
+            :open="deleteTarget !== null"
+            @update:open="(v) => !v && cancelDelete()"
+        >
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle class="flex items-center gap-2">
+                        <AlertTriangle class="size-5 text-rose-500" />
+                        Delete email log entry?
+                    </DialogTitle>
+                    <DialogDescription>
+                        This removes the log row only — the email was already
+                        sent (or attempted) and the audit trail of this attempt
+                        is gone for good. This action cannot be undone.
+                    </DialogDescription>
+                </DialogHeader>
+                <div
+                    v-if="deleteTarget"
+                    class="rounded-md border bg-muted/30 p-3 text-xs"
+                >
+                    <div class="font-medium">
+                        {{ deleteTarget.subject }}
+                    </div>
+                    <div class="mt-1 text-muted-foreground">
+                        to {{ recipientLabel(deleteTarget) }} —
+                        {{ formatTimestamp(deleteTarget.created_at) }}
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        :disabled="deleting"
+                        @click="cancelDelete"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        :disabled="deleting"
+                        @click="confirmDelete"
+                    >
+                        <Trash2 class="size-4" />
+                        {{ deleting ? 'Deleting…' : 'Delete' }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

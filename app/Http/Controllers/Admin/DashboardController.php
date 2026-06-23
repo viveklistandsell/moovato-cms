@@ -32,6 +32,10 @@ final class DashboardController extends Controller
         $now = Carbon::now();
         $weekAgo = $now->copy()->subDays(7);
         $monthAgo = $now->copy()->subDays(30);
+        $range = (string) $request->query('range', '30d');
+        if (! in_array($range, ['7d', '30d', '90d', 'year'], true)) {
+            $range = '30d';
+        }
 
         return Inertia::render('Dashboard', [
             'welcome' => [
@@ -42,6 +46,8 @@ final class DashboardController extends Controller
                 'role_display_name' => $this->roleDisplayName($user),
                 'member_since' => $user?->created_at?->toIso8601String(),
             ],
+            'range' => $range,
+            'achievements' => fn (): array => $this->achievements($weekAgo),
             'kpis' => fn (): array => $this->kpis($weekAgo),
             'chart' => fn (): array => $this->contentChart($now),
             'topPosts' => fn (): array => $this->topPosts(),
@@ -72,6 +78,97 @@ final class DashboardController extends Controller
         $role = $user->roles->first();
 
         return $role?->display_name ?? $role?->name;
+    }
+
+    /**
+     * Achievements + streak badges shown in the welcome strip. All
+     * computed from existing data (no extra columns). Returned in
+     * display order; the welcome strip caps at the first 3 active
+     * ones so we never overflow the row.
+     *
+     * @return array<int, array{key: string, icon: string, label: string, value: string|int, tone: string}>
+     */
+    private function achievements(Carbon $weekAgo): array
+    {
+        $badges = [];
+        $today = Carbon::now()->startOfDay();
+        $streak = 0;
+        for ($i = 0; $i < 60; $i++) {   
+            $dayStart = $today->copy()->subDays($i);
+            $dayEnd = $dayStart->copy()->endOfDay();
+            $hit = Page::query()
+                ->whereBetween('created_at', [$dayStart, $dayEnd])
+                ->exists()
+                || Blog::query()
+                    ->whereBetween('created_at', [$dayStart, $dayEnd])
+                    ->exists();
+            if (! $hit) {
+                break;
+            }
+            $streak++;
+        }
+        if ($streak >= 2) {
+            $badges[] = [
+                'key' => 'streak',
+                'icon' => '🔥',
+                'label' => $streak.'-day streak',
+                'value' => $streak,
+                'tone' => 'fire',
+            ];
+        }
+
+        // 2. Weekly velocity — items created this week.
+        $thisWeek = Page::query()->where('created_at', '>=', $weekAgo)->count()
+            + Blog::query()->where('created_at', '>=', $weekAgo)->count();
+        if ($thisWeek >= 5) {
+            $badges[] = [
+                'key' => 'weekly_velocity',
+                'icon' => '⚡',
+                'label' => $thisWeek.' this week',
+                'value' => $thisWeek,
+                'tone' => 'orange',
+            ];
+        }
+
+        // 3. Views milestone — cumulative blog views.
+        $totalViews = (int) Blog::query()->sum('view_count');
+        $viewsMilestone = match (true) {
+            $totalViews >= 100_000 => 100_000,
+            $totalViews >= 10_000 => 10_000,
+            $totalViews >= 1_000 => 1_000,
+            $totalViews >= 100 => 100,
+            default => 0,
+        };
+        if ($viewsMilestone > 0) {
+            $badges[] = [
+                'key' => 'views',
+                'icon' => '🚀',
+                'label' => number_format($viewsMilestone).'+ views',
+                'value' => $totalViews,
+                'tone' => 'sky',
+            ];
+        }
+
+        // 4. Content total milestone — page + blog count thresholds.
+        $totalContent = Page::query()->count() + Blog::query()->count();
+        $contentMilestone = match (true) {
+            $totalContent >= 500 => 500,
+            $totalContent >= 100 => 100,
+            $totalContent >= 50 => 50,
+            $totalContent >= 10 => 10,
+            default => 0,
+        };
+        if ($contentMilestone > 0) {
+            $badges[] = [
+                'key' => 'content',
+                'icon' => '✍️',
+                'label' => $contentMilestone.'+ items',
+                'value' => $totalContent,
+                'tone' => 'violet',
+            ];
+        }
+
+        return $badges;
     }
 
     /**

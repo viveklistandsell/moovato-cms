@@ -2,6 +2,7 @@
 import { usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted } from 'vue';
 import BackToTop from '@/components/frontend/BackToTop.vue';
+import CookieBanner from '@/components/frontend/CookieBanner.vue';
 import SiteCursor from '@/components/frontend/SiteCursor.vue';
 import SiteFooter from '@/components/frontend/SiteFooter.vue';
 import SiteHeader from '@/components/frontend/SiteHeader.vue';
@@ -17,12 +18,18 @@ const locale = computed<string>(() => {
     return match ? match[1] : 'de';
 });
 
-type SiteLayout = { show_back_to_top?: boolean };
+type SiteLayout = {
+    show_back_to_top?: boolean;
+    cookie_consent_required?: boolean;
+};
 const layout = computed<SiteLayout>(
     () => ((page.props as Record<string, unknown>).siteLayout ?? {}) as SiteLayout,
 );
 const showBackToTop = computed<boolean>(
     () => layout.value.show_back_to_top !== false,
+);
+const showCookieBanner = computed<boolean>(
+    () => layout.value.cookie_consent_required === true,
 );
 
 // Public frontend is always light — admin owns the theme toggle.
@@ -50,5 +57,6 @@ onUnmounted(() => {
         <SiteFooter :locale="locale" />
         <BackToTop v-if="showBackToTop" />
         <SiteCursor />
+        <CookieBanner v-if="showCookieBanner" />
     </div>
 </template>

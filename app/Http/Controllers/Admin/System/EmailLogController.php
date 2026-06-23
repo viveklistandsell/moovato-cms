@@ -47,7 +47,7 @@ final class EmailLogController extends Controller
             });
         }
 
-        $paginator = $query->paginate(25)->withQueryString();
+        $paginator = $query->paginate(15)->withQueryString();
 
         return Inertia::render('admin/system/EmailLog', [
             'logs' => [
@@ -95,6 +95,11 @@ final class EmailLogController extends Controller
                 'message_id' => $emailLog->message_id,
             ],
         ]);
+    }
+    public function destroy(EmailLog $emailLog): \Illuminate\Http\RedirectResponse
+    {
+        $emailLog->delete();
+        return back()->with('success', 'Email log entry deleted.');
     }
 
     /**

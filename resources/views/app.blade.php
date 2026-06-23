@@ -64,21 +64,31 @@
         @if (! ($siteSetting->robots_index ?? true))
             <meta name="robots" content="noindex,nofollow">
         @endif
+        @php($consentRequired = (bool) ($siteSetting->cookie_consent_required ?? false))
 
         @if ($siteSetting->google_tag_manager_id)
-            <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ $siteSetting->google_tag_manager_id }}');</script>
+            <script
+                @if ($consentRequired) type="text/plain" data-category="analytics" data-service="google_tag_manager" @endif
+            >(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ $siteSetting->google_tag_manager_id }}');</script>
         @endif
         @if ($siteSetting->google_analytics_id)
-            <script async src="https://www.googletagmanager.com/gtag/js?id={{ $siteSetting->google_analytics_id }}"></script>
-            <script>
+            <script
+                @if ($consentRequired) type="text/plain" data-category="analytics" data-service="google_analytics" @endif
+                async src="https://www.googletagmanager.com/gtag/js?id={{ $siteSetting->google_analytics_id }}"
+            ></script>
+            <script
+                @if ($consentRequired) type="text/plain" data-category="analytics" data-service="google_analytics" @endif
+            >
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '{{ $siteSetting->google_analytics_id }}');
+                gtag('config', '{{ $siteSetting->google_analytics_id }}', { 'anonymize_ip': true });
             </script>
         @endif
         @if ($siteSetting->meta_pixel_id)
-            <script>
+            <script
+                @if ($consentRequired) type="text/plain" data-category="marketing" data-service="meta_pixel" @endif
+            >
                 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
                 fbq('init', '{{ $siteSetting->meta_pixel_id }}');
                 fbq('track', 'PageView');
@@ -101,7 +111,11 @@
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">
-        @if ($siteSetting->google_tag_manager_id)
+        {{-- GTM noscript fallback. Skipped entirely when consent is
+             required — there's no way to gate an iframe behind JS
+             consent (the visitor doesn't have JS), so we keep it
+             off until a per-user opt-in is explicitly recorded. --}}
+        @if ($siteSetting->google_tag_manager_id && ! $consentRequired)
             <noscript>
                 <iframe src="https://www.googletagmanager.com/ns.html?id={{ $siteSetting->google_tag_manager_id }}"
                         height="0" width="0" style="display:none;visibility:hidden"></iframe>

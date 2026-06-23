@@ -184,4 +184,52 @@
     body {
         @apply bg-background text-foreground;
     }
+    html {
+        @apply scroll-smooth;
+        scroll-padding-top: 4rem;
+    }
+    /* Cookie consent — brand vanilla-cookieconsent v3 via the CSS
+       custom properties it reads internally. Every colour points at
+       a Moovato design token defined in gs.css :root, so the banner
+       reuses the same palette as the rest of the site with zero
+       hard-coded hex values. */
+    #cc-main {
+        --cc-font-family: inherit;
+        --cc-bg: var(--linen);
+        --cc-primary-color: var(--midnight);
+        --cc-secondary-color: var(--slate);
+        --cc-btn-primary-bg: var(--orange);
+        --cc-btn-primary-color: var(--midnight);
+        --cc-btn-primary-hover-bg: var(--midnight);
+        --cc-btn-primary-hover-color: var(--orange);
+        --cc-btn-secondary-bg: transparent;
+        --cc-btn-secondary-color: var(--midnight);
+        --cc-btn-secondary-border-color: var(--midnight);
+        --cc-btn-secondary-hover-bg: var(--midnight);
+        --cc-btn-secondary-hover-color: var(--linen);
+        --cc-btn-secondary-hover-border-color: var(--midnight);
+        --cc-toggle-on-bg: var(--orange);
+        --cc-toggle-off-bg: var(--slate-light);
+        --cc-toggle-on-knob-bg: var(--midnight);
+        --cc-toggle-off-knob-bg: var(--linen);
+        --cc-toggle-readonly-bg: var(--slate-light);
+        --cc-toggle-readonly-knob-bg: var(--linen);
+        --cc-cookie-category-block-bg: var(--white);
+        --cc-cookie-category-block-border: var(--slate-light);
+        --cc-cookie-category-block-hover-bg: var(--paper);
+        --cc-cookie-category-expanded-block-bg: var(--paper);
+        --cc-overlay-bg: color-mix(in srgb, var(--midnight) 60%, transparent);
+        --cc-section-border: var(--slate-light);
+        --cc-separator-border-color: var(--slate-light);
+        --cc-modal-border-radius: calc(var(--radius) * 2);
+        --cc-btn-border-radius: 9999px;
+    }
+    #cc-main .cm__title,
+    #cc-main .pm__title {
+        @apply font-bold;
+    }
+    #cc-main .cm__btn,
+    #cc-main .pm__btn {
+        @apply font-semibold;
+    }
 }

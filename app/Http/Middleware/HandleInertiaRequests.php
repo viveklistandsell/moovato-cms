@@ -61,6 +61,12 @@ final class HandleInertiaRequests extends Middleware
             'siteSettings' => fn (): array => $this->presentSiteSettings(),
             'siteLayout' => fn (): array => $this->presentLayout(),
             'siteLegal' => fn (): array => $this->presentLegalLinks(),
+            'flash' => fn (): array => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'test_mail_success' => $request->session()->get('test_mail_success'),
+                'test_mail_error' => $request->session()->get('test_mail_error'),
+            ],
         ];
     }
 
@@ -114,6 +120,7 @@ final class HandleInertiaRequests extends Middleware
             'show_language_switcher' => (bool) ($s->show_language_switcher ?? true),
             'show_back_to_top' => (bool) ($s->show_back_to_top ?? true),
             'footer_copyright_auto_year' => (bool) ($s->footer_copyright_auto_year ?? true),
+            'cookie_consent_required' => (bool) ($s->cookie_consent_required ?? false),
         ];
     }
 
