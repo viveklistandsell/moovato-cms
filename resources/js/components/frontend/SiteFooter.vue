@@ -46,6 +46,7 @@ const t = computed(() =>
               openingHours: 'Öffnungszeiten',
               hours: 'Mo–Fr 8–18 Uhr',
               rights: 'Alle Rechte vorbehalten.',
+              cookieSettings: 'Cookie-Einstellungen',
           }
         : {
               tagline:
@@ -59,6 +60,7 @@ const t = computed(() =>
               openingHours: 'Opening hours',
               hours: 'Mon–Fri 8am–6pm',
               rights: 'All Rights Reserved.',
+              cookieSettings: 'Cookie Settings',
           },
 );
 
@@ -308,6 +310,14 @@ const socials = computed<Array<{ label: string; icon: typeof Facebook; href: str
                 <p class="mv-footer__copy">
                     © Copyrights {{ year }} - <strong>{{ brandName }}</strong>
                     {{ t.rights }}
+                    <span class="mx-1.5 opacity-50">·</span>
+                    <button
+                        type="button"
+                        class="inline cursor-pointer border-0 bg-transparent p-0 text-inherit underline underline-offset-[3px] opacity-85 transition-opacity hover:opacity-100 hover:text-[var(--orange)]"
+                        data-cookie-settings
+                    >
+                        {{ t.cookieSettings }}
+                    </button>
                 </p>
                 <a
                     class="heart"

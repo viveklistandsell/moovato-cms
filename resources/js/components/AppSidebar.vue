@@ -51,6 +51,17 @@ import {
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
+const BRAND_BUTTON_CLASS = [
+    'transition-colors hover:bg-[var(--orange)]/8 hover:text-[var(--orange)]',
+    'data-[active=true]:bg-[var(--orange)]/12 data-[active=true]:text-[var(--orange)] data-[active=true]:font-semibold',
+    'data-[active=true]:hover:bg-[var(--orange)]/18 data-[active=true]:hover:text-[var(--orange)]',
+    'data-[active=true]:shadow-[inset_3px_0_0_var(--orange)]',
+].join(' ');
+
+const BRAND_SUB_CLASS = [
+    'transition-colors hover:bg-[var(--orange)]/8 hover:text-[var(--orange)]',
+    'data-[active=true]:bg-[var(--orange)]/12 data-[active=true]:text-[var(--orange)] data-[active=true]:font-semibold',
+].join(' ');
 
 const platformItems: NavItem[] = [
     {
@@ -84,13 +95,17 @@ const settingsItems: NavItem[] = [
     { title: 'Security', href: '/admin/settings/security', icon: Settings2Icon },
 ];
 
+const mailItems: NavItem[] = [
+    { title: 'Email Configuration', href: '/admin/settings/email', icon: Settings2Icon },
+    { title: 'Email Log', href: '/admin/system/email-log', icon: Activity },
+];
+
 const systemItems: NavItem[] = [
     { title: 'Health', href: '/admin/system/health', icon: HeartPulse },
     { title: 'Cache Management', href: '/admin/system/cache', icon: Database },
     { title: 'Sitemap', href: '/admin/system/sitemap', icon: ListTree },
     { title: 'Robots.txt', href: '/admin/system/robots', icon: Bot },
     { title: 'Activity Log', href: '/admin/system/activity', icon: Activity },
-    { title: 'Email Log', href: '/admin/system/email-log', icon: MailIcon },
     { title: 'Export & Backup', href: '/admin/system/export', icon: Download },
 ];
 
@@ -186,6 +201,10 @@ const isSystemSectionActive = computed(() =>
     systemItems.some((item) => isCurrentUrl(item.href)),
 );
 
+const isMailSectionActive = computed(() =>
+    mailItems.some((item) => isCurrentUrl(item.href)),
+);
+
 const isUserSectionActive = computed(
     () =>
         isCurrentUrl('/admin/users') ||
@@ -222,6 +241,8 @@ const isUserSectionActive = computed(
                                 <SidebarMenuButton
                                     as-child
                                     tooltip="Blog Management"
+                                    :is-active="isBlogSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
                                 >
                                     <Link :href="blogItems[0].href">
                                         <Newspaper />
@@ -241,6 +262,7 @@ const isUserSectionActive = computed(
                                         <SidebarMenuSubButton
                                             as-child
                                             :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
                                         >
                                             <Link :href="item.href">
                                                 <component :is="item.icon" />
@@ -263,6 +285,8 @@ const isUserSectionActive = computed(
                                 <SidebarMenuButton
                                     as-child
                                     tooltip="Page Management"
+                                    :is-active="isPageSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
                                 >
                                     <Link :href="pageItems[0].href">
                                         <Files />
@@ -282,6 +306,7 @@ const isUserSectionActive = computed(
                                         <SidebarMenuSubButton
                                             as-child
                                             :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
                                         >
                                             <Link :href="item.href">
                                                 <component :is="item.icon" />
@@ -304,6 +329,8 @@ const isUserSectionActive = computed(
                                 <SidebarMenuButton
                                     as-child
                                     tooltip="Navigation Management"
+                                    :is-active="isNavigationSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
                                 >
                                     <Link :href="navigationItems[0].href">
                                         <Navigation />
@@ -323,6 +350,7 @@ const isUserSectionActive = computed(
                                         <SidebarMenuSubButton
                                             as-child
                                             :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
                                         >
                                             <Link :href="item.href">
                                                 <component :is="item.icon" />
@@ -340,6 +368,7 @@ const isUserSectionActive = computed(
                             as-child
                             :is-active="isCurrentUrl(mediaItem.href)"
                             :tooltip="mediaItem.title"
+                            :class="BRAND_BUTTON_CLASS"
                         >
                             <Link :href="mediaItem.href">
                                 <component :is="mediaItem.icon" />
@@ -353,6 +382,7 @@ const isUserSectionActive = computed(
                             as-child
                             :is-active="isCurrentUrl(languagesItem.href)"
                             :tooltip="languagesItem.title"
+                            :class="BRAND_BUTTON_CLASS"
                         >
                             <Link :href="languagesItem.href">
                                 <component :is="languagesItem.icon" />
@@ -368,7 +398,12 @@ const isUserSectionActive = computed(
                     >
                         <SidebarMenuItem>
                             <CollapsibleTrigger as-child>
-                                <SidebarMenuButton as-child tooltip="Settings">
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Settings"
+                                    :is-active="isSettingsSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
+                                >
                                     <Link :href="settingsItems[0].href">
                                         <Settings2Icon />
                                         <span>Settings</span>
@@ -387,6 +422,51 @@ const isUserSectionActive = computed(
                                         <SidebarMenuSubButton
                                             as-child
                                             :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+
+                    <Collapsible
+                        :default-open="isMailSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Mail"
+                                    :is-active="isMailSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
+                                >
+                                    <Link :href="mailItems[0].href">
+                                        <MailIcon />
+                                        <span>Mail</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in mailItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
                                         >
                                             <Link :href="item.href">
                                                 <component :is="item.icon" />
@@ -406,7 +486,12 @@ const isUserSectionActive = computed(
                     >
                         <SidebarMenuItem>
                             <CollapsibleTrigger as-child>
-                                <SidebarMenuButton as-child tooltip="System">
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="System"
+                                    :is-active="isSystemSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
+                                >
                                     <Link :href="systemItems[0].href">
                                         <Server />
                                         <span>System</span>
@@ -425,6 +510,7 @@ const isUserSectionActive = computed(
                                         <SidebarMenuSubButton
                                             as-child
                                             :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
                                         >
                                             <Link :href="item.href">
                                                 <component :is="item.icon" />
@@ -447,6 +533,8 @@ const isUserSectionActive = computed(
                                 <SidebarMenuButton
                                     as-child
                                     tooltip="User Management"
+                                    :is-active="isUserSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
                                 >
                                     <Link :href="userItems[0].href">
                                         <UserRoundCheck />
@@ -466,6 +554,7 @@ const isUserSectionActive = computed(
                                         <SidebarMenuSubButton
                                             as-child
                                             :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
                                         >
                                             <Link :href="item.href">
                                                 <component :is="item.icon" />

@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSett
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\Settings\EmailSettingsController as AdminEmailSettingsController;
 use App\Http\Controllers\Admin\Settings\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\System\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\System\CacheController as AdminCacheController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\RobotsController;
+use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
 use App\Http\Controllers\Frontend\SitemapController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +40,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
+
+// Cookie consent audit endpoint
+Route::post('cookie-consent', [FrontendCookieConsentController::class, 'store'])
+    ->middleware('throttle:30,1')
+    ->name('cookie-consent.store');
 
 // Default-locale (DE) routes live at the root with no /de prefix.
 Route::middleware('locale')->group(function (): void {
@@ -255,6 +262,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
                 }
             });
 
+        Route::prefix('settings/email')->name('settings.email.')->middleware('permission:settings.email')->group(function (): void {
+            Route::get('/', [AdminEmailSettingsController::class, 'edit'])->name('edit');
+            Route::match(['put', 'patch'], '/', [AdminEmailSettingsController::class, 'update'])->name('update');
+            Route::post('test', [AdminEmailSettingsController::class, 'sendTest'])->name('test');
+        });
+
         Route::prefix('system')->name('system.')->group(function (): void {
             Route::get('cache', [AdminCacheController::class, 'index'])
                 ->middleware('permission:system.cache')
@@ -285,6 +298,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
                 ->middleware('permission:settings.activity')
                 ->where('emailLog', '[0-9]+')
                 ->name('email-log.show');
+            Route::delete('email-log/{emailLog}', [AdminEmailLogController::class, 'destroy'])
+                ->middleware('permission:settings.activity')
+                ->where('emailLog', '[0-9]+')
+                ->name('email-log.destroy');
             Route::get('export', [AdminExportController::class, 'index'])
                 ->middleware('permission:system.cache')
                 ->name('export');

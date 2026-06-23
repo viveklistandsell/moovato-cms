@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Listeners\RecordSuccessfulLogin;
+use App\Models\EmailSetting;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -23,6 +24,44 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->overrideSessionLifetime();
     }
+    private function configureMailFromDatabase(): void
+    {
+        try {
+            $s = EmailSetting::current();
+        } catch (Throwable) {
+            return;
+        }
+
+        if (! $s->exists) {
+            return;
+        }
+        if ($s->mail_transport) {
+            config(['mail.default' => $s->mail_transport]);
+        }
+
+        if ($s->mail_host) {
+            config(['mail.mailers.smtp.host' => $s->mail_host]);
+        }
+        if ($s->mail_port) {
+            config(['mail.mailers.smtp.port' => $s->mail_port]);
+        }
+        if ($s->mail_username !== null && $s->mail_username !== '') {
+            config(['mail.mailers.smtp.username' => $s->mail_username]);
+        }
+        if ($s->mail_password !== null && $s->mail_password !== '') {
+            config(['mail.mailers.smtp.password' => $s->mail_password]);
+        }
+        // Encryption explicitly settable to null = no encryption.
+        config(['mail.mailers.smtp.encryption' => $s->mail_encryption ?: null]);
+
+        if ($s->mail_from_address) {
+            config(['mail.from.address' => $s->mail_from_address]);
+        }
+        if ($s->mail_from_name) {
+            config(['mail.from.name' => $s->mail_from_name]);
+        }
+    }
+
     private function overrideSessionLifetime(): void
     {
         try {
@@ -47,6 +86,7 @@ final class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureAuthorization();
+        $this->configureMailFromDatabase();
         $this->registerEventListeners();
     }
 

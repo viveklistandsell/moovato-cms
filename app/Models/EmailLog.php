@@ -30,13 +30,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 final class EmailLog extends Model
 {
     use HasFactory;
-    use HasFactory;
 
-    public const string STATUS_PENDING = 'pending';
+    public const STATUS_PENDING = 'pending';
 
-    public const string STATUS_SENT = 'sent';
+    public const STATUS_SENT = 'sent';
 
-    public const string STATUS_FAILED = 'failed';
+    public const STATUS_FAILED = 'failed';
 
     /**
      * The actor whose request triggered the email, if any. Notifications
