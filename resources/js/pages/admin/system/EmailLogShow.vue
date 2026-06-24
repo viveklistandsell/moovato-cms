@@ -7,7 +7,7 @@ import {
     Clock,
     Paperclip,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -87,21 +87,27 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
     pending: Clock,
     failed: AlertCircle,
 };
+
+const statusLabel = computed<Record<EmailLogDetail['status'], string>>(() => ({
+    sent: t('mail.log_status_sent_short'),
+    pending: t('mail.log_status_pending_short'),
+    failed: t('mail.log_status_failed_short'),
+}));
 </script>
 
 <template>
-    <Head :title="`Email: ${log.subject}`" />
+    <Head :title="t('mail.show_head_prefix', { subject: log.subject })" />
 
     <div class="space-y-6 p-4">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <Heading
                 :title="log.subject"
-                description="Read-only view of a logged outbound email."
+                :description="t('mail.show_description')"
             />
             <Button as-child variant="outline" size="sm">
                 <Link href="/admin/system/email-log">
                     <ArrowLeft class="size-3.5" />
-                    Back to log
+                    {{ t('mail.show_back_to_log') }}
                 </Link>
             </Button>
         </div>
@@ -109,13 +115,13 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
         <!-- Metadata -->
         <Card>
             <CardHeader>
-                <CardTitle class="text-base">Envelope</CardTitle>
+                <CardTitle class="text-base">{{ t('mail.show_envelope') }}</CardTitle>
             </CardHeader>
             <CardContent>
                 <dl
                     class="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-2 text-sm"
                 >
-                    <dt class="font-medium text-muted-foreground">Status</dt>
+                    <dt class="font-medium text-muted-foreground">{{ t('mail.show_status') }}</dt>
                     <dd>
                         <span
                             class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase"
@@ -125,11 +131,11 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                                 :is="STATUS_ICON[log.status]"
                                 class="size-3"
                             />
-                            {{ log.status }}
+                            {{ statusLabel[log.status] }}
                         </span>
                     </dd>
 
-                    <dt class="font-medium text-muted-foreground">From</dt>
+                    <dt class="font-medium text-muted-foreground">{{ t('mail.show_from') }}</dt>
                     <dd>
                         <span v-if="log.from_name">
                             {{ log.from_name }}
@@ -138,40 +144,40 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                         <span v-else>{{ log.from_address }}</span>
                     </dd>
 
-                    <dt class="font-medium text-muted-foreground">To</dt>
+                    <dt class="font-medium text-muted-foreground">{{ t('mail.show_to') }}</dt>
                     <dd>{{ joinAddresses(log.to_addresses) }}</dd>
 
                     <template v-if="log.cc_addresses">
-                        <dt class="font-medium text-muted-foreground">Cc</dt>
+                        <dt class="font-medium text-muted-foreground">{{ t('mail.show_cc') }}</dt>
                         <dd>{{ joinAddresses(log.cc_addresses) }}</dd>
                     </template>
 
                     <template v-if="log.bcc_addresses">
-                        <dt class="font-medium text-muted-foreground">Bcc</dt>
+                        <dt class="font-medium text-muted-foreground">{{ t('mail.show_bcc') }}</dt>
                         <dd>{{ joinAddresses(log.bcc_addresses) }}</dd>
                     </template>
 
                     <template v-if="log.reply_to">
                         <dt class="font-medium text-muted-foreground">
-                            Reply-To
+                            {{ t('mail.show_reply_to') }}
                         </dt>
                         <dd>{{ joinAddresses(log.reply_to) }}</dd>
                     </template>
 
-                    <dt class="font-medium text-muted-foreground">Mailer</dt>
+                    <dt class="font-medium text-muted-foreground">{{ t('mail.show_mailer') }}</dt>
                     <dd class="font-mono text-xs">{{ log.mailer }}</dd>
 
                     <dt class="font-medium text-muted-foreground">
-                        Created at
+                        {{ t('mail.show_created_at') }}
                     </dt>
                     <dd>{{ formatTimestamp(log.created_at) }}</dd>
 
-                    <dt class="font-medium text-muted-foreground">Sent at</dt>
+                    <dt class="font-medium text-muted-foreground">{{ t('mail.show_sent_at') }}</dt>
                     <dd>{{ formatTimestamp(log.sent_at) }}</dd>
 
                     <template v-if="log.triggered_by">
                         <dt class="font-medium text-muted-foreground">
-                            Triggered by
+                            {{ t('mail.show_triggered_by') }}
                         </dt>
                         <dd>
                             {{ log.triggered_by.name }}
@@ -183,7 +189,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
 
                     <template v-if="log.attachment_count > 0">
                         <dt class="font-medium text-muted-foreground">
-                            Attachments
+                            {{ t('mail.show_attachments') }}
                         </dt>
                         <dd
                             class="inline-flex items-center gap-1.5 text-muted-foreground"
@@ -195,7 +201,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
 
                     <template v-if="log.message_id">
                         <dt class="font-medium text-muted-foreground">
-                            Message-ID
+                            {{ t('mail.show_message_id') }}
                         </dt>
                         <dd class="font-mono text-xs break-all">
                             {{ log.message_id }}
@@ -212,7 +218,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
         >
             <CardHeader>
                 <CardTitle class="text-base text-rose-700 dark:text-rose-300">
-                    Send failed
+                    {{ t('mail.show_send_failed') }}
                 </CardTitle>
             </CardHeader>
             <CardContent>
@@ -225,7 +231,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
         <!-- Body / tabs -->
         <Card>
             <CardHeader>
-                <CardTitle class="text-base">Content</CardTitle>
+                <CardTitle class="text-base">{{ t('mail.show_content') }}</CardTitle>
                 <div class="mt-2 flex flex-wrap gap-1 text-xs">
                     <button
                         type="button"
@@ -237,7 +243,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                         "
                         @click="tab = 'preview'"
                     >
-                        Preview (rendered)
+                        {{ t('mail.show_tab_preview') }}
                     </button>
                     <button
                         type="button"
@@ -249,7 +255,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                         "
                         @click="tab = 'html'"
                     >
-                        HTML source
+                        {{ t('mail.show_tab_html') }}
                     </button>
                     <button
                         type="button"
@@ -261,7 +267,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                         "
                         @click="tab = 'text'"
                     >
-                        Plain text
+                        {{ t('mail.show_tab_text') }}
                     </button>
                     <button
                         type="button"
@@ -273,7 +279,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                         "
                         @click="tab = 'headers'"
                     >
-                        Headers
+                        {{ t('mail.show_tab_headers') }}
                     </button>
                 </div>
             </CardHeader>
@@ -288,18 +294,18 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                     v-else-if="tab === 'preview'"
                     class="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground"
                 >
-                    No HTML body captured for this email.
+                    {{ t('mail.show_no_html_body') }}
                 </p>
 
                 <pre
                     v-else-if="tab === 'html'"
                     class="max-h-[60vh] overflow-auto rounded-md border bg-muted/40 p-4 font-mono text-xs whitespace-pre-wrap"
-                    >{{ log.body_html ?? '(no HTML body)' }}</pre>
+                    >{{ log.body_html ?? t('mail.show_no_html_inline') }}</pre>
 
                 <pre
                     v-else-if="tab === 'text'"
                     class="max-h-[60vh] overflow-auto rounded-md border bg-muted/40 p-4 font-mono text-xs whitespace-pre-wrap"
-                    >{{ log.body_text ?? '(no text body)' }}</pre>
+                    >{{ log.body_text ?? t('mail.show_no_text_inline') }}</pre>
 
                 <dl
                     v-else-if="tab === 'headers'"
@@ -318,7 +324,7 @@ const STATUS_ICON: Record<EmailLogDetail['status'], typeof CheckCircle2> = {
                         v-if="Object.keys(log.headers).length === 0"
                         class="col-span-2 rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground"
                     >
-                        No headers captured.
+                        {{ t('mail.show_no_headers') }}
                     </p>
                 </dl>
             </CardContent>

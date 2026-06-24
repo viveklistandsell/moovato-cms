@@ -123,67 +123,67 @@ function sendTest(): void {
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <MailIcon class="size-4" />
-                        Email Configuration
+                        {{ t('mail.config_card_title') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form class="space-y-4" @submit.prevent="submit">
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="mail_transport">Type</Label>
+                            <Label for="mail_transport">{{ t('mail.config_transport') }}</Label>
                             <select
                                 id="mail_transport"
                                 v-model="form.mail_transport"
                                 class="h-9 rounded-md border bg-background px-3 text-sm"
                             >
                                 <option value="smtp">smtp</option>
-                                <option value="log">log (writes to laravel.log)</option>
-                                <option value="sendmail">sendmail</option>
-                                <option value="ses">ses (Amazon SES)</option>
-                                <option value="mailgun">mailgun</option>
+                                <option value="log">{{ t('mail.transport_log') }}</option>
+                                <option value="sendmail">{{ t('mail.transport_sendmail') }}</option>
+                                <option value="ses">{{ t('mail.transport_ses') }}</option>
+                                <option value="mailgun">{{ t('mail.transport_mailgun') }}</option>
                             </select>
                             <InputError :message="form.errors.mail_transport" />
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="mail_host">Mail Host</Label>
+                            <Label for="mail_host">{{ t('mail.config_host') }}</Label>
                             <Input
                                 id="mail_host"
                                 v-model="form.mail_host"
-                                placeholder="smtp.mailtrap.io"
+                                :placeholder="t('mail.host_placeholder')"
                             />
                             <InputError :message="form.errors.mail_host" />
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div class="grid grid-cols-1 gap-1.5">
-                                <Label for="mail_port">Mail Port</Label>
+                                <Label for="mail_port">{{ t('mail.config_port') }}</Label>
                                 <Input
                                     id="mail_port"
                                     v-model.number="form.mail_port"
                                     type="number"
                                     min="1"
                                     max="65535"
-                                    placeholder="587"
+                                    :placeholder="t('mail.port_placeholder')"
                                 />
                                 <InputError :message="form.errors.mail_port" />
                             </div>
                             <div class="grid grid-cols-1 gap-1.5">
-                                <Label for="mail_encryption">Mail Encryption</Label>
+                                <Label for="mail_encryption">{{ t('mail.config_encryption') }}</Label>
                                 <select
                                     id="mail_encryption"
                                     v-model="form.mail_encryption"
                                     class="h-9 rounded-md border bg-background px-3 text-sm"
                                 >
-                                    <option value="tls">tls (STARTTLS, port 587)</option>
-                                    <option value="ssl">ssl (port 465)</option>
-                                    <option value="">none</option>
+                                    <option value="tls">{{ t('mail.encryption_tls') }}</option>
+                                    <option value="ssl">{{ t('mail.encryption_ssl') }}</option>
+                                    <option value="">{{ t('mail.encryption_none') }}</option>
                                 </select>
                                 <InputError :message="form.errors.mail_encryption" />
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="mail_username">Mail Username</Label>
+                            <Label for="mail_username">{{ t('mail.config_username') }}</Label>
                             <Input
                                 id="mail_username"
                                 v-model="form.mail_username"
@@ -193,7 +193,7 @@ function sendTest(): void {
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="mail_password">Mail Password</Label>
+                            <Label for="mail_password">{{ t('mail.config_password') }}</Label>
                             <div class="relative">
                                 <Input
                                     id="mail_password"
@@ -201,8 +201,8 @@ function sendTest(): void {
                                     :type="showPassword ? 'text' : 'password'"
                                     :placeholder="
                                         settings.mail_password_set
-                                            ? '•••••••• (leave blank to keep)'
-                                            : 'Enter password'
+                                            ? t('mail.password_placeholder_set')
+                                            : t('mail.password_placeholder_new')
                                     "
                                     autocomplete="new-password"
                                     class="pr-10"
@@ -222,29 +222,28 @@ function sendTest(): void {
                                 v-if="settings.mail_password_set"
                                 class="text-xs text-muted-foreground"
                             >
-                                A password is already saved. Leave blank to keep
-                                the existing one.
+                                {{ t('mail.password_already_saved') }}
                             </p>
                             <InputError :message="form.errors.mail_password" />
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="mail_from_address">Mail From Address</Label>
+                            <Label for="mail_from_address">{{ t('mail.config_from_address') }}</Label>
                             <Input
                                 id="mail_from_address"
                                 v-model="form.mail_from_address"
                                 type="email"
-                                placeholder="hello@moovato.de"
+                                :placeholder="t('mail.from_address_placeholder')"
                             />
                             <InputError :message="form.errors.mail_from_address" />
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="mail_from_name">Mail From Name</Label>
+                            <Label for="mail_from_name">{{ t('mail.config_from_name') }}</Label>
                             <Input
                                 id="mail_from_name"
                                 v-model="form.mail_from_name"
-                                placeholder="Moovato"
+                                :placeholder="t('mail.from_name_placeholder')"
                             />
                             <InputError :message="form.errors.mail_from_name" />
                         </div>
@@ -252,7 +251,7 @@ function sendTest(): void {
                         <div class="flex justify-end">
                             <Button type="submit" :disabled="form.processing">
                                 <Save class="size-4" />
-                                Save Changes
+                                {{ t('mail.save_changes') }}
                             </Button>
                         </div>
                     </form>
@@ -264,25 +263,25 @@ function sendTest(): void {
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <Send class="size-4" />
-                        Send Test Mail
+                        {{ t('mail.send_test_title') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form class="space-y-4" @submit.prevent="sendTest">
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="test_email">Email</Label>
+                            <Label for="test_email">{{ t('mail.send_test_to') }}</Label>
                             <Input
                                 id="test_email"
                                 v-model="testForm.email"
                                 type="email"
-                                placeholder="recipient@example.com"
+                                :placeholder="t('mail.send_test_to_placeholder')"
                                 required
                             />
                             <InputError :message="testErrors.email" />
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="test_subject">Subject</Label>
+                            <Label for="test_subject">{{ t('mail.send_test_subject') }}</Label>
                             <Input
                                 id="test_subject"
                                 v-model="testForm.subject"
@@ -292,11 +291,10 @@ function sendTest(): void {
                         </div>
 
                         <div class="grid grid-cols-1 gap-1.5">
-                            <Label for="test_message">Message</Label>
+                            <Label for="test_message">{{ t('mail.send_test_message') }}</Label>
                             <RichTextEditor v-model="testForm.message" />
                             <p class="text-xs text-muted-foreground">
-                                Rich-text — bold / italic / lists / links / images all
-                                render in the recipient's inbox.
+                                {{ t('mail.send_test_hint') }}
                             </p>
                             <InputError :message="testErrors.message" />
                         </div>
@@ -325,7 +323,7 @@ function sendTest(): void {
                                 :disabled="testSending"
                             >
                                 <Send class="size-4" />
-                                {{ testSending ? 'Sending…' : 'Send' }}
+                                {{ testSending ? t('mail.send_test_sending') : t('mail.send_test_btn') }}
                             </Button>
                         </div>
                     </form>
