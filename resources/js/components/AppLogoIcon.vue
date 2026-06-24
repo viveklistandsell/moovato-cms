@@ -11,7 +11,7 @@ type Props = {
 
 defineProps<Props>();
 
-const logoSrc = '/storage/media/2026/06/01KTP29F3DRY13P1KQG0F45YAX.svg';
+const logoSrc = '/storage/media/2026/06/01KTTRJQA6059Y61NQ2TFWAQC3.svg';
 </script>
 
 <template>
