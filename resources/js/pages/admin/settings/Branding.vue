@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import { Image as ImageIcon, Save } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useT } from '@/composables/useT';
@@ -83,11 +83,12 @@ function clear(field: NonNullable<typeof pickerTarget.value>): void {
     previewUrls.value = next;
 }
 
-const imageFields = [
-    { field: 'logo_light_path' as const, label: 'Logo (light)' },
-    { field: 'logo_dark_path' as const, label: 'Logo (dark)' },
-    { field: 'favicon_path' as const, label: 'Favicon · 32×32 / 180×180' },
-];
+type ImageField = 'logo_light_path' | 'logo_dark_path' | 'favicon_path';
+const imageFields = computed<Array<{ field: ImageField; label: string }>>(() => [
+    { field: 'logo_light_path', label: t('settings.branding_logo_light_label') },
+    { field: 'logo_dark_path', label: t('settings.branding_logo_dark_label') },
+    { field: 'favicon_path', label: t('settings.branding_favicon_label') },
+]);
 </script>
 
 <template>
@@ -102,7 +103,7 @@ const imageFields = [
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <Card>
                 <CardHeader>
-                    <CardTitle>Logos &amp; favicon</CardTitle>
+                    <CardTitle>{{ t('settings.branding_logos_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="img in imageFields" :key="img.field" class="space-y-2">
@@ -129,7 +130,7 @@ const imageFields = [
                                 class="flex-1"
                                 @click="openPicker(img.field)"
                             >
-                                Pick image
+                                {{ t('settings.branding_pick_image') }}
                             </Button>
                             <Button
                                 v-if="form[img.field]"
@@ -139,7 +140,7 @@ const imageFields = [
                                 class="text-rose-600 hover:text-rose-700"
                                 @click="clear(img.field)"
                             >
-                                Clear
+                                {{ t('settings.branding_clear') }}
                             </Button>
                         </div>
                     </div>
@@ -148,10 +149,10 @@ const imageFields = [
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Theme colour</CardTitle>
+                    <CardTitle>{{ t('settings.branding_theme_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-1">
-                    <Label for="theme_color">Hex value</Label>
+                    <Label for="theme_color">{{ t('settings.branding_hex_value') }}</Label>
                     <div class="flex items-center gap-3">
                         <input
                             id="theme_color"
@@ -166,7 +167,7 @@ const imageFields = [
                         />
                     </div>
                     <p class="text-xs text-muted-foreground">
-                        Drives the browser tab colour and the PWA manifest.
+                        {{ t('settings.branding_theme_help') }}
                     </p>
                     <InputError :message="form.errors.theme_color" />
                 </CardContent>
@@ -175,7 +176,7 @@ const imageFields = [
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save branding
+                    {{ t('settings.branding_save') }}
                 </Button>
             </div>
         </form>

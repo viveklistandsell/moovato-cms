@@ -111,23 +111,9 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
 
     <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
     <FrontendLayout v-else>
-        <!-- Breadcrumb: shown on every page EXCEPT the home page, for both
-             the default and fullwidth templates. Fullwidth gets its own thin
-             breadcrumb bar since it skips the prose article below. -->
-        <nav
-            v-if="isFullwidth && !page.is_home"
-            class="container-xl flex items-center gap-2 pt-8 text-sm text-muted-foreground"
-            aria-label="Breadcrumb"
-        >
-            <Link :href="localizedUrl(locale, '/')" class="hover:text-foreground">
-                {{ t.home }}
-            </Link>
-            <span>›</span>
-            <span class="line-clamp-1 text-foreground">{{ page.title }}</span>
-        </nav>
-
         <!-- DEFAULT only: centered prose with breadcrumb + page title +
-             hero image. Fullwidth skips this so widgets sit edge-to-edge. -->
+             hero image. Fullwidth skips this so widgets sit edge-to-edge
+             with no breadcrumb chrome on top. -->
         <article v-if="!isFullwidth" class="container-xl py-10">
             <nav
                 v-if="!page.is_home"

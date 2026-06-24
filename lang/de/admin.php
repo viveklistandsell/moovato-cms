@@ -900,6 +900,105 @@ return [
         'security_description' => 'Sitzungsdauer und Anmelde-Drosselung.',
         'security_session_lifetime' => 'Sitzungsdauer (Minuten)',
         'security_login_throttle' => 'Anmeldeversuche pro Minute',
+
+        // --- Identity page ---
+        'identity_card_title' => 'Identität',
+        'identity_site_name_help' => 'Wird in &lt;title&gt;, E-Mails und OG-Tags angezeigt.',
+        'identity_default_locale' => 'Standardsprache',
+        'identity_default_locale_help' => 'Über <strong>Sprachen</strong> ändern.',
+        'identity_pick_timezone' => 'Zeitzone wählen',
+        'identity_pick_format' => 'Format wählen',
+        'identity_format_preview' => 'Vorschau heute: :preview',
+        'identity_tagline_card' => 'Slogan (pro Sprache)',
+        'identity_tagline_label' => 'Slogan (:code)',
+        'identity_tagline_placeholder' => 'Kurze Marketing-Zeile',
+        'identity_save' => 'Identität speichern',
+
+        // --- Branding page ---
+        'branding_logos_card' => 'Logos & Favicon',
+        'branding_logo_light_label' => 'Logo (hell)',
+        'branding_logo_dark_label' => 'Logo (dunkel)',
+        'branding_favicon_label' => 'Favicon · 32×32 / 180×180',
+        'branding_pick_image' => 'Bild wählen',
+        'branding_clear' => 'Entfernen',
+        'branding_theme_card' => 'Theme-Farbe',
+        'branding_hex_value' => 'Hex-Wert',
+        'branding_theme_help' => 'Steuert die Browser-Tab-Farbe und das PWA-Manifest.',
+        'branding_save' => 'Branding speichern',
+
+        // --- SEO page ---
+        'seo_title_desc_card' => 'Titel & Beschreibung',
+        'seo_title_template' => 'Standard-Titelvorlage',
+        'seo_title_template_placeholder' => '%page% — %site%',
+        'seo_title_template_help' => 'Tokens: <code>%page%</code>, <code>%site%</code>. Vorschau: <strong>:preview</strong>',
+        'seo_meta_desc_label' => 'Standard-Meta-Beschreibung (pro Sprache)',
+        'seo_chars_recommended' => ':count / 160 empfohlen',
+        'seo_og_card' => 'Standard-OG-Bild · 1200×630',
+        'seo_og_pick_image' => 'Bild wählen',
+        'seo_og_clear' => 'Entfernen',
+        'seo_allow_indexing' => 'Suchindexierung erlauben',
+        'seo_allow_indexing_help' => 'Aus = liefert <code>noindex,nofollow</code> sitewide. Praktisch auf Staging.',
+        'seo_save' => 'SEO-Standards speichern',
+
+        // --- Legal page ---
+        'legal_card_title' => 'Seitenauswahl',
+        'legal_privacy_label' => 'Datenschutzerklärung',
+        'legal_privacy_hint' => 'Verbindet den Footer-Link "Datenschutz".',
+        'legal_terms_label' => 'AGB',
+        'legal_terms_hint' => 'Verbindet den Footer-Link "AGB".',
+        'legal_imprint_label' => 'Impressum',
+        'legal_imprint_hint' => 'In Deutschland gesetzlich vorgeschrieben.',
+        'legal_none' => '— keine —',
+        'legal_save' => 'Rechtliche Seiten speichern',
+
+        // --- Analytics page ---
+        'analytics_tracking_card' => 'Tracking-IDs',
+        'analytics_ga_placeholder' => 'G-XXXXXXXXXX',
+        'analytics_gtm_label' => 'GTM-Container',
+        'analytics_gtm_placeholder' => 'GTM-XXXXXX',
+        'analytics_meta_placeholder' => '123456789',
+        'analytics_custom_head_card' => 'Custom &lt;head&gt;-Code',
+        'analytics_custom_head_placeholder' => '<script>/* dein Snippet */</script>',
+        'analytics_custom_head_help' => 'Wird wortwörtlich in den &lt;head&gt; jeder Seite eingefügt. Nur Admin-Feld.',
+        'analytics_cookie_label' => 'Cookie-Zustimmung erforderlich',
+        'analytics_cookie_help' => 'Verzögert das Laden von GA / GTM / Pixel, bis der Besucher zustimmt (DSGVO / TTDSG).',
+        'analytics_save' => 'Analytics speichern',
+
+        // --- Maintenance page ---
+        'maintenance_enabled_label' => 'Wartungsmodus aktiv',
+        'maintenance_enabled_help' => 'Die öffentliche Site zeigt die Holdingseite unten.',
+        'maintenance_holding_card' => 'Holdingseite (pro Sprache)',
+        'maintenance_heading_label' => 'Überschrift (:code)',
+        'maintenance_message_label' => 'Nachricht (:code)',
+        'maintenance_bypass_card' => 'Bypass-IPs & Umleitungs-URL',
+        'maintenance_bypass_placeholder' => '1.2.3.4, 5.6.7.8, beispiel.com',
+        'maintenance_add_my_ip_active' => 'Meine IP hinzufügen (:ip)',
+        'maintenance_ip_already_added' => ':ip bereits hinzugefügt',
+        'maintenance_bypass_help' => 'Kommagetrennt, gemischt. Einträge werden nach Form weitergeleitet:',
+        'maintenance_bypass_ips_bullet' => '<strong>IP-Adressen</strong> (<code class="font-mono">1.2.3.4</code>) umgehen den Wartungsmodus — Besucher von diesen IPs sehen die Live-Site.',
+        'maintenance_bypass_urls_bullet' => '<strong>URLs oder Hostnamen</strong> (<code class="font-mono">beispiel.com</code>, <code class="font-mono">https://amazon.com</code>) leiten alle anderen weiter. Die erste URL in der Liste gewinnt.',
+        'maintenance_save' => 'Wartung speichern',
+
+        // --- Layout page ---
+        'layout_header_sticky_label' => 'Sticky Header',
+        'layout_header_sticky_hint' => 'Header bleibt beim Scrollen angeheftet.',
+        'layout_language_switcher_label' => 'Sprachumschalter anzeigen',
+        'layout_language_switcher_hint' => 'EN / DE Umschaltung im Header.',
+        'layout_back_to_top_label' => 'Nach-oben-Button anzeigen',
+        'layout_back_to_top_hint' => 'Schwebender Pfeil auf langen Seiten.',
+        'layout_auto_year_label' => 'Footer-Jahr automatisch aktualisieren',
+        'layout_auto_year_hint' => 'Zeigt immer das aktuelle Jahr.',
+        'layout_save' => 'Layout speichern',
+
+        // --- Security page ---
+        'security_require_2fa_label' => '2FA für Administratoren erforderlich',
+        'security_require_2fa_help' => 'Administratoren werden zur 2FA-Einrichtungsseite weitergeleitet, bis aktiviert.',
+        'security_sessions_card' => 'Sitzungen & Drosselung',
+        'security_session_lifetime_label' => 'Sitzungsdauer (Minuten)',
+        'security_session_lifetime_help' => 'Akzeptierter Bereich: <strong>5 – 10 080 Min.</strong> (5 Min. bis 1 Woche). Leer lassen, um auf <code>SESSION_LIFETIME</code> in .env zurückzufallen.',
+        'security_login_throttle_label' => 'Anmelde-Drosselung (Versuche pro Minute)',
+        'security_login_throttle_help' => 'Akzeptierter Bereich: <strong>1 – 60 Versuche/Min.</strong> bevor die IP+E-Mail-Kombination gesperrt wird. Leer lassen für den Fortify-Standard von 5.',
+        'security_save' => 'Sicherheit speichern',
     ],
 
     'site_settings' => [
@@ -915,6 +1014,29 @@ return [
         'instagram' => 'Instagram',
         'about_text' => 'Über-uns-Text',
         'site_tagline' => 'Slogan',
+
+        // About card
+        'about_card_title' => 'Über uns',
+        'about_card_description' => 'Ein Absatz pro Sprache. Der öffentliche Footer zeigt den passenden zur Sprache des Besuchers.',
+        'about_text_label' => 'Über-uns-Text (:code)',
+        'about_text_placeholder' => 'Wir liefern kreative Lösungen, mit denen Ihr Unternehmen schneller wächst…',
+
+        // Contact card
+        'contact_card_title' => 'Kontakt',
+        'contact_card_description' => 'WhatsApp wird nur als Ziffern gespeichert. Der Footer verwandelt sie in einen wa.me-Link, sodass Taps WhatsApp direkt öffnen.',
+        'whatsapp_label' => 'WhatsApp-Nummer',
+        'whatsapp_placeholder' => '+49 123 456 7890',
+        'whatsapp_help' => 'Ländercode + Nummer. Leerzeichen, Bindestriche und "+" werden automatisch entfernt.',
+
+        // Social card
+        'social_card_title' => 'Social-Media-Links',
+        'social_card_description' => 'Jede ausgefüllte URL rendert ein passendes Icon unter der Über-uns-Spalte.',
+        'facebook_url' => 'Facebook-URL',
+        'twitter_url' => 'Twitter / X-URL',
+        'linkedin_url' => 'LinkedIn-URL',
+        'instagram_url' => 'Instagram-URL',
+
+        'save' => 'Einstellungen speichern',
     ],
 
     'mail' => [

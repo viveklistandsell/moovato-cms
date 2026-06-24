@@ -57,33 +57,33 @@ function submit(): void {
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <Card>
                 <CardHeader>
-                    <CardTitle>Tracking IDs</CardTitle>
+                    <CardTitle>{{ t('settings.analytics_tracking_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="grid gap-3 sm:grid-cols-3">
                     <div class="space-y-1">
-                        <Label for="google_analytics_id">Google Analytics ID</Label>
+                        <Label for="google_analytics_id">{{ t('settings.analytics_ga_id') }}</Label>
                         <Input
                             id="google_analytics_id"
                             v-model="form.google_analytics_id"
-                            placeholder="G-XXXXXXXXXX"
+                            :placeholder="t('settings.analytics_ga_placeholder')"
                         />
                         <InputError :message="form.errors.google_analytics_id" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="google_tag_manager_id">GTM container</Label>
+                        <Label for="google_tag_manager_id">{{ t('settings.analytics_gtm_label') }}</Label>
                         <Input
                             id="google_tag_manager_id"
                             v-model="form.google_tag_manager_id"
-                            placeholder="GTM-XXXXXX"
+                            :placeholder="t('settings.analytics_gtm_placeholder')"
                         />
                         <InputError :message="form.errors.google_tag_manager_id" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="meta_pixel_id">Meta Pixel ID</Label>
+                        <Label for="meta_pixel_id">{{ t('settings.analytics_meta_pixel') }}</Label>
                         <Input
                             id="meta_pixel_id"
                             v-model="form.meta_pixel_id"
-                            placeholder="123456789"
+                            :placeholder="t('settings.analytics_meta_placeholder')"
                         />
                         <InputError :message="form.errors.meta_pixel_id" />
                     </div>
@@ -92,7 +92,7 @@ function submit(): void {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Custom &lt;head&gt; code</CardTitle>
+                    <CardTitle v-html="t('settings.analytics_custom_head_card')" />
                 </CardHeader>
                 <CardContent>
                     <Textarea
@@ -100,11 +100,9 @@ function submit(): void {
                         v-model="form.custom_head_code"
                         :rows="6"
                         class="font-mono text-xs"
-                        placeholder="<script>/* your snippet */</script>"
+                        :placeholder="t('settings.analytics_custom_head_placeholder')"
                     />
-                    <p class="mt-1 text-xs text-muted-foreground">
-                        Injected verbatim into every page's &lt;head&gt;. Admin-only field.
-                    </p>
+                    <p class="mt-1 text-xs text-muted-foreground" v-html="t('settings.analytics_custom_head_help')" />
                     <InputError :message="form.errors.custom_head_code" />
                 </CardContent>
             </Card>
@@ -117,9 +115,9 @@ function submit(): void {
                             @update:model-value="(v) => (form.cookie_consent_required = v as boolean)"
                         />
                         <span class="flex-1">
-                            <span class="block font-medium">Require cookie consent</span>
+                            <span class="block font-medium">{{ t('settings.analytics_cookie_label') }}</span>
                             <span class="block text-xs text-muted-foreground">
-                                Defers GA / GTM / Pixel injection until the visitor accepts (GDPR / TTDSG).
+                                {{ t('settings.analytics_cookie_help') }}
                             </span>
                         </span>
                     </label>
@@ -129,7 +127,7 @@ function submit(): void {
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save analytics
+                    {{ t('settings.analytics_save') }}
                 </Button>
             </div>
         </form>

@@ -114,9 +114,9 @@ function errorFor(
                             @update:model-value="(v) => (form.maintenance_enabled = v as boolean)"
                         />
                         <span class="flex-1">
-                            <span class="block font-medium">Maintenance mode enabled</span>
+                            <span class="block font-medium">{{ t('settings.maintenance_enabled_label') }}</span>
                             <span class="block text-xs text-muted-foreground">
-                                Public site shows the holding page below.
+                                {{ t('settings.maintenance_enabled_help') }}
                             </span>
                         </span>
                     </label>
@@ -125,7 +125,7 @@ function errorFor(
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Holding page (per language)</CardTitle>
+                    <CardTitle>{{ t('settings.maintenance_holding_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <LocaleTabs
@@ -137,7 +137,7 @@ function errorFor(
                             <div class="space-y-3 pt-3">
                                 <div class="space-y-1">
                                     <Label :for="`maint_heading_${code}`">
-                                        Heading ({{ code }})
+                                        {{ t('settings.maintenance_heading_label', { code }) }}
                                     </Label>
                                     <Input
                                         :id="`maint_heading_${code}`"
@@ -147,7 +147,7 @@ function errorFor(
                                 </div>
                                 <div class="space-y-1">
                                     <Label :for="`maint_msg_${code}`">
-                                        Message ({{ code }})
+                                        {{ t('settings.maintenance_message_label', { code }) }}
                                     </Label>
                                     <Textarea
                                         :id="`maint_msg_${code}`"
@@ -164,14 +164,14 @@ function errorFor(
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Bypass IPs &amp; redirect URL</CardTitle>
+                    <CardTitle>{{ t('settings.maintenance_bypass_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-2">
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <Input
                             id="maintenance_bypass_ips"
                             v-model="form.maintenance_bypass_ips"
-                            placeholder="1.2.3.4, 5.6.7.8, flipkart.com"
+                            :placeholder="t('settings.maintenance_bypass_placeholder')"
                             class="flex-1"
                         />
                         <Button
@@ -191,30 +191,20 @@ function errorFor(
                             <span class="font-mono text-xs">
                                 {{
                                     currentIpAlreadyListed
-                                        ? `${currentIp} already added`
-                                        : `Add my IP (${currentIp})`
+                                        ? t('settings.maintenance_ip_already_added', { ip: currentIp })
+                                        : t('settings.maintenance_add_my_ip_active', { ip: currentIp })
                                 }}
                             </span>
                         </Button>
                     </div>
                     <p class="text-xs text-muted-foreground">
-                        Comma-separated, mixed. Entries are routed by shape:
+                        {{ t('settings.maintenance_bypass_help') }}
                     </p>
                     <ul
                         class="ml-4 list-disc space-y-0.5 text-xs text-muted-foreground"
                     >
-                        <li>
-                            <strong>IP addresses</strong>
-                            (<code class="font-mono">1.2.3.4</code>) bypass
-                            maintenance — visitors from these IPs see the live
-                            site.
-                        </li>
-                        <li>
-                            <strong>URLs or hostnames</strong>
-                            (<code class="font-mono">flipkart.com</code>,
-                            <code class="font-mono">https://amazon.com</code>)
-                            redirect everyone else. First URL in the list wins.
-                        </li>
+                        <li v-html="t('settings.maintenance_bypass_ips_bullet')" />
+                        <li v-html="t('settings.maintenance_bypass_urls_bullet')" />
                     </ul>
                     <InputError :message="form.errors.maintenance_bypass_ips" />
                 </CardContent>
@@ -223,7 +213,7 @@ function errorFor(
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save maintenance
+                    {{ t('settings.maintenance_save') }}
                 </Button>
             </div>
         </form>

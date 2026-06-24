@@ -900,6 +900,105 @@ return [
         'security_description' => 'Session lifetime and login throttling.',
         'security_session_lifetime' => 'Session lifetime (minutes)',
         'security_login_throttle' => 'Login attempts per minute',
+
+        // --- Identity page ---
+        'identity_card_title' => 'Identity',
+        'identity_site_name_help' => 'Shown in &lt;title&gt;, emails and OG tags.',
+        'identity_default_locale' => 'Default locale',
+        'identity_default_locale_help' => 'Change via <strong>Languages</strong>.',
+        'identity_pick_timezone' => 'Pick a timezone',
+        'identity_pick_format' => 'Pick a format',
+        'identity_format_preview' => 'Preview today: :preview',
+        'identity_tagline_card' => 'Tagline (per language)',
+        'identity_tagline_label' => 'Tagline (:code)',
+        'identity_tagline_placeholder' => 'Short marketing line',
+        'identity_save' => 'Save identity',
+
+        // --- Branding page ---
+        'branding_logos_card' => 'Logos & favicon',
+        'branding_logo_light_label' => 'Logo (light)',
+        'branding_logo_dark_label' => 'Logo (dark)',
+        'branding_favicon_label' => 'Favicon · 32×32 / 180×180',
+        'branding_pick_image' => 'Pick image',
+        'branding_clear' => 'Clear',
+        'branding_theme_card' => 'Theme colour',
+        'branding_hex_value' => 'Hex value',
+        'branding_theme_help' => 'Drives the browser tab colour and the PWA manifest.',
+        'branding_save' => 'Save branding',
+
+        // --- SEO page ---
+        'seo_title_desc_card' => 'Title & description',
+        'seo_title_template' => 'Default title template',
+        'seo_title_template_placeholder' => '%page% — %site%',
+        'seo_title_template_help' => 'Tokens: <code>%page%</code>, <code>%site%</code>. Preview: <strong>:preview</strong>',
+        'seo_meta_desc_label' => 'Default meta description (per language)',
+        'seo_chars_recommended' => ':count / 160 recommended',
+        'seo_og_card' => 'Default OG image · 1200×630',
+        'seo_og_pick_image' => 'Pick image',
+        'seo_og_clear' => 'Clear',
+        'seo_allow_indexing' => 'Allow search indexing',
+        'seo_allow_indexing_help' => 'Off = ships <code>noindex,nofollow</code> sitewide. Handy on staging.',
+        'seo_save' => 'Save SEO defaults',
+
+        // --- Legal page ---
+        'legal_card_title' => 'Page selectors',
+        'legal_privacy_label' => 'Privacy policy',
+        'legal_privacy_hint' => 'Wires the footer "Privacy Policy" link.',
+        'legal_terms_label' => 'Terms & conditions',
+        'legal_terms_hint' => 'Wires the footer "Terms" link.',
+        'legal_imprint_label' => 'Imprint (Impressum)',
+        'legal_imprint_hint' => 'Legally required in Germany.',
+        'legal_none' => '— none —',
+        'legal_save' => 'Save legal pages',
+
+        // --- Analytics page ---
+        'analytics_tracking_card' => 'Tracking IDs',
+        'analytics_ga_placeholder' => 'G-XXXXXXXXXX',
+        'analytics_gtm_label' => 'GTM container',
+        'analytics_gtm_placeholder' => 'GTM-XXXXXX',
+        'analytics_meta_placeholder' => '123456789',
+        'analytics_custom_head_card' => 'Custom &lt;head&gt; code',
+        'analytics_custom_head_placeholder' => '<script>/* your snippet */</script>',
+        'analytics_custom_head_help' => "Injected verbatim into every page's &lt;head&gt;. Admin-only field.",
+        'analytics_cookie_label' => 'Require cookie consent',
+        'analytics_cookie_help' => 'Defers GA / GTM / Pixel injection until the visitor accepts (GDPR / TTDSG).',
+        'analytics_save' => 'Save analytics',
+
+        // --- Maintenance page ---
+        'maintenance_enabled_label' => 'Maintenance mode enabled',
+        'maintenance_enabled_help' => 'Public site shows the holding page below.',
+        'maintenance_holding_card' => 'Holding page (per language)',
+        'maintenance_heading_label' => 'Heading (:code)',
+        'maintenance_message_label' => 'Message (:code)',
+        'maintenance_bypass_card' => 'Bypass IPs & redirect URL',
+        'maintenance_bypass_placeholder' => '1.2.3.4, 5.6.7.8, flipkart.com',
+        'maintenance_add_my_ip_active' => 'Add my IP (:ip)',
+        'maintenance_ip_already_added' => ':ip already added',
+        'maintenance_bypass_help' => 'Comma-separated, mixed. Entries are routed by shape:',
+        'maintenance_bypass_ips_bullet' => '<strong>IP addresses</strong> (<code class="font-mono">1.2.3.4</code>) bypass maintenance — visitors from these IPs see the live site.',
+        'maintenance_bypass_urls_bullet' => '<strong>URLs or hostnames</strong> (<code class="font-mono">flipkart.com</code>, <code class="font-mono">https://amazon.com</code>) redirect everyone else. First URL in the list wins.',
+        'maintenance_save' => 'Save maintenance',
+
+        // --- Layout page ---
+        'layout_header_sticky_label' => 'Sticky header',
+        'layout_header_sticky_hint' => 'Header stays pinned while scrolling.',
+        'layout_language_switcher_label' => 'Show language switcher',
+        'layout_language_switcher_hint' => 'EN / DE toggle in the header.',
+        'layout_back_to_top_label' => 'Show back-to-top button',
+        'layout_back_to_top_hint' => 'Floating arrow on long pages.',
+        'layout_auto_year_label' => 'Auto-update footer year',
+        'layout_auto_year_hint' => 'Always shows the current year.',
+        'layout_save' => 'Save layout',
+
+        // --- Security page ---
+        'security_require_2fa_label' => 'Require 2FA for admins',
+        'security_require_2fa_help' => 'Admins are pushed to the 2FA setup page until enabled.',
+        'security_sessions_card' => 'Sessions & throttling',
+        'security_session_lifetime_label' => 'Session lifetime (minutes)',
+        'security_session_lifetime_help' => 'Accepted range: <strong>5 – 10 080 min</strong> (5 min to 1 week). Leave empty to fall back to <code>SESSION_LIFETIME</code> in .env.',
+        'security_login_throttle_label' => 'Login throttle (attempts per minute)',
+        'security_login_throttle_help' => "Accepted range: <strong>1 – 60 attempts/min</strong> before the IP + email combo is locked out. Leave empty for Fortify's default of 5.",
+        'security_save' => 'Save security',
     ],
 
     'site_settings' => [
@@ -915,6 +1014,29 @@ return [
         'instagram' => 'Instagram',
         'about_text' => 'About text',
         'site_tagline' => 'Tagline',
+
+        // About card
+        'about_card_title' => 'About',
+        'about_card_description' => "One paragraph per language. The public footer shows the one matching the visitor's locale.",
+        'about_text_label' => 'About text (:code)',
+        'about_text_placeholder' => 'We deliver creative solutions to help your business grow…',
+
+        // Contact card
+        'contact_card_title' => 'Contact',
+        'contact_card_description' => 'WhatsApp is stored as digits only. The footer turns it into a wa.me link so taps open WhatsApp directly.',
+        'whatsapp_label' => 'WhatsApp number',
+        'whatsapp_placeholder' => '+49 123 456 7890',
+        'whatsapp_help' => 'Country code + number. Spaces, dashes and "+" are stripped automatically.',
+
+        // Social card
+        'social_card_title' => 'Social links',
+        'social_card_description' => 'Each filled URL renders a matching icon under the About column.',
+        'facebook_url' => 'Facebook URL',
+        'twitter_url' => 'Twitter / X URL',
+        'linkedin_url' => 'LinkedIn URL',
+        'instagram_url' => 'Instagram URL',
+
+        'save' => 'Save settings',
     ],
 
     'mail' => [

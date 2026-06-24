@@ -121,36 +121,32 @@ const dateFormatPreview = computed<string>(() => {
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <Card>
                 <CardHeader>
-                    <CardTitle>Identity</CardTitle>
+                    <CardTitle>{{ t('settings.identity_card_title') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="grid gap-3 sm:grid-cols-2">
                     <div class="space-y-1">
-                        <Label for="site_name">Site name</Label>
+                        <Label for="site_name">{{ t('settings.identity_site_name') }}</Label>
                         <Input id="site_name" v-model="form.site_name" />
-                        <p class="text-xs text-muted-foreground">
-                            Shown in &lt;title&gt;, emails and OG tags.
-                        </p>
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.identity_site_name_help')" />
                         <InputError :message="form.errors.site_name" />
                     </div>
                     <div class="space-y-1">
-                        <Label>Default locale</Label>
+                        <Label>{{ t('settings.identity_default_locale') }}</Label>
                         <Input
                             :model-value="defaultLang"
                             disabled
                             class="cursor-not-allowed"
                         />
-                        <p class="text-xs text-muted-foreground">
-                            Change via <strong>Languages</strong>.
-                        </p>
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.identity_default_locale_help')" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="timezone">Timezone</Label>
+                        <Label for="timezone">{{ t('settings.identity_timezone') }}</Label>
                         <Select
                             :model-value="form.timezone"
                             @update:model-value="(v) => (form.timezone = v as string)"
                         >
                             <SelectTrigger id="timezone">
-                                <SelectValue placeholder="Pick a timezone" />
+                                <SelectValue :placeholder="t('settings.identity_pick_timezone')" />
                             </SelectTrigger>
                             <SelectContent class="max-h-72">
                                 <SelectItem
@@ -165,13 +161,13 @@ const dateFormatPreview = computed<string>(() => {
                         <InputError :message="form.errors.timezone" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="date_format">Date format</Label>
+                        <Label for="date_format">{{ t('settings.identity_date_format') }}</Label>
                         <Select
                             :model-value="form.date_format"
                             @update:model-value="(v) => (form.date_format = v as string)"
                         >
                             <SelectTrigger id="date_format">
-                                <SelectValue placeholder="Pick a format" />
+                                <SelectValue :placeholder="t('settings.identity_pick_format')" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem
@@ -184,7 +180,7 @@ const dateFormatPreview = computed<string>(() => {
                             </SelectContent>
                         </Select>
                         <p class="text-xs text-muted-foreground">
-                            Preview today: <strong>{{ dateFormatPreview }}</strong>
+                            {{ t('settings.identity_format_preview', { preview: dateFormatPreview }) }}
                         </p>
                         <InputError :message="form.errors.date_format" />
                     </div>
@@ -193,7 +189,7 @@ const dateFormatPreview = computed<string>(() => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Tagline (per language)</CardTitle>
+                    <CardTitle>{{ t('settings.identity_tagline_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <LocaleTabs
@@ -204,12 +200,12 @@ const dateFormatPreview = computed<string>(() => {
                         <template #default="{ code }">
                             <div class="space-y-1 pt-3">
                                 <Label :for="`tagline_${code}`">
-                                    Tagline ({{ code }})
+                                    {{ t('settings.identity_tagline_label', { code }) }}
                                 </Label>
                                 <Input
                                     :id="`tagline_${code}`"
                                     v-model="form.translations[languages.findIndex((l) => l.code === code)].site_tagline"
-                                    placeholder="Short marketing line"
+                                    :placeholder="t('settings.identity_tagline_placeholder')"
                                 />
                                 <InputError :message="taglineErrorFor(code)" />
                             </div>
@@ -221,7 +217,7 @@ const dateFormatPreview = computed<string>(() => {
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save identity
+                    {{ t('settings.identity_save') }}
                 </Button>
             </div>
         </form>

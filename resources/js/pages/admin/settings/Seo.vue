@@ -116,24 +116,21 @@ function clearOg(): void {
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <Card>
                 <CardHeader>
-                    <CardTitle>Title &amp; description</CardTitle>
+                    <CardTitle>{{ t('settings.seo_title_desc_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-3">
                     <div class="space-y-1">
-                        <Label for="default_meta_title_template">Default title template</Label>
+                        <Label for="default_meta_title_template">{{ t('settings.seo_title_template') }}</Label>
                         <Input
                             id="default_meta_title_template"
                             v-model="form.default_meta_title_template"
-                            placeholder="%page% — %site%"
+                            :placeholder="t('settings.seo_title_template_placeholder')"
                         />
-                        <p class="text-xs text-muted-foreground">
-                            Tokens: <code>%page%</code>, <code>%site%</code>. Preview:
-                            <strong>{{ titlePreview }}</strong>
-                        </p>
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.seo_title_template_help', { preview: titlePreview })" />
                         <InputError :message="form.errors.default_meta_title_template" />
                     </div>
                     <div class="space-y-1">
-                        <Label>Default meta description (per language)</Label>
+                        <Label>{{ t('settings.seo_meta_desc_label') }}</Label>
                         <LocaleTabs
                             :model-value="activeLang"
                             :languages="languages"
@@ -148,7 +145,7 @@ function clearOg(): void {
                                         maxlength="500"
                                     />
                                     <p class="text-xs text-muted-foreground">
-                                        {{ (form.translations[languages.findIndex((l) => l.code === code)].default_meta_description ?? '').length }} / 160 recommended
+                                        {{ t('settings.seo_chars_recommended', { count: (form.translations[languages.findIndex((l) => l.code === code)].default_meta_description ?? '').length }) }}
                                     </p>
                                     <InputError :message="descErrorFor(code)" />
                                 </div>
@@ -160,7 +157,7 @@ function clearOg(): void {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Default OG image · 1200×630</CardTitle>
+                    <CardTitle>{{ t('settings.seo_og_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-2">
                     <div
@@ -181,7 +178,7 @@ function clearOg(): void {
                             variant="outline"
                             @click="pickerOpen = true"
                         >
-                            Pick image
+                            {{ t('settings.seo_og_pick_image') }}
                         </Button>
                         <Button
                             v-if="form.default_og_image_path"
@@ -191,7 +188,7 @@ function clearOg(): void {
                             class="text-rose-600 hover:text-rose-700"
                             @click="clearOg"
                         >
-                            Clear
+                            {{ t('settings.seo_og_clear') }}
                         </Button>
                     </div>
                 </CardContent>
@@ -205,10 +202,8 @@ function clearOg(): void {
                             @update:model-value="(v) => (form.robots_index = v as boolean)"
                         />
                         <span class="flex-1">
-                            <span class="block font-medium">Allow search indexing</span>
-                            <span class="block text-xs text-muted-foreground">
-                                Off = ships <code>noindex,nofollow</code> sitewide. Handy on staging.
-                            </span>
+                            <span class="block font-medium">{{ t('settings.seo_allow_indexing') }}</span>
+                            <span class="block text-xs text-muted-foreground" v-html="t('settings.seo_allow_indexing_help')" />
                         </span>
                     </label>
                 </CardContent>
@@ -217,7 +212,7 @@ function clearOg(): void {
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save SEO defaults
+                    {{ t('settings.seo_save') }}
                 </Button>
             </div>
         </form>
