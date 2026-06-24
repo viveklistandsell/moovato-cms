@@ -17,6 +17,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.mail'), href: '/admin/settings/email' },
+    { title: t('sidebar.email_configuration'), href: '/admin/settings/email' },
+]);
 
 type Settings = {
     mail_transport: string;
@@ -31,15 +40,8 @@ type Settings = {
 
 const props = defineProps<{ settings: Settings }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Email Configuration', href: '/admin/settings/email' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     mail_transport: props.settings.mail_transport ?? 'smtp',
@@ -107,12 +109,12 @@ function sendTest(): void {
 </script>
 
 <template>
-    <Head title="Email Configuration" />
+    <Head :title="t('mail.config_title')" />
 
     <div class="space-y-6 p-4">
         <Heading
-            title="Email Configuration"
-            description="SMTP credentials used for every outbound email — password reset, notifications, transactional. Save changes here and Laravel uses them on the next request, no .env edit needed."
+            :title="t('mail.config_title')"
+            :description="t('mail.config_description')"
         />
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

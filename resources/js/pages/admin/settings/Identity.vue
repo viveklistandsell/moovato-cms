@@ -5,6 +5,17 @@ import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import LocaleTabs, { type LocaleOption } from '@/components/common/LocaleTabs.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const adminLocale = useAdminLocale();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.site_identity'), href: '/admin/settings/identity' },
+]);
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,15 +45,8 @@ const props = defineProps<{
     timezones: Timezones;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Site Identity', href: '/admin/settings/identity' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const defaultLang = computed<string>(
     () =>
@@ -95,7 +99,7 @@ const dateFormatPreview = computed<string>(() => {
     const dd = String(now.getDate()).padStart(2, '0');
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const yyyy = String(now.getFullYear());
-    const monthShort = now.toLocaleDateString('en-US', { month: 'short' });
+    const monthShort = now.toLocaleDateString(adminLocale.value, { month: 'short' });
     return fmt
         .replace(/Y/g, yyyy)
         .replace(/d/g, dd)
@@ -106,12 +110,12 @@ const dateFormatPreview = computed<string>(() => {
 </script>
 
 <template>
-    <Head title="Site Identity" />
+    <Head :title="t('settings.identity_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Site Identity"
-            description="Site name, tagline, timezone and date format — the bits that brand the site."
+            :title="t('settings.identity_title')"
+            :description="t('settings.identity_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

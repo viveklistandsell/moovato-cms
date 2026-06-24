@@ -17,6 +17,17 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const adminLocale = useAdminLocale();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.system'), href: '/admin/system/cache' },
+    { title: t('sidebar.cache_management'), href: '/admin/system/cache' },
+]);
 
 type Tone = 'rose' | 'sky' | 'violet';
 
@@ -31,15 +42,8 @@ const props = defineProps<{
     sections: CacheSection[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Cache management', href: '/admin/system/cache' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 // Last-cleared timestamps purely for UX feedback inside this session.
 const clearedAt = ref<Record<string, string>>({});
@@ -47,8 +51,8 @@ const pending = ref<string | null>(null);
 
 const page = usePage();
 const flash = computed<{ type?: string; message?: string } | null>(() => {
-    const t = (page.props as Record<string, unknown>).toast;
-    return (t ?? null) as { type?: string; message?: string } | null;
+    const toast = (page.props as Record<string, unknown>).toast;
+    return (toast ?? null) as { type?: string; message?: string } | null;
 });
 
 function clear(type: string): void {
@@ -56,9 +60,7 @@ function clear(type: string): void {
 
     const isAll = type === 'all';
     if (isAll) {
-        const ok = confirm(
-            'Run a full flush? This drops every cache layer including framework caches. Safe but expect a brief slowdown on the next few page hits.',
-        );
+        const ok = confirm(t('system.cache_confirm_flush_all'));
         if (!ok) return;
     }
 
@@ -72,7 +74,7 @@ function clear(type: string): void {
             onSuccess: () => {
                 clearedAt.value = {
                     ...clearedAt.value,
-                    [type]: new Date().toLocaleTimeString(),
+                    [type]: new Date().toLocaleTimeString(adminLocale.value),
                 };
             },
             onFinish: () => {
@@ -111,12 +113,12 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
 </script>
 
 <template>
-    <Head title="Cache management" />
+    <Head :title="t('system.cache_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Cache management"
-            description="Clear specific cache layers when something looks stale. Each action is idempotent — safe to click twice."
+            :title="t('system.cache_title')"
+            :description="t('system.cache_description')"
         />
 
         <div
@@ -133,7 +135,7 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
         <div v-if="grouped.rose.length > 0" class="space-y-3">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <AlertTriangle class="size-4" />
-                Danger zone
+                {{ t('system.cache_danger_zone') }}
             </div>
             <Card v-for="s in grouped.rose" :key="s.type" class="border-rose-200/60 dark:border-rose-900/40">
                 <CardHeader class="flex flex-row items-start justify-between gap-4">
@@ -151,12 +153,12 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
                     >
                         <Loader2 v-if="pending === s.type" class="size-4 animate-spin" />
                         <Trash2 v-else class="size-4" />
-                        Flush everything
+                        {{ t('system.cache_flush_everything') }}
                     </Button>
                 </CardHeader>
                 <CardContent v-if="clearedAt[s.type]" class="pb-4 pt-0">
                     <p class="text-xs text-muted-foreground">
-                        Last cleared at {{ clearedAt[s.type] }}.
+                        {{ t('system.cache_last_cleared', { time: clearedAt[s.type] }) }}
                     </p>
                 </CardContent>
             </Card>
@@ -166,7 +168,7 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
         <div v-if="grouped.sky.length > 0" class="space-y-3">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <RefreshCw class="size-4" />
-                Framework caches
+                {{ t('system.cache_framework_caches') }}
             </div>
             <div class="grid gap-3 sm:grid-cols-2">
                 <Card v-for="s in grouped.sky" :key="s.type">
@@ -179,9 +181,9 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
                     </CardHeader>
                     <CardContent class="flex items-center justify-between gap-3">
                         <span v-if="clearedAt[s.type]" class="text-xs text-muted-foreground">
-                            Cleared {{ clearedAt[s.type] }}
+                            {{ t('system.cache_cleared_at', { time: clearedAt[s.type] }) }}
                         </span>
-                        <span v-else class="text-xs text-muted-foreground/60">Idle</span>
+                        <span v-else class="text-xs text-muted-foreground/60">{{ t('system.cache_idle') }}</span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -190,7 +192,7 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
                         >
                             <Loader2 v-if="pending === s.type" class="size-4 animate-spin" />
                             <Trash2 v-else class="size-4" />
-                            Clear
+                            {{ t('system.cache_clear_btn') }}
                         </Button>
                     </CardContent>
                 </Card>
@@ -201,7 +203,7 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
         <div v-if="grouped.violet.length > 0" class="space-y-3">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <Database class="size-4" />
-                Application caches
+                {{ t('system.cache_application_caches') }}
             </div>
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Card v-for="s in grouped.violet" :key="s.type">
@@ -214,9 +216,9 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
                     </CardHeader>
                     <CardContent class="flex items-center justify-between gap-3">
                         <span v-if="clearedAt[s.type]" class="text-xs text-muted-foreground">
-                            Cleared {{ clearedAt[s.type] }}
+                            {{ t('system.cache_cleared_at', { time: clearedAt[s.type] }) }}
                         </span>
-                        <span v-else class="text-xs text-muted-foreground/60">Idle</span>
+                        <span v-else class="text-xs text-muted-foreground/60">{{ t('system.cache_idle') }}</span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -225,7 +227,7 @@ function toneClass(tone: Tone, kind: 'badge' | 'button'): string {
                         >
                             <Loader2 v-if="pending === s.type" class="size-4 animate-spin" />
                             <Trash2 v-else class="size-4" />
-                            Clear
+                            {{ t('system.cache_clear_btn') }}
                         </Button>
                     </CardContent>
                 </Card>

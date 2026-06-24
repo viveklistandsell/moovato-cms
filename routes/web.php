@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AdminLocaleController;
 use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryController;
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MediaFileController;
@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSett
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\Settings\EmailSettingsController as AdminEmailSettingsController;
 use App\Http\Controllers\Admin\Settings\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\System\ActivityLogController as AdminActivityLogController;
@@ -30,13 +31,11 @@ use App\Http\Controllers\Admin\User\PermissionController as AdminPermissionContr
 use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
+use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\RobotsController;
-use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
 use App\Http\Controllers\Frontend\SitemapController;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
@@ -97,8 +96,12 @@ Route::prefix('{locale}')
     ->where('permalink', '(?!blog)[a-z0-9-]+')
     ->name('pages.show');
 
-Route::middleware(['auth', 'verified'])->group(function (): void {
+Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+
+    // Header language switcher — persists user.admin_locale.
+    Route::patch('admin/locale', AdminLocaleController::class)
+        ->name('admin.locale.update');
 
     // Bare /admin (and /admin/) has no landing view of its own — redirect to
     // the dashboard so authenticated visitors don't see a confusing 404.
@@ -338,7 +341,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     });
 });
 
-Route::middleware(['auth', 'verified', 'admin'])
+Route::middleware(['auth', 'verified', 'admin', 'admin.locale'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function (): void {

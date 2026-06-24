@@ -3,6 +3,15 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { Image as ImageIcon, Save } from 'lucide-vue-next';
 import { ref } from 'vue';
 import Heading from '@/components/Heading.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.branding'), href: '/admin/settings/branding' },
+]);
 import InputError from '@/components/InputError.vue';
 import MediaPicker from '@/components/common/MediaPicker.vue';
 import { Button } from '@/components/ui/button';
@@ -19,15 +28,8 @@ type Settings = {
 
 const props = defineProps<{ settings: Settings }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Branding', href: '/admin/settings/branding' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     logo_light_path: props.settings.logo_light_path ?? '',
@@ -89,12 +91,12 @@ const imageFields = [
 </script>
 
 <template>
-    <Head title="Branding" />
+    <Head :title="t('settings.branding_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Branding"
-            description="Logos, favicon and theme colour — what the browser tab and PWA install card show."
+            :title="t('settings.branding_title')"
+            :description="t('settings.branding_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

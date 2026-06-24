@@ -20,6 +20,15 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.system'), href: '/admin/system/cache' },
+    { title: t('sidebar.sitemap'), href: '/admin/system/sitemap' },
+]);
 
 type SitemapCounts = {
     home: number;
@@ -33,20 +42,13 @@ const props = defineProps<{
     sitemap: { url: string; counts: SitemapCounts };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Sitemap', href: '/admin/system/sitemap' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const page = usePage();
 const flash = computed<{ type?: string; message?: string } | null>(() => {
-    const t = (page.props as Record<string, unknown>).toast;
-    return (t ?? null) as { type?: string; message?: string } | null;
+    const toast = (page.props as Record<string, unknown>).toast;
+    return (toast ?? null) as { type?: string; message?: string } | null;
 });
 
 const flushing = ref(false);
@@ -80,21 +82,21 @@ const totalUrls = computed<number>(() => {
 });
 
 const stats = computed(() => [
-    { label: 'Total URLs', value: totalUrls.value, tone: 'primary' as const },
-    { label: 'Home', value: props.sitemap.counts.home },
-    { label: 'Blog index', value: props.sitemap.counts.blog_index },
-    { label: 'Pages', value: props.sitemap.counts.pages },
-    { label: 'Blog posts', value: props.sitemap.counts.blog_posts },
+    { label: t('system.sitemap_total_urls'), value: totalUrls.value, tone: 'primary' as const },
+    { label: t('system.sitemap_home'), value: props.sitemap.counts.home },
+    { label: t('system.sitemap_blog_index'), value: props.sitemap.counts.blog_index },
+    { label: t('system.sitemap_pages'), value: props.sitemap.counts.pages },
+    { label: t('system.sitemap_blog_posts'), value: props.sitemap.counts.blog_posts },
 ]);
 </script>
 
 <template>
-    <Head title="Sitemap" />
+    <Head :title="t('system.sitemap_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Sitemap"
-            description="Dynamic sitemap.xml — generated from the database on demand and cached for 30 minutes. Submit this URL to Google Search Console / Bing Webmaster Tools."
+            :title="t('system.sitemap_title')"
+            :description="t('system.sitemap_description')"
         />
 
         <div
@@ -115,7 +117,7 @@ const stats = computed(() => [
                         sitemap.xml
                     </CardTitle>
                     <CardDescription>
-                        Lists the home page, every published Page and every published blog post for every active locale.
+                        {{ t('system.sitemap_lists') }}
                     </CardDescription>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -125,13 +127,13 @@ const stats = computed(() => [
                     <Button as-child variant="default">
                         <a href="/admin/system/sitemap/download" download>
                             <Download class="size-4" />
-                            Download XML
+                            {{ t('system.sitemap_download_xml') }}
                         </a>
                     </Button>
                     <Button variant="outline" :disabled="flushing" @click="flushSitemap">
                         <Loader2 v-if="flushing" class="size-4 animate-spin" />
                         <RefreshCw v-else class="size-4" />
-                        Flush cache
+                        {{ t('system.sitemap_flush_cache') }}
                     </Button>
                 </div>
             </CardHeader>
@@ -149,12 +151,12 @@ const stats = computed(() => [
                     >
                         <CheckCircle2 v-if="copied" class="size-3.5 text-emerald-600" />
                         <Copy v-else class="size-3.5" />
-                        <span class="text-[11px]">{{ copied ? 'Copied' : 'Copy' }}</span>
+                        <span class="text-[11px]">{{ copied ? t('system.sitemap_copied') : t('system.sitemap_copy') }}</span>
                     </Button>
                     <Button as-child size="sm" variant="ghost" class="h-7 gap-1">
                         <a :href="sitemap.url" target="_blank" rel="noopener">
                             <ExternalLink class="size-3.5" />
-                            <span class="text-[11px]">Open</span>
+                            <span class="text-[11px]">{{ t('system.sitemap_open') }}</span>
                         </a>
                     </Button>
                 </div>
@@ -178,7 +180,7 @@ const stats = computed(() => [
                 </div>
 
                 <p class="text-xs text-muted-foreground">
-                    Counts are multiplied by <strong>{{ sitemap.counts.locales }}</strong> active locale<span v-if="sitemap.counts.locales > 1">s</span> — each URL exists once per language.
+                    {{ t('system.sitemap_locales_hint', { count: sitemap.counts.locales }) }}
                 </p>
             </CardContent>
         </Card>

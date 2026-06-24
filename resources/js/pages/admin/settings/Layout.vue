@@ -5,6 +5,15 @@ import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.layout_toggles'), href: '/admin/settings/layout' },
+]);
 
 type Settings = {
     header_sticky: boolean;
@@ -15,15 +24,8 @@ type Settings = {
 
 const props = defineProps<{ settings: Settings }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Layout toggles', href: '/admin/settings/layout' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     header_sticky: props.settings.header_sticky,
@@ -61,12 +63,12 @@ const toggles = [
 </script>
 
 <template>
-    <Head title="Layout toggles" />
+    <Head :title="t('settings.layout_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Layout toggles"
-            description="On/off switches for header behaviour and footer details."
+            :title="t('settings.layout_title')"
+            :description="t('settings.layout_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

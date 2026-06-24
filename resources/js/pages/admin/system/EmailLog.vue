@@ -17,6 +17,18 @@ import {
 import { computed, ref, watch } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const adminLocale = useAdminLocale();
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.mail'), href: '/admin/system/email-log' },
+    { title: t('sidebar.email_log'), href: '/admin/system/email-log' },
+]);
 import {
     Card,
     CardContent,
@@ -69,15 +81,8 @@ const props = defineProps<{
     };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Email log', href: '/admin/system/email-log' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const search = ref<string>(props.filters.q ?? '');
 const status = ref<string | null>(props.filters.status);
@@ -137,10 +142,9 @@ const hasFilters = computed<boolean>(
 
 function formatTimestamp(iso: string | null): string {
     if (iso === null) {
-return '—';
-}
-
-    return new Date(iso).toLocaleString();
+        return '—';
+    }
+    return new Date(iso).toLocaleString(adminLocale.value);
 }
 
 function senderLabel(row: EmailLogRow): string {
@@ -214,12 +218,12 @@ function cleanLabel(label: string): string {
 </script>
 
 <template>
-    <Head title="Email log" />
+    <Head :title="t('mail.log_title')" />
 
     <div class="space-y-6 p-4">
         <Heading
-            title="Email log"
-            description="Every outbound mail Laravel attempted to send, with full body and headers. Read-only — outgoing email is not editable after the fact."
+            :title="t('mail.log_title')"
+            :description="t('mail.log_description')"
         />
 
         <!-- Filters -->

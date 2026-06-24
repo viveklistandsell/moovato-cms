@@ -67,7 +67,47 @@ final class HandleInertiaRequests extends Middleware
                 'test_mail_success' => $request->session()->get('test_mail_success'),
                 'test_mail_error' => $request->session()->get('test_mail_error'),
             ],
+            // Active languages list — drives the admin header
+            // language switcher. Cached for 5 minutes since languages
+            // change rarely. Only resolved on admin / dashboard
+            // requests to keep public payloads small.
+            'adminLanguages' => fn (): array => $this->adminLanguages(),
+            'adminLocale' => $request->user()?->admin_locale,
+            // Admin UI translation dict — only resolved on admin /
+            // dashboard requests so the public payload stays small.
+            // Re-resolved on every request (cheap — Laravel caches
+            // the loaded lang file in memory) so a locale change
+            // is reflected after the next navigation.
+            'translations' => fn (): array => $this->isAdminRoute($request)
+                ? (array) trans('admin')
+                : [],
         ];
+    }
+
+    private function isAdminRoute(Request $request): bool
+    {
+        return $request->is('admin/*') || $request->is('admin') || $request->is('dashboard');
+    }
+
+    /**
+     * @return array<int, array{code: string, native_name: string, flag: ?string}>
+     */
+    private function adminLanguages(): array
+    {
+        return Cache::remember(
+            'admin.languages.switcher',
+            300,
+            fn (): array => Language::query()
+                ->where('status', true)
+                ->orderBy('sort_order')
+                ->get(['code', 'native_name', 'flag'])
+                ->map(fn (Language $l): array => [
+                    'code' => (string) $l->code,
+                    'native_name' => (string) $l->native_name,
+                    'flag' => $l->flag,
+                ])
+                ->all(),
+        );
     }
 
     /**
@@ -95,6 +135,7 @@ final class HandleInertiaRequests extends Middleware
             'instagram_url' => $s->instagram_url,
         ];
     }
+
     private function storageUrl(?string $path): ?string
     {
         if ($path === null || $path === '') {

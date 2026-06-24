@@ -13,6 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/InputError.vue';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 const props = defineProps<{
     open: boolean;
@@ -50,23 +53,24 @@ function submit(): void {
     <Dialog :open="open" @update:open="emit('update:open', $event)">
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>New folder</DialogTitle>
+                <DialogTitle>{{ t('media.new_folder_title') }}</DialogTitle>
                 <DialogDescription>
-                    Create a folder
                     {{
-                        parentId ? 'inside the current folder' : 'at the root'
-                    }}.
+                        parentId
+                            ? t('media.new_folder_in_current')
+                            : t('media.new_folder_at_root')
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
             <form class="flex flex-col gap-4" @submit.prevent="submit">
                 <div class="flex flex-col gap-2">
-                    <Label for="folder-name">Name</Label>
+                    <Label for="folder-name">{{ t('media.name_label') }}</Label>
                     <Input
                         id="folder-name"
                         v-model="form.name"
                         autofocus
-                        placeholder="My folder"
+                        :placeholder="t('media.name_placeholder')"
                     />
                     <InputError :message="form.errors.name" />
                 </div>
@@ -77,10 +81,10 @@ function submit(): void {
                         variant="outline"
                         @click="emit('update:open', false)"
                     >
-                        Cancel
+                        {{ t('media.cancel') }}
                     </Button>
                     <Button type="submit" :disabled="form.processing">
-                        Create
+                        {{ t('media.create_button') }}
                     </Button>
                 </DialogFooter>
             </form>

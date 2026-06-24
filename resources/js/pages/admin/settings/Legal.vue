@@ -12,6 +12,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.legal_pages'), href: '/admin/settings/legal' },
+]);
 
 type Settings = {
     privacy_page_id: number | null;
@@ -26,15 +35,8 @@ const props = defineProps<{
     pageOptions: PageOption[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Legal pages', href: '/admin/settings/legal' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     privacy_page_id: props.settings.privacy_page_id,
@@ -74,12 +76,12 @@ function onSelect(field: keyof Settings, v: string): void {
 </script>
 
 <template>
-    <Head title="Legal pages" />
+    <Head :title="t('settings.legal_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Legal pages"
-            description="Pick the published pages used for Privacy, Terms and Impressum. The footer links route here automatically."
+            :title="t('settings.legal_title')"
+            :description="t('settings.legal_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

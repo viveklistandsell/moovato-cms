@@ -51,8 +51,21 @@ import {
 } from '@/components/ui/sheet';
 import InputError from '@/components/InputError.vue';
 import MediaPicker from '@/components/common/MediaPicker.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { usePermissionLabels } from '@/composables/usePermissionLabels';
+import { useT } from '@/composables/useT';
+
+const adminLocale = useAdminLocale();
+const { roleLabel } = usePermissionLabels();
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.user_management'), href: '/admin/users' },
+]);
 
 type RoleOption = { value: string; label: string; color: string };
 type StatusOption = { value: string; label: string; color: string };
@@ -98,14 +111,8 @@ const props = defineProps<{
     openCreate?: boolean;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Users', href: '/admin/users' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 // ---------- table query ----------
 const {
@@ -181,17 +188,17 @@ const someOnPageSelected = computed(
     () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
-const bulkActions: BulkAction[] = [
-    { value: 'activate', label: 'Activate' },
-    { value: 'deactivate', label: 'Deactivate' },
-    { value: 'ban', label: 'Ban' },
+const bulkActions = computed<BulkAction[]>(() => [
+    { value: 'activate', label: t('status.active') },
+    { value: 'deactivate', label: t('status.inactive') },
+    { value: 'ban', label: t('users.ban') },
     {
         value: 'delete',
-        label: 'Delete',
+        label: t('table.bulk_delete'),
         destructive: true,
-        confirm: 'Delete {count} selected user(s)?',
+        confirm: t('table.bulk_confirm_delete'),
     },
-];
+]);
 
 function applyBulkAction(action: string): void {
     if (selection.isEmpty.value) return;
@@ -210,33 +217,33 @@ function applyBulkAction(action: string): void {
 const statsCards = computed(() => [
     {
         key: 'total',
-        label: 'Total Users',
+        label: t('users.total_users'),
         value: props.stats.total,
-        sub: 'All Registered Users',
+        sub: t('users.all_registered_users'),
         icon: Users,
         iconBg: 'bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300',
     },
     {
         key: 'active',
-        label: 'Active Users',
+        label: t('users.active_users'),
         value: props.stats.active,
-        sub: 'Users Active',
+        sub: t('users.users_active'),
         icon: UserCheck,
         iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300',
     },
     {
         key: 'inactive',
-        label: 'Inactive Users',
+        label: t('users.inactive_users'),
         value: props.stats.inactive,
-        sub: 'Users Inactive',
+        sub: t('users.users_inactive'),
         icon: UserX,
         iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300',
     },
     {
         key: 'admins',
-        label: 'Admins',
+        label: t('users.admins'),
         value: props.stats.admins,
-        sub: 'Total Admins',
+        sub: t('users.total_admins'),
         icon: ShieldCheck,
         iconBg: 'bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-300',
     },
@@ -256,21 +263,21 @@ function badgeClasses(color: string | null | undefined): string {
 }
 
 function relativeTime(iso: string | null): string {
-    if (!iso) return 'Never';
+    if (!iso) return t('common.never');
     const diffMs = Date.now() - new Date(iso).getTime();
     const min = Math.floor(diffMs / 60_000);
-    if (min < 1) return 'just now';
-    if (min < 60) return `${min} min ago`;
+    if (min < 1) return t('users.just_now');
+    if (min < 60) return t('users.min_ago', { count: min });
     const hr = Math.floor(min / 60);
-    if (hr < 24) return `${hr} hour${hr === 1 ? '' : 's'} ago`;
+    if (hr < 24) return t('users.hour_ago', { count: hr });
     const day = Math.floor(hr / 24);
-    return `${day} day${day === 1 ? '' : 's'} ago`;
+    return t('users.day_ago', { count: day });
 }
 
 function fullTime(iso: string | null): string {
     if (!iso) return '';
     const d = new Date(iso);
-    return d.toLocaleString('en-US', {
+    return d.toLocaleString(adminLocale.value, {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -403,7 +410,7 @@ function submitReset(): void {
 
 // ---------- single delete ----------
 function destroyUser(row: UserRow): void {
-    if (!confirm(`Delete user "${row.name}"?`)) return;
+    if (!confirm(t('table.confirm_delete_named', { name: row.name }))) return;
     router.delete(`/admin/users/${row.id}`, {
         preserveScroll: true,
     });
@@ -444,18 +451,18 @@ watch(drawerOpen, (isOpen) => {
 </script>
 
 <template>
-    <Head title="User Management" />
+    <Head :title="t('users.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <!-- Header -->
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="User Management"
-                description="Manage users, roles, and access."
+                :title="t('users.title')"
+                :description="t('users.description')"
             />
             <Button @click="openCreate">
                 <Plus class="size-4" />
-                Add New User
+                {{ t('users.create_button') }}
             </Button>
         </div>
 
@@ -491,7 +498,7 @@ watch(drawerOpen, (isOpen) => {
                     <SearchInput
                         :model-value="search"
                         :loading="isLoading"
-                        placeholder="Search by name or email…"
+                        :placeholder="t('table.search_user')"
                         @search="setSearch"
                     />
                     <Select
@@ -499,16 +506,16 @@ watch(drawerOpen, (isOpen) => {
                         @update:model-value="(v) => { roleFilter = v as string; applyFilters(); }"
                     >
                         <SelectTrigger class="h-9 w-44">
-                            <SelectValue placeholder="All Roles" />
+                            <SelectValue :placeholder="t('users.role_filter_all')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Roles</SelectItem>
+                            <SelectItem value="all">{{ t('users.role_filter_all') }}</SelectItem>
                             <SelectItem
                                 v-for="opt in roleOptions"
                                 :key="opt.value"
                                 :value="opt.value"
                             >
-                                {{ opt.label }}
+                                {{ roleLabel(opt.value, opt.label) }}
                             </SelectItem>
                         </SelectContent>
                     </Select>
@@ -517,10 +524,10 @@ watch(drawerOpen, (isOpen) => {
                         @update:model-value="(v) => { statusFilter = v as string; applyFilters(); }"
                     >
                         <SelectTrigger class="h-9 w-40">
-                            <SelectValue placeholder="All Status" />
+                            <SelectValue :placeholder="t('users.status_filter_all')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="all">{{ t('users.status_filter_all') }}</SelectItem>
                             <SelectItem
                                 v-for="opt in statusOptions"
                                 :key="opt.value"
@@ -532,20 +539,18 @@ watch(drawerOpen, (isOpen) => {
                     </Select>
                     <Button type="button" @click="applyFilters">
                         <Filter class="size-4" />
-                        Filter
+                        {{ t('common.filter') }}
                     </Button>
 
                     <div class="ml-auto flex items-center gap-2">
                         <BulkActions
                             :actions="bulkActions"
                             :count="selection.count.value"
-                            label="Bulk action"
                             @action="applyBulkAction"
                         />
                         <PerPageSelect
                             :model-value="perPage"
                             :options="[10, 25, 50, 100]"
-                            label="Per page"
                             @update:model-value="setPerPage"
                         />
                         <Button
@@ -554,7 +559,7 @@ watch(drawerOpen, (isOpen) => {
                             @click="resetAllFilters"
                         >
                             <RotateCcw class="size-4" />
-                            Reset
+                            {{ t('common.reset') }}
                         </Button>
                     </div>
                 </div>
@@ -572,7 +577,7 @@ watch(drawerOpen, (isOpen) => {
                                                   ? 'indeterminate'
                                                   : false
                                         "
-                                        aria-label="Select all on this page"
+                                        :aria-label="t('table.select_all_on_page')"
                                         @update:model-value="selection.toggleAll(visibleIds)"
                                     />
                                 </th>
@@ -588,7 +593,7 @@ watch(drawerOpen, (isOpen) => {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="name"
-                                        label="User"
+                                        :label="t('table.col_user')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -597,19 +602,19 @@ watch(drawerOpen, (isOpen) => {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="email"
-                                        label="Email"
+                                        :label="t('table.col_email')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground">
-                                    Role
+                                    {{ t('table.col_role') }}
                                 </th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="status"
-                                        label="Status"
+                                        :label="t('table.col_status')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -618,21 +623,21 @@ watch(drawerOpen, (isOpen) => {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="last_login_at"
-                                        label="Last Login"
+                                        :label="t('table.col_last_login')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th class="px-4 py-3 text-center font-medium uppercase tracking-wide text-muted-foreground">
-                                    Actions
+                                    {{ t('table.col_actions') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="users.length === 0">
                                 <td colspan="8" class="px-4 py-12 text-center text-sm text-muted-foreground">
-                                    {{ isFiltered ? 'No users match your filters.' : 'No users yet.' }}
+                                    {{ isFiltered ? t('users.no_results_filtered') : t('users.no_users_yet') }}
                                 </td>
                             </tr>
                             <tr
@@ -643,7 +648,7 @@ watch(drawerOpen, (isOpen) => {
                                 <td class="px-3 py-3">
                                     <Checkbox
                                         :model-value="selection.isSelected(row.id)"
-                                        :aria-label="`Select ${row.name}`"
+                                        :aria-label="t('table.select_row', { name: row.name })"
                                         @update:model-value="selection.toggle(row.id)"
                                     />
                                 </td>
@@ -673,7 +678,7 @@ watch(drawerOpen, (isOpen) => {
                                         class="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
                                         :class="badgeClasses(row.role_color)"
                                     >
-                                        {{ row.role_display_name }}
+                                        {{ roleLabel(row.role, row.role_display_name ?? row.role) }}
                                     </Badge>
                                     <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>
@@ -707,7 +712,7 @@ watch(drawerOpen, (isOpen) => {
                                             type="button"
                                             size="icon"
                                             class="size-8 bg-sky-500 hover:bg-sky-600"
-                                            :title="`Edit ${row.name}`"
+                                            :title="t('table.edit_row', { name: row.name })"
                                             @click="openEdit(row)"
                                         >
                                             <Pencil class="size-4" />
@@ -716,7 +721,7 @@ watch(drawerOpen, (isOpen) => {
                                             type="button"
                                             size="icon"
                                             class="size-8 bg-amber-500 hover:bg-amber-600"
-                                            :title="`Reset password for ${row.name}`"
+                                            :title="t('users.reset_password') + ' — ' + row.name"
                                             @click="openReset(row)"
                                         >
                                             <Key class="size-4" />
@@ -725,7 +730,7 @@ watch(drawerOpen, (isOpen) => {
                                             type="button"
                                             size="icon"
                                             class="size-8 bg-rose-500 hover:bg-rose-600"
-                                            :title="`Delete ${row.name}`"
+                                            :title="t('table.delete_row', { name: row.name })"
                                             :disabled="row.id === currentUserId"
                                             @click="destroyUser(row)"
                                         >
@@ -837,7 +842,7 @@ watch(drawerOpen, (isOpen) => {
                                     :key="opt.value"
                                     :value="opt.value"
                                 >
-                                    {{ opt.label }}
+                                    {{ roleLabel(opt.value, opt.label) }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>

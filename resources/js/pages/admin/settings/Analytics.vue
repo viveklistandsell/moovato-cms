@@ -9,6 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.analytics_tracking'), href: '/admin/settings/analytics' },
+]);
 
 type Settings = {
     google_analytics_id: string | null;
@@ -20,15 +29,8 @@ type Settings = {
 
 const props = defineProps<{ settings: Settings }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Analytics & tracking', href: '/admin/settings/analytics' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     google_analytics_id: props.settings.google_analytics_id ?? '',
@@ -44,12 +46,12 @@ function submit(): void {
 </script>
 
 <template>
-    <Head title="Analytics & tracking" />
+    <Head :title="t('settings.analytics_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Analytics & tracking"
-            description="GA4, GTM, Meta Pixel IDs plus a free-form &lt;head&gt; snippet for anything custom."
+            :title="t('settings.analytics_title')"
+            :description="t('settings.analytics_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

@@ -12,6 +12,17 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const adminLocale = useAdminLocale();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.system'), href: '/admin/system/cache' },
+    { title: t('sidebar.activity_log'), href: '/admin/system/activity' },
+]);
 
 type ActivityLogRow = {
     id: number;
@@ -49,15 +60,8 @@ const props = defineProps<{
     };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Activity log', href: '/admin/system/activity' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 // Mirror the server filters locally so typing into the search box feels
 // instant while a 300ms debounce holds back the HTTP request.
@@ -110,7 +114,7 @@ const hasFilters = computed<boolean>(
 
 function formatTimestamp(iso: string | null): string {
     if (iso === null) return '—';
-    return new Date(iso).toLocaleString();
+    return new Date(iso).toLocaleString(adminLocale.value);
 }
 
 function prettyAction(raw: string): string {
@@ -139,21 +143,20 @@ function cleanLabel(label: string): string {
 </script>
 
 <template>
-    <Head title="Activity log" />
+    <Head :title="t('system.activity_title')" />
 
     <div class="space-y-6 p-4">
         <Heading
-            title="Activity log"
-            description="Audit trail of admin and system actions. Read-only; entries are appended once and kept indefinitely."
+            :title="t('system.activity_title')"
+            :description="t('system.activity_description')"
         />
 
         <!-- Filter bar -->
         <Card>
             <CardHeader>
-                <CardTitle class="text-base">Filters</CardTitle>
+                <CardTitle class="text-base">{{ t('system.activity_filters_title') }}</CardTitle>
                 <CardDescription class="text-xs">
-                    Combine free-text search with the dropdowns to narrow the
-                    audit trail.
+                    {{ t('system.activity_filters_description') }}
                 </CardDescription>
             </CardHeader>
             <CardContent class="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -163,7 +166,7 @@ function cleanLabel(label: string): string {
                     />
                     <Input
                         v-model="search"
-                        placeholder="Search description, action, IP…"
+                        :placeholder="t('system.activity_search_full')"
                         class="pl-9"
                         @input="onSearchInput"
                     />
@@ -173,7 +176,7 @@ function cleanLabel(label: string): string {
                     v-model="userId"
                     class="h-9 rounded-md border bg-background px-3 text-sm"
                 >
-                    <option :value="null">All users</option>
+                    <option :value="null">{{ t('system.activity_filter_all_users') }}</option>
                     <option
                         v-for="u in options.users"
                         :key="u.id"
@@ -187,7 +190,7 @@ function cleanLabel(label: string): string {
                     v-model="action"
                     class="h-9 rounded-md border bg-background px-3 text-sm"
                 >
-                    <option :value="null">All actions</option>
+                    <option :value="null">{{ t('system.activity_filter_all_actions') }}</option>
                     <option
                         v-for="a in options.actions"
                         :key="a"
@@ -201,7 +204,7 @@ function cleanLabel(label: string): string {
                     v-model="subjectType"
                     class="h-9 rounded-md border bg-background px-3 text-sm"
                 >
-                    <option :value="null">All subject types</option>
+                    <option :value="null">{{ t('system.activity_filter_all_subjects') }}</option>
                     <option
                         v-for="s in options.subject_types"
                         :key="s"
@@ -216,11 +219,7 @@ function cleanLabel(label: string): string {
                 class="flex items-center justify-between pt-0"
             >
                 <p class="text-xs text-muted-foreground">
-                    Showing
-                    <span class="font-semibold text-foreground">
-                        {{ logs.total }}
-                    </span>
-                    matching entries.
+                    {{ t('system.activity_showing_matching', { count: logs.total }) }}
                 </p>
                 <Button
                     type="button"
@@ -229,7 +228,7 @@ function cleanLabel(label: string): string {
                     @click="clearFilters"
                 >
                     <X class="size-3.5" />
-                    Clear filters
+                    {{ t('system.activity_clear_filters_btn') }}
                 </Button>
             </CardContent>
         </Card>
@@ -241,14 +240,14 @@ function cleanLabel(label: string): string {
                     <table class="w-full border-collapse text-sm">
                         <thead class="bg-muted/40 text-left text-xs uppercase">
                             <tr>
-                                <th class="px-4 py-3 font-medium">When</th>
-                                <th class="px-4 py-3 font-medium">User</th>
-                                <th class="px-4 py-3 font-medium">Action</th>
-                                <th class="px-4 py-3 font-medium">Subject</th>
+                                <th class="px-4 py-3 font-medium">{{ t('system.activity_col_when') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('system.activity_col_user') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('system.activity_col_action') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('system.activity_col_subject') }}</th>
                                 <th class="px-4 py-3 font-medium">
-                                    Description
+                                    {{ t('system.activity_col_description') }}
                                 </th>
-                                <th class="px-4 py-3 font-medium">IP</th>
+                                <th class="px-4 py-3 font-medium">{{ t('system.activity_col_ip') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -261,7 +260,7 @@ function cleanLabel(label: string): string {
                                     class="px-4 py-12 text-center text-muted-foreground"
                                 >
                                     <Filter class="mx-auto mb-2 size-6 opacity-40" />
-                                    No activity matches the current filters.
+                                    {{ t('system.activity_no_match') }}
                                 </td>
                             </tr>
                             <tr
@@ -288,7 +287,7 @@ function cleanLabel(label: string): string {
                                         v-else
                                         class="text-xs text-muted-foreground"
                                     >
-                                        system
+                                        {{ t('system.activity_system_actor') }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 font-mono text-xs">

@@ -12,6 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.seo_defaults'), href: '/admin/settings/seo' },
+]);
 
 type TranslationRow = { default_meta_description: string | null };
 
@@ -27,15 +36,8 @@ const props = defineProps<{
     languages: LocaleOption[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'SEO defaults', href: '/admin/settings/seo' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const defaultLang = computed<string>(
     () =>
@@ -103,12 +105,12 @@ function clearOg(): void {
 </script>
 
 <template>
-    <Head title="SEO defaults" />
+    <Head :title="t('settings.seo_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="SEO defaults"
-            description="Fallbacks used when an individual page leaves its SEO fields blank."
+            :title="t('settings.seo_title')"
+            :description="t('settings.seo_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

@@ -16,6 +16,17 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const adminLocale = useAdminLocale();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.mail'), href: '/admin/system/email-log' },
+    { title: t('sidebar.email_log'), href: '/admin/system/email-log' },
+]);
 
 type EmailLogDetail = {
     id: number;
@@ -41,25 +52,16 @@ type EmailLogDetail = {
 
 defineProps<{ log: EmailLogDetail }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Email log', href: '/admin/system/email-log' },
-            { title: 'Detail', href: '#' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const tab = ref<'preview' | 'html' | 'text' | 'headers'>('preview');
 
 function formatTimestamp(iso: string | null): string {
     if (iso === null) {
-return '—';
-}
-
-    return new Date(iso).toLocaleString();
+        return '—';
+    }
+    return new Date(iso).toLocaleString(adminLocale.value);
 }
 
 function joinAddresses(

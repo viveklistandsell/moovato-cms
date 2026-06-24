@@ -11,6 +11,17 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { usePermissionLabels } from '@/composables/usePermissionLabels';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const { moduleLabel, permissionLabel, roleLabel } = usePermissionLabels();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.user_management'), href: '/admin/users' },
+    { title: t('sidebar.permissions'), href: '/admin/permissions' },
+]);
 
 type RoleRef = {
     id: number;
@@ -36,15 +47,8 @@ defineProps<{
     roles: RoleRef[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Users', href: '/admin/users' },
-            { title: 'Permissions', href: '/admin/permissions' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 function badgeClasses(color: string): string {
     const map: Record<string, string> = {
@@ -60,18 +64,18 @@ function badgeClasses(color: string): string {
 </script>
 
 <template>
-    <Head title="Permissions" />
+    <Head :title="t('permissions.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="Permissions"
-                description="Every permission in the system, bucketed by module. Edit who has them via the Roles page."
+                :title="t('permissions.title')"
+                :description="t('permissions.description')"
             />
             <Button as-child variant="outline">
                 <Link href="/admin/roles">
                     <ShieldCheck class="size-4" />
-                    Manage roles
+                    {{ t('sidebar.roles') }}
                 </Link>
             </Button>
         </div>
@@ -81,13 +85,13 @@ function badgeClasses(color: string): string {
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2">
                         <KeyRound class="size-4 text-muted-foreground" />
-                        {{ group.group }}
+                        {{ moduleLabel(group.group) }}
                         <Badge variant="secondary" class="text-[10px]">
                             {{ group.items.length }}
                         </Badge>
                     </CardTitle>
                     <CardDescription>
-                        Permissions in the {{ group.group }} module.
+                        {{ t('permissions.group_description', { module: moduleLabel(group.group) }) }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="overflow-x-auto p-0">
@@ -95,13 +99,13 @@ function badgeClasses(color: string): string {
                         <thead class="bg-muted/50 text-left text-xs">
                             <tr>
                                 <th class="px-4 py-2 font-medium uppercase tracking-wide text-muted-foreground">
-                                    Permission
+                                    {{ t('permissions.col_permission') }}
                                 </th>
                                 <th class="px-4 py-2 font-medium uppercase tracking-wide text-muted-foreground">
-                                    Key
+                                    {{ t('permissions.col_key') }}
                                 </th>
                                 <th class="px-4 py-2 font-medium uppercase tracking-wide text-muted-foreground">
-                                    Assigned to
+                                    {{ t('permissions.col_assigned_to') }}
                                 </th>
                             </tr>
                         </thead>
@@ -112,7 +116,7 @@ function badgeClasses(color: string): string {
                                 class="border-t"
                             >
                                 <td class="px-4 py-3">
-                                    <div class="font-medium">{{ perm.display_name }}</div>
+                                    <div class="font-medium">{{ permissionLabel(perm.name, perm.display_name) }}</div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <code class="rounded bg-muted px-1.5 py-0.5 text-[11px]">
@@ -127,13 +131,13 @@ function badgeClasses(color: string): string {
                                             class="rounded-full px-2 py-0.5 text-[10px]"
                                             :class="badgeClasses(role.color)"
                                         >
-                                            {{ role.display_name }}
+                                            {{ roleLabel(role.name, role.display_name) }}
                                         </Badge>
                                         <span
                                             v-if="perm.roles.length === 0"
                                             class="text-xs text-muted-foreground"
                                         >
-                                            — unused —
+                                            {{ t('permissions.unused') }}
                                         </span>
                                         <Button
                                             v-if="perm.roles.length > 0"

@@ -2,9 +2,13 @@
 import { Search } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import AdminLocaleSwitcher from '@/components/admin/AdminLocaleSwitcher.vue';
 import AppearanceToggle from '@/components/common/AppearanceToggle.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 const breadcrumbsRef = useBreadcrumbs();
 const breadcrumbs = computed(() => breadcrumbsRef?.value ?? []);
@@ -37,13 +41,14 @@ onMounted(() => {
                 @click="openSearch"
             >
                 <Search class="size-3.5" />
-                <span class="hidden md:inline">Search…</span>
+                <span class="hidden md:inline">{{ t('common.search') }}</span>
                 <kbd
                     class="hidden rounded border bg-muted px-1 py-0.5 font-mono text-[10px] md:inline"
                 >
                     {{ isMac ? '⌘' : 'Ctrl' }}K
                 </kbd>
             </button>
+            <AdminLocaleSwitcher />
             <AppearanceToggle />
         </div>
     </header>

@@ -16,6 +16,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 type Language = {
     id: number;
@@ -37,10 +40,10 @@ const props = defineProps<{
 const isEdit = computed(() => props.language !== null);
 
 setBreadcrumbs(() => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Languages', href: '/admin/languages' },
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.languages'), href: '/admin/languages' },
     {
-        title: isEdit.value ? 'Edit language' : 'Add a language',
+        title: isEdit.value ? t('languages.edit_title') : t('languages.create_title'),
         href: '#',
     },
 ]);
@@ -68,7 +71,7 @@ function submit(): void {
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit language' : 'Add language'" />
+    <Head :title="isEdit ? t('languages.edit_title') : t('languages.add_button')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-center gap-3">
@@ -78,11 +81,11 @@ function submit(): void {
                 </Link>
             </Button>
             <Heading
-                :title="isEdit ? 'Edit language' : 'Add a language'"
+                :title="isEdit ? t('languages.edit_title') : t('languages.create_title')"
                 :description="
                     isEdit
-                        ? 'Update locale details and visibility.'
-                        : 'Pick a code (e.g. de, en, fr-FR) and the human-readable names.'
+                        ? t('languages.edit_description')
+                        : t('languages.create_description')
                 "
             />
         </div>
@@ -95,28 +98,25 @@ function submit(): void {
             <div class="space-y-6 lg:col-span-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Identity</CardTitle>
+                        <CardTitle>{{ t('languages.identity_title') }}</CardTitle>
                         <CardDescription>
-                            Code is the URL prefix (e.g. <code>en</code> →
-                            <code>/en/blog</code>) and the language tab key.
+                            {{ t('languages.identity_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="grid gap-5">
                         <div class="grid gap-2">
                             <Label for="code">
-                                Code
+                                {{ t('languages.code_label') }}
                                 <span class="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="code"
                                 v-model="form.code"
-                                placeholder="de, en, fr, de_AT…"
+                                :placeholder="t('languages.code_placeholder')"
                                 autocomplete="off"
                             />
                             <p class="text-xs text-muted-foreground">
-                                Lowercase ASCII; 2–10 chars. Optional region
-                                suffix like <code>de_AT</code> or
-                                <code>en-GB</code>.
+                                {{ t('languages.code_hint') }}
                             </p>
                             <InputError :message="form.errors.code" />
                         </div>
@@ -124,25 +124,25 @@ function submit(): void {
                         <div class="grid gap-2 sm:grid-cols-2">
                             <div class="grid gap-2">
                                 <Label for="name">
-                                    Name
+                                    {{ t('languages.name_label') }}
                                     <span class="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="name"
                                     v-model="form.name"
-                                    placeholder="English"
+                                    :placeholder="t('languages.name_placeholder')"
                                 />
                                 <InputError :message="form.errors.name" />
                             </div>
                             <div class="grid gap-2">
                                 <Label for="native_name">
-                                    Native name
+                                    {{ t('languages.native_name_label') }}
                                     <span class="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="native_name"
                                     v-model="form.native_name"
-                                    placeholder="Deutsch"
+                                    :placeholder="t('languages.native_name_placeholder')"
                                 />
                                 <InputError
                                     :message="form.errors.native_name"
@@ -152,20 +152,20 @@ function submit(): void {
 
                         <div class="grid gap-2 sm:grid-cols-2">
                             <div class="grid gap-2">
-                                <Label for="flag">Flag</Label>
+                                <Label for="flag">{{ t('languages.flag_label') }}</Label>
                                 <Input
                                     id="flag"
                                     v-model="form.flag"
-                                    placeholder="🇩🇪 (emoji)"
+                                    :placeholder="t('languages.flag_placeholder')"
                                 />
                                 <InputError :message="form.errors.flag" />
                             </div>
                             <div class="grid gap-2">
-                                <Label for="lang_locale">PHP locale</Label>
+                                <Label for="lang_locale">{{ t('languages.php_locale_label') }}</Label>
                                 <Input
                                     id="lang_locale"
                                     v-model="form.lang_locale"
-                                    placeholder="de_DE, en_US…"
+                                    :placeholder="t('languages.php_locale_placeholder')"
                                 />
                                 <InputError
                                     :message="form.errors.lang_locale"
@@ -180,7 +180,7 @@ function submit(): void {
             <div class="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Save</CardTitle>
+                        <CardTitle>{{ t('languages.save_card_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="flex items-center gap-2">
@@ -190,7 +190,7 @@ function submit(): void {
                                 class="flex-1"
                             >
                                 <Save class="size-4" />
-                                Save
+                                {{ t('languages.save_button') }}
                             </Button>
                             <Button
                                 as-child
@@ -200,7 +200,7 @@ function submit(): void {
                             >
                                 <Link href="/admin/languages">
                                     <X class="size-4" />
-                                    Cancel
+                                    {{ t('languages.cancel_button') }}
                                 </Link>
                             </Button>
                         </div>
@@ -209,12 +209,12 @@ function submit(): void {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Settings</CardTitle>
+                        <CardTitle>{{ t('languages.settings_card_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="flex items-center justify-between">
                             <Label for="status" class="cursor-pointer">
-                                Active
+                                {{ t('languages.active_toggle') }}
                             </Label>
                             <Switch
                                 id="status"
@@ -223,13 +223,12 @@ function submit(): void {
                             />
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            Inactive languages are hidden from the public site
-                            and from translation tabs.
+                            {{ t('languages.active_hint') }}
                         </p>
 
                         <div class="flex items-center justify-between">
                             <Label for="lang_is_default" class="cursor-pointer">
-                                Default language
+                                {{ t('languages.default_toggle') }}
                             </Label>
                             <Switch
                                 id="lang_is_default"
@@ -240,13 +239,11 @@ function submit(): void {
                             />
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            The default locale renders at the URL root (no
-                            <code>/code/</code> prefix). Enabling this unsets it
-                            on every other language.
+                            {{ t('languages.default_hint') }}
                         </p>
 
                         <div class="grid gap-2">
-                            <Label for="sort_order">Sort order</Label>
+                            <Label for="sort_order">{{ t('languages.sort_order_label') }}</Label>
                             <Input
                                 id="sort_order"
                                 v-model.number="form.sort_order"
@@ -254,8 +251,7 @@ function submit(): void {
                                 min="0"
                             />
                             <p class="text-xs text-muted-foreground">
-                                Controls the order language tabs appear in Edit
-                                forms.
+                                {{ t('languages.sort_order_hint') }}
                             </p>
                             <InputError :message="form.errors.sort_order" />
                         </div>

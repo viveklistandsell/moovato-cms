@@ -16,6 +16,15 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.system'), href: '/admin/system/cache' },
+    { title: t('sidebar.health'), href: '/admin/system/health' },
+]);
 
 type Status = 'ok' | 'warn' | 'fail';
 
@@ -32,15 +41,8 @@ const props = defineProps<{
     summary: { ok: number; warn: number; fail: number };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Health', href: '/admin/system/health' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 function refresh(): void {
     router.reload({ only: ['checks', 'summary'] });
@@ -55,21 +57,27 @@ const overall = computed<Status>(() => {
 const overallCopy = computed<{ title: string; subtitle: string }>(() => {
     if (overall.value === 'fail') {
         return {
-            title: 'Action required',
-            subtitle: `${props.summary.fail} failing check${props.summary.fail === 1 ? '' : 's'}.`,
+            title: t('system.health_action_required'),
+            subtitle: t('system.health_failing_count', { count: props.summary.fail }),
         };
     }
     if (overall.value === 'warn') {
         return {
-            title: 'Investigate warnings',
-            subtitle: `${props.summary.warn} warning${props.summary.warn === 1 ? '' : 's'}.`,
+            title: t('system.health_investigate_warnings'),
+            subtitle: t('system.health_warning_count', { count: props.summary.warn }),
         };
     }
     return {
-        title: 'All clear',
-        subtitle: 'Every check passing.',
+        title: t('system.health_all_clear'),
+        subtitle: t('system.health_every_passing'),
     };
 });
+
+const statusLabel: Record<Status, string> = {
+    ok: t('system.health_status_ok'),
+    warn: t('system.health_status_warn'),
+    fail: t('system.health_status_fail'),
+};
 
 const TONE: Record<
     Status,
@@ -97,13 +105,13 @@ const TONE: Record<
 </script>
 
 <template>
-    <Head title="System health" />
+    <Head :title="t('system.health_title')" />
 
     <div class="space-y-6 p-4">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <Heading
-                title="System health"
-                description="Read-only operational dashboard. Surfaces deploy and configuration problems before they break the public site."
+                :title="t('system.health_title')"
+                :description="t('system.health_description')"
             />
             <Button
                 type="button"
@@ -112,7 +120,7 @@ const TONE: Record<
                 @click="refresh"
             >
                 <RefreshCw class="size-3.5" />
-                Re-check
+                {{ t('system.health_recheck') }}
             </Button>
         </div>
 
@@ -153,19 +161,19 @@ const TONE: Record<
                         class="rounded-full px-2 py-1"
                         :class="TONE.ok.chip"
                     >
-                        {{ summary.ok }} OK
+                        {{ t('system.health_pill_ok', { count: summary.ok }) }}
                     </span>
                     <span
                         class="rounded-full px-2 py-1"
                         :class="TONE.warn.chip"
                     >
-                        {{ summary.warn }} warning
+                        {{ t('system.health_pill_warn', { count: summary.warn }) }}
                     </span>
                     <span
                         class="rounded-full px-2 py-1"
                         :class="TONE.fail.chip"
                     >
-                        {{ summary.fail }} failing
+                        {{ t('system.health_pill_fail', { count: summary.fail }) }}
                     </span>
                 </div>
             </CardContent>
@@ -174,10 +182,9 @@ const TONE: Record<
         <!-- Check rows -->
         <Card>
             <CardHeader>
-                <CardTitle class="text-base">Checks</CardTitle>
+                <CardTitle class="text-base">{{ t('system.health_checks_title') }}</CardTitle>
                 <CardDescription class="text-xs">
-                    Each row reports a single subsystem. Click "Re-check" to
-                    re-run.
+                    {{ t('system.health_checks_description') }}
                 </CardDescription>
             </CardHeader>
             <CardContent class="p-0">
@@ -226,7 +233,7 @@ const TONE: Record<
                             class="rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide uppercase"
                             :class="TONE[check.status].chip"
                         >
-                            {{ check.status }}
+                            {{ statusLabel[check.status] }}
                         </span>
                     </li>
                 </ul>

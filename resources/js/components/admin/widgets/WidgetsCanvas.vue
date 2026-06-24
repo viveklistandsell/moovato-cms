@@ -6,10 +6,13 @@ import { toast } from 'vue-sonner';
 import draggable from 'vuedraggable';
 import type { LocaleOption } from '@/components/common/LocaleTabs.vue';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/composables/useT';
 import WidgetCard from './WidgetCard.vue';
 import WidgetEditDrawer from './WidgetEditDrawer.vue';
 import WidgetPickerModal from './WidgetPickerModal.vue';
 import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
+
+const t = useT();
 
 const props = defineProps<{
     // When provided (edit mode), the canvas owns its Save button and syncs
@@ -245,7 +248,7 @@ function save(): void {
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <LayoutTemplate class="size-4" />
-                {{ widgets.length }} widget{{ widgets.length === 1 ? '' : 's' }}
+                {{ t('widgets.count', { count: widgets.length }) }}
             </div>
             <div class="flex items-center gap-2">
                 <Button
@@ -255,7 +258,7 @@ function save(): void {
                     @click="pickerOpen = true"
                 >
                     <Plus class="size-4" />
-                    Add widget
+                    {{ t('widgets.add') }}
                 </Button>
                 <Button
                     v-if="hasSaveEndpoint"
@@ -266,7 +269,7 @@ function save(): void {
                 >
                     <Loader2 v-if="saving" class="size-4 animate-spin" />
                     <Save v-else class="size-4" />
-                    Save widgets
+                    {{ t('widgets.save') }}
                 </Button>
             </div>
         </div>
@@ -275,8 +278,7 @@ function save(): void {
             v-if="!hasSaveEndpoint"
             class="rounded-md border border-dashed bg-muted/30 px-3 py-2 text-xs text-muted-foreground"
         >
-            Widgets you add here will be saved together with the page when you
-            click <strong>Save</strong> above.
+            {{ t('widgets.create_hint') }}
         </p>
 
         <div
@@ -284,11 +286,9 @@ function save(): void {
             class="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed bg-muted/30 px-6 py-12 text-center"
         >
             <LayoutTemplate class="size-8 text-muted-foreground/50" />
-            <div class="text-sm font-medium">No widgets yet</div>
+            <div class="text-sm font-medium">{{ t('widgets.empty_title') }}</div>
             <p class="max-w-sm text-xs text-muted-foreground">
-                Build this page from reusable blocks — hero sections, banners,
-                features, FAQs, and more. Click <strong>Add widget</strong> to
-                start.
+                {{ t('widgets.empty_hint') }}
             </p>
             <Button
                 type="button"
@@ -297,7 +297,7 @@ function save(): void {
                 @click="pickerOpen = true"
             >
                 <Plus class="size-4" />
-                Add your first widget
+                {{ t('widgets.add_first') }}
             </Button>
         </div>
 

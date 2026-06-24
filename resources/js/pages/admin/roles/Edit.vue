@@ -24,6 +24,12 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { usePermissionLabels } from '@/composables/usePermissionLabels';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const { moduleLabel, permissionLabel } = usePermissionLabels();
 
 type PermissionItem = {
     id: number;
@@ -56,16 +62,16 @@ const props = defineProps<{
 
 const isEdit = computed(() => props.role !== null);
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Users', href: '/admin/users' },
-            { title: 'Roles', href: '/admin/roles' },
-            { title: 'Edit role', href: '#' },
-        ],
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.user_management'), href: '/admin/users' },
+    { title: t('sidebar.roles'), href: '/admin/roles' },
+    {
+        title: isEdit.value ? t('roles.edit_title') : t('roles.create_title'),
+        href: '#',
     },
-});
+]);
+defineOptions({});
 
 const form = useForm({
     name: props.role?.name ?? '',
@@ -114,7 +120,7 @@ function submit(): void {
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit role' : 'New role'" />
+    <Head :title="isEdit ? t('roles.edit_title') : t('roles.create_button')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
@@ -125,11 +131,11 @@ function submit(): void {
                     </Link>
                 </Button>
                 <Heading
-                    :title="isEdit ? `Edit ${role?.display_name}` : 'Create a new role'"
+                    :title="isEdit ? t('roles.edit_for', { name: role?.display_name ?? '' }) : t('roles.new_role_title')"
                     :description="
                         role?.is_system
-                            ? 'This is a system role — name is locked, but you can adjust display info + permissions.'
-                            : 'Group permissions into a role you can assign to users.'
+                            ? t('roles.system_description')
+                            : t('roles.normal_description')
                     "
                 />
             </div>
@@ -140,52 +146,52 @@ function submit(): void {
             <div class="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Role identity</CardTitle>
+                        <CardTitle>{{ t('roles.identity_title') }}</CardTitle>
                         <CardDescription>
-                            Shown in the user table and role picker.
+                            {{ t('roles.identity_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="grid gap-2">
                             <Label for="role-name">
-                                Name
+                                {{ t('roles.name_label') }}
                                 <Lock v-if="role?.is_system" class="ml-1 inline size-3 text-muted-foreground" />
                             </Label>
                             <Input
                                 id="role-name"
                                 v-model="form.name"
                                 :disabled="role?.is_system === true"
-                                placeholder="moderator"
+                                :placeholder="t('roles.name_placeholder')"
                             />
                             <p class="text-xs text-muted-foreground">
-                                Stable identifier used in code (e.g. `moderator`).
+                                {{ t('roles.name_hint') }}
                             </p>
                             <InputError :message="form.errors.name" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="role-display-name">Display name</Label>
+                            <Label for="role-display-name">{{ t('roles.display_name_label') }}</Label>
                             <Input
                                 id="role-display-name"
                                 v-model="form.display_name"
-                                placeholder="Content Moderator"
+                                :placeholder="t('roles.display_name_placeholder')"
                             />
                             <InputError :message="form.errors.display_name" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="role-description">Description</Label>
+                            <Label for="role-description">{{ t('roles.description_label') }}</Label>
                             <Textarea
                                 id="role-description"
                                 v-model="form.description"
                                 :rows="3"
-                                placeholder="Short summary of what this role is for."
+                                :placeholder="t('roles.description_placeholder')"
                             />
                             <InputError :message="form.errors.description" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="role-color">Badge color</Label>
+                            <Label for="role-color">{{ t('roles.color_label') }}</Label>
                             <Select
                                 :model-value="form.color"
                                 @update:model-value="(v) => (form.color = v as string)"
@@ -210,17 +216,17 @@ function submit(): void {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Save</CardTitle>
+                        <CardTitle>{{ t('roles.save_card_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="flex flex-wrap items-center gap-2">
                         <Button type="submit" :disabled="form.processing">
                             <Save class="size-4" />
-                            {{ isEdit ? 'Save changes' : 'Create role' }}
+                            {{ isEdit ? t('roles.save_changes') : t('roles.create_role') }}
                         </Button>
                         <Button as-child type="button" variant="outline">
                             <Link href="/admin/roles">
                                 <X class="size-4" />
-                                Cancel
+                                {{ t('roles.cancel') }}
                             </Link>
                         </Button>
                     </CardContent>
@@ -231,10 +237,9 @@ function submit(): void {
             <div class="space-y-6 lg:col-span-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Permissions</CardTitle>
+                        <CardTitle>{{ t('roles.permissions_title') }}</CardTitle>
                         <CardDescription>
-                            Tick the permissions this role should grant. Use the
-                            group header to toggle all permissions in that module.
+                            {{ t('roles.permissions_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-6">
@@ -250,7 +255,7 @@ function submit(): void {
                                         (v) => toggleGroup(group, v === true)
                                     "
                                 />
-                                <span class="text-sm font-semibold">{{ group.group }}</span>
+                                <span class="text-sm font-semibold">{{ moduleLabel(group.group) }}</span>
                                 <Badge variant="secondary" class="text-[10px]">
                                     {{ group.items.length }}
                                 </Badge>
@@ -269,7 +274,7 @@ function submit(): void {
                                     />
                                     <div class="flex-1">
                                         <div class="text-sm font-medium">
-                                            {{ perm.display_name }}
+                                            {{ permissionLabel(perm.name, perm.display_name) }}
                                         </div>
                                         <div class="text-[11px] text-muted-foreground">
                                             {{ perm.name }}

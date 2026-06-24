@@ -8,6 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.security'), href: '/admin/settings/security' },
+]);
 
 type Settings = {
     require_2fa_for_admins: boolean;
@@ -17,15 +26,8 @@ type Settings = {
 
 const props = defineProps<{ settings: Settings }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Security', href: '/admin/settings/security' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     require_2fa_for_admins: props.settings.require_2fa_for_admins,
@@ -39,12 +41,12 @@ function submit(): void {
 </script>
 
 <template>
-    <Head title="Security" />
+    <Head :title="t('settings.security_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Security"
-            description="2FA enforcement, session lifetime and login throttling."
+            :title="t('settings.security_title')"
+            :description="t('settings.security_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">

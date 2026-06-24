@@ -15,6 +15,8 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
 
+use function array_key_exists;
+
 /**
  * Admin-managed SMTP / mail configuration. Three endpoints:
  *
@@ -52,7 +54,7 @@ final class EmailSettingsController extends Controller
     public function update(UpdateEmailSettingsRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        if (! \array_key_exists('mail_password', $data) || $data['mail_password'] === null || $data['mail_password'] === '') {
+        if (! array_key_exists('mail_password', $data) || $data['mail_password'] === null || $data['mail_password'] === '') {
             unset($data['mail_password']);
         }
         $s = EmailSetting::query()->orderBy('id')->first() ?? EmailSetting::query()->create([]);
@@ -132,6 +134,7 @@ final class EmailSettingsController extends Controller
 
         app('mail.manager')->purge($transport);
     }
+
     private function validateRuntimeMailConfig(): ?string
     {
         $transport = (string) config('mail.default');

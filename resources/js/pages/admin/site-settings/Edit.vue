@@ -16,6 +16,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.site_social_settings'), href: '/admin/site-settings' },
+]);
 
 type TranslationRow = { about_text: string | null };
 
@@ -36,14 +44,8 @@ const props = defineProps<{
     languages: LocaleOption[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Site Settings', href: '/admin/site-settings' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const defaultLang = computed<string>(
     () =>
@@ -87,12 +89,12 @@ function errorForTranslation(lang: string): string | undefined {
 </script>
 
 <template>
-    <Head title="Site Settings" />
+    <Head :title="t('site_settings.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Site Settings"
-            description="Powers the public footer — About text per language, contact details, WhatsApp number, and social links."
+            :title="t('site_settings.title')"
+            :description="t('site_settings.description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">
