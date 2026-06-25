@@ -387,6 +387,17 @@ return [
         'settings' => 'Einstellungen',
         'save_failed' => 'Speichern fehlgeschlagen',
         'saved' => 'Widgets gespeichert',
+
+        // Cross-page copy / paste (browser clipboard via localStorage).
+        'copy_to_clipboard' => 'In die Zwischenablage kopieren',
+        'copied_toast' => '":label" in die Zwischenablage kopiert. Öffne eine andere Seite und klicke auf Einfügen.',
+        'paste' => 'Einfügen',
+        'paste_tooltip' => 'Widget aus der Zwischenablage hier einfügen',
+        'paste_disabled_empty' => 'Zwischenablage ist leer — kopiere zuerst ein Widget von einer anderen Seite.',
+        'paste_disabled_unavailable' => 'Widget-Typ ":type" ist auf dieser Seite nicht verfügbar.',
+        'paste_no_clipboard' => 'Nichts zum Einfügen — Zwischenablage ist leer.',
+        'paste_type_unavailable' => 'Widget-Typ ":type" ist auf dieser Seite nicht verfügbar.',
+        'pasted_toast' => '":label" eingefügt. Vergiss nicht zu speichern.',
     ],
 
     'blog' => [

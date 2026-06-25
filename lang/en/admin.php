@@ -387,6 +387,17 @@ return [
         'settings' => 'Settings',
         'save_failed' => 'Save failed',
         'saved' => 'Widgets saved',
+
+        // Cross-page copy / paste (browser clipboard via localStorage).
+        'copy_to_clipboard' => 'Copy to clipboard',
+        'copied_toast' => '":label" copied to clipboard. Open another page and click Paste.',
+        'paste' => 'Paste',
+        'paste_tooltip' => 'Paste the widget from your clipboard here',
+        'paste_disabled_empty' => 'Clipboard is empty — copy a widget from another page first.',
+        'paste_disabled_unavailable' => 'Widget type ":type" is not available on this page.',
+        'paste_no_clipboard' => 'Nothing to paste — clipboard is empty.',
+        'paste_type_unavailable' => 'Widget type ":type" is not available on this page.',
+        'pasted_toast' => '":label" pasted. Don\'t forget to save.',
     ],
 
     'blog' => [

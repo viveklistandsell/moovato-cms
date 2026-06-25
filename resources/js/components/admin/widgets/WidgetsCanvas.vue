@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { LayoutTemplate, Loader2, Plus, Save } from 'lucide-vue-next';
+import {
+    ClipboardPaste,
+    LayoutTemplate,
+    Loader2,
+    Plus,
+    Save,
+} from 'lucide-vue-next';
 import { computed, nextTick, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import draggable from 'vuedraggable';
 import type { LocaleOption } from '@/components/common/LocaleTabs.vue';
 import { Button } from '@/components/ui/button';
 import { useT } from '@/composables/useT';
+import { useWidgetClipboard } from '@/composables/useWidgetClipboard';
 import WidgetCard from './WidgetCard.vue';
 import WidgetEditDrawer from './WidgetEditDrawer.vue';
 import WidgetPickerModal from './WidgetPickerModal.vue';
 import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
 
 const t = useT();
+const clipboard = useWidgetClipboard();
 
 const props = defineProps<{
     // When provided (edit mode), the canvas owns its Save button and syncs
@@ -181,6 +189,75 @@ function duplicate(index: number): void {
     widgets.value = next;
 }
 
+/** Copy a widget snapshot to the cross-tab clipboard. */
+function copyToClipboard(index: number): void {
+    const source = widgets.value[index];
+    if (!source) return;
+    const snapshot: WidgetInstance = JSON.parse(JSON.stringify(source));
+    clipboard.copy(snapshot);
+    const label = metaByType.value[source.type]?.label ?? source.type;
+    toast.success(t('widgets.copied_toast', { label }));
+}
+
+const pasteEnabled = computed<boolean>(() => {
+    const w = clipboard.contents.value;
+    if (!w) return false;
+    return w.type in metaByType.value;
+});
+
+const pasteButtonTitle = computed<string>(() => {
+    const w = clipboard.contents.value;
+    if (!w) return t('widgets.paste_disabled_empty');
+    if (!(w.type in metaByType.value)) {
+        return t('widgets.paste_disabled_unavailable', { type: w.type });
+    }
+    return t('widgets.paste_tooltip');
+});
+
+function paste(): void {
+    const clipboardWidget = clipboard.read();
+    if (!clipboardWidget) {
+        toast.error(t('widgets.paste_no_clipboard'));
+        return;
+    }
+    const meta = metaByType.value[clipboardWidget.type];
+    if (!meta) {
+        toast.error(
+            t('widgets.paste_type_unavailable', { type: clipboardWidget.type }),
+        );
+        return;
+    }
+
+    const sourceTranslations = clipboardWidget.translations ?? {};
+    const translations: Record<string, Record<string, unknown>> = {};
+    for (const lang of props.languages) {
+        translations[lang.code] = sourceTranslations[lang.code]
+            ? { ...sourceTranslations[lang.code] }
+            : { ...meta.default_data };
+    }
+
+    const newIndex = widgets.value.length;
+    const pasted: WidgetInstance = {
+        id: null,
+        type: clipboardWidget.type,
+        position: newIndex,
+        is_active: clipboardWidget.is_active ?? true,
+        settings: {
+            ...meta.default_settings,
+            ...(clipboardWidget.settings ?? {}),
+        },
+        translations,
+        visibility: {
+            desktop: clipboardWidget.visibility?.desktop ?? true,
+            tablet: clipboardWidget.visibility?.tablet ?? true,
+            mobile: clipboardWidget.visibility?.mobile ?? true,
+        },
+        css_class: clipboardWidget.css_class ?? '',
+    };
+    widgets.value = [...widgets.value, pasted];
+    toast.success(t('widgets.pasted_toast', { label: meta.label }));
+}
+
 function remove(index: number): void {
     widgets.value = widgets.value.filter((_, i) => i !== index);
 }
@@ -261,6 +338,17 @@ function save(): void {
                     {{ t('widgets.add') }}
                 </Button>
                 <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    :disabled="!pasteEnabled"
+                    :title="pasteButtonTitle"
+                    @click="paste"
+                >
+                    <ClipboardPaste class="size-4" />
+                    {{ t('widgets.paste') }}
+                </Button>
+                <Button
                     v-if="hasSaveEndpoint"
                     type="button"
                     size="sm"
@@ -317,6 +405,7 @@ function save(): void {
                     :default-lang="defaultLang"
                     @edit="edit(index)"
                     @duplicate="duplicate(index)"
+                    @copy-to-clipboard="copyToClipboard(index)"
                     @remove="remove(index)"
                     @toggle-active="toggleActive(index)"
                 />

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+    ClipboardCopy,
     Copy,
     Eye,
     EyeOff,
@@ -12,8 +13,11 @@ import {
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/composables/useT';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
+
+const t = useT();
 
 const props = defineProps<{
     widget: WidgetInstance;
@@ -24,6 +28,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'edit'): void;
     (e: 'duplicate'): void;
+    (e: 'copy-to-clipboard'): void;
     (e: 'remove'): void;
     (e: 'toggle-active'): void;
 }>();
@@ -130,6 +135,7 @@ const visibilityHidden = computed(() => {
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="t('widgets.duplicate')"
                     @click="emit('duplicate')"
                 >
                     <Copy class="size-4" />
@@ -138,6 +144,16 @@ const visibilityHidden = computed(() => {
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="t('widgets.copy_to_clipboard')"
+                    @click="emit('copy-to-clipboard')"
+                >
+                    <ClipboardCopy class="size-4" />
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    :title="t('widgets.edit_widget')"
                     @click="emit('edit')"
                 >
                     <Pencil class="size-4" />
