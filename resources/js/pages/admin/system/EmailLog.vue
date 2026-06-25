@@ -17,6 +17,18 @@ import {
 import { computed, ref, watch } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useAdminLocale } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const adminLocale = useAdminLocale();
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.mail'), href: '/admin/system/email-log' },
+    { title: t('sidebar.email_log'), href: '/admin/system/email-log' },
+]);
 import {
     Card,
     CardContent,
@@ -69,15 +81,8 @@ const props = defineProps<{
     };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Email log', href: '/admin/system/email-log' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const search = ref<string>(props.filters.q ?? '');
 const status = ref<string | null>(props.filters.status);
@@ -137,10 +142,9 @@ const hasFilters = computed<boolean>(
 
 function formatTimestamp(iso: string | null): string {
     if (iso === null) {
-return '—';
-}
-
-    return new Date(iso).toLocaleString();
+        return '—';
+    }
+    return new Date(iso).toLocaleString(adminLocale.value);
 }
 
 function senderLabel(row: EmailLogRow): string {
@@ -175,6 +179,12 @@ const STATUS_ICON: Record<EmailLogRow['status'], typeof CheckCircle2> = {
     pending: Clock,
     failed: AlertCircle,
 };
+
+const statusLabel = computed<Record<EmailLogRow['status'], string>>(() => ({
+    sent: t('mail.log_status_sent_short'),
+    pending: t('mail.log_status_pending_short'),
+    failed: t('mail.log_status_failed_short'),
+}));
 
 const deleteTarget = ref<EmailLogRow | null>(null);
 const deleting = ref<boolean>(false);
@@ -214,21 +224,20 @@ function cleanLabel(label: string): string {
 </script>
 
 <template>
-    <Head title="Email log" />
+    <Head :title="t('mail.log_title')" />
 
     <div class="space-y-6 p-4">
         <Heading
-            title="Email log"
-            description="Every outbound mail Laravel attempted to send, with full body and headers. Read-only — outgoing email is not editable after the fact."
+            :title="t('mail.log_title')"
+            :description="t('mail.log_description')"
         />
 
         <!-- Filters -->
         <Card>
             <CardHeader>
-                <CardTitle class="text-base">Filters</CardTitle>
+                <CardTitle class="text-base">{{ t('mail.log_filters_title') }}</CardTitle>
                 <CardDescription class="text-xs">
-                    Search subject + sender + recipients, or narrow by status
-                    and actor.
+                    {{ t('mail.log_filters_description') }}
                 </CardDescription>
             </CardHeader>
             <CardContent class="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -238,7 +247,7 @@ function cleanLabel(label: string): string {
                     />
                     <Input
                         v-model="search"
-                        placeholder="Search subject, sender, recipient…"
+                        :placeholder="t('mail.log_search_placeholder')"
                         class="pl-9"
                         @input="onSearchInput"
                     />
@@ -248,17 +257,17 @@ function cleanLabel(label: string): string {
                     v-model="status"
                     class="h-9 rounded-md border bg-background px-3 text-sm"
                 >
-                    <option :value="null">All statuses</option>
-                    <option value="sent">Sent</option>
-                    <option value="pending">Pending</option>
-                    <option value="failed">Failed</option>
+                    <option :value="null">{{ t('mail.log_filter_all_statuses') }}</option>
+                    <option value="sent">{{ t('mail.log_status_sent') }}</option>
+                    <option value="pending">{{ t('mail.log_status_pending') }}</option>
+                    <option value="failed">{{ t('mail.log_status_failed') }}</option>
                 </select>
 
                 <select
                     v-model="triggeredBy"
                     class="h-9 rounded-md border bg-background px-3 text-sm"
                 >
-                    <option :value="null">All actors</option>
+                    <option :value="null">{{ t('mail.log_filter_all_actors') }}</option>
                     <option
                         v-for="a in options.actors"
                         :key="a.id"
@@ -273,11 +282,7 @@ function cleanLabel(label: string): string {
                 class="flex items-center justify-between pt-0"
             >
                 <p class="text-xs text-muted-foreground">
-                    Showing
-                    <span class="font-semibold text-foreground">
-                        {{ logs.total }}
-                    </span>
-                    matching emails.
+                    {{ t('mail.log_showing_matching', { count: logs.total }) }}
                 </p>
                 <Button
                     type="button"
@@ -286,7 +291,7 @@ function cleanLabel(label: string): string {
                     @click="clearFilters"
                 >
                     <X class="size-3.5" />
-                    Clear filters
+                    {{ t('mail.log_clear_filters') }}
                 </Button>
             </CardContent>
         </Card>
@@ -298,14 +303,14 @@ function cleanLabel(label: string): string {
                     <table class="w-full border-collapse text-sm">
                         <thead class="bg-muted/40 text-left text-xs uppercase">
                             <tr>
-                                <th class="px-4 py-3 font-medium">When</th>
-                                <th class="px-4 py-3 font-medium">Status</th>
-                                <th class="px-4 py-3 font-medium">From</th>
-                                <th class="px-4 py-3 font-medium">To</th>
-                                <th class="px-4 py-3 font-medium">Subject</th>
-                                <th class="px-4 py-3 font-medium">Mailer</th>
-                                <th class="px-4 py-3 font-medium">Actor</th>
-                                <th class="px-4 py-3 font-medium text-right">Action</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_when') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_status') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_from') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_to') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_subject') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_mailer') }}</th>
+                                <th class="px-4 py-3 font-medium">{{ t('mail.log_actor') }}</th>
+                                <th class="px-4 py-3 font-medium text-right">{{ t('mail.log_action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -318,7 +323,7 @@ function cleanLabel(label: string): string {
                                     class="px-4 py-12 text-center text-muted-foreground"
                                 >
                                     <Mail class="mx-auto mb-2 size-6 opacity-40" />
-                                    No emails match the current filters.
+                                    {{ t('mail.log_no_emails_match') }}
                                 </td>
                             </tr>
                             <tr
@@ -340,7 +345,7 @@ function cleanLabel(label: string): string {
                                             :is="STATUS_ICON[row.status]"
                                             class="size-3"
                                         />
-                                        {{ row.status }}
+                                        {{ statusLabel[row.status] }}
                                     </span>
                                 </td>
                                 <td
@@ -380,7 +385,7 @@ function cleanLabel(label: string): string {
                                         v-else
                                         class="text-muted-foreground"
                                     >
-                                        system
+                                        {{ t('mail.log_system') }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-right">
@@ -388,14 +393,14 @@ function cleanLabel(label: string): string {
                                         <Link
                                             :href="`/admin/system/email-log/${row.id}`"
                                             class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                                            title="View"
+                                            :title="t('mail.log_view')"
                                         >
                                             <Eye class="size-4" />
                                         </Link>
                                         <button
                                             type="button"
                                             class="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950 dark:hover:text-rose-400"
-                                            title="Delete"
+                                            :title="t('mail.log_delete')"
                                             @click="askDelete(row)"
                                         >
                                             <Trash2 class="size-4" />
@@ -475,12 +480,10 @@ function cleanLabel(label: string): string {
                 <DialogHeader>
                     <DialogTitle class="flex items-center gap-2">
                         <AlertTriangle class="size-5 text-rose-500" />
-                        Delete email log entry?
+                        {{ t('mail.log_delete_title') }}
                     </DialogTitle>
                     <DialogDescription>
-                        This removes the log row only — the email was already
-                        sent (or attempted) and the audit trail of this attempt
-                        is gone for good. This action cannot be undone.
+                        {{ t('mail.log_delete_description') }}
                     </DialogDescription>
                 </DialogHeader>
                 <div
@@ -491,8 +494,10 @@ function cleanLabel(label: string): string {
                         {{ deleteTarget.subject }}
                     </div>
                     <div class="mt-1 text-muted-foreground">
-                        to {{ recipientLabel(deleteTarget) }} —
-                        {{ formatTimestamp(deleteTarget.created_at) }}
+                        {{ t('mail.log_delete_to_when', {
+                            recipient: recipientLabel(deleteTarget),
+                            time: formatTimestamp(deleteTarget.created_at),
+                        }) }}
                     </div>
                 </div>
                 <DialogFooter>
@@ -502,7 +507,7 @@ function cleanLabel(label: string): string {
                         :disabled="deleting"
                         @click="cancelDelete"
                     >
-                        Cancel
+                        {{ t('mail.log_delete_cancel') }}
                     </Button>
                     <Button
                         type="button"
@@ -511,7 +516,7 @@ function cleanLabel(label: string): string {
                         @click="confirmDelete"
                     >
                         <Trash2 class="size-4" />
-                        {{ deleting ? 'Deleting…' : 'Delete' }}
+                        {{ deleting ? t('mail.log_delete_deleting') : t('mail.log_delete_confirm') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>

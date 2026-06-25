@@ -24,7 +24,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AchievementBadge from '@/components/admin/dashboard/AchievementBadge.vue';
 import DateRangeSelector from '@/components/dashboard/DateRangeSelector.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
 import { dashboard } from '@/routes';
+
+const t = useT();
+
+// Reactive breadcrumb: re-runs when the locale changes so the header
+// title flips with the rest of the UI. `defineOptions` ran once at
+// compile time so it can't reach the live translation dict.
+setBreadcrumbs(() => [{ title: t('dashboard.title'), href: dashboard() }]);
 
 type Welcome = {
     name: string | null;
@@ -107,18 +116,15 @@ const props = defineProps<{
     permissions: Permissions;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'Dashboard', href: dashboard() }],
-    },
-});
+// Breadcrumb is set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const greeting = computed<string>(() => {
     const h = new Date().getHours();
-    if (h >= 5 && h < 12) return 'Guten Morgen';
-    if (h >= 12 && h < 18) return 'Guten Tag';
-    if (h >= 18 && h < 23) return 'Guten Abend';
-    return 'Hi';
+    if (h >= 5 && h < 12) return t('dashboard.greeting_morning');
+    if (h >= 12 && h < 18) return t('dashboard.greeting_day');
+    if (h >= 18 && h < 23) return t('dashboard.greeting_evening');
+    return t('dashboard.greeting_hi');
 });
 
 function formatDate(iso: string | null): string {
@@ -197,25 +203,25 @@ const attentionItems = computed(() =>
     [
         {
             key: 'page_drafts',
-            label: 'Page drafts',
+            label: t('dashboard.page_drafts'),
             count: props.attention.page_drafts,
             href: '/admin/pages?status=draft',
         },
         {
             key: 'post_drafts',
-            label: 'Blog drafts',
+            label: t('dashboard.blog_drafts'),
             count: props.attention.post_drafts,
             href: '/admin/blog/posts?status=draft',
         },
         {
             key: 'unverified_users',
-            label: 'Unverified users (last 30d)',
+            label: t('dashboard.unverified_users'),
             count: props.attention.unverified_users,
             href: props.permissions.users_view ? '/admin/users' : null,
         },
         {
             key: 'missing_translations',
-            label: 'Items missing translations',
+            label: t('dashboard.missing_translations'),
             count: props.attention.missing_translations,
             href: '/admin/pages?lang=de',
         },
@@ -272,13 +278,13 @@ function publishedRatio(total: number, published: number): number {
                         </h1>
                         <p class="mt-0.5 text-xs text-muted-foreground">
                             <span v-if="welcome.role_display_name">
-                                Logged in as
+                                {{ t('dashboard.logged_in_as') }}
                                 <span class="font-medium text-foreground">
                                     {{ welcome.role_display_name }}
                                 </span>
                             </span>
                             <span v-if="welcome.member_since">
-                                · since {{ formatDate(welcome.member_since) }}
+                                · {{ t('dashboard.member_since') }} {{ formatDate(welcome.member_since) }}
                             </span>
                         </p>
                         <div
@@ -299,7 +305,7 @@ function publishedRatio(total: number, published: number): number {
                     <Button v-if="permissions.pages_create" as-child size="sm">
                         <Link href="/admin/pages/create">
                             <Plus class="size-4" />
-                            New page
+                            {{ t('dashboard.new_page') }}
                         </Link>
                     </Button>
                     <Button
@@ -310,7 +316,7 @@ function publishedRatio(total: number, published: number): number {
                     >
                         <Link href="/admin/blog/posts/create">
                             <Plus class="size-4" />
-                            New blog
+                            {{ t('dashboard.new_blog') }}
                         </Link>
                     </Button>
                     <Button
@@ -321,7 +327,7 @@ function publishedRatio(total: number, published: number): number {
                     >
                         <Link href="/admin/users/create">
                             <UserPlus class="size-4" />
-                            New user
+                            {{ t('dashboard.new_user') }}
                         </Link>
                     </Button>
                     <DateRangeSelector :value="range" />
@@ -349,14 +355,14 @@ function publishedRatio(total: number, published: number): number {
                         class="inline-flex items-center gap-1.5 rounded-full bg-[var(--orange)]/15 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--orange)] ring-1 ring-inset ring-[var(--orange)]/30"
                     >
                         <Sparkles class="size-3" />
-                        Content velocity · last 12 weeks
+                        {{ t('dashboard.hero_velocity') }}
                     </div>
                     <div class="mt-3 flex items-end gap-2">
                         <span class="text-4xl font-bold leading-none tracking-tight">
                             {{ heroTotal.toLocaleString() }}
                         </span>
                         <span class="pb-0.5 text-xs text-[var(--linen)]/60">
-                            items created
+                            {{ t('dashboard.hero_items_created') }}
                         </span>
                     </div>
                     <div
@@ -378,7 +384,7 @@ function publishedRatio(total: number, published: number): number {
                             {{ heroDelta }}%
                         </span>
                         <span class="text-[var(--linen)]/60">
-                            vs. prior 6 weeks
+                            {{ t('dashboard.hero_vs_prior') }}
                         </span>
                     </div>
                 </div>
@@ -416,7 +422,7 @@ function publishedRatio(total: number, published: number): number {
                     <p
                         class="mt-1 text-right text-[9px] uppercase tracking-wider text-[var(--linen)]/40"
                     >
-                        Weekly creation trend
+                        {{ t('dashboard.hero_trend') }}
                     </p>
                 </div>
             </div>
@@ -435,7 +441,7 @@ function publishedRatio(total: number, published: number): number {
                     <div class="flex items-start justify-between">
                         <div>
                             <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                Pages
+                                {{ t('dashboard.kpi_pages') }}
                             </p>
                             <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
                                 {{ kpis.pages.total.toLocaleString() }}
@@ -449,7 +455,7 @@ function publishedRatio(total: number, published: number): number {
                     </div>
                     <p class="mt-2 text-xs text-muted-foreground">
                         <span class="font-semibold text-foreground">{{ kpis.pages.published }}</span>
-                        published · {{ kpis.pages.draft }} draft
+                        {{ t('dashboard.published') }} · {{ kpis.pages.draft }} {{ t('dashboard.draft') }}
                     </p>
                     <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
@@ -461,7 +467,7 @@ function publishedRatio(total: number, published: number): number {
                         href="/admin/pages"
                         class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
                     >
-                        Manage pages <ArrowUpRight class="size-3" />
+                        {{ t('dashboard.manage_pages') }} <ArrowUpRight class="size-3" />
                     </Link>
                 </div>
             </div>
@@ -477,7 +483,7 @@ function publishedRatio(total: number, published: number): number {
                     <div class="flex items-start justify-between">
                         <div>
                             <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                Blogs
+                                {{ t('dashboard.kpi_blogs') }}
                             </p>
                             <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
                                 {{ kpis.posts.total.toLocaleString() }}
@@ -494,7 +500,7 @@ function publishedRatio(total: number, published: number): number {
                         <span class="font-semibold text-foreground">
                             {{ kpis.posts.views.toLocaleString() }}
                         </span>
-                        total views
+                        {{ t('dashboard.total_views') }}
                     </p>
                     <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
@@ -506,7 +512,7 @@ function publishedRatio(total: number, published: number): number {
                         href="/admin/blog/posts"
                         class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
                     >
-                        Manage blogs <ArrowUpRight class="size-3" />
+                        {{ t('dashboard.manage_blogs') }} <ArrowUpRight class="size-3" />
                     </Link>
                 </div>
             </div>
@@ -523,7 +529,7 @@ function publishedRatio(total: number, published: number): number {
                     <div class="flex items-start justify-between">
                         <div>
                             <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                Users
+                                {{ t('dashboard.kpi_users') }}
                             </p>
                             <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
                                 {{ kpis.users.total.toLocaleString() }}
@@ -537,7 +543,7 @@ function publishedRatio(total: number, published: number): number {
                     </div>
                     <p class="mt-2 text-xs text-muted-foreground">
                         <span class="font-semibold text-foreground">+{{ kpis.users.new_this_week }}</span>
-                        new this week
+                        {{ t('dashboard.new_this_week') }}
                     </p>
                     <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
@@ -549,7 +555,7 @@ function publishedRatio(total: number, published: number): number {
                         href="/admin/users"
                         class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
                     >
-                        Manage users <ArrowUpRight class="size-3" />
+                        {{ t('dashboard.manage_users') }} <ArrowUpRight class="size-3" />
                     </Link>
                 </div>
             </div>
@@ -565,7 +571,7 @@ function publishedRatio(total: number, published: number): number {
                     <div class="flex items-start justify-between">
                         <div>
                             <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                Media
+                                {{ t('dashboard.kpi_media') }}
                             </p>
                             <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
                                 {{ kpis.media.files.toLocaleString() }}
@@ -579,14 +585,14 @@ function publishedRatio(total: number, published: number): number {
                     </div>
                     <p class="mt-2 text-xs text-muted-foreground">
                         <span class="font-semibold text-foreground">{{ formatBytes(kpis.media.bytes) }}</span>
-                        · {{ kpis.media.folders }} folders
+                        · {{ kpis.media.folders }} {{ t('dashboard.folders') }}
                     </p>
                     <div class="mt-3 h-1.5 rounded-full bg-violet-500/20" />
                     <Link
                         href="/admin/media"
                         class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
                     >
-                        Open library <ArrowUpRight class="size-3" />
+                        {{ t('dashboard.open_library') }} <ArrowUpRight class="size-3" />
                     </Link>
                 </div>
             </div>
@@ -602,7 +608,7 @@ function publishedRatio(total: number, published: number): number {
                         >
                             <TrendingUp class="size-3.5" />
                         </div>
-                        Content created · last 12 weeks
+                        {{ t('dashboard.content_created_12_weeks') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -610,7 +616,7 @@ function publishedRatio(total: number, published: number): number {
                         v-if="heroTotal === 0"
                         class="flex h-40 items-center justify-center text-sm text-muted-foreground"
                     >
-                        No content created in the last 12 weeks.
+                        {{ t('dashboard.no_content_12_weeks') }}
                     </div>
                     <div v-else>
                         <div class="flex h-48 gap-1.5">
@@ -642,11 +648,11 @@ function publishedRatio(total: number, published: number): number {
                                 <span
                                     class="size-3 rounded-sm bg-gradient-to-t from-[var(--midnight)]/60 to-[var(--midnight)] dark:from-[var(--linen)]/40 dark:to-[var(--linen)]"
                                 />
-                                Pages
+                                {{ t('dashboard.kpi_pages') }}
                             </span>
                             <span class="flex items-center gap-1.5">
                                 <span class="size-3 rounded-sm bg-gradient-to-t from-[var(--orange)]/60 to-[var(--orange)]" />
-                                Blogs
+                                {{ t('dashboard.kpi_blogs') }}
                             </span>
                         </div>
                     </div>
@@ -661,7 +667,7 @@ function publishedRatio(total: number, published: number): number {
                         >
                             <Eye class="size-3.5" />
                         </div>
-                        Top viewed blogs
+                        {{ t('dashboard.top_viewed_blogs') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent class="px-0">
@@ -669,7 +675,7 @@ function publishedRatio(total: number, published: number): number {
                         v-if="topPosts.length === 0"
                         class="px-6 py-8 text-center text-sm text-muted-foreground"
                     >
-                        No blogs yet.
+                        {{ t('dashboard.no_blogs_yet') }}
                     </div>
                     <ol v-else class="divide-y divide-border/40">
                         <li
@@ -697,7 +703,7 @@ function publishedRatio(total: number, published: number): number {
                                     {{ p.title }}
                                 </Link>
                                 <p class="text-[10px] text-muted-foreground">
-                                    by {{ p.author ?? '—' }}
+                                    {{ t('dashboard.by_author', { author: p.author ?? '—' }) }}
                                 </p>
                             </div>
                             <span class="flex shrink-0 items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-xs font-bold text-muted-foreground">
@@ -720,12 +726,12 @@ function publishedRatio(total: number, published: number): number {
                         >
                             <LanguagesIcon class="size-3.5" />
                         </div>
-                        Languages
+                        {{ t('dashboard.languages_title') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-4">
                     <div v-if="languageCoverage.length === 0" class="text-sm text-muted-foreground">
-                        No active languages.
+                        {{ t('dashboard.no_active_languages') }}
                     </div>
                     <div
                         v-for="lang in languageCoverage"
@@ -740,7 +746,7 @@ function publishedRatio(total: number, published: number): number {
                                 <span class="font-semibold">
                                     {{ lang.code.toUpperCase() }} · {{ lang.native_name }}
                                     <Badge v-if="lang.is_default" variant="secondary" class="ml-1 text-[10px]">
-                                        default
+                                        {{ t('dashboard.default') }}
                                     </Badge>
                                 </span>
                                 <span class="text-sm font-black text-[var(--orange)]">
@@ -786,7 +792,7 @@ function publishedRatio(total: number, published: number): number {
                         >
                             <ImageIcon class="size-3.5" />
                         </div>
-                        Top page categories
+                        {{ t('dashboard.top_page_categories') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent class="px-0">
@@ -794,7 +800,7 @@ function publishedRatio(total: number, published: number): number {
                         v-if="topCategories.length === 0"
                         class="px-6 py-8 text-center text-sm text-muted-foreground"
                     >
-                        No categories yet.
+                        {{ t('dashboard.no_categories') }}
                     </div>
                     <ul v-else class="divide-y divide-border/40">
                         <li
@@ -809,7 +815,7 @@ function publishedRatio(total: number, published: number): number {
                                 {{ c.name }}
                             </Link>
                             <span class="shrink-0 rounded-full bg-muted/60 px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground">
-                                {{ c.page_count }} page{{ c.page_count === 1 ? '' : 's' }}
+                                {{ c.page_count }} {{ t('dashboard.kpi_pages') }}
                             </span>
                         </li>
                     </ul>
@@ -824,7 +830,7 @@ function publishedRatio(total: number, published: number): number {
                         >
                             <AlertTriangle class="size-3.5" />
                         </div>
-                        Needs your attention
+                        {{ t('dashboard.needs_attention') }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -833,7 +839,7 @@ function publishedRatio(total: number, published: number): number {
                         class="flex flex-col items-center justify-center gap-2 py-8 text-center text-sm text-muted-foreground"
                     >
                         <FileEdit class="size-5" />
-                        All caught up — nothing pending.
+                        {{ t('dashboard.all_caught_up') }}
                     </div>
                     <ul v-else class="space-y-2">
                         <li
@@ -854,7 +860,7 @@ function publishedRatio(total: number, published: number): number {
                                 :href="row.href"
                                 class="inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] hover:gap-1.5"
                             >
-                                review <ArrowUpRight class="size-3" />
+                                {{ t('common.review') }} <ArrowUpRight class="size-3" />
                             </Link>
                         </li>
                     </ul>

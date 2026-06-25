@@ -15,6 +15,8 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
 
+use function array_key_exists;
+
 /**
  * Admin-managed SMTP / mail configuration. Three endpoints:
  *
@@ -37,14 +39,14 @@ final class EmailSettingsController extends Controller
 
         return Inertia::render('admin/settings/Email', [
             'settings' => [
-                'mail_transport' => $s->mail_transport ?? 'smtp',
-                'mail_host' => $s->mail_host,
-                'mail_port' => $s->mail_port,
-                'mail_username' => $s->mail_username,
+                'mail_transport' => $s->mail_transport ?? (string) config('mail.default', 'smtp'),
+                'mail_host' => $s->mail_host ?? (string) config('mail.mailers.smtp.host', ''),
+                'mail_port' => $s->mail_port ?? (int) config('mail.mailers.smtp.port', 587),
+                'mail_username' => $s->mail_username ?? (string) config('mail.mailers.smtp.username', ''),
                 'mail_password_set' => $s->mail_password !== null && $s->mail_password !== '',
-                'mail_encryption' => $s->mail_encryption,
-                'mail_from_address' => $s->mail_from_address,
-                'mail_from_name' => $s->mail_from_name,
+                'mail_encryption' => $s->mail_encryption ?? (string) config('mail.mailers.smtp.encryption', ''),
+                'mail_from_address' => $s->mail_from_address ?? (string) config('mail.from.address', ''),
+                'mail_from_name' => $s->mail_from_name ?? (string) config('mail.from.name', ''),
             ],
         ]);
     }
@@ -52,7 +54,7 @@ final class EmailSettingsController extends Controller
     public function update(UpdateEmailSettingsRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        if (! \array_key_exists('mail_password', $data) || $data['mail_password'] === null || $data['mail_password'] === '') {
+        if (! array_key_exists('mail_password', $data) || $data['mail_password'] === null || $data['mail_password'] === '') {
             unset($data['mail_password']);
         }
         $s = EmailSetting::query()->orderBy('id')->first() ?? EmailSetting::query()->create([]);
@@ -132,6 +134,7 @@ final class EmailSettingsController extends Controller
 
         app('mail.manager')->purge($transport);
     }
+
     private function validateRuntimeMailConfig(): ?string
     {
         $transport = (string) config('mail.default');

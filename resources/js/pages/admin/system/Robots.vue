@@ -18,25 +18,27 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.system'), href: '/admin/system/cache' },
+    { title: t('sidebar.robots_txt'), href: '/admin/system/robots' },
+]);
 
 const props = defineProps<{
     robots: { url: string; body: string; allowsIndexing: boolean };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Robots.txt', href: '/admin/system/robots' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const page = usePage();
 const flash = computed<{ type?: string; message?: string } | null>(() => {
-    const t = (page.props as Record<string, unknown>).toast;
-    return (t ?? null) as { type?: string; message?: string } | null;
+    const toast = (page.props as Record<string, unknown>).toast;
+    return (toast ?? null) as { type?: string; message?: string } | null;
 });
 
 const copied = ref(false);
@@ -49,12 +51,12 @@ function copyUrl(): void {
 </script>
 
 <template>
-    <Head title="Robots.txt" />
+    <Head :title="t('system.robots_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Robots.txt"
-            description="Driven by the Allow search indexing toggle in Settings → SEO Defaults. When off, the entire site is disallowed."
+            :title="t('system.robots_title')"
+            :description="t('system.robots_description')"
         />
 
         <div
@@ -74,7 +76,7 @@ function copyUrl(): void {
                     robots.txt
                 </CardTitle>
                 <CardDescription>
-                    Live preview of the exact response served at <code class="font-mono">/robots.txt</code>.
+                    {{ t('system.robots_driven_by') }}
                 </CardDescription>
             </CardHeader>
             <CardContent class="space-y-4">
@@ -99,7 +101,7 @@ function copyUrl(): void {
                                 ? 'text-emerald-900 dark:text-emerald-100'
                                 : 'text-rose-900 dark:text-rose-100'"
                         >
-                            {{ robots.allowsIndexing ? 'Search engines may crawl the site' : 'Site is blocked from all crawlers' }}
+                            {{ robots.allowsIndexing ? t('system.robots_status_allowed_desc') : t('system.robots_status_blocked_desc') }}
                         </div>
                         <p
                             class="text-xs"
@@ -107,7 +109,7 @@ function copyUrl(): void {
                                 ? 'text-emerald-800/80 dark:text-emerald-300/80'
                                 : 'text-rose-800/80 dark:text-rose-300/80'"
                         >
-                            Change this in <a class="underline" href="/admin/settings/seo">Settings → SEO Defaults</a>.
+                            {{ t('system.robots_change_hint') }}
                         </p>
                     </div>
                 </div>
@@ -125,19 +127,19 @@ function copyUrl(): void {
                     >
                         <CheckCircle2 v-if="copied" class="size-3.5 text-emerald-600" />
                         <Copy v-else class="size-3.5" />
-                        <span class="text-[11px]">{{ copied ? 'Copied' : 'Copy' }}</span>
+                        <span class="text-[11px]">{{ copied ? t('system.robots_copied') : t('system.robots_copy') }}</span>
                     </Button>
                     <Button as-child size="sm" variant="ghost" class="h-7 gap-1">
                         <a :href="robots.url" target="_blank" rel="noopener">
                             <ExternalLink class="size-3.5" />
-                            <span class="text-[11px]">Open</span>
+                            <span class="text-[11px]">{{ t('system.robots_open') }}</span>
                         </a>
                     </Button>
                 </div>
 
                 <!-- Body preview -->
                 <div class="space-y-1">
-                    <div class="text-xs font-medium text-muted-foreground">Current response body</div>
+                    <div class="text-xs font-medium text-muted-foreground">{{ t('system.robots_body_title') }}</div>
                     <pre class="overflow-x-auto rounded-md border bg-muted/40 p-3 font-mono text-xs leading-relaxed">{{ robots.body }}</pre>
                 </div>
             </CardContent>

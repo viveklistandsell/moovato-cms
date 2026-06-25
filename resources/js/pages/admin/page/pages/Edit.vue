@@ -34,9 +34,12 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
 import MediaPicker from '@/components/common/MediaPicker.vue';
 import { localizedUrl } from '@/lib/localizedUrl';
 import { slugify } from '@/lib/slug';
+
+const t = useT();
 
 type Translation = {
     title: string;
@@ -81,11 +84,10 @@ const props = defineProps<{
 const isEdit = computed(() => props.page !== null);
 
 setBreadcrumbs(() => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Pages', href: '/admin/pages' },
-    { title: 'Pages', href: '/admin/pages' },
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.pages'), href: '/admin/pages' },
     {
-        title: isEdit.value ? 'Edit page' : 'Create a new page',
+        title: isEdit.value ? t('pages.edit_title') : t('pages.create_title'),
         href: '#',
     },
 ]);
@@ -134,9 +136,9 @@ watch(
     () => form.translations,
     (translations) => {
         for (const code of Object.keys(translations)) {
-            const t = translations[code];
-            if (!permalinkTouched.value[code] && t.title.length > 0) {
-                t.permalink = slugify(t.title);
+            const tr = translations[code];
+            if (!permalinkTouched.value[code] && tr.title.length > 0) {
+                tr.permalink = slugify(tr.title);
             }
         }
     },
@@ -201,7 +203,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit page' : 'New page'" />
+    <Head :title="isEdit ? t('pages.edit_title') : t('pages.new_page')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
@@ -212,11 +214,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                     </Link>
                 </Button>
                 <Heading
-                    :title="isEdit ? 'Edit page' : 'Create a new page'"
+                    :title="isEdit ? t('pages.edit_title') : t('pages.create_title')"
                     :description="
                         isEdit
-                            ? 'Update content, image, and visibility.'
-                            : 'German is required. English is optional — fill it now or later.'
+                            ? t('pages.edit_description')
+                            : t('pages.create_description')
                     "
                 />
             </div>
@@ -230,10 +232,9 @@ const errorFor = (code: string, field: keyof Translation) =>
             <div class="space-y-6 lg:col-span-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Translations</CardTitle>
+                        <CardTitle>{{ t('pages.translations_title') }}</CardTitle>
                         <CardDescription>
-                            Switch between German and English. Only German is
-                            required.
+                            {{ t('pages.translations_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -245,7 +246,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 <div class="space-y-5 pt-4">
                                     <div class="grid gap-2">
                                         <Label :for="`title-${code}`">
-                                            Title
+                                            {{ t('pages.title_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -261,7 +262,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             v-model="
                                                 form.translations[code].title
                                             "
-                                            placeholder="Page title"
+                                            :placeholder="t('pages.title_placeholder')"
                                         />
                                         <InputError
                                             :message="errorFor(code, 'title')"
@@ -270,7 +271,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                                     <div class="grid gap-2">
                                         <Label :for="`permalink-${code}`">
-                                            Permalink
+                                            {{ t('pages.permalink_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -293,7 +294,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                     form.translations[code]
                                                         .permalink
                                                 "
-                                                placeholder="your-permalink"
+                                                :placeholder="t('pages.permalink_placeholder')"
                                                 class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
                                                 @input="onPermalinkInput(code)"
                                             />
@@ -301,13 +302,13 @@ const errorFor = (code: string, field: keyof Translation) =>
                                         <p
                                             class="text-xs text-muted-foreground"
                                         >
-                                            Preview:
+                                            {{ t('pages.preview_label') }}:
                                             <span class="text-primary">
                                                 {{ urlPrefixes[code]
                                                 }}{{
                                                     form.translations[code]
                                                         .permalink ||
-                                                    'your-permalink'
+                                                    t('pages.permalink_placeholder')
                                                 }}
                                             </span>
                                         </p>
@@ -329,11 +330,9 @@ const errorFor = (code: string, field: keyof Translation) =>
                      Save button that hits the sync endpoint directly. -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>Page Widgets</CardTitle>
+                        <CardTitle>{{ t('pages.widgets_title') }}</CardTitle>
                         <CardDescription>
-                            Compose the page from reusable blocks — hero
-                            sections, banners, features, FAQs, galleries, and
-                            more. Each widget supports per-language content.
+                            {{ t('pages.widgets_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -358,16 +357,16 @@ const errorFor = (code: string, field: keyof Translation) =>
             <div class="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Publish</CardTitle>
+                        <CardTitle>{{ t('pages.publish_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="flex flex-wrap items-center gap-2">
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 :disabled="form.processing"
                                 class="flex-1"
                             >
-                                Save & Exit
+                                {{ t('pages.save_exit') }}
                             </Button>
                             <Button
                                 v-if="previewUrl"
@@ -382,18 +381,18 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     class="flex-1"
                                 >
                                     <ExternalLink class="size-4" />
-                                    Preview
+                                    {{ t('pages.preview_button') }}
                                 </a>
                             </Button>
-                            <Button 
-                                as-child 
-                                type="button" 
+                            <Button
+                                as-child
+                                type="button"
                                 variant="outline"
                                 class="flex-1"
                             >
                                 <Link href="/admin/pages">
                                     <X class="size-4" />
-                                    Cancel
+                                    {{ t('pages.cancel') }}
                                 </Link>
                             </Button>
                         </div>
@@ -401,7 +400,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             v-if="form.progress"
                             class="mt-3 text-xs text-muted-foreground"
                         >
-                            Uploading: {{ form.progress.percentage }}%
+                            {{ t('pages.uploading', { percent: form.progress.percentage ?? 0 }) }}
                         </p>
                     </CardContent>
                 </Card>
@@ -409,7 +408,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            Status
+                            {{ t('common.status') }}
                             <span class="text-destructive">*</span>
                         </CardTitle>
                     </CardHeader>
@@ -424,20 +423,16 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="published"
-                                    >Published</SelectItem
-                                >
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="inactive"
-                                    >Inactive</SelectItem
-                                >
+                                <SelectItem value="published">{{ t('status.published') }}</SelectItem>
+                                <SelectItem value="draft">{{ t('status.draft') }}</SelectItem>
+                                <SelectItem value="inactive">{{ t('status.inactive') }}</SelectItem>
                             </SelectContent>
                         </Select>
                         <InputError :message="form.errors.status" />
 
                         <div class="flex items-center justify-between">
                             <Label for="is_home" class="cursor-pointer">
-                                Set as homepage
+                                {{ t('pages.set_as_homepage') }}
                             </Label>
                             <Switch
                                 id="is_home"
@@ -446,19 +441,16 @@ const errorFor = (code: string, field: keyof Translation) =>
                             />
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            Only one page can be the homepage. Enabling this
-                            unsets it on every other page.
+                            {{ t('pages.homepage_hint') }}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Template</CardTitle>
+                        <CardTitle>{{ t('pages.template_title') }}</CardTitle>
                         <CardDescription>
-                            Default keeps header/footer. Full width drops the
-                            reading-column constraint. No layout strips header
-                            and footer entirely.
+                            {{ t('pages.template_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -473,11 +465,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem
-                                    v-for="t in templates"
-                                    :key="t.value"
-                                    :value="t.value"
+                                    v-for="tmpl in templates"
+                                    :key="tmpl.value"
+                                    :value="tmpl.value"
                                 >
-                                    {{ t.label }}
+                                    {{ tmpl.label }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>
@@ -487,14 +479,14 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Categories</CardTitle>
+                        <CardTitle>{{ t('pages.categories_card_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <MultiSelect
                             :model-value="form.category_ids"
                             :options="categoryOptions"
-                            placeholder="Pick categories…"
-                            empty-message="No categories yet."
+                            :placeholder="t('pages.categories_pick')"
+                            :empty-message="t('pages.category_no_items')"
                             @update:model-value="(v) => (form.category_ids = v)"
                         />
                         <InputError
@@ -506,9 +498,9 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Featured image</CardTitle>
+                        <CardTitle>{{ t('pages.featured_image') }}</CardTitle>
                         <CardDescription>
-                            JPEG / PNG / WebP, up to 4 MB.
+                            {{ t('pages.featured_image_hint') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-3">
@@ -518,7 +510,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             <img
                                 v-if="imagePreview"
                                 :src="imagePreview"
-                                alt="Preview"
+                                :alt="t('pages.preview_label')"
                                 class="size-full object-cover"
                             />
                             <ImageIcon
@@ -535,7 +527,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 @click="pickerOpen = true"
                             >
                                 <Upload class="size-4" />
-                                {{ imagePreview ? 'Replace' : 'Upload' }}
+                                {{ imagePreview ? t('pages.image_replace') : t('pages.image_upload') }}
                             </Button>
                             <Button
                                 v-if="imagePreview"
@@ -545,12 +537,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 @click="removeImage"
                             >
                                 <X class="size-4" />
-                                Remove
+                                {{ t('pages.image_remove') }}
                             </Button>
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            Opens the media library — pick an existing image or
-                            upload a new one there.
+                            {{ t('pages.image_picker_hint') }}
                         </p>
                         <InputError :message="form.errors.image" />
                         <InputError :message="form.errors.image_path" />

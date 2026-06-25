@@ -93,7 +93,7 @@ final class DashboardController extends Controller
         $badges = [];
         $today = Carbon::now()->startOfDay();
         $streak = 0;
-        for ($i = 0; $i < 60; $i++) {   
+        for ($i = 0; $i < 60; $i++) {
             $dayStart = $today->copy()->subDays($i);
             $dayEnd = $dayStart->copy()->endOfDay();
             $hit = Page::query()
@@ -111,7 +111,7 @@ final class DashboardController extends Controller
             $badges[] = [
                 'key' => 'streak',
                 'icon' => '🔥',
-                'label' => $streak.'-day streak',
+                'label' => (string) trans('admin.achievements.streak', ['count' => $streak]),
                 'value' => $streak,
                 'tone' => 'fire',
             ];
@@ -124,7 +124,7 @@ final class DashboardController extends Controller
             $badges[] = [
                 'key' => 'weekly_velocity',
                 'icon' => '⚡',
-                'label' => $thisWeek.' this week',
+                'label' => (string) trans('admin.achievements.weekly_velocity', ['count' => $thisWeek]),
                 'value' => $thisWeek,
                 'tone' => 'orange',
             ];
@@ -143,7 +143,7 @@ final class DashboardController extends Controller
             $badges[] = [
                 'key' => 'views',
                 'icon' => '🚀',
-                'label' => number_format($viewsMilestone).'+ views',
+                'label' => (string) trans('admin.achievements.views', ['count' => number_format($viewsMilestone)]),
                 'value' => $totalViews,
                 'tone' => 'sky',
             ];
@@ -162,7 +162,7 @@ final class DashboardController extends Controller
             $badges[] = [
                 'key' => 'content',
                 'icon' => '✍️',
-                'label' => $contentMilestone.'+ items',
+                'label' => (string) trans('admin.achievements.content', ['count' => $contentMilestone]),
                 'value' => $totalContent,
                 'tone' => 'violet',
             ];

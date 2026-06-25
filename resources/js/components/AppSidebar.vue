@@ -49,8 +49,11 @@ import {
     SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
+import { useT } from '@/composables/useT';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
+
+const t = useT();
 const BRAND_BUTTON_CLASS = [
     'transition-colors hover:bg-[var(--orange)]/8 hover:text-[var(--orange)]',
     'data-[active=true]:bg-[var(--orange)]/12 data-[active=true]:text-[var(--orange)] data-[active=true]:font-semibold',
@@ -63,146 +66,101 @@ const BRAND_SUB_CLASS = [
     'data-[active=true]:bg-[var(--orange)]/12 data-[active=true]:text-[var(--orange)] data-[active=true]:font-semibold',
 ].join(' ');
 
-const platformItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
+// All nav arrays are computed() so that locale changes from the
+// header switcher re-render the labels without reloading the
+// component tree.
+const platformItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.dashboard'), href: dashboard(), icon: LayoutGrid },
+]);
 
-const mediaItem: NavItem = {
-    title: 'Media',
+const mediaItem = computed<NavItem>(() => ({
+    title: t('sidebar.media'),
     href: '/admin/media',
     icon: ImagePlay,
-};
+}));
 
-const languagesItem: NavItem = {
-    title: 'Languages',
+const languagesItem = computed<NavItem>(() => ({
+    title: t('sidebar.languages'),
     href: '/admin/languages',
     icon: Languages,
-};
+}));
 
-const settingsItems: NavItem[] = [
-    { title: 'Site/Social Settings', href: '/admin/site-settings', icon: Settings2Icon },
-    { title: 'Site Identity', href: '/admin/settings/identity', icon: Settings2Icon },
-    { title: 'Branding', href: '/admin/settings/branding', icon: Settings2Icon },
-    { title: 'SEO Defaults', href: '/admin/settings/seo', icon: Settings2Icon },
-    { title: 'Legal Pages', href: '/admin/settings/legal', icon: Settings2Icon },
-    { title: 'Analytics & Tracking', href: '/admin/settings/analytics', icon: Settings2Icon },
-    { title: 'Maintenance Mode', href: '/admin/settings/maintenance', icon: Settings2Icon },
-    { title: 'Layout Toggles', href: '/admin/settings/layout', icon: Settings2Icon },
-    { title: 'Security', href: '/admin/settings/security', icon: Settings2Icon },
-];
+const settingsItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.site_social_settings'), href: '/admin/site-settings', icon: Settings2Icon },
+    { title: t('sidebar.site_identity'), href: '/admin/settings/identity', icon: Settings2Icon },
+    { title: t('sidebar.branding'), href: '/admin/settings/branding', icon: Settings2Icon },
+    { title: t('sidebar.seo_defaults'), href: '/admin/settings/seo', icon: Settings2Icon },
+    { title: t('sidebar.legal_pages'), href: '/admin/settings/legal', icon: Settings2Icon },
+    { title: t('sidebar.analytics_tracking'), href: '/admin/settings/analytics', icon: Settings2Icon },
+    { title: t('sidebar.maintenance_mode'), href: '/admin/settings/maintenance', icon: Settings2Icon },
+    { title: t('sidebar.layout_toggles'), href: '/admin/settings/layout', icon: Settings2Icon },
+    { title: t('sidebar.security'), href: '/admin/settings/security', icon: Settings2Icon },
+]);
 
-const mailItems: NavItem[] = [
-    { title: 'Email Configuration', href: '/admin/settings/email', icon: Settings2Icon },
-    { title: 'Email Log', href: '/admin/system/email-log', icon: Activity },
-];
+const mailItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.email_configuration'), href: '/admin/settings/email', icon: Settings2Icon },
+    { title: t('sidebar.email_log'), href: '/admin/system/email-log', icon: Activity },
+]);
 
-const systemItems: NavItem[] = [
-    { title: 'Health', href: '/admin/system/health', icon: HeartPulse },
-    { title: 'Cache Management', href: '/admin/system/cache', icon: Database },
-    { title: 'Sitemap', href: '/admin/system/sitemap', icon: ListTree },
-    { title: 'Robots.txt', href: '/admin/system/robots', icon: Bot },
-    { title: 'Activity Log', href: '/admin/system/activity', icon: Activity },
-    { title: 'Export & Backup', href: '/admin/system/export', icon: Download },
-];
+const systemItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.health'), href: '/admin/system/health', icon: HeartPulse },
+    { title: t('sidebar.cache_management'), href: '/admin/system/cache', icon: Database },
+    { title: t('sidebar.sitemap'), href: '/admin/system/sitemap', icon: ListTree },
+    { title: t('sidebar.robots_txt'), href: '/admin/system/robots', icon: Bot },
+    { title: t('sidebar.activity_log'), href: '/admin/system/activity', icon: Activity },
+    { title: t('sidebar.export_backup'), href: '/admin/system/export', icon: Download },
+]);
 
-const blogItems: NavItem[] = [
-    {
-        title: 'Blog Posts',
-        href: '/admin/blog/posts',
-        icon: Newspaper,
-    },
-    {
-        title: 'Blog Categories',
-        href: '/admin/blog/categories',
-        icon: FolderTree,
-    },
-    {
-        title: 'Blog Tags',
-        href: '/admin/blog/tags',
-        icon: Tag,
-    },
-];
+const blogItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.blog_posts'), href: '/admin/blog/posts', icon: Newspaper },
+    { title: t('sidebar.blog_categories'), href: '/admin/blog/categories', icon: FolderTree },
+    { title: t('sidebar.blog_tags'), href: '/admin/blog/tags', icon: Tag },
+]);
 
-const pageItems: NavItem[] = [
-    {
-        title: 'Pages',
-        href: '/admin/pages',
-        icon: Files,
-    },
-    {
-        title: 'Page Categories',
-        href: '/admin/pages/categories',
-        icon: FolderTree,
-    },
-];
+const pageItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.pages'), href: '/admin/pages', icon: Files },
+    { title: t('sidebar.page_categories'), href: '/admin/pages/categories', icon: FolderTree },
+]);
 
-const navigationItems: NavItem[] = [
-    {
-        title: 'Header Menu',
-        href: '/admin/menus/header',
-        icon: MenuIcon,
-    },
-    {
-        title: 'Footer Menu',
-        href: '/admin/menus/footer',
-        icon: MenuIcon,
-    },
-];
+const navigationItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.header_menu'), href: '/admin/menus/header', icon: MenuIcon },
+    { title: t('sidebar.footer_menu'), href: '/admin/menus/footer', icon: MenuIcon },
+]);
 
-// User management sub-menu shown under the collapsible "User Management" item.
-// "Add User" jumps to the index page with `?new=1` so Index.vue auto-opens
-// the create drawer — no separate route required.
-const userItems: NavItem[] = [
-    {
-        title: 'All Users',
-        href: '/admin/users',
-        icon: Users,
-    },
-    {
-        title: 'Add User',
-        href: '/admin/users/create',
-        icon: UserPlus,
-    },
-    {
-        title: 'Roles',
-        href: '/admin/roles',
-        icon: ShieldCheck,
-    },
-    {
-        title: 'Permissions',
-        href: '/admin/permissions',
-        icon: KeyRound,
-    },
-];
+// User management sub-menu shown under the collapsible "User Management"
+// item. "Add User" jumps to the index page with `?new=1` so Index.vue
+// auto-opens the create drawer — no separate route required.
+const userItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.all_users'), href: '/admin/users', icon: Users },
+    { title: t('sidebar.add_user'), href: '/admin/users/create', icon: UserPlus },
+    { title: t('sidebar.roles'), href: '/admin/roles', icon: ShieldCheck },
+    { title: t('sidebar.permissions'), href: '/admin/permissions', icon: KeyRound },
+]);
 
 const { isCurrentUrl } = useCurrentUrl();
 
 const isBlogSectionActive = computed(() =>
-    blogItems.some((item) => isCurrentUrl(item.href)),
+    blogItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isPageSectionActive = computed(() =>
-    pageItems.some((item) => isCurrentUrl(item.href)),
+    pageItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isNavigationSectionActive = computed(() =>
-    navigationItems.some((item) => isCurrentUrl(item.href)),
+    navigationItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isSettingsSectionActive = computed(() =>
-    settingsItems.some((item) => isCurrentUrl(item.href)),
+    settingsItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isSystemSectionActive = computed(() =>
-    systemItems.some((item) => isCurrentUrl(item.href)),
+    systemItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isMailSectionActive = computed(() =>
-    mailItems.some((item) => isCurrentUrl(item.href)),
+    mailItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isUserSectionActive = computed(
@@ -246,7 +204,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="blogItems[0].href">
                                         <Newspaper />
-                                        <span>Blog Management</span>
+                                        <span>{{ t('sidebar.blog_management') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />
@@ -290,7 +248,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="pageItems[0].href">
                                         <Files />
-                                        <span>Page Management</span>
+                                        <span>{{ t('sidebar.page_management') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />
@@ -334,7 +292,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="navigationItems[0].href">
                                         <Navigation />
-                                        <span>Navigation Management</span>
+                                        <span>{{ t('sidebar.navigation_management') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />
@@ -406,7 +364,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="settingsItems[0].href">
                                         <Settings2Icon />
-                                        <span>Settings</span>
+                                        <span>{{ t('sidebar.settings') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />
@@ -450,7 +408,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="mailItems[0].href">
                                         <MailIcon />
-                                        <span>Mail</span>
+                                        <span>{{ t('sidebar.mail') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />
@@ -494,7 +452,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="systemItems[0].href">
                                         <Server />
-                                        <span>System</span>
+                                        <span>{{ t('sidebar.system') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />
@@ -538,7 +496,7 @@ const isUserSectionActive = computed(
                                 >
                                     <Link :href="userItems[0].href">
                                         <UserRoundCheck />
-                                        <span>User Management</span>
+                                        <span>{{ t('sidebar.user_management') }}</span>
                                         <ChevronRight
                                             class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                                         />

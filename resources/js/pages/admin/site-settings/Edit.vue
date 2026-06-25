@@ -16,6 +16,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.site_social_settings'), href: '/admin/site-settings' },
+]);
 
 type TranslationRow = { about_text: string | null };
 
@@ -36,14 +44,8 @@ const props = defineProps<{
     languages: LocaleOption[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Site Settings', href: '/admin/site-settings' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const defaultLang = computed<string>(
     () =>
@@ -87,21 +89,20 @@ function errorForTranslation(lang: string): string | undefined {
 </script>
 
 <template>
-    <Head title="Site Settings" />
+    <Head :title="t('site_settings.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Site Settings"
-            description="Powers the public footer — About text per language, contact details, WhatsApp number, and social links."
+            :title="t('site_settings.title')"
+            :description="t('site_settings.description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">
             <Card>
                 <CardHeader>
-                    <CardTitle>About</CardTitle>
+                    <CardTitle>{{ t('site_settings.about_card_title') }}</CardTitle>
                     <CardDescription>
-                        One paragraph per language. The public footer shows
-                        the one matching the visitor's locale.
+                        {{ t('site_settings.about_card_description') }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -113,13 +114,13 @@ function errorForTranslation(lang: string): string | undefined {
                         <template #default="{ code }">
                             <div class="space-y-1 pt-3">
                                 <Label :for="`about_text_${code}`">
-                                    About text ({{ code }})
+                                    {{ t('site_settings.about_text_label', { code }) }}
                                 </Label>
                                 <Textarea
                                     :id="`about_text_${code}`"
                                     v-model="form.translations[props.languages.findIndex((l) => l.code === code)].about_text"
                                     :rows="4"
-                                    placeholder="We deliver creative solutions to help your business grow…"
+                                    :placeholder="t('site_settings.about_text_placeholder')"
                                 />
                                 <InputError :message="errorForTranslation(code)" />
                             </div>
@@ -130,38 +131,36 @@ function errorForTranslation(lang: string): string | undefined {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Contact</CardTitle>
+                    <CardTitle>{{ t('site_settings.contact_card_title') }}</CardTitle>
                     <CardDescription>
-                        WhatsApp is stored as digits only. The footer turns
-                        it into a wa.me link so taps open WhatsApp directly.
+                        {{ t('site_settings.contact_card_description') }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="grid gap-3 sm:grid-cols-2">
                     <div class="space-y-1 sm:col-span-2">
-                        <Label for="address">Address</Label>
+                        <Label for="address">{{ t('site_settings.address') }}</Label>
                         <Input id="address" v-model="form.address" />
                         <InputError :message="form.errors.address" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="phone">Phone</Label>
+                        <Label for="phone">{{ t('site_settings.phone') }}</Label>
                         <Input id="phone" v-model="form.phone" />
                         <InputError :message="form.errors.phone" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="email">Email</Label>
+                        <Label for="email">{{ t('site_settings.email') }}</Label>
                         <Input id="email" v-model="form.email" type="email" />
                         <InputError :message="form.errors.email" />
                     </div>
                     <div class="space-y-1 sm:col-span-2">
-                        <Label for="whatsapp">WhatsApp number</Label>
+                        <Label for="whatsapp">{{ t('site_settings.whatsapp_label') }}</Label>
                         <Input
                             id="whatsapp"
                             v-model="form.whatsapp"
-                            placeholder="+49 123 456 7890"
+                            :placeholder="t('site_settings.whatsapp_placeholder')"
                         />
                         <p class="text-xs text-muted-foreground">
-                            Country code + number. Spaces, dashes and "+" are
-                            stripped automatically.
+                            {{ t('site_settings.whatsapp_help') }}
                         </p>
                         <InputError :message="form.errors.whatsapp" />
                     </div>
@@ -170,15 +169,14 @@ function errorForTranslation(lang: string): string | undefined {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Social links</CardTitle>
+                    <CardTitle>{{ t('site_settings.social_card_title') }}</CardTitle>
                     <CardDescription>
-                        Each filled URL renders a matching icon under the
-                        About column.
+                        {{ t('site_settings.social_card_description') }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent class="grid gap-3 sm:grid-cols-2">
                     <div class="space-y-1">
-                        <Label for="facebook_url">Facebook URL</Label>
+                        <Label for="facebook_url">{{ t('site_settings.facebook_url') }}</Label>
                         <Input
                             id="facebook_url"
                             v-model="form.facebook_url"
@@ -187,7 +185,7 @@ function errorForTranslation(lang: string): string | undefined {
                         <InputError :message="form.errors.facebook_url" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="twitter_url">Twitter / X URL</Label>
+                        <Label for="twitter_url">{{ t('site_settings.twitter_url') }}</Label>
                         <Input
                             id="twitter_url"
                             v-model="form.twitter_url"
@@ -196,7 +194,7 @@ function errorForTranslation(lang: string): string | undefined {
                         <InputError :message="form.errors.twitter_url" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="linkedin_url">LinkedIn URL</Label>
+                        <Label for="linkedin_url">{{ t('site_settings.linkedin_url') }}</Label>
                         <Input
                             id="linkedin_url"
                             v-model="form.linkedin_url"
@@ -205,7 +203,7 @@ function errorForTranslation(lang: string): string | undefined {
                         <InputError :message="form.errors.linkedin_url" />
                     </div>
                     <div class="space-y-1">
-                        <Label for="instagram_url">Instagram URL</Label>
+                        <Label for="instagram_url">{{ t('site_settings.instagram_url') }}</Label>
                         <Input
                             id="instagram_url"
                             v-model="form.instagram_url"
@@ -219,7 +217,7 @@ function errorForTranslation(lang: string): string | undefined {
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save settings
+                    {{ t('site_settings.save') }}
                 </Button>
             </div>
         </form>

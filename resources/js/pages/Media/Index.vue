@@ -32,6 +32,10 @@ import RenameDialog from '@/components/Media/RenameDialog.vue';
 import DeleteConfirmDialog from '@/components/Media/DeleteConfirmDialog.vue';
 import MoveDialog from '@/components/Media/MoveDialog.vue';
 import FilePreviewModal from '@/components/Media/FilePreviewModal.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 type CurrentFolder = {
     id: number;
@@ -59,11 +63,8 @@ const props = defineProps<{
     totalSize: number;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'Media', href: '/admin/media' }],
-    },
-});
+setBreadcrumbs(() => [{ title: t('media.title'), href: '/admin/media' }]);
+defineOptions({});
 
 const newFolderOpen = ref(false);
 
@@ -371,7 +372,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
 </script>
 
 <template>
-    <Head title="Media" />
+    <Head :title="t('media.title')" />
 
     <MediaLayout>
         <div class="flex h-full flex-1 flex-col gap-4 p-4">
@@ -385,7 +386,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         <Input
                             v-model="searchInput"
                             type="search"
-                            placeholder="Search files…"
+                            :placeholder="t('media.search_placeholder')"
                             class="h-9 w-56 pr-8 pl-8"
                             @input="onSearchInput"
                             @keydown.enter.prevent="applySearch"
@@ -406,7 +407,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         @click="newFolderOpen = true"
                     >
                         <FolderPlus class="h-4 w-4" />
-                        New folder
+                        {{ t('media.new_folder') }}
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger
@@ -415,40 +416,40 @@ function onPreviewUpdated(file: MediaFileItem): void {
                             <ArrowUpDown class="h-4 w-4" />
                             {{
                                 {
-                                    newest: 'Newest',
-                                    oldest: 'Oldest',
-                                    name: 'Name (A→Z)',
-                                    name_desc: 'Name (Z→A)',
-                                    largest: 'Largest',
-                                    smallest: 'Smallest',
+                                    newest: t('media.sort_newest'),
+                                    oldest: t('media.sort_oldest'),
+                                    name: t('media.sort_name_asc'),
+                                    name_desc: t('media.sort_name_desc'),
+                                    largest: t('media.sort_largest'),
+                                    smallest: t('media.sort_smallest'),
                                 }[currentSort]
                             }}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem @click="changeSort('newest')">
-                                Newest first
+                                {{ t('media.sort_newest_first') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('oldest')">
-                                Oldest first
+                                {{ t('media.sort_oldest_first') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('name')">
-                                Name (A → Z)
+                                {{ t('media.sort_name_asc_long') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('name_desc')">
-                                Name (Z → A)
+                                {{ t('media.sort_name_desc_long') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('largest')">
-                                Largest first
+                                {{ t('media.sort_largest_first') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('smallest')">
-                                Smallest first
+                                {{ t('media.sort_smallest_first') }}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Button as-child variant="outline" size="sm">
                         <Link href="/admin/media/trash">
                             <Trash2 class="h-4 w-4" />
-                            Trash
+                            {{ t('media.trash') }}
                         </Link>
                     </Button>
                 </div>
@@ -459,22 +460,22 @@ function onPreviewUpdated(file: MediaFileItem): void {
             >
                 <span class="inline-flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    {{ files.total }} file(s)
+                    {{ t('media.files_count', { count: files.total }) }}
                 </span>
                 <span class="inline-flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                    {{ folders.length }} folder(s)
+                    {{ t('media.folders_count', { count: folders.length }) }}
                 </span>
                 <span
                     v-if="totalSize > 0"
                     class="inline-flex items-center gap-1.5"
                 >
                     <span class="h-2 w-2 rounded-full bg-blue-500"></span>
-                    {{ readableSize(totalSize) }} total
+                    {{ t('media.total_size', { size: readableSize(totalSize) }) }}
                 </span>
                 <span v-if="search" class="inline-flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-violet-500"></span>
-                    Search: "{{ search }}"
+                    {{ t('media.search_label', { term: search }) }}
                 </span>
             </div>
 
@@ -484,7 +485,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
             >
                 <div class="flex items-center gap-3">
                     <span class="font-medium">
-                        {{ totalSelected }} selected
+                        {{ t('media.selected_count', { count: totalSelected }) }}
                     </span>
                     <button
                         type="button"
@@ -493,8 +494,8 @@ function onPreviewUpdated(file: MediaFileItem): void {
                     >
                         {{
                             allOnPageSelected
-                                ? 'Deselect this page'
-                                : 'Select all on this page'
+                                ? t('media.deselect_this_page')
+                                : t('media.select_all_on_page')
                         }}
                     </button>
                 </div>
@@ -506,7 +507,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         variant="outline"
                         @click="openBulkMove"
                     >
-                        Move {{ selectedIds.length }} file(s)…
+                        {{ t('media.move_files', { count: selectedIds.length }) }}
                     </Button>
                     <Button
                         type="button"
@@ -515,7 +516,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         @click="openBulkDelete"
                     >
                         <Trash2 class="h-4 w-4" />
-                        Delete
+                        {{ t('media.delete') }}
                     </Button>
                     <Button
                         type="button"
@@ -523,7 +524,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         variant="ghost"
                         @click="clearSelection"
                     >
-                        Clear
+                        {{ t('media.clear') }}
                     </Button>
                 </div>
             </div>
@@ -533,7 +534,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                     <p
                         class="mb-2 px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
-                        Folders
+                        {{ t('media.folders') }}
                     </p>
                     <FolderTree
                         :tree="tree"
@@ -553,11 +554,10 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         <FolderPlus class="h-8 w-8 text-muted-foreground" />
                         <div class="flex flex-col gap-1">
                             <p class="text-sm font-medium">
-                                Create your first album
+                                {{ t('media.create_first_album') }}
                             </p>
                             <p class="text-xs text-muted-foreground">
-                                Start by creating a folder, then upload images,
-                                PDFs, video, or any other file type into it.
+                                {{ t('media.create_first_hint') }}
                             </p>
                         </div>
                         <Button
@@ -566,7 +566,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                             @click="newFolderOpen = true"
                         >
                             <FolderPlus class="h-4 w-4" />
-                            New folder
+                            {{ t('media.new_folder') }}
                         </Button>
                     </div>
 
@@ -579,7 +579,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         <h3
                             class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
                         >
-                            Folders
+                            {{ t('media.folders') }}
                         </h3>
                         <div
                             class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
@@ -601,7 +601,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         <h3
                             class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
                         >
-                            Files ({{ files.total }})
+                            {{ t('media.files_section', { count: files.total }) }}
                         </h3>
                         <div
                             v-if="files.data.length > 0"
@@ -623,8 +623,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                             v-else
                             class="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground"
                         >
-                            No files in this folder yet. Drop files above to
-                            upload.
+                            {{ t('media.no_files_yet') }}
                         </p>
 
                         <nav
@@ -674,11 +673,10 @@ function onPreviewUpdated(file: MediaFileItem): void {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>
-                        Delete {{ bulkDeleteCount }} item(s)?
+                        {{ t('media.bulk_delete_title', { count: bulkDeleteCount }) }}
                     </DialogTitle>
                     <DialogDescription>
-                        Selected folders and files will be moved to trash and
-                        can be restored later.
+                        {{ t('media.bulk_delete_description') }}
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -687,14 +685,14 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         variant="outline"
                         @click="deleteOpen = false"
                     >
-                        Cancel
+                        {{ t('media.cancel') }}
                     </Button>
                     <Button
                         type="button"
                         variant="destructive"
                         @click="performBulkDelete"
                     >
-                        Move to trash
+                        {{ t('media.move_to_trash') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>

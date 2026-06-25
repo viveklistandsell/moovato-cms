@@ -3,6 +3,14 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ChevronRight, Menu as MenuIcon } from 'lucide-vue-next';
 import Heading from '@/components/Heading.vue';
 import { Card, CardContent } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.navigation_management'), href: '/admin/menus' },
+]);
 
 type MenuRow = {
     id: number;
@@ -16,23 +24,17 @@ defineProps<{
     menus: MenuRow[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Navigation', href: '/admin/menus' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 </script>
 
 <template>
-    <Head title="Navigation Management" />
+    <Head :title="t('sidebar.navigation_management')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Navigation Management"
-            description="Manage the items shown in each menu slot."
+            :title="t('sidebar.navigation_management')"
+            :description="t('menus.description')"
         />
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -8,6 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.security'), href: '/admin/settings/security' },
+]);
 
 type Settings = {
     require_2fa_for_admins: boolean;
@@ -17,15 +26,8 @@ type Settings = {
 
 const props = defineProps<{ settings: Settings }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Settings', href: '/admin/settings/identity' },
-            { title: 'Security', href: '/admin/settings/security' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const form = useForm({
     require_2fa_for_admins: props.settings.require_2fa_for_admins,
@@ -39,12 +41,12 @@ function submit(): void {
 </script>
 
 <template>
-    <Head title="Security" />
+    <Head :title="t('settings.security_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
-            title="Security"
-            description="2FA enforcement, session lifetime and login throttling."
+            :title="t('settings.security_title')"
+            :description="t('settings.security_description')"
         />
 
         <form class="flex flex-col gap-4" @submit.prevent="submit">
@@ -56,9 +58,9 @@ function submit(): void {
                             @update:model-value="(v) => (form.require_2fa_for_admins = v as boolean)"
                         />
                         <span class="flex-1">
-                            <span class="block font-medium">Require 2FA for admins</span>
+                            <span class="block font-medium">{{ t('settings.security_require_2fa_label') }}</span>
                             <span class="block text-xs text-muted-foreground">
-                                Admins are pushed to the 2FA setup page until enabled.
+                                {{ t('settings.security_require_2fa_help') }}
                             </span>
                         </span>
                     </label>
@@ -67,12 +69,12 @@ function submit(): void {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Sessions &amp; throttling</CardTitle>
+                    <CardTitle>{{ t('settings.security_sessions_card') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="grid gap-3 sm:grid-cols-2">
                     <div class="space-y-1">
                         <Label for="session_lifetime_minutes">
-                            Session lifetime (minutes)
+                            {{ t('settings.security_session_lifetime_label') }}
                         </Label>
                         <Input
                             id="session_lifetime_minutes"
@@ -83,18 +85,14 @@ function submit(): void {
                             step="5"
                             placeholder="120"
                         />
-                        <p class="text-xs text-muted-foreground">
-                            Accepted range: <strong>5 – 10 080 min</strong>
-                            (5 min to 1 week). Leave empty to fall back to
-                            <code>SESSION_LIFETIME</code> in .env.
-                        </p>
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.security_session_lifetime_help')" />
                         <InputError
                             :message="form.errors.session_lifetime_minutes"
                         />
                     </div>
                     <div class="space-y-1">
                         <Label for="login_throttle_attempts">
-                            Login throttle (attempts per minute)
+                            {{ t('settings.security_login_throttle_label') }}
                         </Label>
                         <Input
                             id="login_throttle_attempts"
@@ -104,11 +102,7 @@ function submit(): void {
                             max="60"
                             placeholder="5"
                         />
-                        <p class="text-xs text-muted-foreground">
-                            Accepted range: <strong>1 – 60 attempts/min</strong>
-                            before the IP + email combo is locked out. Leave
-                            empty for Fortify's default of 5.
-                        </p>
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.security_login_throttle_help')" />
                         <InputError
                             :message="form.errors.login_throttle_attempts"
                         />
@@ -119,7 +113,7 @@ function submit(): void {
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
                     <Save class="size-4" />
-                    Save security
+                    {{ t('settings.security_save') }}
                 </Button>
             </div>
         </form>

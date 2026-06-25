@@ -36,7 +36,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import MediaPicker from '@/components/common/MediaPicker.vue';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
 import { slugify } from '@/lib/slug';
+
+const t = useT();
 
 type Translation = {
     name: string;
@@ -85,11 +88,10 @@ const props = defineProps<{
 const isEdit = computed(() => props.post !== null);
 
 setBreadcrumbs(() => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Blog', href: '/admin/blog/posts' },
-    { title: 'Posts', href: '/admin/blog/posts' },
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.blog_posts'), href: '/admin/blog/posts' },
     {
-        title: isEdit.value ? 'Edit post' : 'Create a new post',
+        title: isEdit.value ? t('blog.posts_edit') : t('blog.posts_create'),
         href: '#',
     },
 ]);
@@ -134,9 +136,9 @@ watch(
     () => form.translations,
     (translations) => {
         for (const code of Object.keys(translations)) {
-            const t = translations[code];
-            if (!permalinkTouched.value[code] && t.name.length > 0) {
-                t.permalink = slugify(t.name);
+            const tr = translations[code];
+            if (!permalinkTouched.value[code] && tr.name.length > 0) {
+                tr.permalink = slugify(tr.name);
             }
         }
     },
@@ -236,7 +238,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit post' : 'New post'" />
+    <Head :title="isEdit ? t('blog.posts_edit') : t('blog.new_post')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
@@ -247,11 +249,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                     </Link>
                 </Button>
                 <Heading
-                    :title="isEdit ? 'Edit post' : 'Create a new post'"
+                    :title="isEdit ? t('blog.posts_edit') : t('blog.posts_create')"
                     :description="
                         isEdit
-                            ? 'Update content, image, and visibility.'
-                            : 'German is required. English is optional — fill it now or later.'
+                            ? t('blog.edit_description')
+                            : t('blog.create_description')
                     "
                 />
             </div>
@@ -265,10 +267,9 @@ const errorFor = (code: string, field: keyof Translation) =>
             <div class="space-y-6 lg:col-span-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Translations</CardTitle>
+                        <CardTitle>{{ t('pages.translations_title') }}</CardTitle>
                         <CardDescription>
-                            Switch between German and English. Only German is
-                            required.
+                            {{ t('pages.translations_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -280,7 +281,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 <div class="space-y-5 pt-4">
                                     <div class="grid gap-2">
                                         <Label :for="`name-${code}`">
-                                            Title
+                                            {{ t('blog.title_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -296,7 +297,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             v-model="
                                                 form.translations[code].name
                                             "
-                                            placeholder="Post title"
+                                            :placeholder="t('blog.title_placeholder')"
                                         />
                                         <InputError
                                             :message="errorFor(code, 'name')"
@@ -305,7 +306,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                                     <div class="grid gap-2">
                                         <Label :for="`permalink-${code}`">
-                                            Permalink
+                                            {{ t('blog.permalink_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -328,7 +329,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                     form.translations[code]
                                                         .permalink
                                                 "
-                                                placeholder="your-permalink"
+                                                :placeholder="t('blog.permalink_placeholder')"
                                                 class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
                                                 @input="onPermalinkInput(code)"
                                             />
@@ -336,13 +337,13 @@ const errorFor = (code: string, field: keyof Translation) =>
                                         <p
                                             class="text-xs text-muted-foreground"
                                         >
-                                            Preview:
+                                            {{ t('pages.preview_label') }}:
                                             <span class="text-primary">
                                                 {{ urlPrefixes[code]
                                                 }}{{
                                                     form.translations[code]
                                                         .permalink ||
-                                                    'your-permalink'
+                                                    t('blog.permalink_placeholder')
                                                 }}
                                             </span>
                                         </p>
@@ -356,7 +357,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     <div class="grid gap-2">
                                         <Label
                                             :for="`short-description-${code}`"
-                                            >Blog Short description</Label
+                                            >{{ t('blog.short_description_label') }}</Label
                                         >
                                         <Textarea
                                             :id="`short-description-${code}`"
@@ -365,7 +366,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                     .short_description as string
                                             "
                                             :rows="2"
-                                            placeholder="Short summary shown in lists for this blog"
+                                            :placeholder="t('blog.short_description_placeholder')"
                                         />
                                         <InputError
                                             :message="
@@ -379,7 +380,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                                     <div class="grid gap-2">
                                         <Label>
-                                            Blog Content
+                                            {{ t('blog.content_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -394,7 +395,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             :model-value="
                                                 form.translations[code].content
                                             "
-                                            :placeholder="`Blog Content (${code.toUpperCase()})`"
+                                            :placeholder="t('blog.content_placeholder', { code: code.toUpperCase() })"
                                             @update:model-value="
                                                 (v) =>
                                                     (form.translations[
@@ -408,12 +409,9 @@ const errorFor = (code: string, field: keyof Translation) =>
                                         <p
                                             class="text-xs text-muted-foreground"
                                         >
-                                            {{ wordCounts[code] ?? 0 }}
-                                            words
+                                            {{ t('blog.words_count', { count: wordCounts[code] ?? 0 }) }}
                                             <span v-if="!readingTimeTouched">
-                                                · est.
-                                                {{ form.reading_time }} min read
-                                                (auto)
+                                                {{ t('blog.reading_time_estimate', { minutes: form.reading_time }) }}
                                             </span>
                                         </p>
                                         <InputError
@@ -431,7 +429,7 @@ const errorFor = (code: string, field: keyof Translation) =>
             <div class="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Publish</CardTitle>
+                        <CardTitle>{{ t('blog.publish_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="flex items-center gap-2">
@@ -441,7 +439,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 class="flex-1"
                             >
                                 <Save class="size-4" />
-                                Save & Exit
+                                {{ t('blog.save_exit') }}
                             </Button>
                             <Button
                                 v-if="previewUrl"
@@ -456,7 +454,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     class="flex-1"
                                 >
                                     <ExternalLink class="size-4" />
-                                    Preview
+                                    {{ t('blog.preview_button') }}
                                 </a>
                             </Button>
                             <Button
@@ -467,7 +465,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             >
                                 <Link href="/admin/blog/posts">
                                     <X class="size-4" />
-                                    Cancel
+                                    {{ t('blog.cancel') }}
                                 </Link>
                             </Button>
                         </div>
@@ -475,7 +473,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             v-if="form.progress"
                             class="mt-3 text-xs text-muted-foreground"
                         >
-                            Uploading: {{ form.progress.percentage }}%
+                            {{ t('blog.uploading', { percent: form.progress.percentage ?? 0 }) }}
                         </p>
                     </CardContent>
                 </Card>
@@ -483,7 +481,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            Blog status
+                            {{ t('blog.blog_status') }}
                             <span class="text-destructive">*</span>
                         </CardTitle>
                     </CardHeader>
@@ -498,13 +496,9 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="published"
-                                    >Published</SelectItem
-                                >
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="inactive"
-                                    >Inactive</SelectItem
-                                >
+                                <SelectItem value="published">{{ t('status.published') }}</SelectItem>
+                                <SelectItem value="draft">{{ t('status.draft') }}</SelectItem>
+                                <SelectItem value="inactive">{{ t('status.inactive') }}</SelectItem>
                             </SelectContent>
                         </Select>
                         <InputError
@@ -516,9 +510,9 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Blog image</CardTitle>
+                        <CardTitle>{{ t('blog.blog_image') }}</CardTitle>
                         <CardDescription>
-                            JPEG / PNG / WebP, up to 4 MB.
+                            {{ t('blog.image_hint') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-3">
@@ -528,7 +522,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             <img
                                 v-if="imagePreview"
                                 :src="imagePreview"
-                                alt="Preview"
+                                :alt="t('pages.preview_label')"
                                 class="size-full object-cover"
                             />
                             <ImageIcon
@@ -545,7 +539,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 @click="pickerOpen = true"
                             >
                                 <Upload class="size-4" />
-                                {{ imagePreview ? 'Replace' : 'Upload' }}
+                                {{ imagePreview ? t('blog.image_replace') : t('blog.image_upload') }}
                             </Button>
                             <Button
                                 v-if="imagePreview"
@@ -556,12 +550,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 @click="removeImage"
                             >
                                 <X class="size-4" />
-                                Remove
+                                {{ t('blog.image_remove') }}
                             </Button>
                         </div>
                         <p class="text-xs text-muted-foreground">
-                            Opens the media library — pick an existing image or
-                            upload a new one there.
+                            {{ t('blog.image_picker_hint') }}
                         </p>
                         <InputError :message="form.errors.image" />
                         <InputError :message="form.errors.image_path" />
@@ -570,17 +563,17 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Settings</CardTitle>
+                        <CardTitle>{{ t('blog.settings_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="grid gap-2">
-                            <Label>Blog categories</Label>
+                            <Label>{{ t('blog.categories_label') }}</Label>
                             <MultiSelect
                                 :model-value="form.category_ids"
                                 :options="categoryOptions"
-                                placeholder="Select categories…"
-                                search-placeholder="Search categories"
-                                empty-text="No categories"
+                                :placeholder="t('blog.categories_placeholder')"
+                                :search-placeholder="t('blog.categories_search')"
+                                :empty-text="t('blog.categories_empty')"
                                 @update:model-value="
                                     (v) => (form.category_ids = v)
                                 "
@@ -589,13 +582,13 @@ const errorFor = (code: string, field: keyof Translation) =>
                         </div>
 
                         <div class="grid gap-2">
-                            <Label>Blog tags</Label>
+                            <Label>{{ t('blog.tags_label') }}</Label>
                             <MultiSelect
                                 :model-value="form.tag_ids"
                                 :options="tagOptions"
-                                placeholder="Select tags…"
-                                search-placeholder="Search tags"
-                                empty-text="No tags"
+                                :placeholder="t('blog.tags_placeholder')"
+                                :search-placeholder="t('blog.tags_search')"
+                                :empty-text="t('blog.tags_empty')"
                                 @update:model-value="(v) => (form.tag_ids = v)"
                             />
                             <InputError :message="form.errors.tag_ids" />
@@ -607,7 +600,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             <Label
                                 for="is_sticky"
                                 class="cursor-pointer font-medium"
-                                >Sticky?</Label
+                                >{{ t('blog.sticky_label') }}</Label
                             >
                             <Switch
                                 id="is_sticky"
@@ -624,7 +617,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             <Label
                                 for="is_featured"
                                 class="cursor-pointer font-medium"
-                                >Featured?</Label
+                                >{{ t('blog.featured_label') }}</Label
                             >
                             <Switch
                                 id="is_featured"
@@ -637,11 +630,11 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                         <div class="grid gap-2">
                             <Label for="reading_time">
-                                Reading time (min)
+                                {{ t('blog.reading_time_label') }}
                                 <span
                                     v-if="!readingTimeTouched"
                                     class="ml-1 text-[10px] font-normal tracking-wide text-muted-foreground uppercase"
-                                    >auto</span
+                                    >{{ t('blog.auto_label') }}</span
                                 >
                             </Label>
                             <Input
@@ -655,14 +648,13 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 v-if="!readingTimeTouched"
                                 class="text-xs text-muted-foreground"
                             >
-                                Auto-calculated from content ({{ totalWords }}
-                                words ÷ 200 wpm). Edit to override.
+                                {{ t('blog.reading_time_hint', { words: totalWords }) }}
                             </p>
                             <InputError :message="form.errors.reading_time" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="sort_order">Sort order</Label>
+                            <Label for="sort_order">{{ t('blog.sort_order_label') }}</Label>
                             <Input
                                 id="sort_order"
                                 v-model.number="form.sort_order"
@@ -670,7 +662,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 min="1"
                             />
                             <p class="text-xs text-muted-foreground">
-                                Set to 1 to put on top.
+                                {{ t('blog.sort_order_hint') }}
                             </p>
                             <InputError :message="form.errors.sort_order" />
                         </div>
@@ -679,17 +671,17 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                 <Card v-if="isEdit">
                     <CardHeader>
-                        <CardTitle>Stats</CardTitle>
+                        <CardTitle>{{ t('blog.stats_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-muted-foreground">Views</span>
+                            <span class="text-muted-foreground">{{ t('blog.views_label') }}</span>
                             <span class="font-medium">{{
                                 post?.view_count?.toLocaleString() ?? 0
                             }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-muted-foreground">Author</span>
+                            <span class="text-muted-foreground">{{ t('blog.author_label') }}</span>
                             <span class="font-medium">{{
                                 post?.user_name ?? '—'
                             }}</span>

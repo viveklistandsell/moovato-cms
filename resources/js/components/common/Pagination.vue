@@ -3,6 +3,9 @@ import { Link } from '@inertiajs/vue3';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 export type PaginationLink = {
     url: string | null;
@@ -53,31 +56,23 @@ function cleanLabel(label: string): string {
     >
         <p class="text-xs text-muted-foreground">
             <template v-if="pagination.total > 0">
-                Showing
-                <span class="font-medium text-foreground">{{
-                    pagination.from ?? 0
-                }}</span>
-                to
-                <span class="font-medium text-foreground">{{
-                    pagination.to ?? 0
-                }}</span>
-                of
-                <span class="font-medium text-foreground">{{
-                    pagination.total
-                }}</span>
-                results
-                <span v-if="pagination.last_page > 1" class="ml-2"
-                    >· page
-                    <span class="font-medium text-foreground">{{
-                        pagination.current_page
-                    }}</span>
-                    of
-                    <span class="font-medium text-foreground">{{
-                        pagination.last_page
-                    }}</span></span
-                >
+                {{
+                    t('table.pagination_showing', {
+                        from: pagination.from ?? 0,
+                        to: pagination.to ?? 0,
+                        total: pagination.total,
+                    })
+                }}
+                <span v-if="pagination.last_page > 1" class="ml-2">
+                    {{
+                        t('table.pagination_page', {
+                            current: pagination.current_page,
+                            last: pagination.last_page,
+                        })
+                    }}
+                </span>
             </template>
-            <template v-else>No results</template>
+            <template v-else>{{ t('table.pagination_no_results') }}</template>
         </p>
 
         <div v-if="pagination.last_page > 1" class="flex items-center gap-1">

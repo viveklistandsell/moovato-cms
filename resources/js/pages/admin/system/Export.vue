@@ -17,6 +17,15 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.system'), href: '/admin/system/cache' },
+    { title: t('sidebar.export_backup'), href: '/admin/system/export' },
+]);
 
 defineProps<{
     counts: { pages: number; posts: number };
@@ -27,24 +36,17 @@ defineProps<{
     };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'System', href: '/admin/system/cache' },
-            { title: 'Export & backup', href: '/admin/system/export' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 </script>
 
 <template>
-    <Head title="Export & backup" />
+    <Head :title="t('system.export_title')" />
 
     <div class="space-y-6 p-4">
         <Heading
-            title="Export & backup"
-            description="Stream a portable JSON snapshot of your content, or a full SQL dump of the database, for migration or disaster recovery."
+            :title="t('system.export_title')"
+            :description="t('system.export_description')"
         />
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -54,16 +56,14 @@ defineOptions({
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <PageIcon class="size-5 text-violet-600" />
-                            <CardTitle class="text-base">Pages</CardTitle>
+                            <CardTitle class="text-base">{{ t('system.export_pages_card') }}</CardTitle>
                         </div>
                         <span class="text-xs text-muted-foreground">
-                            {{ counts.pages }} total
+                            {{ t('system.export_total', { count: counts.pages }) }}
                         </span>
                     </div>
                     <CardDescription class="text-xs">
-                        Every page with its translations, categories, widget
-                        tree (settings + per-locale data) — bundled as
-                        pretty-printed JSON.
+                        {{ t('system.export_pages_desc') }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -73,7 +73,7 @@ defineOptions({
                             class="inline-flex items-center gap-2"
                         >
                             <FileJson class="size-4" />
-                            Download pages.json
+                            {{ t('system.export_pages_dl') }}
                         </a>
                     </Button>
                 </CardContent>
@@ -85,15 +85,14 @@ defineOptions({
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <Newspaper class="size-5 text-sky-600" />
-                            <CardTitle class="text-base">Blog posts</CardTitle>
+                            <CardTitle class="text-base">{{ t('system.export_posts_card') }}</CardTitle>
                         </div>
                         <span class="text-xs text-muted-foreground">
-                            {{ counts.posts }} total
+                            {{ t('system.export_total', { count: counts.posts }) }}
                         </span>
                     </div>
                     <CardDescription class="text-xs">
-                        Every blog post with translations, category +
-                        tag permalinks, and author metadata.
+                        {{ t('system.export_posts_desc') }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -103,7 +102,7 @@ defineOptions({
                             class="inline-flex items-center gap-2"
                         >
                             <FileJson class="size-4" />
-                            Download blog-posts.json
+                            {{ t('system.export_posts_dl') }}
                         </a>
                     </Button>
                 </CardContent>
@@ -115,16 +114,14 @@ defineOptions({
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <Database class="size-5 text-rose-600" />
-                            <CardTitle class="text-base">Full database</CardTitle>
+                            <CardTitle class="text-base">{{ t('system.export_db_title') }}</CardTitle>
                         </div>
                         <span class="text-xs font-mono uppercase text-muted-foreground">
                             {{ database.driver }}
                         </span>
                     </div>
                     <CardDescription class="text-xs">
-                        Streams a complete <code>mysqldump</code> of every
-                        table, including users + settings + media metadata.
-                        Restore with <code>mysql &lt; backup.sql</code>.
+                        {{ t('system.export_db_desc') }}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -139,34 +136,27 @@ defineOptions({
                             class="inline-flex items-center gap-2"
                         >
                             <Download class="size-4" />
-                            Download database.sql
+                            {{ t('system.export_db_dl') }}
                         </a>
                         <span
                             v-else
                             class="inline-flex w-full items-center justify-center gap-2"
                         >
                             <AlertTriangle class="size-4" />
-                            Not available
+                            {{ t('system.export_db_not_available') }}
                         </span>
                     </Button>
                     <p
                         v-if="database.mysqldump_available && database.mysqldump_path"
                         class="mt-3 text-xs text-muted-foreground"
                     >
-                        Using:
-                        <code class="break-all">
-                            {{ database.mysqldump_path }}
-                        </code>
+                        {{ t('system.export_db_using', { path: database.mysqldump_path }) }}
                     </p>
                     <p
                         v-if="!database.mysqldump_available"
                         class="mt-3 text-xs text-muted-foreground"
                     >
-                        <code>mysqldump</code> was not found in any of the
-                        common install locations, on PATH, or in the
-                        <code>DB_DUMP_BIN</code> .env override. Install the
-                        MySQL client tools (or set <code>DB_DUMP_BIN</code> to
-                        an absolute path), then refresh this page.
+                        {{ t('system.export_db_missing_hint') }}
                     </p>
                 </CardContent>
             </Card>
@@ -176,23 +166,12 @@ defineOptions({
         <Card>
             <CardContent class="text-xs leading-relaxed text-muted-foreground">
                 <p class="mb-2 font-semibold text-foreground">
-                    A few things worth knowing
+                    {{ t('system.export_footnote_title') }}
                 </p>
                 <ul class="list-disc space-y-1 pl-5">
-                    <li>
-                        JSON exports are <strong>content snapshots</strong>,
-                        not deployment artefacts — they don't include the
-                        actual uploaded media bytes, only their paths.
-                    </li>
-                    <li>
-                        The SQL dump <strong>is</strong> a full backup of the
-                        database, but the <code>storage/app/public</code>
-                        folder still needs separate handling for media files.
-                    </li>
-                    <li>
-                        Downloads stream as they're generated — large databases
-                        won't OOM the server.
-                    </li>
+                    <li>{{ t('system.export_footnote_1') }}</li>
+                    <li>{{ t('system.export_footnote_2') }}</li>
+                    <li>{{ t('system.export_footnote_3') }}</li>
                 </ul>
             </CardContent>
         </Card>

@@ -20,6 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'name', 'email', 'password', 'avatar', 'status',
     'last_login_at', 'last_login_ip', 'login_count',
+    'admin_locale',
 ])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 final class User extends Authenticatable

@@ -14,7 +14,17 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useTableQuery } from '@/composables/common/useTableQuery';
+import { useFormatDate } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const formatDate = useFormatDate();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.languages'), href: '/admin/languages' },
+]);
 
 type Language = {
     id: number;
@@ -41,23 +51,8 @@ const props = defineProps<{
     filters: Filters;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Languages', href: '/admin/languages' },
-        ],
-    },
-});
-
-function formatDate(iso: string | null): string {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const { search, sortBy, sortDir, isLoading, setSearch, toggleSort, resetAll } =
     useTableQuery(
@@ -76,30 +71,26 @@ const isFiltered = computed(
 
 function confirmDelete(l: Language): boolean {
     if (l.lang_is_default) {
-        alert(
-            `"${l.name}" is the default language. Promote another language to default before removing this one.`,
-        );
+        alert(t('languages.cannot_delete_default', { name: l.name }));
         return false;
     }
-    return confirm(
-        `Remove language "${l.name}"? Existing translation rows for this locale will be orphaned.`,
-    );
+    return confirm(t('table.confirm_delete_named', { name: l.name }));
 }
 </script>
 
 <template>
-    <Head title="Languages" />
+    <Head :title="t('languages.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="Languages"
-                description="Add, remove, and reorder the locales the CMS supports."
+                :title="t('languages.title')"
+                :description="t('languages.description')"
             />
             <Button as-child>
                 <Link href="/admin/languages/create">
                     <Plus class="size-4" />
-                    Add language
+                    {{ t('languages.create_button') }}
                 </Link>
             </Button>
         </div>
@@ -110,9 +101,9 @@ function confirmDelete(l: Language): boolean {
                     class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
                 >
                     <div>
-                        <CardTitle>All languages</CardTitle>
+                        <CardTitle>{{ t('languages.all_languages') }}</CardTitle>
                         <CardDescription>
-                            {{ languages.length }} total
+                            {{ t('table.total', { count: languages.length }) }}
                         </CardDescription>
                     </div>
                     <div
@@ -121,7 +112,7 @@ function confirmDelete(l: Language): boolean {
                         <SearchInput
                             :model-value="search"
                             :loading="isLoading"
-                            placeholder="Search code, name, native…"
+                            :placeholder="t('languages.search_placeholder')"
                             @search="setSearch"
                         />
                         <Button
@@ -131,7 +122,7 @@ function confirmDelete(l: Language): boolean {
                             @click="resetAll"
                         >
                             <X class="size-4" />
-                            Clear
+                            {{ t('table.clear') }}
                         </Button>
                     </div>
                 </div>
@@ -145,14 +136,14 @@ function confirmDelete(l: Language): boolean {
                     <p class="text-sm text-muted-foreground">
                         {{
                             isFiltered
-                                ? 'No languages match your filters.'
-                                : 'No languages yet.'
+                                ? t('languages.no_results_filtered')
+                                : t('languages.no_languages')
                         }}
                     </p>
                     <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/languages/create">
                             <Plus class="size-4" />
-                            Add your first language
+                            {{ t('languages.add_first_language') }}
                         </Link>
                     </Button>
                 </div>
@@ -164,11 +155,11 @@ function confirmDelete(l: Language): boolean {
                     <table class="w-full text-sm">
                         <thead class="bg-muted/50 text-left text-xs">
                             <tr>
-                                <th class="w-20 px-4 py-3">Flag</th>
+                                <th class="w-20 px-4 py-3">{{ t('languages.flag_col') }}</th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="code"
-                                        label="Code"
+                                        :label="t('table.col_code')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -177,7 +168,7 @@ function confirmDelete(l: Language): boolean {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="name"
-                                        label="Name"
+                                        :label="t('table.col_name')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -186,17 +177,17 @@ function confirmDelete(l: Language): boolean {
                                 <th
                                     class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Native
+                                    {{ t('languages.native') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Locale
+                                    {{ t('languages.locale') }}
                                 </th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="status"
-                                        label="Status"
+                                        :label="t('table.col_status')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -205,12 +196,12 @@ function confirmDelete(l: Language): boolean {
                                 <th
                                     class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Default
+                                    {{ t('table.col_default') }}
                                 </th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="sort_order"
-                                        label="Order"
+                                        :label="t('table.col_order')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -219,7 +210,7 @@ function confirmDelete(l: Language): boolean {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="created_at"
-                                        label="Created"
+                                        :label="t('table.col_created')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -228,7 +219,7 @@ function confirmDelete(l: Language): boolean {
                                 <th
                                     class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Actions
+                                    {{ t('table.col_actions') }}
                                 </th>
                             </tr>
                         </thead>
@@ -278,7 +269,7 @@ function confirmDelete(l: Language): boolean {
                                             row.status ? 'default' : 'outline'
                                         "
                                     >
-                                        {{ row.status ? 'Active' : 'Inactive' }}
+                                        {{ row.status ? t('languages.active_label') : t('languages.inactive_label') }}
                                     </Badge>
                                 </td>
                                 <td class="px-4 py-3">
@@ -286,7 +277,7 @@ function confirmDelete(l: Language): boolean {
                                         v-if="row.lang_is_default"
                                         variant="secondary"
                                         class="text-[10px]"
-                                        >default</Badge
+                                        >{{ t('dashboard.default') }}</Badge
                                     >
                                     <span
                                         v-else

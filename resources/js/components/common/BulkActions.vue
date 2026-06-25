@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown } from 'lucide-vue-next';
+import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -8,6 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useT } from '@/composables/useT';
 
 export type BulkAction = {
     value: string;
@@ -25,6 +27,11 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'action', value: string): void;
 }>();
+
+const t = useT();
+const resolvedLabel = computed<string>(
+    () => props.label || t('table.bulk_action'),
+);
 
 function trigger(action: BulkAction): void {
     if (props.count === 0) {
@@ -44,7 +51,7 @@ function trigger(action: BulkAction): void {
     <DropdownMenu>
         <DropdownMenuTrigger as-child>
             <Button variant="outline" size="sm" :disabled="count === 0">
-                <span>{{ label ?? 'Bulk action' }}</span>
+                <span>{{ resolvedLabel }}</span>
                 <span
                     v-if="count > 0"
                     class="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground"

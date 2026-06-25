@@ -17,8 +17,11 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useT } from '@/composables/useT';
 import type { MenuTreeContext, TreeNode, LinkType } from './tree-types';
 import { MENU_TREE_CONTEXT } from './tree-types';
+
+const t = useT();
 
 // Explicit name so the recursive <MenuTreeNode> reference resolves even if
 // the component is imported under an alias.
@@ -51,19 +54,19 @@ function iconFor(type: LinkType) {
 
 function typeLabel(type: LinkType): string {
     return type === 'home'
-        ? 'Home'
+        ? t('menus.type_home')
         : type === 'page'
-          ? 'Page'
+          ? t('menus.type_page')
           : type === 'category'
-            ? 'Category'
-            : 'Custom Link';
+            ? t('menus.type_category')
+            : t('menus.type_custom_link');
 }
 
 function labelOf(node: TreeNode): string {
     return (
         node.translations[ctx.defaultLang.value]?.label ??
         node.linked_title ??
-        `Item #${node.id}`
+        t('menus.item_default_label', { id: node.id })
     );
 }
 
@@ -90,7 +93,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
             <button
                 type="button"
                 class="drag-handle cursor-grab text-muted-foreground hover:text-foreground"
-                title="Drag to reorder or nest under another item"
+                :title="t('menus.drag_hint')"
             >
                 <GripVertical class="size-4" />
             </button>
@@ -122,7 +125,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
             <button
                 type="button"
                 class="text-muted-foreground hover:text-foreground"
-                :title="isExpanded ? 'Collapse' : 'Expand'"
+                :title="isExpanded ? t('menus.collapse') : t('menus.expand')"
                 @click="ctx.toggleExpanded(node.id)"
             >
                 <component
@@ -146,7 +149,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                     <div class="space-y-3 pt-3">
                         <div class="space-y-1">
                             <Label :for="`label-${node.id}-${code}`" class="text-xs">
-                                Navigation Label ({{ code }})
+                                {{ t('menus.navigation_label', { code }) }}
                             </Label>
                             <Input
                                 :id="`label-${node.id}-${code}`"
@@ -156,7 +159,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                         </div>
                         <div v-if="node.link_type === 'url'" class="space-y-1">
                             <Label :for="`url-${node.id}-${code}`" class="text-xs">
-                                URL ({{ code }})
+                                {{ t('menus.url_for_code', { code }) }}
                             </Label>
                             <Input
                                 :id="`url-${node.id}-${code}`"
@@ -175,7 +178,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
 
             <div class="mt-3 grid grid-cols-2 gap-3 border-t pt-3">
                 <div class="space-y-1">
-                    <Label :for="`css-${node.id}`" class="text-xs">CSS class</Label>
+                    <Label :for="`css-${node.id}`" class="text-xs">{{ t('menus.css_class') }}</Label>
                     <Input
                         :id="`css-${node.id}`"
                         v-model="draft.css_class"
@@ -190,7 +193,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                                 (v) => (draft.open_in_new_tab = v === true)
                             "
                         />
-                        Open in new tab
+                        {{ t('menus.open_in_new_tab_short') }}
                     </label>
                     <label class="flex cursor-pointer items-center gap-2 text-xs">
                         <Checkbox
@@ -199,7 +202,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                                 (v) => (draft.is_active = v === true)
                             "
                         />
-                        Active
+                        {{ t('menus.active') }}
                     </label>
                 </div>
             </div>
@@ -213,10 +216,10 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                     @click="ctx.destroyItem(node)"
                 >
                     <Trash2 class="size-3.5" />
-                    Remove
+                    {{ t('menus.remove') }}
                 </Button>
                 <Button type="button" size="sm" @click="ctx.saveItem(node)">
-                    Save changes
+                    {{ t('menus.save_changes') }}
                 </Button>
             </div>
         </div>
@@ -243,8 +246,7 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                         v-if="node.children.length === 0 && isExpanded"
                         class="rounded-md border border-dashed py-2 text-center text-[11px] text-muted-foreground"
                     >
-                        Drop an item here to nest it under
-                        "{{ labelOf(node) }}"
+                        {{ t('menus.nest_under', { name: labelOf(node) }) }}
                     </div>
                 </template>
             </draggable>

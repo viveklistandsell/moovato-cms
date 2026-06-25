@@ -8,6 +8,17 @@ import {
     Card,
     CardContent,
 } from '@/components/ui/card';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { usePermissionLabels } from '@/composables/usePermissionLabels';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+const { roleLabel } = usePermissionLabels();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.user_management'), href: '/admin/users' },
+    { title: t('sidebar.roles'), href: '/admin/roles' },
+]);
 
 type Role = {
     id: number;
@@ -24,15 +35,8 @@ defineProps<{
     roles: Role[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Users', href: '/admin/users' },
-            { title: 'Roles', href: '/admin/roles' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 function badgeClasses(color: string): string {
     const map: Record<string, string> = {
@@ -48,28 +52,29 @@ function badgeClasses(color: string): string {
 
 function destroy(role: Role): void {
     if (role.is_system) return;
+    const name = roleLabel(role.name, role.display_name);
     if (role.user_count > 0) {
-        alert(`Cannot delete "${role.display_name}" — ${role.user_count} user(s) still assigned.`);
+        alert(t('roles.cannot_delete_in_use', { name, count: role.user_count }));
         return;
     }
-    if (!confirm(`Delete role "${role.display_name}"?`)) return;
+    if (!confirm(t('roles.confirm_delete', { name }))) return;
     router.delete(`/admin/roles/${role.id}`, { preserveScroll: true });
 }
 </script>
 
 <template>
-    <Head title="Roles" />
+    <Head :title="t('roles.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="Roles"
-                description="Group permissions into roles, then assign roles to users."
+                :title="t('roles.title')"
+                :description="t('roles.description')"
             />
             <Button as-child>
                 <Link href="/admin/roles/create">
                     <Plus class="size-4" />
-                    New role
+                    {{ t('roles.create_button') }}
                 </Link>
             </Button>
         </div>
@@ -87,11 +92,11 @@ function destroy(role: Role): void {
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="font-semibold">{{ role.display_name }}</span>
+                                    <span class="font-semibold">{{ roleLabel(role.name, role.display_name) }}</span>
                                     <Lock
                                         v-if="role.is_system"
                                         class="size-3 text-muted-foreground"
-                                        title="System role (locked)"
+                                        :title="t('roles.system_role_locked')"
                                     />
                                 </div>
                                 <div class="text-xs text-muted-foreground">
@@ -112,15 +117,15 @@ function destroy(role: Role): void {
                     </p>
 
                     <div class="mt-auto flex items-center gap-4 border-t pt-3 text-xs text-muted-foreground">
-                        <span><strong class="text-foreground">{{ role.user_count }}</strong> user(s)</span>
-                        <span><strong class="text-foreground">{{ role.permission_count }}</strong> permission(s)</span>
+                        <span>{{ t('roles.users_count', { count: role.user_count }) }}</span>
+                        <span>{{ t('roles.permissions_count', { count: role.permission_count }) }}</span>
                     </div>
 
                     <div class="flex items-center justify-end gap-1.5">
                         <Button as-child variant="outline" size="sm">
                             <Link :href="`/admin/roles/${role.id}/edit`">
                                 <Pencil class="size-3.5" />
-                                Edit
+                                {{ t('roles.edit') }}
                             </Link>
                         </Button>
                         <Button
@@ -132,7 +137,7 @@ function destroy(role: Role): void {
                             @click="destroy(role)"
                         >
                             <Trash2 class="size-3.5" />
-                            Delete
+                            {{ t('roles.delete') }}
                         </Button>
                     </div>
                 </CardContent>

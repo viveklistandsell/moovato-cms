@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,11 @@ use Throwable;
  * Sitemap, Maintenance Mode, etc.).
  *
  * Permission: `system.cache` — sysadmin-adjacent like Cache + Export.
+ *
+ * Localization: labels + detail strings come from `lang/<locale>/admin.php`
+ * under `system.health_check.<id>.*`. The SetAdminLocale middleware sets
+ * the active locale before this controller runs, so `trans()` returns the
+ * right language for the user driving the page.
  */
 final class HealthController extends Controller
 {
@@ -72,9 +78,9 @@ final class HealthController extends Controller
 
         return $this->row(
             'php',
-            'PHP version',
+            $this->label('php'),
             $ok ? 'ok' : 'fail',
-            $ok ? 'Meets minimum ('.self::PHP_MIN.').' : 'Below minimum ('.self::PHP_MIN.'). Upgrade PHP.',
+            $this->detail($ok ? 'php.ok' : 'php.fail', ['min' => self::PHP_MIN]),
             $current,
         );
     }
@@ -88,17 +94,17 @@ final class HealthController extends Controller
 
             return $this->row(
                 'database',
-                'Database',
+                $this->label('database'),
                 'ok',
-                'Reachable.',
+                $this->detail('database.ok'),
                 "{$driver} · {$name}",
             );
         } catch (Throwable $e) {
             return $this->row(
                 'database',
-                'Database',
+                $this->label('database'),
                 'fail',
-                'Connection failed: '.$e->getMessage(),
+                $this->detail('database.fail', ['error' => $e->getMessage()]),
                 null,
             );
         }
@@ -117,17 +123,17 @@ final class HealthController extends Controller
 
             return $this->row(
                 'cache',
-                'Cache driver',
+                $this->label('cache'),
                 $ok ? 'ok' : 'fail',
-                $ok ? 'put/get/forget roundtrip succeeded.' : 'Cache wrote but read back wrong value.',
+                $this->detail($ok ? 'cache.ok' : 'cache.wrong_value'),
                 (string) config('cache.default'),
             );
         } catch (Throwable $e) {
             return $this->row(
                 'cache',
-                'Cache driver',
+                $this->label('cache'),
                 'fail',
-                'Cache failed: '.$e->getMessage(),
+                $this->detail('cache.fail', ['error' => $e->getMessage()]),
                 (string) config('cache.default'),
             );
         }
@@ -141,9 +147,9 @@ final class HealthController extends Controller
         if (! file_exists($link)) {
             return $this->row(
                 'storage-symlink',
-                'Storage symlink',
+                $this->label('storage_symlink'),
                 'fail',
-                'public/storage missing. Run `php artisan storage:link` on this host.',
+                $this->detail('storage_symlink.missing'),
                 $link,
             );
         }
@@ -156,11 +162,9 @@ final class HealthController extends Controller
 
             return $this->row(
                 'storage-symlink',
-                'Storage symlink',
+                $this->label('storage_symlink'),
                 $matches ? 'warn' : 'fail',
-                $matches
-                    ? 'public/storage is not a symlink but its realpath resolves to storage/app/public (typical of Windows junctions).'
-                    : 'public/storage exists but is not a symlink to storage/app/public.',
+                $this->detail($matches ? 'storage_symlink.windows_junction' : 'storage_symlink.not_symlink'),
                 $link,
             );
         }
@@ -169,10 +173,12 @@ final class HealthController extends Controller
 
         return $this->row(
             'storage-symlink',
-            'Storage symlink',
+            $this->label('storage_symlink'),
             $ok ? 'ok' : 'fail',
-            $ok ? 'Points at storage/app/public.' : 'Symlink target ('.readlink($link).') does not match storage/app/public.',
-            readlink($link),
+            $ok
+                ? $this->detail('storage_symlink.ok')
+                : $this->detail('storage_symlink.mismatch', ['target' => (string) readlink($link)]),
+            (string) readlink($link),
         );
     }
 
@@ -183,9 +189,9 @@ final class HealthController extends Controller
 
         return $this->row(
             'storage-writable',
-            'Storage writable',
+            $this->label('storage_writable'),
             $ok ? 'ok' : 'fail',
-            $ok ? 'PHP can write here.' : 'storage/app/public is not writable by the PHP user.',
+            $this->detail($ok ? 'storage_writable.ok' : 'storage_writable.fail'),
             $path,
         );
     }
@@ -199,9 +205,9 @@ final class HealthController extends Controller
         if ($free === false || $total === false) {
             return $this->row(
                 'disk',
-                'Disk free space',
+                $this->label('disk'),
                 'warn',
-                'Could not read disk space — host restriction?',
+                $this->detail('disk.unreadable'),
                 null,
             );
         }
@@ -215,10 +221,13 @@ final class HealthController extends Controller
 
         return $this->row(
             'disk',
-            'Disk free space',
+            $this->label('disk'),
             $status,
-            sprintf('%s free of %s on the storage volume.', $this->bytes((int) $free), $this->bytes((int) $total)),
-            sprintf('%.1f%% free', $percentFree),
+            $this->detail('disk.detail', [
+                'free' => $this->bytes((int) $free),
+                'total' => $this->bytes((int) $total),
+            ]),
+            $this->detail('disk.value', ['percent' => number_format($percentFree, 1)]),
         );
     }
 
@@ -229,9 +238,9 @@ final class HealthController extends Controller
         if ($driver === 'sync') {
             return $this->row(
                 'queue',
-                'Queue worker',
+                $this->label('queue'),
                 'warn',
-                'Driver is `sync` — jobs run inline during requests. Switch to database/redis and run `php artisan queue:work` in production.',
+                $this->detail('queue.sync'),
                 $driver,
             );
         }
@@ -246,17 +255,17 @@ final class HealthController extends Controller
 
                 return $this->row(
                     'queue',
-                    'Queue worker',
+                    $this->label('queue'),
                     $status,
-                    "{$pending} pending · {$failed} failed.",
+                    $this->detail('queue.database', ['pending' => $pending, 'failed' => $failed]),
                     $driver,
                 );
             } catch (Throwable $e) {
                 return $this->row(
                     'queue',
-                    'Queue worker',
+                    $this->label('queue'),
                     'warn',
-                    'Driver is `database` but the jobs table could not be read: '.$e->getMessage(),
+                    $this->detail('queue.database_unreadable', ['error' => $e->getMessage()]),
                     $driver,
                 );
             }
@@ -264,9 +273,9 @@ final class HealthController extends Controller
 
         return $this->row(
             'queue',
-            'Queue worker',
+            $this->label('queue'),
             'ok',
-            "Driver: {$driver}. Ensure a worker process is running on the host.",
+            $this->detail('queue.other_driver', ['driver' => $driver]),
             $driver,
         );
     }
@@ -279,9 +288,9 @@ final class HealthController extends Controller
         if ($mailer === 'log') {
             return $this->row(
                 'mail',
-                'Mail driver',
+                $this->label('mail'),
                 'warn',
-                'Mailer is `log` — outgoing email lands in the log file, not in inboxes. Set MAIL_MAILER=smtp/ses/etc. before launch.',
+                $this->detail('mail.log'),
                 $mailer,
             );
         }
@@ -289,18 +298,18 @@ final class HealthController extends Controller
         if ($from === '') {
             return $this->row(
                 'mail',
-                'Mail driver',
+                $this->label('mail'),
                 'warn',
-                'No MAIL_FROM_ADDRESS configured. Notifications will fail to send.',
+                $this->detail('mail.no_from'),
                 $mailer,
             );
         }
 
         return $this->row(
             'mail',
-            'Mail driver',
+            $this->label('mail'),
             'ok',
-            "Sending from {$from}.",
+            $this->detail('mail.ok', ['from' => $from]),
             $mailer,
         );
     }
@@ -313,18 +322,18 @@ final class HealthController extends Controller
         if ($env === 'production' && $debug) {
             return $this->row(
                 'debug',
-                'Debug mode',
+                $this->label('debug'),
                 'fail',
-                'APP_DEBUG=true on production exposes stack traces with file paths and env values. Set to false immediately.',
+                $this->detail('debug.production_on'),
                 'on',
             );
         }
 
         return $this->row(
             'debug',
-            'Debug mode',
+            $this->label('debug'),
             'ok',
-            $debug ? 'On (allowed outside production).' : 'Off.',
+            $this->detail($debug ? 'debug.on' : 'debug.off'),
             $debug ? 'on' : 'off',
         );
     }
@@ -335,9 +344,9 @@ final class HealthController extends Controller
 
         return $this->row(
             'env',
-            'App environment',
+            $this->label('env'),
             'ok',
-            'Reported by APP_ENV. Use this to confirm which environment a deploy actually landed on.',
+            $this->detail('env.detail'),
             $env,
         );
     }
@@ -349,27 +358,26 @@ final class HealthController extends Controller
         if (! file_exists($path)) {
             return $this->row(
                 'log',
-                'Log file',
+                $this->label('log'),
                 'warn',
-                'No laravel.log yet — first request will create it.',
+                $this->detail('log.missing'),
                 $path,
             );
         }
 
         $size = filesize($path);
         $mtime = filemtime($path);
-        $detail = sprintf(
-            '%s · last write %s.',
-            $this->bytes($size === false ? 0 : (int) $size),
-            $mtime !== false ? date('Y-m-d H:i:s', $mtime) : 'unknown',
-        );
+        $detail = $this->detail('log.detail', [
+            'size' => $this->bytes($size === false ? 0 : (int) $size),
+            'when' => $mtime !== false ? date('Y-m-d H:i:s', $mtime) : $this->detail('log.unknown_when'),
+        ]);
         $status = ($size !== false && $size > 100 * 1024 * 1024) ? 'warn' : 'ok';
 
         return $this->row(
             'log',
-            'Log file',
+            $this->label('log'),
             $status,
-            $detail.($status === 'warn' ? ' Consider rotating — over 100 MB.' : ''),
+            $detail.($status === 'warn' ? $this->detail('log.rotate_hint') : ''),
             $path,
         );
     }
@@ -377,22 +385,22 @@ final class HealthController extends Controller
     private function checkMaintenance(): array
     {
         try {
-            $on = (bool) (\App\Models\SiteSetting::current()->maintenance_enabled ?? false);
+            $on = (bool) (SiteSetting::current()->maintenance_enabled ?? false);
         } catch (Throwable) {
             return $this->row(
                 'maintenance',
-                'Maintenance mode',
+                $this->label('maintenance'),
                 'warn',
-                'Could not read site settings.',
+                $this->detail('maintenance.unreadable'),
                 null,
             );
         }
 
         return $this->row(
             'maintenance',
-            'Maintenance mode',
+            $this->label('maintenance'),
             $on ? 'warn' : 'ok',
-            $on ? 'Holding page is active — only admins see the live site.' : 'Off — site is public.',
+            $this->detail($on ? 'maintenance.on' : 'maintenance.off'),
             $on ? 'enabled' : 'disabled',
         );
     }
@@ -409,6 +417,25 @@ final class HealthController extends Controller
             'detail' => $detail,
             'value' => $value,
         ];
+    }
+
+    /**
+     * Convenience wrapper for the localized check label.
+     */
+    private function label(string $checkKey): string
+    {
+        return (string) trans("admin.system.health_check.{$checkKey}.label");
+    }
+
+    /**
+     * Convenience wrapper for localized check detail strings. `$detailKey`
+     * is shaped like `<check>.<variant>` (e.g. `php.ok`, `database.fail`).
+     *
+     * @param  array<string, string|int|float>  $replacements
+     */
+    private function detail(string $detailKey, array $replacements = []): string
+    {
+        return (string) trans("admin.system.health_check.{$detailKey}", $replacements);
     }
 
     private function bytes(int $b): string

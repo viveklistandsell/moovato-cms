@@ -4,6 +4,9 @@ import { router } from '@inertiajs/vue3';
 import { Upload, X } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { useChunkedUpload } from '@/composables/useChunkedUpload';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 const props = defineProps<{
     folderId: number | null;
@@ -53,13 +56,13 @@ function statusLabel(
 ): string {
     switch (status) {
         case 'queued':
-            return 'Queued';
+            return t('media.status_queued');
         case 'uploading':
-            return 'Uploading';
+            return t('media.status_uploading');
         case 'done':
-            return 'Done';
+            return t('media.status_done');
         case 'error':
-            return 'Error';
+            return t('media.status_error');
     }
 }
 </script>
@@ -78,19 +81,17 @@ function statusLabel(
             <Upload class="h-8 w-8 text-muted-foreground" />
             <div class="flex flex-col gap-1">
                 <p class="text-sm font-medium">
-                    Drop files here, or
+                    {{ t('media.drop_files_here') }}
                     <button
                         ref="browseTrigger"
                         type="button"
                         class="text-primary underline hover:no-underline"
                     >
-                        browse
+                        {{ t('media.browse') }}
                     </button>
                 </p>
                 <p class="text-xs text-muted-foreground">
-                    Any file type — images, PDF, Excel, Word, text, video,
-                    audio, zip, etc. Up to 500&nbsp;MB per file. Chunked upload
-                    — resumable on disconnect.
+                    {{ t('media.upload_hint') }}
                 </p>
             </div>
         </div>
@@ -101,7 +102,12 @@ function statusLabel(
         >
             <div class="flex items-center justify-between">
                 <p class="text-xs font-medium">
-                    {{ files.length }} file(s) — {{ totalProgress }}%
+                    {{
+                        t('media.files_progress', {
+                            count: files.length,
+                            percent: totalProgress,
+                        })
+                    }}
                 </p>
                 <Button
                     v-if="!uploading"
@@ -110,7 +116,7 @@ function statusLabel(
                     variant="ghost"
                     @click="clearCompleted"
                 >
-                    Clear done
+                    {{ t('media.clear_done') }}
                 </Button>
             </div>
 

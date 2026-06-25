@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import { Calendar, ChevronDown } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useT } from '@/composables/useT';
 
 const props = defineProps<{ value: string }>();
 
+const t = useT();
+
 type Option = { key: string; label: string };
-const options: Option[] = [
-    { key: '7d', label: 'Last 7 days' },
-    { key: '30d', label: 'Last 30 days' },
-    { key: '90d', label: 'Last 90 days' },
-    { key: 'year', label: 'This year' },
-];
+const options = computed<Option[]>(() => [
+    { key: '7d', label: t('date_range.last_7_days') },
+    { key: '30d', label: t('date_range.last_30_days') },
+    { key: '90d', label: t('date_range.last_90_days') },
+    { key: 'year', label: t('date_range.this_year') },
+]);
 
 const open = ref<boolean>(false);
 
 function currentLabel(): string {
-    return options.find((o) => o.key === props.value)?.label ?? 'Last 30 days';
+    return options.value.find((o) => o.key === props.value)?.label
+        ?? t('date_range.last_30_days');
 }
 
 function pick(key: string): void {

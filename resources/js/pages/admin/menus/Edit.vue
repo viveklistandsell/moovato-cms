@@ -16,7 +16,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
 import MenuTreeNode from './MenuTreeNode.vue';
+
+const t = useT();
 import {
     MENU_TREE_CONTEXT,
     type ItemDraft,
@@ -41,14 +45,18 @@ const props = defineProps<{
     categoryOptions: Option[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Navigation', href: '/admin/menus' },
-        ],
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.navigation_management'), href: '/admin/menus' },
+    {
+        title: props.menu.key === 'footer'
+            ? t('sidebar.footer_menu')
+            : t('sidebar.header_menu'),
+        href: `/admin/menus/${props.menu.id}/edit`,
     },
-});
+]);
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const languagesRef = computed<LocaleOption[]>(() => props.languages);
 
@@ -343,12 +351,12 @@ function bulkAdd(
 </script>
 
 <template>
-    <Head :title="`${menu.name} — Navigation`" />
+    <Head :title="`${menu.name} — ${t('sidebar.navigation_management')}`" />
 
     <div class="flex flex-col gap-6 p-4">
         <Heading
             :title="menu.name"
-            description="Use the panels on the left to add items. Drag items on the right to reorder or nest at any depth — drop one item onto another to make it a child."
+            :description="t('menus.description')"
         />
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-[340px_1fr]">
@@ -365,7 +373,7 @@ function bulkAdd(
                                 class="flex flex-1 items-center justify-between px-4 py-3 text-sm font-semibold hover:bg-muted/50"
                                 @click="toggleSource('pages')"
                             >
-                                Pages
+                                {{ t('menus.source_pages') }}
                                 <component
                                     :is="openSources.pages ? ChevronUp : ChevronDown"
                                     class="size-4"
@@ -374,10 +382,10 @@ function bulkAdd(
                             <Link
                                 href="/admin/pages/create"
                                 class="mr-2 inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/10"
-                                title="Create a new page"
+                                :title="t('menus.create_page_title')"
                             >
                                 <PlusCircle class="size-3.5" />
-                                New
+                                {{ t('menus.new') }}
                             </Link>
                         </div>
                         <div v-if="openSources.pages" class="p-3">
@@ -388,7 +396,7 @@ function bulkAdd(
                                 <Input
                                     v-model="pageSearch"
                                     type="search"
-                                    placeholder="Search pages…"
+                                    :placeholder="t('menus.search_pages')"
                                     class="h-8 pl-7 text-xs"
                                 />
                             </div>
@@ -397,7 +405,7 @@ function bulkAdd(
                                     v-if="filteredPages.length === 0"
                                     class="px-3 py-6 text-center text-xs text-muted-foreground"
                                 >
-                                    No pages found.
+                                    {{ t('menus.no_pages_found') }}
                                 </div>
                                 <label
                                     v-for="page in filteredPages"
@@ -413,7 +421,7 @@ function bulkAdd(
                             </div>
                             <div class="mt-2 flex items-center justify-between">
                                 <span class="text-[11px] text-muted-foreground">
-                                    {{ selectedPageIds.size }} selected
+                                    {{ t('menus.selected_count', { count: selectedPageIds.size }) }}
                                 </span>
                                 <Button
                                     type="button"
@@ -422,7 +430,7 @@ function bulkAdd(
                                     @click="addSelectedPages"
                                 >
                                     <Plus class="size-3.5" />
-                                    Add to Menu
+                                    {{ t('menus.add_to_menu') }}
                                 </Button>
                             </div>
                         </div>
@@ -438,7 +446,7 @@ function bulkAdd(
                                 class="flex flex-1 items-center justify-between px-4 py-3 text-sm font-semibold hover:bg-muted/50"
                                 @click="toggleSource('categories')"
                             >
-                                Page Categories
+                                {{ t('menus.source_categories') }}
                                 <component
                                     :is="openSources.categories ? ChevronUp : ChevronDown"
                                     class="size-4"
@@ -447,10 +455,10 @@ function bulkAdd(
                             <Link
                                 href="/admin/pages/categories/create"
                                 class="mr-2 inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/10"
-                                title="Create a new page category"
+                                :title="t('menus.create_category_title')"
                             >
                                 <PlusCircle class="size-3.5" />
-                                New
+                                {{ t('menus.new') }}
                             </Link>
                         </div>
                         <div v-if="openSources.categories" class="p-3">
@@ -461,7 +469,7 @@ function bulkAdd(
                                 <Input
                                     v-model="categorySearch"
                                     type="search"
-                                    placeholder="Search categories…"
+                                    :placeholder="t('menus.search_categories')"
                                     class="h-8 pl-7 text-xs"
                                 />
                             </div>
@@ -470,7 +478,7 @@ function bulkAdd(
                                     v-if="filteredCategories.length === 0"
                                     class="px-3 py-6 text-center text-xs text-muted-foreground"
                                 >
-                                    No categories found.
+                                    {{ t('menus.no_categories_found') }}
                                 </div>
                                 <label
                                     v-for="cat in filteredCategories"
@@ -485,13 +493,11 @@ function bulkAdd(
                                 </label>
                             </div>
                             <p class="mt-2 text-[11px] text-muted-foreground">
-                                Categories show their published pages
-                                automatically — drag any item underneath to
-                                add it as a manual child.
+                                {{ t('menus.categories_hint') }}
                             </p>
                             <div class="mt-2 flex items-center justify-between">
                                 <span class="text-[11px] text-muted-foreground">
-                                    {{ selectedCategoryIds.size }} selected
+                                    {{ t('menus.selected_count', { count: selectedCategoryIds.size }) }}
                                 </span>
                                 <Button
                                     type="button"
@@ -500,7 +506,7 @@ function bulkAdd(
                                     @click="addSelectedCategories"
                                 >
                                     <Plus class="size-3.5" />
-                                    Add to Menu
+                                    {{ t('menus.add_to_menu') }}
                                 </Button>
                             </div>
                         </div>
@@ -515,7 +521,7 @@ function bulkAdd(
                             class="flex w-full items-center justify-between border-b px-4 py-3 text-sm font-semibold hover:bg-muted/50"
                             @click="toggleSource('url')"
                         >
-                            Custom Link
+                            {{ t('menus.source_custom_link') }}
                             <component
                                 :is="openSources.url ? ChevronUp : ChevronDown"
                                 class="size-4"
@@ -523,26 +529,26 @@ function bulkAdd(
                         </button>
                         <div v-if="openSources.url" class="space-y-2 p-3">
                             <div class="space-y-1">
-                                <Label for="custom-url" class="text-xs">URL</Label>
+                                <Label for="custom-url" class="text-xs">{{ t('menus.url_label') }}</Label>
                                 <Input
                                     id="custom-url"
                                     v-model="customUrl"
                                     type="url"
-                                    placeholder="https://example.com or /contact"
+                                    :placeholder="t('menus.url_placeholder')"
                                     class="h-8 text-xs"
                                 />
                             </div>
                             <div class="space-y-1">
-                                <Label for="custom-label" class="text-xs">Link Text</Label>
+                                <Label for="custom-label" class="text-xs">{{ t('menus.link_text_label') }}</Label>
                                 <Input
                                     id="custom-label"
                                     v-model="customLabel"
-                                    placeholder="e.g. Contact"
+                                    :placeholder="t('menus.link_text_placeholder')"
                                     class="h-8 text-xs"
                                 />
                             </div>
                             <p class="text-[11px] text-muted-foreground">
-                                Same URL/label across languages. Override per language after adding.
+                                {{ t('menus.custom_link_hint') }}
                             </p>
                             <div class="flex justify-end">
                                 <Button
@@ -552,7 +558,7 @@ function bulkAdd(
                                     @click="addCustomLink"
                                 >
                                     <Plus class="size-3.5" />
-                                    Add to Menu
+                                    {{ t('menus.add_to_menu') }}
                                 </Button>
                             </div>
                         </div>
@@ -568,7 +574,7 @@ function bulkAdd(
                             class="flex w-full items-center justify-between border-b px-4 py-3 text-sm font-semibold hover:bg-muted/50"
                             @click="toggleSource('home')"
                         >
-                            Home
+                            {{ t('menus.source_home') }}
                             <component
                                 :is="openSources.home ? ChevronUp : ChevronDown"
                                 class="size-4"
@@ -576,12 +582,12 @@ function bulkAdd(
                         </button>
                         <div v-if="openSources.home" class="p-3">
                             <p class="mb-2 text-[11px] text-muted-foreground">
-                                Adds an item that links to the localized site root.
+                                {{ t('menus.home_hint') }}
                             </p>
                             <div class="flex justify-end">
                                 <Button type="button" size="sm" @click="addHomeItem">
                                     <Plus class="size-3.5" />
-                                    Add Home
+                                    {{ t('menus.add_home') }}
                                 </Button>
                             </div>
                         </div>
@@ -595,10 +601,9 @@ function bulkAdd(
             <Card>
                 <CardContent class="space-y-1 p-4">
                     <div class="mb-3 flex items-center justify-between">
-                        <h2 class="text-sm font-semibold">Menu Structure</h2>
+                        <h2 class="text-sm font-semibold">{{ t('menus.menu_structure') }}</h2>
                         <span class="text-[11px] text-muted-foreground">
-                            Drag to reorder. Drop one item onto another to nest
-                            it — supports unlimited depth, like WordPress.
+                            {{ t('menus.menu_structure_hint') }}
                         </span>
                     </div>
 
@@ -606,7 +611,7 @@ function bulkAdd(
                         v-if="tree.length === 0"
                         class="rounded-md border border-dashed py-12 text-center text-sm text-muted-foreground"
                     >
-                        Use the panels on the left to add items to this menu.
+                        {{ t('menus.empty_menu_hint') }}
                     </div>
 
                     <draggable
