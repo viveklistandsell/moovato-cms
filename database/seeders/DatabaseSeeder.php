@@ -17,6 +17,9 @@ final class DatabaseSeeder extends Seeder
             MenuSeeder::class,
             SiteSettingSeeder::class,
             EmailSettingSeeder::class,
+            CountrySeeder::class,
+            StateSeeder::class,
+            CitySeeder::class,
         ]);
     }
 }

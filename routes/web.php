@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryContr
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\Directory\CityController as AdminCityController;
+use App\Http\Controllers\Admin\Directory\CountryController as AdminCountryController;
+use App\Http\Controllers\Admin\Directory\StateController as AdminStateController;
 use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\MediaFileController;
@@ -144,6 +147,26 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
         Route::resource('languages', AdminLanguageController::class)
             ->parameters(['languages' => 'language'])
             ->except('show');
+
+        Route::prefix('directory')->name('directory.')->middleware('permission:locations.view')->group(function (): void {
+            Route::post('countries/bulk-action', [AdminCountryController::class, 'bulkAction'])
+                ->name('countries.bulk-action');
+            Route::resource('countries', AdminCountryController::class)
+                ->parameters(['countries' => 'country'])
+                ->except('show');
+
+            Route::post('states/bulk-action', [AdminStateController::class, 'bulkAction'])
+                ->name('states.bulk-action');
+            Route::resource('states', AdminStateController::class)
+                ->parameters(['states' => 'state'])
+                ->except('show');
+
+            Route::post('cities/bulk-action', [AdminCityController::class, 'bulkAction'])
+                ->name('cities.bulk-action');
+            Route::resource('cities', AdminCityController::class)
+                ->parameters(['cities' => 'city'])
+                ->except('show');
+        });
 
         Route::prefix('pages')->name('pages.')->group(function (): void {
             // Sub-resource: page categories (under /admin/pages/categories).

@@ -3,11 +3,14 @@ import { Link } from '@inertiajs/vue3';
 import {
     Activity,
     Bot,
+    Building2,
     ChevronRight,
     Database,
     Download,
+    Flag,
     HeartPulse,
     Mail as MailIcon,
+    Map as MapIcon,
     Files,
     FolderTree,
     ImagePlay,
@@ -122,6 +125,12 @@ const pageItems = computed<NavItem[]>(() => [
     { title: t('sidebar.page_categories'), href: '/admin/pages/categories', icon: FolderTree },
 ]);
 
+const directoryItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.countries'), href: '/admin/directory/countries', icon: Flag },
+    { title: t('sidebar.states'), href: '/admin/directory/states', icon: MapIcon },
+    { title: t('sidebar.cities'), href: '/admin/directory/cities', icon: Building2 },
+]);
+
 const navigationItems = computed<NavItem[]>(() => [
     { title: t('sidebar.header_menu'), href: '/admin/menus/header', icon: MenuIcon },
     { title: t('sidebar.footer_menu'), href: '/admin/menus/footer', icon: MenuIcon },
@@ -145,6 +154,10 @@ const isBlogSectionActive = computed(() =>
 
 const isPageSectionActive = computed(() =>
     pageItems.value.some((item) => isCurrentUrl(item.href)),
+);
+
+const isDirectorySectionActive = computed(() =>
+    directoryItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isNavigationSectionActive = computed(() =>
@@ -259,6 +272,50 @@ const isUserSectionActive = computed(
                                 <SidebarMenuSub>
                                     <SidebarMenuSubItem
                                         v-for="item in pageItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+
+                    <Collapsible
+                        :default-open="isDirectorySectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Directory Management"
+                                    :is-active="isDirectorySectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
+                                >
+                                    <Link :href="directoryItems[0].href">
+                                        <MapIcon />
+                                        <span>{{ t('sidebar.directory_management') }}</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in directoryItems"
                                         :key="item.title"
                                     >
                                         <SidebarMenuSubButton
