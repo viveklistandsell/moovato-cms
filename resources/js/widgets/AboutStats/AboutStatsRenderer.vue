@@ -40,7 +40,10 @@ defineProps<{ settings: Settings; data: Data }>();
                     class="text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
                 >
                     {{ data.heading }}
-                    <span v-if="data.heading_accent" class="text-[var(--orange)]">
+                    <span
+                        v-if="data.heading_accent"
+                        class="text-[var(--orange)]"
+                    >
                         {{ data.heading_accent }}
                     </span>
                 </h2>
@@ -55,7 +58,6 @@ defineProps<{ settings: Settings; data: Data }>();
                 >
                     {{ data.body }}
                 </p>
-                
             </div>
 
             <div class="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
@@ -102,9 +104,10 @@ defineProps<{ settings: Settings; data: Data }>();
                                 <span class="mv-aboutstats-stat-value">
                                     {{ stat.value }}
                                 </span>
-                                <span class="mv-aboutstats-stat-desc">
-                                    {{ stat.description }}
-                                </span>
+                                <div
+                                    class="mv-rte mv-aboutstats-stat-desc"
+                                    v-html="stat.description"
+                                />
                             </dd>
                         </div>
                     </dl>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Settings = {
@@ -44,7 +44,10 @@ const data = defineModel<Data>('data', { required: true });
             </div>
             <div class="grid gap-2">
                 <Label>Description</Label>
-                <Textarea v-model="data.description" :rows="4" />
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <div class="grid gap-1">

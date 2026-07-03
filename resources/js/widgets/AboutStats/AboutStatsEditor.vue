@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -198,7 +199,10 @@ function removeStat(index: number): void {
                             class="w-24"
                             placeholder="98%"
                         />
-                        <Input v-model="stat.title" placeholder="Zufriedenheit" />
+                        <Input
+                            v-model="stat.title"
+                            placeholder="Zufriedenheit"
+                        />
                         <Button
                             type="button"
                             variant="ghost"
@@ -208,7 +212,7 @@ function removeStat(index: number): void {
                             <Trash2 class="size-4 text-destructive" />
                         </Button>
                     </div>
-                    <Input
+                    <RichTextEditor
                         v-model="stat.description"
                         placeholder="Garantierte Zufriedenheit"
                     />

@@ -60,12 +60,11 @@ defineProps<{ settings: Settings; data: Data }>();
                             >
                                 {{ feature.title }}
                             </span>
-                            <span
+                            <div
                                 v-if="feature.description"
-                                class="mt-1 block text-[15px] leading-relaxed text-[var(--slate)]"
-                            >
-                                {{ feature.description }}
-                            </span>
+                                class="mv-rte mt-1 block text-[15px] leading-relaxed text-[var(--slate)]"
+                                v-html="feature.description"
+                            />
                         </span>
                     </li>
                 </ol>

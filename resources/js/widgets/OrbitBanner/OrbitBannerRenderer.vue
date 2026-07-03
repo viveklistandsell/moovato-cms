@@ -132,7 +132,7 @@ const crumbs = computed<Crumb[]>(() => {
                     class="mv-orbitbanner-desc mt-8 flex items-start gap-4"
                 >
                     <ArrowDown class="mt-1 size-4 shrink-0" />
-                    <p class="max-w-md">{{ data.description }}</p>
+                    <div class="mv-rte max-w-md" v-html="data.description" />
                 </div>
 
                 <div v-if="data.primary_label" class="mt-10">

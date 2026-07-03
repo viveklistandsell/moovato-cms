@@ -55,12 +55,11 @@ const alignClass = computed(() =>
                 >
                     {{ data.title }}
                 </h2>
-                <p
+                <div
                     v-if="data.description"
-                    class="max-w-2xl text-base opacity-90 sm:text-lg"
-                >
-                    {{ data.description }}
-                </p>
+                    class="mv-rte max-w-2xl text-base opacity-90 sm:text-lg"
+                    v-html="data.description"
+                />
                 <div
                     v-if="data.primary_label || data.secondary_label"
                     class="flex flex-wrap gap-3"

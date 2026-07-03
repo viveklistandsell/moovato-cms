@@ -11,6 +11,7 @@ use App\Widgets\Banner\BannerWidget;
 use App\Widgets\Blog\BlogWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
 use App\Widgets\Comparison\ComparisonWidget;
+use App\Widgets\Contact\ContactWidget;
 use App\Widgets\ContentCollage\ContentCollageWidget;
 use App\Widgets\ContentStyle1\ContentStyle1Widget;
 use App\Widgets\ContentStyle2\ContentStyle2Widget;
@@ -24,6 +25,7 @@ use App\Widgets\Faq\FaqWidget;
 use App\Widgets\FaqMedia\FaqMediaWidget;
 use App\Widgets\Features\FeaturesWidget;
 use App\Widgets\Gallery\GalleryWidget;
+use App\Widgets\GetInTouch\GetInTouchWidget;
 use App\Widgets\Hero\HeroWidget;
 use App\Widgets\Heronew\HeronewWidget;
 use App\Widgets\HowItWorks\HowItWorksWidget;
@@ -110,6 +112,8 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ContentCollageWidget::class,
         ComparisonWidget::class,
         CompanyDirectoryWidget::class,
+        ContactWidget::class,
+        GetInTouchWidget::class,
     ];
 
     public function register(): void

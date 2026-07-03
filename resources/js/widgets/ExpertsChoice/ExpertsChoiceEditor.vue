@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,7 +53,10 @@ function removeCard(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Heading</Label>
-                <Input v-model="data.heading" placeholder="Die Wahl der Profis" />
+                <Input
+                    v-model="data.heading"
+                    placeholder="Die Wahl der Profis"
+                />
             </div>
             <div class="grid gap-2">
                 <Label>Body</Label>
@@ -130,9 +134,8 @@ function removeCard(index: number): void {
                 <Input v-model="card.icon" placeholder="Icon (lucide)" />
                 <div class="space-y-2">
                     <Input v-model="card.title" placeholder="Title" />
-                    <Textarea
+                    <RichTextEditor
                         v-model="card.description"
-                        :rows="2"
                         placeholder="Description"
                     />
                 </div>

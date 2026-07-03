@@ -114,7 +114,7 @@ function save(): void {
     <Sheet v-model:open="open">
         <SheetContent
             side="right"
-            class="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl"
+            class="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl"
         >
             <SheetHeader class="border-b px-6 py-4">
                 <SheetTitle>

@@ -111,12 +111,11 @@ const colsClass = computed(() => {
                                 >
                                     {{ item.title }}
                                 </h3>
-                                <p
+                                <div
                                     v-if="item.description"
-                                    class="mv-services__desc"
-                                >
-                                    {{ item.description }}
-                                </p>
+                                    class="mv-rte mv-services__desc"
+                                    v-html="item.description"
+                                />
                             </div>
                         </article>
                     </div>

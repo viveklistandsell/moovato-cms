@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -8,7 +9,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 
 type Settings = {
     variant: 'brand' | 'muted' | 'dark';
@@ -42,7 +42,10 @@ const data = defineModel<Data>('data', { required: true });
             </div>
             <div class="grid gap-2">
                 <Label>Description</Label>
-                <Textarea v-model="data.description" :rows="3" />
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
         </div>
         <div class="space-y-4">

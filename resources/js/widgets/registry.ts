@@ -10,6 +10,8 @@ import BlogEditor from './Blog/BlogEditor.vue';
 import BlogRenderer from './Blog/BlogRenderer.vue';
 import CompanyDirectoryEditor from './CompanyDirectory/CompanyDirectoryEditor.vue';
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
+import ContactEditor from './Contact/ContactEditor.vue';
+import ContactRenderer from './Contact/ContactRenderer.vue';
 import ContentCollageEditor from './ContentCollage/ContentCollageEditor.vue';
 import ContentCollageRenderer from './ContentCollage/ContentCollageRenderer.vue';
 import ComparisonEditor from './Comparison/ComparisonEditor.vue';
@@ -42,6 +44,8 @@ import FeaturesEditor from './Features/FeaturesEditor.vue';
 import FeaturesRenderer from './Features/FeaturesRenderer.vue';
 import GalleryEditor from './Gallery/GalleryEditor.vue';
 import GalleryRenderer from './Gallery/GalleryRenderer.vue';
+import GetInTouchEditor from './GetInTouch/GetInTouchEditor.vue';
+import GetInTouchRenderer from './GetInTouch/GetInTouchRenderer.vue';
 import HeroEditor from './Hero/HeroEditor.vue';
 import HeroRenderer from './Hero/HeroRenderer.vue';
 import HeronewEditor from './Heronew/HeronewEditor.vue';
@@ -177,6 +181,8 @@ export const widgetRegistry: WidgetRegistry = {
         editor: CompanyDirectoryEditor,
         renderer: CompanyDirectoryRenderer,
     },
+    contact: { editor: ContactEditor, renderer: ContactRenderer },
+    get_in_touch: { editor: GetInTouchEditor, renderer: GetInTouchRenderer },
 };
 
 export function getWidgetEntry(type: string) {
