@@ -86,12 +86,18 @@ final class PermissionSeeder extends Seeder
             ['name' => 'menus.update', 'display_name' => 'Update menu items', 'group' => 'Menus'],
             ['name' => 'menus.delete', 'display_name' => 'Delete menu items', 'group' => 'Menus'],
 
+            // Directory / Locations (countries, states, cities)
+            ['name' => 'locations.view', 'display_name' => 'View countries / states / cities', 'group' => 'Directory'],
+            ['name' => 'locations.create', 'display_name' => 'Create countries / states / cities', 'group' => 'Directory'],
+            ['name' => 'locations.update', 'display_name' => 'Update countries / states / cities', 'group' => 'Directory'],
+            ['name' => 'locations.delete', 'display_name' => 'Delete countries / states / cities', 'group' => 'Directory'],
+
             // Languages + global settings
             ['name' => 'settings.languages', 'display_name' => 'Manage languages', 'group' => 'Settings'],
             ['name' => 'settings.activity', 'display_name' => 'View activity log', 'group' => 'Settings'],
             ['name' => 'settings.site', 'display_name' => 'Manage site settings (footer, contact)', 'group' => 'Settings'],
             ['name' => 'settings.email', 'display_name' => 'Manage email / SMTP configuration', 'group' => 'Settings'],
-            
+
             // System (cache, queue, logs)
             ['name' => 'system.cache', 'display_name' => 'Clear application caches', 'group' => 'System'],
         ];
