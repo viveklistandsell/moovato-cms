@@ -23,7 +23,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-whychoose section-py">
         <div
-            class="container-xl grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16"
+            class="container-xl grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-x-5"
         >
             <div class="wc-sticky lg:sticky lg:top-24 lg:self-start">
                 <span v-if="data.eyebrow" class="wc-eyebrow">

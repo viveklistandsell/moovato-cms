@@ -7,6 +7,7 @@
 :root {
     --midnight: #0f172a;
     --midnight-soft: #1e293b;
+    --charcoal: #2d2d2d;
     --orange: #ff5d2c;
     --yellow-dark: #ff9831;
     --orange-soft: #ffede6;
@@ -40,9 +41,12 @@
 .mv-heronew {
     position: relative;
     overflow: hidden;
-    padding: 0pxx;
+    padding: 0;
 }
-
+.container-xxl{
+    max-width:85rem;
+    margin-inline:auto;
+}
 .mv-heronew .hero {
     position: relative;
     z-index: 20;
@@ -73,18 +77,34 @@
 .mv-heronew .hero-badge {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    background: var(--white);
-    padding: 10px 18px 10px 14px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--midnight);
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+    gap: 12px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     margin-bottom: 28px;
-}
-.mv-heronew .hero-badge .ico {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--orange);
+}
+.mv-heronew .hero-badge::before,
+.mv-heronew .hero-badge::after {
+    content: '';
+    width: 30px;
+    height: 16px;
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+.mv-heronew .hero-badge::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 16'%3E%3Cpath d='M0 0L16 8L0 16Z' fill='%23ff5d2c'/%3E%3Ccircle cx='17' cy='8' r='4' fill='%230f172a'/%3E%3Ccircle cx='27' cy='8' r='2' fill='%230f172a'/%3E%3C/svg%3E");
+}
+.mv-heronew .hero-badge::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 16'%3E%3Cpath d='M29 0L13 8L29 16Z' fill='%23ff5d2c'/%3E%3Ccircle cx='12' cy='8' r='4' fill='%230f172a'/%3E%3Ccircle cx='2' cy='8' r='2' fill='%230f172a'/%3E%3C/svg%3E");
 }
 .mv-heronew .hero-title {
     font-size: 64px;
@@ -1472,12 +1492,12 @@
     padding: 18px 0;
     background: linear-gradient(
         90deg,
-        #ff7a45 0%,
+        color-mix(in srgb, var(--orange) 82%, var(--white)) 0%,
         var(--orange) 50%,
-        #fe330a 100%
+        color-mix(in srgb, var(--orange) 78%, var(--midnight)) 100%
     );
-    border-top: 2px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 18px 50px rgba(255, 87, 34, 0.25);
+    border-top: 2px solid color-mix(in srgb, var(--white) 50%, transparent);
+    box-shadow: 0 18px 50px color-mix(in srgb, var(--orange) 25%, transparent);
 }
 .mv-ticker__track {
     display: flex;
@@ -1932,7 +1952,7 @@
 }
 @media (min-width: 1024px) {
     .mv-services__box {
-        padding: 60px;
+        padding: 30px 15px 15px;
     }
 }
 .mv-services__eyebrow {
@@ -1945,10 +1965,10 @@
     line-height: 1;
     padding: 12px 20px;
     border-radius: 999px;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 .mv-services__heading {
-    margin: 0 0 50px;
+    margin: 0 0 30px;
     max-width: 685px;
     font-size: 34px;
     line-height: 1.15;
@@ -1963,53 +1983,140 @@
     }
 }
 .mv-services__card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-    padding: 20px;
-    border-radius: 12px;
-    background: var(--white);
-    border: 1px solid transparent;
-    text-align: center;
-    transition:
-        box-shadow 0.25s ease,
-        border-color 0.25s ease;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 44px 36px 52px;
+    background: var(--midnight);
+    border: 1px solid color-mix(in srgb, var(--white) 14%, transparent);
+    border-radius: 10px;
 }
-.mv-services__card:hover {
-    border-color: var(--orange);
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
+.mv-services__hover {
+    position: absolute;
+    inset: -1px;
+    z-index: 0;
+    display: flex;
+    pointer-events: none;
+}
+.mv-services__hover-bg {
+    width: calc(25% + 0.3px);
+    height: 100%;
+    background: var(--orange);
+    transform: translateY(101%);
+    transition: transform 0.3s ease;
+}
+.mv-services__hover-bg:nth-child(1) {
+    transition-delay: 0.1s;
+}
+.mv-services__hover-bg:nth-child(2) {
+    transition-delay: 0.2s;
+}
+.mv-services__hover-bg:nth-child(3) {
+    transition-delay: 0.3s;
+}
+.mv-services__hover-bg:nth-child(4) {
+    transition-delay: 0.4s;
+}
+.mv-services__card:hover .mv-services__hover-bg {
+    transform: translateY(0);
+}
+.mv-services__content {
+    position: relative;
+    z-index: 1;
+}
+.mv-services__title {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--white);
+}
+.mv-services__desc {
+    margin: 0 0 26px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--white);
+    transform: translateY(8px);
+    transition:
+        transform 0.4s ease;
+}
+
+.mv-services__iconbox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 26px;
+    border: 1px solid color-mix(in srgb, var(--white) 14%, transparent);
+    transition: border-color 0.5s ease;
+}
+.mv-services__iconbox::before,
+.mv-services__iconbox::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: var(--orange);
+    transition:
+        background 0.5s ease,
+        transform 0.5s ease;
+}
+.mv-services__iconbox::before {
+    top: -4px;
+    right: -4px;
+}
+.mv-services__iconbox::after {
+    left: -4px;
+    bottom: -4px;
+}
+.mv-services__card:hover .mv-services__iconbox {
+    border-color: var(--white);
+}
+.mv-services__card:hover .mv-services__iconbox::before,
+.mv-services__card:hover .mv-services__iconbox::after {
+    background: var(--white);
+}
+.mv-services__card:hover .mv-services__iconbox::before {
+    transform: translateX(-79px);
+}
+.mv-services__card:hover .mv-services__iconbox::after {
+    transform: translateX(79px);
 }
 .mv-services__icon {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 60px;
-    height: 60px;
-    border-radius: 999px;
-    color: var(--orange);
-    background: var(--orange-soft);
-    transition:
-        background 0.25s ease,
-        color 0.25s ease;
-}
-.mv-services__card:hover .mv-services__icon {
-    background: var(--orange);
     color: var(--white);
 }
-.mv-services__title {
-    margin: 0 0 14px;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--midnight);
-    line-height: 22px;
+.mv-services__btn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    color: var(--white);
+    background: color-mix(in srgb, var(--white) 14%, transparent);
+    transition:
+        background 0.5s ease,
+        color 0.5s ease;
 }
-.mv-services__desc {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.6;
-    color: var(--slate);
+.mv-services__btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.5s ease;
+}
+.mv-services__card:hover .mv-services__btn {
+    background: var(--white);
+    color: var(--orange);
+}
+.mv-services__card:hover .mv-services__btn svg {
+    transform: translateX(3px);
 }
 @media (prefers-reduced-motion: reduce) {
     .mv-services__line-pulse {
@@ -3627,31 +3734,119 @@
 .mv-about .mv-about-eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
+    gap: 12px;
+    font-size: 16px;
+    font-weight: 700;
     line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    padding: 12px 20px;
-    border-radius: 999px;
-    background: var(--white);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
     color: var(--orange);
-    border: 1px solid var(--orange-soft);
 }
 
+.mv-quote .v7-eyebrow::before,
+.mv-quote .v7-eyebrow::after,
+.mv-services__eyebrow::before,
+.mv-services__eyebrow::after,
+.mv-howitworks__eyebrow::before,
+.mv-howitworks__eyebrow::after,
+.mv-pricing__eyebrow::before,
+.mv-pricing__eyebrow::after,
+.mv-reviews__badge::before,
+.mv-reviews__badge::after,
+.mv-whychoose .wc-eyebrow::before,
+.mv-whychoose .wc-eyebrow::after,
+.mv-partners-eyebrow::before,
+.mv-partners-eyebrow::after,
+.mv-blog-eyebrow::before,
+.mv-blog-eyebrow::after,
+.mv-map-eyebrow::before,
+.mv-map-eyebrow::after,
+.mv-faqmedia .mv-faqmedia-eyebrow::before,
+.mv-faqmedia .mv-faqmedia-eyebrow::after,
+.mv-aboutstats .mv-aboutstats-eyebrow::before,
+.mv-aboutstats .mv-aboutstats-eyebrow::after,
+.mv-aboutexp .mv-aboutexp-eyebrow::before,
+.mv-aboutexp .mv-aboutexp-eyebrow::after,
+.mv-mediachecklist .mv-mediachecklist-eyebrow::before,
+.mv-mediachecklist .mv-mediachecklist-eyebrow::after,
+.mv-teamcta .mv-teamcta-eyebrow::before,
+.mv-teamcta .mv-teamcta-eyebrow::after,
+.mv-statfeatures .mv-statfeatures-eyebrow::before,
+.mv-statfeatures .mv-statfeatures-eyebrow::after,
+.mv-splitmedia .mv-splitmedia-eyebrow::before,
+.mv-splitmedia .mv-splitmedia-eyebrow::after,
+.mv-collage .mv-collage-eyebrow::before,
+.mv-collage .mv-collage-eyebrow::after,
+.mv-about .mv-about-eyebrow::before,
+.mv-about .mv-about-eyebrow::after {
+    content: '';
+    width: 30px;
+    height: 16px;
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.mv-quote .v7-eyebrow::before,
+.mv-services__eyebrow::before,
+.mv-howitworks__eyebrow::before,
+.mv-pricing__eyebrow::before,
+.mv-reviews__badge::before,
+.mv-whychoose .wc-eyebrow::before,
+.mv-partners-eyebrow::before,
+.mv-blog-eyebrow::before,
+.mv-map-eyebrow::before,
+.mv-faqmedia .mv-faqmedia-eyebrow::before,
 .mv-aboutstats .mv-aboutstats-eyebrow::before,
 .mv-aboutexp .mv-aboutexp-eyebrow::before,
 .mv-mediachecklist .mv-mediachecklist-eyebrow::before,
 .mv-teamcta .mv-teamcta-eyebrow::before,
 .mv-statfeatures .mv-statfeatures-eyebrow::before,
 .mv-splitmedia .mv-splitmedia-eyebrow::before,
-.mv-collage .mv-collage-eyebrow::before {
-    content: '';
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background: var(--orange);
+.mv-collage .mv-collage-eyebrow::before,
+.mv-about .mv-about-eyebrow::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 16'%3E%3Cpath d='M0 0L16 8L0 16Z' fill='%23ff5d2c'/%3E%3Ccircle cx='17' cy='8' r='4' fill='%230f172a'/%3E%3Ccircle cx='27' cy='8' r='2' fill='%230f172a'/%3E%3C/svg%3E");
+}
+
+.mv-quote .v7-eyebrow::after,
+.mv-services__eyebrow::after,
+.mv-howitworks__eyebrow::after,
+.mv-pricing__eyebrow::after,
+.mv-reviews__badge::after,
+.mv-whychoose .wc-eyebrow::after,
+.mv-partners-eyebrow::after,
+.mv-blog-eyebrow::after,
+.mv-map-eyebrow::after,
+.mv-faqmedia .mv-faqmedia-eyebrow::after,
+.mv-aboutstats .mv-aboutstats-eyebrow::after,
+.mv-aboutexp .mv-aboutexp-eyebrow::after,
+.mv-mediachecklist .mv-mediachecklist-eyebrow::after,
+.mv-teamcta .mv-teamcta-eyebrow::after,
+.mv-statfeatures .mv-statfeatures-eyebrow::after,
+.mv-splitmedia .mv-splitmedia-eyebrow::after,
+.mv-collage .mv-collage-eyebrow::after,
+.mv-about .mv-about-eyebrow::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 16'%3E%3Cpath d='M29 0L13 8L29 16Z' fill='%23ff5d2c'/%3E%3Ccircle cx='12' cy='8' r='4' fill='%230f172a'/%3E%3Ccircle cx='2' cy='8' r='2' fill='%230f172a'/%3E%3C/svg%3E");
+}
+
+.mv-whychoose .wc-eyebrow {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: var(--orange);
+    color: var(--orange);
+}
+
+.mv-map-eyebrow::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 16'%3E%3Cpath d='M0 0L16 8L0 16Z' fill='%23ff5d2c'/%3E%3Ccircle cx='17' cy='8' r='4' fill='%23ffffff'/%3E%3Ccircle cx='27' cy='8' r='2' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+.mv-map-eyebrow::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 16'%3E%3Cpath d='M29 0L13 8L29 16Z' fill='%23ff5d2c'/%3E%3Ccircle cx='12' cy='8' r='4' fill='%23ffffff'/%3E%3Ccircle cx='2' cy='8' r='2' fill='%23ffffff'/%3E%3C/svg%3E");
 }
 
 .mv-collage .mv-collage-slot {
@@ -5008,7 +5203,7 @@
 
 .mv-floating-btns {
     position: fixed;
-    right: 20px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     z-index: 60;

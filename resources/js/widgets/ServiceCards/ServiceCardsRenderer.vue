@@ -80,8 +80,8 @@ const colsClass = computed(() => {
                 </svg>
             </div>
 
-            <div class="relative z-10 container-xl">
-                <div class="mv-services__box">
+            <div class="relative z-10 container-xxl">
+                <div class="mv-services__box "> 
                     <div class="flex flex-col items-center">
                         <span v-if="data.eyebrow" class="mv-services__eyebrow">
                             {{ data.eyebrow }}
@@ -91,20 +91,33 @@ const colsClass = computed(() => {
                         </h2>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-8" :class="colsClass">
+                    <div
+                        class="mv-services__grid grid grid-cols-1 gap-4 p-5"
+                        :class="colsClass"
+                    >
                         <article
                             v-for="(item, i) in data.items ?? []"
                             :key="i"
                             class="mv-services__card"
                         >
-                            <span class="mv-services__icon">
-                                <WidgetIcon
-                                    :name="item.icon"
-                                    fallback="Box"
-                                    class="size-7"
-                                />
-                            </span>
-                            <div>
+                            <div class="mv-services__hover" aria-hidden="true">
+                                <span class="mv-services__hover-bg" />
+                                <span class="mv-services__hover-bg" />
+                                <span class="mv-services__hover-bg" />
+                                <span class="mv-services__hover-bg" />
+                            </div>
+
+                            <div class="mv-services__content">
+                                <div class="mv-services__iconbox">
+                                    <span class="mv-services__icon">
+                                        <WidgetIcon
+                                            :name="item.icon"
+                                            fallback="Box"
+                                            class="size-8"
+                                        />
+                                    </span>
+                                </div>
+
                                 <h3
                                     v-if="item.title"
                                     class="mv-services__title"
@@ -113,10 +126,23 @@ const colsClass = computed(() => {
                                 </h3>
                                 <div
                                     v-if="item.description"
-                                    class="mv-rte mv-services__desc"
+                                    class="mv-services__desc"
                                     v-html="item.description"
                                 />
                             </div>
+
+                            <span class="mv-services__btn" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M5 12h14M13 6l6 6-6 6" />
+                                </svg>
+                            </span>
                         </article>
                     </div>
                 </div>
