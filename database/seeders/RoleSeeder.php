@@ -77,6 +77,7 @@ final class RoleSeeder extends Seeder
                     'media.view', 'media.upload', 'media.delete',
                     'menus.view', 'menus.create', 'menus.update', 'menus.delete',
                     'locations.view', 'locations.create', 'locations.update', 'locations.delete',
+                    'service_categories.view', 'service_categories.create', 'service_categories.update', 'service_categories.delete',
                     'settings.activity',
                 ],
             ],

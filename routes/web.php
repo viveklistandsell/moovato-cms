@@ -22,6 +22,8 @@ use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryContr
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
+use App\Http\Controllers\Admin\Service\CategoryController as AdminServiceCategoryController;
+use App\Http\Controllers\Admin\Service\ParentCategoryController as AdminServiceParentCategoryController;
 use App\Http\Controllers\Admin\Settings\EmailSettingsController as AdminEmailSettingsController;
 use App\Http\Controllers\Admin\Settings\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\System\ActivityLogController as AdminActivityLogController;
@@ -168,8 +170,24 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->except('show');
         });
 
+        Route::prefix('services')->name('services.')->middleware('permission:service_categories.view')->group(function (): void {
+            Route::post('categories/reorder', [AdminServiceCategoryController::class, 'reorder'])
+                ->name('categories.reorder');
+            Route::post('categories/bulk-action', [AdminServiceCategoryController::class, 'bulkAction'])
+                ->name('categories.bulk-action');
+            Route::resource('categories', AdminServiceCategoryController::class)
+                ->parameters(['categories' => 'category'])
+                ->except('show');
+            Route::post('parent-categories/bulk-action', [AdminServiceParentCategoryController::class, 'bulkAction'])
+                ->name('parent-categories.bulk-action');
+            Route::get('parent-categories/options', [AdminServiceParentCategoryController::class, 'options'])
+                ->name('parent-categories.options');
+            Route::resource('parent-categories', AdminServiceParentCategoryController::class)
+                ->parameters(['parent-categories' => 'category'])
+                ->except('show');
+        });
+
         Route::prefix('pages')->name('pages.')->group(function (): void {
-            // Sub-resource: page categories (under /admin/pages/categories).
             Route::post('categories/reorder', [AdminPageCategoryController::class, 'reorder'])
                 ->name('categories.reorder');
             Route::post('categories/bulk-action', [AdminPageCategoryController::class, 'bulkAction'])
@@ -178,19 +196,13 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->parameters(['categories' => 'category'])
                 ->except('show');
 
-            // Top-level resource: pages live at /admin/pages directly.
-            // Numeric constraint on {page} prevents collision with /categories.
             Route::post('bulk-action', [AdminPageController::class, 'bulkAction'])
                 ->name('bulk-action');
 
-            // Clone a page; same numeric constraint as the catch-all resource.
             Route::post('{page}/duplicate', [AdminPageController::class, 'duplicate'])
                 ->where('page', '[0-9]+')
                 ->name('duplicate');
 
-            // Widget builder sync: full replace-all of the widget stack for a
-            // given page. Must be registered BEFORE the catch-all resource
-            // route so the {page} param resolves to a Page model bound here.
             Route::post('{page}/widgets', [AdminPageWidgetController::class, 'sync'])
                 ->where('page', '[0-9]+')
                 ->name('widgets.sync');
@@ -201,9 +213,6 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->where(['page' => '[0-9]+']);
         });
 
-        // User management — single-page CRUD via drawer (no separate create/edit
-        // routes). Permission middleware gates each action; the controller's
-        // own actions throw on guard violations (self-delete, last super admin).
         Route::prefix('users')->name('users.')->group(function (): void {
             Route::get('/', [AdminUserController::class, 'index'])
                 ->middleware('permission:users.view')

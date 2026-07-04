@@ -92,6 +92,12 @@ final class PermissionSeeder extends Seeder
             ['name' => 'locations.update', 'display_name' => 'Update countries / states / cities', 'group' => 'Directory'],
             ['name' => 'locations.delete', 'display_name' => 'Delete countries / states / cities', 'group' => 'Directory'],
 
+            // Services — service categories (and later listings / enquiries)
+            ['name' => 'service_categories.view', 'display_name' => 'View service categories', 'group' => 'Services'],
+            ['name' => 'service_categories.create', 'display_name' => 'Create service categories', 'group' => 'Services'],
+            ['name' => 'service_categories.update', 'display_name' => 'Update service categories', 'group' => 'Services'],
+            ['name' => 'service_categories.delete', 'display_name' => 'Delete service categories', 'group' => 'Services'],
+
             // Languages + global settings
             ['name' => 'settings.languages', 'display_name' => 'Manage languages', 'group' => 'Settings'],
             ['name' => 'settings.activity', 'display_name' => 'View activity log', 'group' => 'Settings'],

@@ -10,6 +10,27 @@ function toBcp47(locale: string): string {
 }
 
 /**
+ * Returns the raw base language code (`'de'`, `'en'`, …) of the admin's
+ * active locale — the segment before any region suffix. Use this to key
+ * into `translations[code]` maps returned by admin controllers.
+ *
+ * Falls back to `'de'` (the Moovato default) when no locale is set.
+ */
+export function useAdminLanguage(): ComputedRef<string> {
+    const page = usePage();
+    return computed<string>(() => {
+        const raw =
+            (page.props as { adminLocale?: string | null }).adminLocale ??
+            (page.props as { locale?: string | null }).locale ??
+            'de';
+        if (typeof raw !== 'string' || raw === '') {
+            return 'de';
+        }
+        return raw.split(/[-_]/)[0].toLowerCase();
+    });
+}
+
+/**
  * Returns a reactive BCP-47 locale tag matching the user's active admin
  * locale. Used to localize `Intl.DateTimeFormat` / `toLocaleString` output
  * so dates render in the same language as the rest of the admin UI.

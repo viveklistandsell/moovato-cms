@@ -68,6 +68,8 @@ import ReviewsEditor from './Reviews/ReviewsEditor.vue';
 import ReviewsRenderer from './Reviews/ReviewsRenderer.vue';
 import ServiceCardsEditor from './ServiceCards/ServiceCardsEditor.vue';
 import ServiceCardsRenderer from './ServiceCards/ServiceCardsRenderer.vue';
+import ServicesCategoryGridEditor from './ServicesCategoryGrid/ServicesCategoryGridEditor.vue';
+import ServicesCategoryGridRenderer from './ServicesCategoryGrid/ServicesCategoryGridRenderer.vue';
 import TestimonialEditor from './Testimonial/TestimonialEditor.vue';
 import TestimonialRenderer from './Testimonial/TestimonialRenderer.vue';
 import TextBlockEditor from './TextBlock/TextBlockEditor.vue';
@@ -102,6 +104,10 @@ export const widgetRegistry: WidgetRegistry = {
     service_cards: {
         editor: ServiceCardsEditor,
         renderer: ServiceCardsRenderer,
+    },
+    services_category_grid: {
+        editor: ServicesCategoryGridEditor,
+        renderer: ServicesCategoryGridRenderer,
     },
     how_it_works: {
         editor: HowItWorksEditor,
