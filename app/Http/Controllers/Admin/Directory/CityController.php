@@ -47,7 +47,6 @@ final class CityController extends Controller
         if ($stateId !== null) {
             $query->where('state_id', $stateId);
         } elseif ($countryId !== null) {
-            // No state picked yet but country filter is active — scope through state.
             $query->whereHas('state', fn (Builder $q) => $q->where('country_id', $countryId));
         }
 

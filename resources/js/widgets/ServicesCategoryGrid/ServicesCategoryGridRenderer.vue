@@ -20,7 +20,6 @@ type Settings = {
     max_items: number;
     columns: number;
     show_description: boolean;
-    /** Server-injected. See PageController::resolveServiceParentCategories(). */
     categories?: Category[];
 };
 
@@ -44,7 +43,6 @@ const categories = computed<Category[]>(() => props.settings.categories ?? []);
  */
 const gridColsClass = computed<string>(() => {
     const cols = props.settings.columns ?? 5;
-    // Base grid: 2 cols on mobile, then bump up to the target at sm/md/lg.
     const map: Record<number, string> = {
         2: 'grid-cols-2',
         3: 'grid-cols-2 sm:grid-cols-3',

@@ -63,8 +63,6 @@ setBreadcrumbs(() => [
     },
 ]);
 
-// Country selector is local-only — it filters the states dropdown but is
-// not stored on the City row (state already implies country via FK).
 const selectedCountryId = ref<number>(
     props.city?.country_id ?? props.countries[0]?.id ?? 0,
 );
@@ -79,16 +77,12 @@ const form = useForm({
     sort_order: props.city?.sort_order ?? props.nextSortOrder,
 });
 
-// Reload the states dropdown when the country changes — Inertia partial
-// reload swaps the `states` prop scoped to the new country.
 watch(selectedCountryId, (countryId) => {
     if (!countryId) return;
     router.reload({
         only: ['states'],
         data: { country_id: countryId },
         onSuccess: () => {
-            // If the previously selected state is no longer in the list,
-            // reset to the first available one.
             const stillValid = props.states.some((s) => s.id === form.state_id);
             if (!stillValid) {
                 form.state_id = props.states[0]?.id ?? 0;
@@ -97,7 +91,6 @@ watch(selectedCountryId, (countryId) => {
     });
 });
 
-// Auto-slugify name → permalink while creating, stop once user edits permalink.
 let permalinkTouched = isEdit.value;
 watch(
     () => form.permalink,

@@ -148,8 +148,6 @@ function applyFilters(overrides: {
 
 function onCountryChange(value: string): void {
     const id = value === 'all' ? null : Number(value);
-    // Switching country resets the state filter — old states are no longer
-    // valid under the new country.
     applyFilters({ country_id: id, state_id: null });
 }
 

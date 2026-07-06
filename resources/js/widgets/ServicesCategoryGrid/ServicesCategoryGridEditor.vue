@@ -23,7 +23,6 @@ type Settings = {
     max_items: number;
     columns: 2 | 3 | 4 | 5 | 6;
     show_description: boolean;
-    /** Server-injected. See PageController::resolveServiceParentCategories(). */
     categories?: unknown;
 };
 
@@ -39,7 +38,6 @@ const data = defineModel<Data>('data', { required: true });
 
 <template>
     <div class="space-y-6">
-        <!-- Heading / eyebrow / subheading ------------------------------- -->
         <div class="grid gap-4 md:grid-cols-2">
             <div class="grid gap-2">
                 <Label>Eyebrow</Label>

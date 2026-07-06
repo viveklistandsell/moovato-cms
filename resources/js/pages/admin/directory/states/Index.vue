@@ -96,9 +96,6 @@ const isFiltered = computed(
         props.filters.country_id !== null,
 );
 
-// Cascade filter — preserve search/sort/perPage, reset to page 1.
-// `useTableQuery` only tracks the standard table params; for module-specific
-// dropdowns like country_id we call router.get directly.
 function onCountryChange(value: string): void {
     const id = value === 'all' ? null : Number(value);
     const params: Record<string, string | number> = {};
