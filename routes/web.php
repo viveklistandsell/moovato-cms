@@ -151,18 +151,24 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             ->except('show');
 
         Route::prefix('directory')->name('directory.')->middleware('permission:locations.view')->group(function (): void {
+            Route::post('countries/reorder', [AdminCountryController::class, 'reorder'])
+                ->name('countries.reorder');
             Route::post('countries/bulk-action', [AdminCountryController::class, 'bulkAction'])
                 ->name('countries.bulk-action');
             Route::resource('countries', AdminCountryController::class)
                 ->parameters(['countries' => 'country'])
                 ->except('show');
 
+            Route::post('states/reorder', [AdminStateController::class, 'reorder'])
+                ->name('states.reorder');
             Route::post('states/bulk-action', [AdminStateController::class, 'bulkAction'])
                 ->name('states.bulk-action');
             Route::resource('states', AdminStateController::class)
                 ->parameters(['states' => 'state'])
                 ->except('show');
 
+            Route::post('cities/reorder', [AdminCityController::class, 'reorder'])
+                ->name('cities.reorder');
             Route::post('cities/bulk-action', [AdminCityController::class, 'bulkAction'])
                 ->name('cities.bulk-action');
             Route::resource('cities', AdminCityController::class)
@@ -178,6 +184,8 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             Route::resource('categories', AdminServiceCategoryController::class)
                 ->parameters(['categories' => 'category'])
                 ->except('show');
+            Route::post('parent-categories/reorder', [AdminServiceParentCategoryController::class, 'reorder'])
+                ->name('parent-categories.reorder');
             Route::post('parent-categories/bulk-action', [AdminServiceParentCategoryController::class, 'bulkAction'])
                 ->name('parent-categories.bulk-action');
             Route::get('parent-categories/options', [AdminServiceParentCategoryController::class, 'options'])

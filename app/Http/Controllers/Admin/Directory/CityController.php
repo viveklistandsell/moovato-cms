@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Directory;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Directory\City\BulkActionCitiesRequest;
+use App\Http\Requests\Admin\Directory\City\ReorderCitiesRequest;
 use App\Http\Requests\Admin\Directory\City\StoreCityRequest;
 use App\Http\Requests\Admin\Directory\City\UpdateCityRequest;
 use App\Models\City;
@@ -129,7 +130,9 @@ final class CityController extends Controller
         $data['sort_order'] = $data['sort_order'] ?? City::nextSortOrder((int) $data['state_id']);
         $data['is_popular'] = (bool) ($data['is_popular'] ?? false);
 
-        City::query()->create($data);
+        /** @var City $city */
+        $city = City::query()->create($data);
+        $city->reorderToCurrentPosition();
 
         return redirect()
             ->route('admin.directory.cities.index')
@@ -154,7 +157,13 @@ final class CityController extends Controller
         /** @var array<string, mixed> $data */
         $data = $request->validated();
         $data['is_popular'] = (bool) ($data['is_popular'] ?? false);
+        $oldStateId = (int) $city->state_id;
         $city->update($data);
+        $city->reorderToCurrentPosition();
+
+        if ($oldStateId !== (int) $city->state_id) {
+            City::compactSiblings($oldStateId);
+        }
 
         return redirect()
             ->route('admin.directory.cities.index')
@@ -163,11 +172,43 @@ final class CityController extends Controller
 
     public function destroy(City $city): RedirectResponse
     {
+        $stateId = (int) $city->state_id;
         $city->delete();
+        City::compactSiblings($stateId);
 
         return redirect()
             ->route('admin.directory.cities.index')
             ->with('toast', ['type' => 'success', 'message' => 'City deleted.']);
+    }
+
+    public function reorder(ReorderCitiesRequest $request): RedirectResponse
+    {
+        /** @var array{state_id: int, ordered_ids: array<int, int>} $data */
+        $data = $request->validated();
+        $stateId = (int) $data['state_id'];
+        $orderedIds = $data['ordered_ids'];
+
+        $validIds = City::query()
+            ->where('state_id', $stateId)
+            ->whereIn('id', $orderedIds)
+            ->pluck('id')
+            ->all();
+        if (count($validIds) !== count($orderedIds)) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Reorder rejected: some cities do not belong to the selected state.',
+            ]);
+        }
+
+        DB::transaction(function () use ($orderedIds): void {
+            foreach ($orderedIds as $index => $id) {
+                City::query()
+                    ->where('id', $id)
+                    ->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
     }
 
     public function bulkAction(BulkActionCitiesRequest $request): RedirectResponse

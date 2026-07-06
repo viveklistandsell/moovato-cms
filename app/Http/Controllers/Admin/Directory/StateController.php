@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Directory;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Directory\State\BulkActionStatesRequest;
+use App\Http\Requests\Admin\Directory\State\ReorderStatesRequest;
 use App\Http\Requests\Admin\Directory\State\StoreStateRequest;
 use App\Http\Requests\Admin\Directory\State\UpdateStateRequest;
 use App\Models\Country;
@@ -114,7 +115,9 @@ final class StateController extends Controller
         $data = $request->validated();
         $data['sort_order'] = $data['sort_order'] ?? State::nextSortOrder((int) $data['country_id']);
 
-        State::query()->create($data);
+        /** @var State $state */
+        $state = State::query()->create($data);
+        $state->reorderToCurrentPosition();
 
         return redirect()
             ->route('admin.directory.states.index')
@@ -134,7 +137,13 @@ final class StateController extends Controller
     {
         /** @var array<string, mixed> $data */
         $data = $request->validated();
+        $oldCountryId = (int) $state->country_id;
         $state->update($data);
+        $state->reorderToCurrentPosition();
+
+        if ($oldCountryId !== (int) $state->country_id) {
+            State::compactSiblings($oldCountryId);
+        }
 
         return redirect()
             ->route('admin.directory.states.index')
@@ -143,11 +152,44 @@ final class StateController extends Controller
 
     public function destroy(State $state): RedirectResponse
     {
+        $countryId = (int) $state->country_id;
         $state->delete();
+        State::compactSiblings($countryId);
 
         return redirect()
             ->route('admin.directory.states.index')
             ->with('toast', ['type' => 'success', 'message' => 'State deleted.']);
+    }
+
+    public function reorder(ReorderStatesRequest $request): RedirectResponse
+    {
+        /** @var array{country_id: int, ordered_ids: array<int, int>} $data */
+        $data = $request->validated();
+        $countryId = (int) $data['country_id'];
+        $orderedIds = $data['ordered_ids'];
+
+        $validIds = State::query()
+            ->where('country_id', $countryId)
+            ->whereIn('id', $orderedIds)
+            ->pluck('id')
+            ->all();
+
+        if (count($validIds) !== count($orderedIds)) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Reorder rejected: some states do not belong to the selected country.',
+            ]);
+        }
+
+        DB::transaction(function () use ($orderedIds): void {
+            foreach ($orderedIds as $index => $id) {
+                State::query()
+                    ->where('id', $id)
+                    ->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
     }
 
     public function bulkAction(BulkActionStatesRequest $request): RedirectResponse

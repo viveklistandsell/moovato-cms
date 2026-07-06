@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Pencil, Plus, Trash2, X } from 'lucide-vue-next';
+import { GripVertical, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
@@ -30,6 +30,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useDragReorder } from '@/composables/common/useDragReorder';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
 import { useFormatDate } from '@/composables/useAdminLocale';
@@ -96,8 +97,16 @@ const isFiltered = computed(
         props.filters.country_id !== null,
 );
 
-function onCountryChange(value: string): void {
-    const id = value === 'all' ? null : Number(value);
+function onCountryChange(value: unknown): void {
+    const normalizedValue =
+        typeof value === 'bigint' ? value.toString() : value;
+    const id =
+        normalizedValue === 'all' ||
+        normalizedValue === null ||
+        typeof normalizedValue === 'boolean' ||
+        typeof normalizedValue === 'object'
+            ? null
+            : Number(normalizedValue);
     const params: Record<string, string | number> = {};
     if (search.value) params.q = search.value;
     if (sortBy.value) {
@@ -113,6 +122,44 @@ function onCountryChange(value: string): void {
         replace: true,
     });
 }
+
+type Row = State & { parent_id: number };
+const visibleRows = computed<Row[]>(() =>
+    props.states.map((s) => ({ ...s, parent_id: s.country_id })),
+);
+
+const canDrag = computed(
+    () =>
+        !(search.value && search.value.length > 0) &&
+        sortBy.value === null &&
+        props.filters.country_id !== null,
+);
+
+const {
+    isReordering,
+    isDragging,
+    isDropTarget,
+    isInvalidDrop,
+    onDragStart,
+    onDragOver,
+    onDragLeave,
+    onDragEnd,
+    onDrop,
+} = useDragReorder<Row>({
+    getItems: () => visibleRows.value,
+    onReorder: ({ parent_id, ordered_ids }) =>
+        new Promise<void>((resolve) => {
+            router.post(
+                '/admin/directory/states/reorder',
+                { country_id: parent_id, ordered_ids },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onFinish: () => resolve(),
+                },
+            );
+        }),
+});
 
 function confirmDelete(s: State): boolean {
     return confirm(t('table.confirm_delete_named', { name: s.name }));
@@ -245,6 +292,7 @@ function applyBulkAction(action: string): void {
                 <div
                     v-else
                     class="overflow-x-auto border-t border-sidebar-border/70 dark:border-sidebar-border"
+                    :class="{ 'opacity-60': isReordering }"
                 >
                     <table class="w-full text-sm">
                         <thead class="bg-muted/50 text-left text-xs">
@@ -264,6 +312,7 @@ function applyBulkAction(action: string): void {
                                         />
                                     </div>
                                 </th>
+                                <th class="w-10 px-2 py-3"></th>
                                 <th class="w-20 px-2 py-3">
                                     <SortableColumn
                                         column="sort_order"
@@ -334,9 +383,22 @@ function applyBulkAction(action: string): void {
                         </thead>
                         <tbody>
                             <tr
-                                v-for="s in states"
+                                v-for="s in visibleRows"
                                 :key="s.id"
-                                class="border-t border-sidebar-border/70 transition-colors hover:bg-muted/30 dark:border-sidebar-border"
+                                :draggable="canDrag"
+                                class="border-t border-sidebar-border/70 transition-colors dark:border-sidebar-border"
+                                :class="{
+                                    'opacity-40': isDragging(s),
+                                    '!border-t-2 !border-primary': isDropTarget(s),
+                                    'bg-destructive/5': isInvalidDrop(s),
+                                    'hover:bg-muted/30':
+                                        !isDragging(s) && !isDropTarget(s),
+                                }"
+                                @dragstart="canDrag && onDragStart($event, s)"
+                                @dragover="canDrag && onDragOver($event, s)"
+                                @dragleave="canDrag && onDragLeave(s)"
+                                @drop="canDrag && onDrop($event, s)"
+                                @dragend="onDragEnd"
                             >
                                 <td class="px-2 py-3">
                                     <div class="flex items-center justify-center">
@@ -345,6 +407,23 @@ function applyBulkAction(action: string): void {
                                             :aria-label="t('table.select_row', { name: s.name })"
                                             @update:model-value="selection.toggle(s.id)"
                                         />
+                                    </div>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <div
+                                        class="flex items-center justify-center text-muted-foreground"
+                                        :class="
+                                            canDrag
+                                                ? 'cursor-grab hover:text-foreground active:cursor-grabbing'
+                                                : 'cursor-not-allowed opacity-30'
+                                        "
+                                        :title="
+                                            canDrag
+                                                ? t('table.reorder_drag_hint')
+                                                : t('table.reorder_disabled_hint')
+                                        "
+                                    >
+                                        <GripVertical class="size-4" />
                                     </div>
                                 </td>
                                 <td class="px-2 py-3 text-center">

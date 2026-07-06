@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Pencil, Plus, Star, Trash2, X } from 'lucide-vue-next';
+import { GripVertical, Pencil, Plus, Star, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useDragReorder } from '@/composables/common/useDragReorder';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
 import { useAdminLanguage, useFormatDate } from '@/composables/useAdminLocale';
@@ -82,7 +83,11 @@ const props = defineProps<{
 
 defineOptions({});
 
-type Row = Category & { displayName: string; displayPermalink: string };
+type Row = Category & {
+    displayName: string;
+    displayPermalink: string;
+    parent_id: null;
+};
 
 const defaultLangCode = computed<string>(
     () => props.languages.find((l) => l.is_default)?.code ?? 'de',
@@ -108,6 +113,7 @@ const visibleRows = computed<Row[]>(() =>
             ...c,
             displayName: t.name,
             displayPermalink: t.permalink,
+            parent_id: null,
         };
     }),
 );
@@ -127,6 +133,34 @@ const { search, sortBy, sortDir, perPage, isLoading, setSearch, toggleSort, setP
 const isFiltered = computed(
     () => (search.value && search.value.length > 0) || sortBy.value !== null,
 );
+
+const canDrag = computed(() => !isFiltered.value);
+
+const {
+    isReordering,
+    isDragging,
+    isDropTarget,
+    isInvalidDrop,
+    onDragStart,
+    onDragOver,
+    onDragLeave,
+    onDragEnd,
+    onDrop,
+} = useDragReorder<Row>({
+    getItems: () => visibleRows.value,
+    onReorder: ({ ordered_ids }) =>
+        new Promise<void>((resolve) => {
+            router.post(
+                '/admin/services/parent-categories/reorder',
+                { ordered_ids },
+                {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onFinish: () => resolve(),
+                },
+            );
+        }),
+});
 
 function confirmDelete(c: Row): boolean {
     return confirm(t('table.confirm_delete_named', { name: c.displayName }));
@@ -239,6 +273,7 @@ function applyBulkAction(action: string): void {
                 <div
                     v-else
                     class="overflow-x-auto border-t border-sidebar-border/70 dark:border-sidebar-border"
+                    :class="{ 'opacity-60': isReordering }"
                 >
                     <table class="w-full text-sm">
                         <thead class="bg-muted/50 text-left text-xs">
@@ -258,6 +293,7 @@ function applyBulkAction(action: string): void {
                                         />
                                     </div>
                                 </th>
+                                <th class="w-10 px-2 py-3"></th>
                                 <th class="w-20 px-2 py-3">
                                     <SortableColumn column="sort_order" :label="t('table.col_order')" :active-column="sortBy" :direction="sortDir" @sort="toggleSort" />
                                 </th>
@@ -294,7 +330,20 @@ function applyBulkAction(action: string): void {
                             <tr
                                 v-for="node in visibleRows"
                                 :key="node.id"
-                                class="border-t border-sidebar-border/70 transition-colors hover:bg-muted/30 dark:border-sidebar-border"
+                                :draggable="canDrag"
+                                class="border-t border-sidebar-border/70 transition-colors dark:border-sidebar-border"
+                                :class="{
+                                    'opacity-40': isDragging(node),
+                                    '!border-t-2 !border-primary': isDropTarget(node),
+                                    'bg-destructive/5': isInvalidDrop(node),
+                                    'hover:bg-muted/30':
+                                        !isDragging(node) && !isDropTarget(node),
+                                }"
+                                @dragstart="canDrag && onDragStart($event, node)"
+                                @dragover="canDrag && onDragOver($event, node)"
+                                @dragleave="canDrag && onDragLeave(node)"
+                                @drop="canDrag && onDrop($event, node)"
+                                @dragend="onDragEnd"
                             >
                                 <td class="px-2 py-3">
                                     <div class="flex items-center justify-center">
@@ -303,6 +352,23 @@ function applyBulkAction(action: string): void {
                                             :aria-label="t('table.select_row', { name: node.displayName })"
                                             @update:model-value="selection.toggle(node.id)"
                                         />
+                                    </div>
+                                </td>
+                                <td class="px-2 py-3">
+                                    <div
+                                        class="flex items-center justify-center text-muted-foreground"
+                                        :class="
+                                            canDrag
+                                                ? 'cursor-grab hover:text-foreground active:cursor-grabbing'
+                                                : 'cursor-not-allowed opacity-30'
+                                        "
+                                        :title="
+                                            canDrag
+                                                ? t('table.reorder_drag_hint')
+                                                : t('table.reorder_disabled_hint')
+                                        "
+                                    >
+                                        <GripVertical class="size-4" />
                                     </div>
                                 </td>
                                 <td class="px-2 py-3 text-center">

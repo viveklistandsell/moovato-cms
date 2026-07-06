@@ -9,6 +9,7 @@ use App\Actions\Admin\Service\ParentCategory\DeleteServiceParentCategory;
 use App\Actions\Admin\Service\ParentCategory\UpdateServiceParentCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Service\ParentCategory\BulkActionServiceParentCategoriesRequest;
+use App\Http\Requests\Admin\Service\ParentCategory\ReorderServiceParentCategoriesRequest;
 use App\Http\Requests\Admin\Service\ParentCategory\StoreServiceParentCategoryRequest;
 use App\Http\Requests\Admin\Service\ParentCategory\UpdateServiceParentCategoryRequest;
 use App\Models\Language;
@@ -110,7 +111,8 @@ final class ParentCategoryController extends Controller
     {
         /** @var array<string, mixed> $data */
         $data = $request->validated();
-        $action->handle($data);
+        $parent = $action->handle($data);
+        $parent->reorderToCurrentPosition();
 
         return redirect()
             ->route('admin.services.parent-categories.index')
@@ -135,7 +137,8 @@ final class ParentCategoryController extends Controller
     ): RedirectResponse {
         /** @var array<string, mixed> $data */
         $data = $request->validated();
-        $action->handle($category, $data);
+        $parent = $action->handle($category, $data);
+        $parent->reorderToCurrentPosition();
 
         return redirect()
             ->route('admin.services.parent-categories.index')
@@ -149,10 +152,27 @@ final class ParentCategoryController extends Controller
         } catch (RuntimeException $e) {
             return back()->with('toast', ['type' => 'error', 'message' => $e->getMessage()]);
         }
+        ServiceParentCategory::compactSiblings();
 
         return redirect()
             ->route('admin.services.parent-categories.index')
             ->with('toast', ['type' => 'success', 'message' => 'Parent category deleted.']);
+    }
+    public function reorder(ReorderServiceParentCategoriesRequest $request): RedirectResponse
+    {
+        /** @var array{ordered_ids: array<int, int>} $data */
+        $data = $request->validated();
+        $orderedIds = $data['ordered_ids'];
+
+        DB::transaction(function () use ($orderedIds): void {
+            foreach ($orderedIds as $index => $id) {
+                ServiceParentCategory::query()
+                    ->where('id', $id)
+                    ->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
     }
 
     public function bulkAction(

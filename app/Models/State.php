@@ -26,6 +26,42 @@ final class State extends Model
         return ((int) $query->max('sort_order')) + 1;
     }
 
+    public static function compactSiblings(int $countryId): void
+    {
+        $siblings = self::query()
+            ->where('country_id', $countryId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($siblings as $index => $sibling) {
+            $newOrder = $index + 1;
+            if ((int) $sibling->sort_order !== $newOrder) {
+                self::query()->where('id', $sibling->id)->update(['sort_order' => $newOrder]);
+            }
+        }
+    }
+
+    public function reorderToCurrentPosition(): void
+    {
+        $siblings = self::query()
+            ->where('country_id', $this->country_id)
+            ->where('id', '!=', $this->id)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $targetIndex = max(0, min($siblings->count(), $this->sort_order - 1));
+        $siblings->splice($targetIndex, 0, [$this]);
+
+        foreach ($siblings as $index => $sibling) {
+            $newOrder = $index + 1;
+            if ((int) $sibling->sort_order !== $newOrder) {
+                self::query()->where('id', $sibling->id)->update(['sort_order' => $newOrder]);
+            }
+        }
+    }
+
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
