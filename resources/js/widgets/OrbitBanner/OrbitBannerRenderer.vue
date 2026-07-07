@@ -6,6 +6,7 @@ import { localizedUrl } from '@/lib/localizedUrl';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Settings = {
+    theme?: 'light' | 'dark';
     image_path: string | null;
     image_url: string | null;
     inline_image_path: string | null;
@@ -52,7 +53,10 @@ const crumbs = computed<Crumb[]>(() => {
 </script>
 
 <template>
-    <section class="mv-orbitbanner section-py">
+    <section
+        class="mv-orbitbanner section-py"
+        :class="{ 'is-dark': settings.theme === 'dark' }"
+    >
         <div class="mv-orbitbanner-fade-top" aria-hidden="true"></div>
         <div class="mv-orbitbanner-glow-top" aria-hidden="true"></div>
         <div

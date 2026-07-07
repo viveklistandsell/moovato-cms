@@ -35,7 +35,7 @@ defineProps<{ settings: Settings; data: Data }>();
     >
         <div class="container-xl">
             <div
-                class="grid items-center gap-10 lg:grid-cols-2 lg:gap-12"
+                class="grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
                 :class="settings.card ? 'mv-mc-card' : ''"
             >
                 <div

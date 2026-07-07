@@ -58,7 +58,7 @@ function submit(): void {
 <template>
     <section class="mv-contact section-py" id="kontakt">
         <div
-            class="container-xl grid grid-cols-1 items-stretch gap-y-8 lg:grid-cols-2 lg:gap-x-5"
+            class="container-xl grid grid-cols-1 items-stretch gap-y-8 lg:grid-cols-2 lg:gap-x-10"
         >
             <!-- LEFT: info card (editable) -->
             <aside class="mv-contact__card">

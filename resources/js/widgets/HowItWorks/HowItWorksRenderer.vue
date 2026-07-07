@@ -107,7 +107,7 @@ onBeforeUnmount(() => {
                         </h3>
                         <div
                             v-if="step.description"
-                            class="mv-rte mv-howitworks__step-desc"
+                            class=" mv-howitworks__step-desc"
                             v-html="step.description"
                         />
                     </div>

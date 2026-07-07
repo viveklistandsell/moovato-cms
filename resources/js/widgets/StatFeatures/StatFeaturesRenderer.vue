@@ -24,7 +24,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-statfeatures section-py">
         <div
-            class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-12"
+            class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
             <div>
                 <span v-if="data.eyebrow" class="mv-statfeatures-eyebrow">

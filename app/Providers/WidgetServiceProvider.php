@@ -23,6 +23,7 @@ use App\Widgets\DarkIntro\DarkIntroWidget;
 use App\Widgets\ExpertsChoice\ExpertsChoiceWidget;
 use App\Widgets\Faq\FaqWidget;
 use App\Widgets\FaqMedia\FaqMediaWidget;
+use App\Widgets\FaqPage\FaqPageWidget;
 use App\Widgets\Features\FeaturesWidget;
 use App\Widgets\Gallery\GalleryWidget;
 use App\Widgets\GetInTouch\GetInTouchWidget;
@@ -49,6 +50,7 @@ use App\Widgets\StatsBand\StatsBandWidget;
 use App\Widgets\SupportingMedia\SupportingMediaWidget;
 use App\Widgets\TeamCta\TeamCtaWidget;
 use App\Widgets\Testimonial\TestimonialWidget;
+use App\Widgets\TestimonialsShowcase\TestimonialsShowcaseWidget;
 use App\Widgets\TextBlock\TextBlockWidget;
 use App\Widgets\TextColumns\TextColumnsWidget;
 use App\Widgets\TrustBar\TrustBarWidget;
@@ -77,6 +79,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         CtaWidget::class,
         FaqWidget::class,
         TestimonialWidget::class,
+        TestimonialsShowcaseWidget::class,
         GalleryWidget::class,
         HeronewWidget::class,
         TrustBarWidget::class,
@@ -89,6 +92,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         WhyChooseUsWidget::class,
         PartnersWidget::class,
         FaqMediaWidget::class,
+        FaqPageWidget::class,
         BlogWidget::class,
         MapWidget::class,
         PromoCtaWidget::class,

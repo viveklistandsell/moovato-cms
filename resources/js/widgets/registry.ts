@@ -40,6 +40,8 @@ import FaqEditor from './Faq/FaqEditor.vue';
 import FaqRenderer from './Faq/FaqRenderer.vue';
 import FaqMediaEditor from './FaqMedia/FaqMediaEditor.vue';
 import FaqMediaRenderer from './FaqMedia/FaqMediaRenderer.vue';
+import FaqPageEditor from './FaqPage/FaqPageEditor.vue';
+import FaqPageRenderer from './FaqPage/FaqPageRenderer.vue';
 import FeaturesEditor from './Features/FeaturesEditor.vue';
 import FeaturesRenderer from './Features/FeaturesRenderer.vue';
 import GalleryEditor from './Gallery/GalleryEditor.vue';
@@ -76,6 +78,8 @@ import ServiceCardsEditor from './ServiceCards/ServiceCardsEditor.vue';
 import ServiceCardsRenderer from './ServiceCards/ServiceCardsRenderer.vue';
 import TestimonialEditor from './Testimonial/TestimonialEditor.vue';
 import TestimonialRenderer from './Testimonial/TestimonialRenderer.vue';
+import TestimonialsShowcaseEditor from './TestimonialsShowcase/TestimonialsShowcaseEditor.vue';
+import TestimonialsShowcaseRenderer from './TestimonialsShowcase/TestimonialsShowcaseRenderer.vue';
 import TextBlockEditor from './TextBlock/TextBlockEditor.vue';
 import TextBlockRenderer from './TextBlock/TextBlockRenderer.vue';
 import TrustBarEditor from './TrustBar/TrustBarEditor.vue';
@@ -102,6 +106,10 @@ export const widgetRegistry: WidgetRegistry = {
     cta: { editor: CtaEditor, renderer: CtaRenderer },
     faq: { editor: FaqEditor, renderer: FaqRenderer },
     testimonial: { editor: TestimonialEditor, renderer: TestimonialRenderer },
+    testimonials_showcase: {
+        editor: TestimonialsShowcaseEditor,
+        renderer: TestimonialsShowcaseRenderer,
+    },
     gallery: { editor: GalleryEditor, renderer: GalleryRenderer },
     trust_bar: { editor: TrustBarEditor, renderer: TrustBarRenderer },
     marquee: { editor: MarqueeEditor, renderer: MarqueeRenderer },
@@ -122,6 +130,7 @@ export const widgetRegistry: WidgetRegistry = {
     },
     partners: { editor: PartnersEditor, renderer: PartnersRenderer },
     faq_media: { editor: FaqMediaEditor, renderer: FaqMediaRenderer },
+    faq_page: { editor: FaqPageEditor, renderer: FaqPageRenderer },
     blog: { editor: BlogEditor, renderer: BlogRenderer },
     map: { editor: MapEditor, renderer: MapRenderer },
     promo_cta: { editor: PromoCtaEditor, renderer: PromoCtaRenderer },

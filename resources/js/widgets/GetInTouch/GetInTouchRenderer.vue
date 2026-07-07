@@ -19,7 +19,7 @@ defineProps<{ settings: Record<string, unknown>; data: Data }>();
     <section class="mv-getintouch section-py">
         <div class="container-xl">
             <div
-                class="mv-getintouch__card grid grid-cols-1 items-center gap-y-8 lg:grid-cols-[1.3fr_1fr] lg:gap-x-5"
+                class="mv-getintouch__card grid grid-cols-1 items-center gap-y-8 lg:grid-cols-[1.3fr_1fr] lg:gap-x-10"
             >
                 <div class="mv-getintouch__body">
                     <span class="mv-getintouch__eyebrow">{{

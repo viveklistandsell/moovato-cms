@@ -26,7 +26,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-about section-py">
         <div
-            class="container-xl grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center lg:gap-x-5"
+            class="container-xl grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
             <div class="mv-about-media">
                 <div class="mv-about-image">

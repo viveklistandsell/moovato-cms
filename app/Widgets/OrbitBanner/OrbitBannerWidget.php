@@ -34,6 +34,7 @@ final class OrbitBannerWidget implements WidgetContract
     public static function defaultSettings(): array
     {
         return [
+            'theme' => 'light',
             'image_path' => null,
             'image_url' => null,
             'inline_image_path' => null,
@@ -61,6 +62,7 @@ final class OrbitBannerWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
+            'theme' => ['required', 'in:light,dark'],
             'image_path' => ['nullable', 'string', 'max:1000'],
             'image_url' => ['nullable', 'string', 'max:2000'],
             'inline_image_path' => ['nullable', 'string', 'max:1000'],

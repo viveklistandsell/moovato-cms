@@ -2,9 +2,11 @@
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Settings = {
+    theme: 'light' | 'dark';
     image_path: string | null;
     image_url: string | null;
     inline_image_path: string | null;
@@ -27,6 +29,25 @@ const data = defineModel<Data>('data', { required: true });
 
 <template>
     <div class="grid gap-6 md:grid-cols-2">
+        <div
+            class="flex items-center justify-between rounded-md border bg-muted/30 p-3 md:col-span-2"
+        >
+            <div class="grid gap-0.5">
+                <Label for="orbit-theme">Dark background</Label>
+                <span class="text-xs text-muted-foreground">
+                    Switches the banner to a dark theme and recolors the text,
+                    borders and accents.
+                </span>
+            </div>
+            <Switch
+                id="orbit-theme"
+                :model-value="settings.theme === 'dark'"
+                @update:model-value="
+                    (v) => (settings.theme = v ? 'dark' : 'light')
+                "
+            />
+        </div>
+
         <div class="space-y-4">
             <div class="grid gap-2">
                 <Label>Highlight</Label>

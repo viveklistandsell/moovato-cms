@@ -58,6 +58,11 @@ test('orbit banner validates image slots and copy fields', function (): void {
         ]);
 });
 
+test('orbit banner defaults to a light theme and validates the toggle', function (): void {
+    expect(OrbitBannerWidget::defaultSettings())->toHaveKey('theme', 'light')
+        ->and(OrbitBannerWidget::settingsRules()['theme'])->toBe(['required', 'in:light,dark']);
+});
+
 test('orbit banner exposes the picker metadata shape', function (): void {
     $meta = OrbitBannerWidget::toArray();
 

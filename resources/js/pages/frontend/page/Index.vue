@@ -134,28 +134,12 @@ const hasOwnBreadcrumb = computed(() =>
         <!-- Breadcrumb: shown on every page EXCEPT the home page, for both
              the default and fullwidth templates. Fullwidth gets its own thin
              breadcrumb bar since it skips the prose article below. -->
-        <nav
+        <div
             v-if="isFullwidth && !page.is_home && !hasOwnBreadcrumb"
-            class="container-xl flex items-center gap-2 pt-8 text-sm text-muted-foreground"
-            aria-label="Breadcrumb"
+            class="container-xl pt-8"
         >
-            <Link
-                :href="localizedUrl(locale, '/')"
-                class="hover:text-foreground"
-            >
-                {{ t.home }}
-            </Link>
-            <span>›</span>
-            <span class="line-clamp-1 text-foreground">{{ page.title }}</span>
-        </nav>
-
-        <!-- DEFAULT only: centered prose with breadcrumb + page title +
-             hero image. Fullwidth skips this so widgets sit edge-to-edge
-             with no breadcrumb chrome on top. -->
-        <article v-if="!isFullwidth" class="container-xl py-10">
             <nav
-                v-if="!page.is_home && !hasOwnBreadcrumb"
-                class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
+                class="mv-pagebanner-crumbs mv-crumbs-onlight"
                 aria-label="Breadcrumb"
             >
                 <Link
@@ -164,8 +148,28 @@ const hasOwnBreadcrumb = computed(() =>
                 >
                     {{ t.home }}
                 </Link>
-                <span>›</span>
-                <span class="line-clamp-1 text-foreground">
+                <span class="sep">›</span>
+                <span class="is-current line-clamp-1">{{ page.title }}</span>
+            </nav>
+        </div>
+
+        <!-- DEFAULT only: centered prose with breadcrumb + page title +
+             hero image. Fullwidth skips this so widgets sit edge-to-edge
+             with no breadcrumb chrome on top. -->
+        <article v-if="!isFullwidth" class="container-xl py-10">
+            <nav
+                v-if="!page.is_home && !hasOwnBreadcrumb"
+                class="mv-pagebanner-crumbs mv-crumbs-onlight mb-6"
+                aria-label="Breadcrumb"
+            >
+                <Link
+                    :href="localizedUrl(locale, '/')"
+                    class="hover:text-foreground"
+                >
+                    {{ t.home }}
+                </Link>
+                <span class="sep">›</span>
+                <span class="is-current line-clamp-1">
                     {{ page.title }}
                 </span>
             </nav>

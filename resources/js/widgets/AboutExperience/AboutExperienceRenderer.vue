@@ -34,7 +34,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-aboutexp section-py">
         <div
-            class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-12"
+            class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
             <div class="ax-media">
                 <div class="ax-photo ax-photo--main">

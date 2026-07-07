@@ -60,7 +60,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </p>
             </div>
 
-            <div class="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
+            <div class="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-x-10">
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div class="mv-aboutstats-photo">
                         <img
