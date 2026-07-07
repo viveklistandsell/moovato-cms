@@ -14,10 +14,6 @@ export type ReorderPayload = {
 type UseDragReorderOptions<T extends ReorderableItem> = {
     /** Returns the current full list of items. Called on each drop. */
     getItems: () => T[];
-    /**
-     * Persist the new order. Should return a Promise that resolves when the
-     * server round-trip completes — `isReordering` stays true until then.
-     */
     onReorder: (payload: ReorderPayload) => Promise<void> | void;
 };
 

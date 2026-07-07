@@ -11,6 +11,7 @@ import {
     HeartPulse,
     Mail as MailIcon,
     Map as MapIcon,
+    Boxes,
     Files,
     FolderTree,
     ImagePlay,
@@ -69,9 +70,6 @@ const BRAND_SUB_CLASS = [
     'data-[active=true]:bg-[var(--orange)]/12 data-[active=true]:text-[var(--orange)] data-[active=true]:font-semibold',
 ].join(' ');
 
-// All nav arrays are computed() so that locale changes from the
-// header switcher re-render the labels without reloading the
-// component tree.
 const platformItems = computed<NavItem[]>(() => [
     { title: t('sidebar.dashboard'), href: dashboard(), icon: LayoutGrid },
 ]);
@@ -131,6 +129,11 @@ const directoryItems = computed<NavItem[]>(() => [
     { title: t('sidebar.cities'), href: '/admin/directory/cities', icon: Building2 },
 ]);
 
+const servicesItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.service_parent_categories'), href: '/admin/services/parent-categories', icon: FolderTree },
+    { title: t('sidebar.service_categories'), href: '/admin/services/categories', icon: FolderTree },
+]);
+
 const navigationItems = computed<NavItem[]>(() => [
     { title: t('sidebar.header_menu'), href: '/admin/menus/header', icon: MenuIcon },
     { title: t('sidebar.footer_menu'), href: '/admin/menus/footer', icon: MenuIcon },
@@ -158,6 +161,10 @@ const isPageSectionActive = computed(() =>
 
 const isDirectorySectionActive = computed(() =>
     directoryItems.value.some((item) => isCurrentUrl(item.href)),
+);
+
+const isServicesSectionActive = computed(() =>
+    servicesItems.value.some((item) => isCurrentUrl(item.href)),
 );
 
 const isNavigationSectionActive = computed(() =>
@@ -316,6 +323,50 @@ const isUserSectionActive = computed(
                                 <SidebarMenuSub>
                                     <SidebarMenuSubItem
                                         v-for="item in directoryItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+
+                    <Collapsible
+                        :default-open="isServicesSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    tooltip="Services Management"
+                                    :is-active="isServicesSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
+                                >
+                                    <Link :href="servicesItems[0].href">
+                                        <Boxes />
+                                        <span>{{ t('sidebar.services_management') }}</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in servicesItems"
                                         :key="item.title"
                                     >
                                         <SidebarMenuSubButton

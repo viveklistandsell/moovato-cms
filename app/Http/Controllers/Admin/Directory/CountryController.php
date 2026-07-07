@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Directory;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Directory\Country\BulkActionCountriesRequest;
+use App\Http\Requests\Admin\Directory\Country\ReorderCountriesRequest;
 use App\Http\Requests\Admin\Directory\Country\StoreCountryRequest;
 use App\Http\Requests\Admin\Directory\Country\UpdateCountryRequest;
 use App\Models\Country;
@@ -82,7 +83,7 @@ final class CountryController extends Controller
     {
         return Inertia::render('admin/directory/countries/Edit', [
             'country' => null,
-            'nextSortOrder' => Country::nextSortOrder(),    
+            'nextSortOrder' => Country::nextSortOrder(),
         ]);
     }
 
@@ -92,7 +93,9 @@ final class CountryController extends Controller
         $data = $request->validated();
         $data['sort_order'] = $data['sort_order'] ?? Country::nextSortOrder();
 
-        Country::query()->create($data);
+        /** @var Country $country */
+        $country = Country::query()->create($data);
+        $country->reorderToCurrentPosition();
 
         return redirect()
             ->route('admin.directory.countries.index')
@@ -112,6 +115,7 @@ final class CountryController extends Controller
         /** @var array<string, mixed> $data */
         $data = $request->validated();
         $country->update($data);
+        $country->reorderToCurrentPosition();
 
         return redirect()
             ->route('admin.directory.countries.index')
@@ -121,10 +125,28 @@ final class CountryController extends Controller
     public function destroy(Country $country): RedirectResponse
     {
         $country->delete();
+        Country::compactSiblings();
 
         return redirect()
             ->route('admin.directory.countries.index')
             ->with('toast', ['type' => 'success', 'message' => 'Country deleted.']);
+    }
+
+    public function reorder(ReorderCountriesRequest $request): RedirectResponse
+    {
+        /** @var array{ordered_ids: array<int, int>} $data */
+        $data = $request->validated();
+        $orderedIds = $data['ordered_ids'];
+
+        DB::transaction(function () use ($orderedIds): void {
+            foreach ($orderedIds as $index => $id) {
+                Country::query()
+                    ->where('id', $id)
+                    ->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
     }
 
     public function bulkAction(BulkActionCountriesRequest $request): RedirectResponse

@@ -69,8 +69,6 @@ const form = useForm({
     sort_order: props.state?.sort_order ?? props.nextSortOrder,
 });
 
-// Auto-generate permalink from name while creating — but stop touching it
-// once the user has manually edited it, or on edit (preserve existing).
 let permalinkTouched = isEdit.value;
 watch(
     () => form.permalink,

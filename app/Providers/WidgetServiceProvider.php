@@ -43,6 +43,7 @@ use App\Widgets\QuoteForm\QuoteFormWidget;
 use App\Widgets\Registry\WidgetRegistry;
 use App\Widgets\Reviews\ReviewsWidget;
 use App\Widgets\ServiceCards\ServiceCardsWidget;
+use App\Widgets\ServicesCategoryGrid\ServicesCategoryGridWidget;
 use App\Widgets\SplitMedia\SplitMediaWidget;
 use App\Widgets\SplitMediaLeft\SplitMediaLeftWidget;
 use App\Widgets\StatFeatures\StatFeaturesWidget;
@@ -86,6 +87,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         MarqueeWidget::class,
         QuoteFormWidget::class,
         ServiceCardsWidget::class,
+        ServicesCategoryGridWidget::class,
         HowItWorksWidget::class,
         PricingWidget::class,
         ReviewsWidget::class,

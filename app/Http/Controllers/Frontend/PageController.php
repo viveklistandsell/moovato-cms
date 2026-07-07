@@ -9,6 +9,7 @@ use App\Models\Blog;
 use App\Models\Page;
 use App\Models\PageTranslation;
 use App\Models\PageWidget;
+use App\Models\ServiceParentCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -138,6 +139,10 @@ final class PageController extends Controller
                     $settings['posts'] = $this->resolveBlogPosts($settings, $locale);
                 }
 
+                if ($w->type === 'services_category_grid') {
+                    $settings['categories'] = $this->resolveServiceParentCategories($settings, $locale);
+                }
+
                 return [
                     'type' => $w->type,
                     'settings' => $settings,
@@ -204,6 +209,68 @@ final class PageController extends Controller
                     'category' => $category !== null ? ($ctr?->name ?? $category->name) : null,
                 ];
             })
+            ->all();
+    }
+
+    /**
+     * Resolve the parent service categories rendered by a
+     * `services_category_grid` widget. Always reads from
+     * `service_parent_categories` — one tile per umbrella (Umzüge,
+     * Spezialtransport, …). Filters:
+     *
+     *   - only_featured  → restrict to parents flagged featured
+     *   - only_popular   → restrict to parents flagged popular
+     *   - max_items      → cap the grid size (0 = no cap)
+     *
+     * Falls back to the default-locale name/permalink when the requested
+     * locale has no translation row, so an EN visitor never sees a blank
+     * tile even for a parent that hasn't been fully translated.
+     *
+     * @param  array<string, mixed>  $settings
+     * @return array<int, array{id: int, name: string, permalink: string, icon: ?string, short_description: ?string, url: string, is_featured: bool, is_popular: bool}>
+     */
+    private function resolveServiceParentCategories(array $settings, string $locale): array
+    {
+        $onlyFeatured = (bool) ($settings['only_featured'] ?? false);
+        $onlyPopular = (bool) ($settings['only_popular'] ?? false);
+        $maxItems = (int) ($settings['max_items'] ?? 0);
+
+        $query = ServiceParentCategory::query()
+            ->where('status', 'published')
+            ->with('translations')
+            ->orderBy('sort_order')
+            ->orderBy('name');
+
+        if ($onlyFeatured) {
+            $query->where('is_featured', true);
+        }
+        if ($onlyPopular) {
+            $query->where('is_popular', true);
+        }
+        if ($maxItems > 0) {
+            $query->limit($maxItems);
+        }
+
+        return $query->get()
+            ->map(function (ServiceParentCategory $p) use ($locale): array {
+                $tr = $p->translations->firstWhere('lang', $locale)
+                    ?? $p->translations->first();
+
+                $permalink = $tr?->permalink ?? '';
+                $name = $tr?->name ?? $p->name;
+
+                return [
+                    'id' => $p->id,
+                    'name' => $name,
+                    'permalink' => $permalink,
+                    'icon' => $p->icon,
+                    'short_description' => $tr?->short_description,
+                    'url' => $this->localizedPath($locale, '/services/'.$permalink),
+                    'is_featured' => (bool) $p->is_featured,
+                    'is_popular' => (bool) $p->is_popular,
+                ];
+            })
+            ->values()
             ->all();
     }
 
