@@ -582,7 +582,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                             {{ t('media.folders') }}
                         </h3>
                         <div
-                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7"
                         >
                             <FolderCard
                                 v-for="folder in folders"
@@ -605,7 +605,7 @@ function onPreviewUpdated(file: MediaFileItem): void {
                         </h3>
                         <div
                             v-if="files.data.length > 0"
-                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7"
                         >
                             <FileCard
                                 v-for="file in files.data"

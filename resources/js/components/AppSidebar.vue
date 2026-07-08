@@ -306,7 +306,7 @@ const isUserSectionActive = computed(
                             <CollapsibleTrigger as-child>
                                 <SidebarMenuButton
                                     as-child
-                                    tooltip="Directory Management"
+                                    :tooltip="t('sidebar.directory_management')"
                                     :is-active="isDirectorySectionActive"
                                     :class="BRAND_BUTTON_CLASS"
                                 >

@@ -2,6 +2,7 @@
 import { router, usePage } from '@inertiajs/vue3';
 import { Check, ChevronDown, Globe } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 
 type Language = {
     code: string;
@@ -91,7 +92,7 @@ onBeforeUnmount(() => {
             @click="toggle"
         >
             <Globe v-if="!current?.flag" class="size-3.5" />
-            <span v-else class="text-sm leading-none">{{ current.flag }}</span>
+            <FlagImage v-else :code="current.flag" size="sm" />
             <span class="hidden md:inline">
                 {{ current ? current.code.toUpperCase() : '—' }}
             </span>
@@ -114,9 +115,7 @@ onBeforeUnmount(() => {
                 @click="pick(lang.code)"
             >
                 <span class="flex items-center gap-2">
-                    <span class="text-base leading-none">
-                        {{ lang.flag ?? '🏳️' }}
-                    </span>
+                    <FlagImage :code="lang.flag" size="sm" />
                     <span class="font-semibold">
                         {{ lang.code.toUpperCase() }}
                     </span>
