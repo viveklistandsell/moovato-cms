@@ -69,15 +69,16 @@ const form = useForm({
     sort_order: props.state?.sort_order ?? props.nextSortOrder,
 });
 
-let permalinkTouched = isEdit.value;
-watch(
-    () => form.permalink,
-    (val, oldVal) => {
-        if (oldVal !== undefined && val !== oldVal) {
-            permalinkTouched = true;
-        }
-    },
-);
+/**
+ * Auto-sync the permalink from the name UNTIL the admin manually types
+ * something different in the permalink field.
+ */
+let permalinkTouched = isEdit.value && slugify(form.name) !== form.permalink;
+
+function onPermalinkInput(): void {
+    permalinkTouched = true;
+}
+
 watch(
     () => form.name,
     (val) => {
@@ -186,6 +187,7 @@ function submit(): void {
                             placeholder="berlin"
                             class="font-mono"
                             autocomplete="off"
+                            @input="onPermalinkInput"
                         />
                         <p class="text-xs text-muted-foreground">
                             {{ t('locations.field_permalink_hint_state') }}

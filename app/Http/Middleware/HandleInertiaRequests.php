@@ -66,6 +66,8 @@ final class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
                 'test_mail_success' => $request->session()->get('test_mail_success'),
                 'test_mail_error' => $request->session()->get('test_mail_error'),
+                'toast' => $request->session()->get('toast'),
+                'importResult' => $request->session()->get('importResult'),
             ],
             // Active languages list — drives the admin header
             // language switcher. Cached for 5 minutes since languages

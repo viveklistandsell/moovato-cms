@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import { GripVertical, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import {
+    AlertTriangle,
+    Download,
+    FileSpreadsheet,
+    GripVertical,
+    Pencil,
+    Plus,
+    Trash2,
+    Upload,
+    X,
+} from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
     type BulkAction,
@@ -196,6 +207,116 @@ function applyBulkAction(action: string): void {
         },
     );
 }
+
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
+const importForm = useForm({
+    file: null as File | null,
+});
+
+function openFilePicker(): void {
+    fileInputRef.value?.click();
+}
+
+function onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    importForm.file = file;
+    importForm.post('/admin/directory/states/import', {
+        preserveScroll: true,
+        forceFormData: true,
+        onFinish: () => {
+            if (input) input.value = '';
+            importForm.reset();
+        },
+    });
+}
+
+type ImportResultShape = {
+    created: number;
+    updated: number;
+    skipped: number;
+    total: number;
+    errors: Array<{
+        row: number;
+        errors: Record<string, string[]>;
+        values: Record<string, string>;
+    }>;
+};
+
+const page = usePage();
+const importResult = computed<ImportResultShape | null>(() => {
+    const flash = (page.props as { flash?: { importResult?: unknown } }).flash;
+    return (flash?.importResult as ImportResultShape | null) ?? null;
+});
+
+const dismissedImportResult = ref(false);
+function dismissImportResult(): void {
+    dismissedImportResult.value = true;
+}
+const showImportResult = computed(
+    () =>
+        !dismissedImportResult.value &&
+        importResult.value !== null &&
+        (importResult.value.errors?.length ?? 0) > 0,
+);
+const downloadingUrls = ref<Set<string>>(new Set());
+function isDownloading(url: string): boolean {
+    return downloadingUrls.value.has(url);
+}
+
+async function downloadCsv(url: string, fallbackFilename: string): Promise<void> {
+    if (downloadingUrls.value.has(url)) return;
+
+    const toastId = toast.loading(t('locations.csv_download_starting'));
+    downloadingUrls.value.add(url);
+
+    try {
+        const response = await fetch(url, {
+            headers: { Accept: 'text/csv, text/plain, */*' },
+            credentials: 'same-origin',
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const disposition = response.headers.get('Content-Disposition') ?? '';
+        const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+        const filename = match?.[1] ?? fallbackFilename;
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = objectUrl;
+        anchor.download = decodeURIComponent(filename);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+
+        toast.success(
+            t('locations.csv_download_success', {
+                filename: decodeURIComponent(filename),
+            }),
+            { id: toastId },
+        );
+    } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        toast.error(
+            t('locations.csv_download_error', { error: message }),
+            { id: toastId },
+        );
+    } finally {
+        downloadingUrls.value.delete(url);
+    }
+}
+
+function exportUrl(): string {
+    return props.filters.country_id !== null
+        ? `/admin/directory/states/export?country_id=${props.filters.country_id}`
+        : '/admin/directory/states/export';
+}
 </script>
 
 <template>
@@ -207,13 +328,141 @@ function applyBulkAction(action: string): void {
                 :title="t('locations.states_title')"
                 :description="t('locations.states_description')"
             />
-            <Button as-child>
-                <Link href="/admin/directory/states/create">
-                    <Plus class="size-4" />
-                    {{ t('locations.state_create') }}
-                </Link>
-            </Button>
+            <div class="flex flex-wrap items-center gap-2">
+                <Button
+                    variant="outline"
+                    class="group relative h-9 gap-2.5 border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 px-4 font-medium text-slate-700 shadow-sm ring-1 ring-slate-100 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:from-slate-100 hover:to-slate-200 hover:text-slate-900 hover:shadow-md hover:ring-slate-200 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900 dark:text-slate-100 dark:ring-slate-800/50 dark:hover:from-slate-700 dark:hover:to-slate-800 dark:hover:ring-slate-700"
+                    :disabled="isDownloading('/admin/directory/states/sample-csv')"
+                    @click="
+                        downloadCsv(
+                            '/admin/directory/states/sample-csv',
+                            'states-sample.csv',
+                        )
+                    "
+                >
+                    <span
+                        class="flex size-5 items-center justify-center rounded-md bg-slate-200/80 text-slate-700 transition-all duration-200 group-hover:scale-110 group-hover:bg-slate-300 dark:bg-slate-700/60 dark:text-slate-200 dark:group-hover:bg-slate-600"
+                    >
+                        <FileSpreadsheet class="size-3.5" />
+                    </span>
+                    {{ t('locations.csv_sample') }}
+                </Button>
+                <Button
+                    variant="outline"
+                    class="group relative h-9 gap-2.5 border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 px-4 font-medium text-emerald-700 shadow-sm ring-1 ring-emerald-100 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:from-emerald-100 hover:to-emerald-200 hover:text-emerald-900 hover:shadow-md hover:ring-emerald-200 dark:border-emerald-800 dark:from-emerald-950/70 dark:to-emerald-950 dark:text-emerald-200 dark:ring-emerald-900/50 dark:hover:from-emerald-900/70 dark:hover:to-emerald-950 dark:hover:ring-emerald-800"
+                    :disabled="isDownloading(exportUrl())"
+                    @click="downloadCsv(exportUrl(), 'states-export.csv')"
+                >
+                    <span
+                        class="flex size-5 items-center justify-center rounded-md bg-emerald-200/80 text-emerald-700 transition-all duration-200 group-hover:-translate-y-px group-hover:scale-110 group-hover:bg-emerald-300 dark:bg-emerald-800/60 dark:text-emerald-200 dark:group-hover:bg-emerald-700"
+                    >
+                        <Download class="size-3.5" />
+                    </span>
+                    {{ t('locations.csv_export') }}
+                </Button>
+                <Button
+                    variant="outline"
+                    class="group relative h-9 gap-2.5 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 px-4 font-medium text-blue-700 shadow-sm ring-1 ring-blue-100 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 hover:from-blue-100 hover:to-blue-200 hover:text-blue-900 hover:shadow-md hover:ring-blue-200 dark:border-blue-800 dark:from-blue-950/70 dark:to-blue-950 dark:text-blue-200 dark:ring-blue-900/50 dark:hover:from-blue-900/70 dark:hover:to-blue-950 dark:hover:ring-blue-800"
+                    :disabled="importForm.processing"
+                    @click="openFilePicker"
+                >
+                    <span
+                        class="flex size-5 items-center justify-center rounded-md bg-blue-200/80 text-blue-700 transition-all duration-200 group-hover:translate-y-px group-hover:scale-110 group-hover:bg-blue-300 dark:bg-blue-800/60 dark:text-blue-200 dark:group-hover:bg-blue-700"
+                    >
+                        <Upload class="size-3.5" />
+                    </span>
+                    {{
+                        importForm.processing
+                            ? t('locations.csv_import_processing')
+                            : t('locations.csv_import')
+                    }}
+                </Button>
+                <input
+                    ref="fileInputRef"
+                    type="file"
+                    accept=".csv,text/csv,text/plain"
+                    class="hidden"
+                    @change="onFileSelected"
+                />
+                <Button as-child>
+                    <Link href="/admin/directory/states/create">
+                        <Plus class="size-4" />
+                        {{ t('locations.state_create') }}
+                    </Link>
+                </Button>
+            </div>
         </div>
+        <Card
+            v-if="showImportResult"
+            class="border-amber-200 dark:border-amber-900"
+        >
+            <CardHeader class="flex flex-row items-start justify-between gap-2 space-y-0">
+                <div class="flex items-start gap-3">
+                    <AlertTriangle class="mt-0.5 size-5 text-amber-600" />
+                    <div>
+                        <CardTitle class="text-base">
+                            {{ t('locations.csv_import_finished') }}
+                        </CardTitle>
+                        <CardDescription>
+                            {{
+                                t('locations.csv_import_summary', {
+                                    created: importResult?.created ?? 0,
+                                    updated: importResult?.updated ?? 0,
+                                    skipped: importResult?.skipped ?? 0,
+                                })
+                            }}
+                        </CardDescription>
+                    </div>
+                </div>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    @click="dismissImportResult"
+                >
+                    <X class="size-4" />
+                </Button>
+            </CardHeader>
+            <CardContent class="pt-0">
+                <div class="overflow-x-auto rounded-md border">
+                    <table class="w-full text-sm">
+                        <thead class="bg-muted/50 text-left text-xs">
+                            <tr>
+                                <th class="px-3 py-2">{{ t('locations.csv_col_row') }}</th>
+                                <th class="px-3 py-2">{{ t('locations.csv_col_field') }}</th>
+                                <th class="px-3 py-2">{{ t('locations.csv_col_error') }}</th>
+                                <th class="px-3 py-2">{{ t('locations.csv_col_value') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template
+                                v-for="err in importResult?.errors ?? []"
+                                :key="err.row"
+                            >
+                                <tr
+                                    v-for="(messages, field) in err.errors"
+                                    :key="`${err.row}-${field}`"
+                                    class="border-t"
+                                >
+                                    <td class="px-3 py-2 font-mono text-xs">
+                                        {{ err.row }}
+                                    </td>
+                                    <td class="px-3 py-2 font-mono text-xs">
+                                        {{ field }}
+                                    </td>
+                                    <td class="px-3 py-2 text-destructive">
+                                        {{ messages.join(' · ') }}
+                                    </td>
+                                    <td class="px-3 py-2 font-mono text-xs text-muted-foreground">
+                                        {{ err.values[field] ?? '' }}
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </CardContent>
+        </Card>
 
         <Card>
             <CardHeader>

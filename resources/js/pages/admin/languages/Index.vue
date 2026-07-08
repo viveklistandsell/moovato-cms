@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import SearchInput from '@/components/common/SearchInput.vue';
 import SortableColumn from '@/components/common/SortableColumn.vue';
 import { Badge } from '@/components/ui/badge';
@@ -230,8 +231,15 @@ function confirmDelete(l: Language): boolean {
                                 class="border-t border-sidebar-border/70 transition-colors hover:bg-muted/30 dark:border-sidebar-border"
                             >
                                 <td class="px-4 py-3">
-                                    <span class="text-xl" :title="row.code">
-                                        {{ row.flag || '—' }}
+                                    <span :title="row.code">
+                                        <FlagImage
+                                            v-if="row.flag"
+                                            :code="row.flag"
+                                            size="md"
+                                        />
+                                        <span v-else class="text-muted-foreground">
+                                            —
+                                        </span>
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">

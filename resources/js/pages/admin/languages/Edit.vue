@@ -4,6 +4,8 @@ import { ArrowLeft, Save, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
+import FlagPicker from '@/components/common/FlagPicker.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -153,11 +155,22 @@ function submit(): void {
                         <div class="grid gap-2 sm:grid-cols-2">
                             <div class="grid gap-2">
                                 <Label for="flag">{{ t('languages.flag_label') }}</Label>
-                                <Input
-                                    id="flag"
-                                    v-model="form.flag"
-                                    :placeholder="t('languages.flag_placeholder')"
-                                />
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="flex h-9 w-11 shrink-0 items-center justify-center rounded-md border bg-muted/40"
+                                    >
+                                        <FlagImage :code="form.flag" size="md" />
+                                    </span>
+                                    <Input
+                                        id="flag"
+                                        v-model="form.flag"
+                                        :placeholder="t('languages.flag_placeholder')"
+                                        class="flex-1"
+                                    />
+                                    <FlagPicker
+                                        @select="(code) => (form.flag = code)"
+                                    />
+                                </div>
                                 <InputError :message="form.errors.flag" />
                             </div>
                             <div class="grid gap-2">

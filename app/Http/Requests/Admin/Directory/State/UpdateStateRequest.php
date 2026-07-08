@@ -6,6 +6,7 @@ namespace App\Http\Requests\Admin\Directory\State;
 
 use App\Models\State;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 final class UpdateStateRequest extends FormRequest
@@ -47,6 +48,11 @@ final class UpdateStateRequest extends FormRequest
         $code = $this->input('code');
         if (is_string($code)) {
             $this->merge(['code' => mb_strtoupper(mb_trim($code))]);
+        }
+        $permalink = $this->input('permalink');
+        $name = $this->input('name');
+        if ((! is_string($permalink) || mb_trim($permalink) === '') && is_string($name) && mb_trim($name) !== '') {
+            $this->merge(['permalink' => Str::slug($name)]);
         }
     }
 }

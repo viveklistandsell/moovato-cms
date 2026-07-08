@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AchievementBadge from '@/components/admin/dashboard/AchievementBadge.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import DateRangeSelector from '@/components/dashboard/DateRangeSelector.vue';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useT } from '@/composables/useT';
@@ -738,9 +739,7 @@ function publishedRatio(total: number, published: number): number {
                         :key="lang.code"
                         class="flex items-center gap-3"
                     >
-                        <span class="text-2xl leading-none drop-shadow-sm">
-                            {{ lang.flag ?? '🏳️' }}
-                        </span>
+                        <FlagImage :code="lang.flag" size="lg" />
                         <div class="flex-1">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="font-semibold">

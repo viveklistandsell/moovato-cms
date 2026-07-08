@@ -163,6 +163,12 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->name('states.reorder');
             Route::post('states/bulk-action', [AdminStateController::class, 'bulkAction'])
                 ->name('states.bulk-action');
+            Route::get('states/export', [AdminStateController::class, 'export'])
+                ->name('states.export');
+            Route::get('states/sample-csv', [AdminStateController::class, 'sampleCsv'])
+                ->name('states.sample-csv');
+            Route::post('states/import', [AdminStateController::class, 'import'])
+                ->name('states.import');
             Route::resource('states', AdminStateController::class)
                 ->parameters(['states' => 'state'])
                 ->except('show');

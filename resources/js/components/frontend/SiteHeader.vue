@@ -17,6 +17,7 @@ import {
     X,
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import { getDefaultLocale, localizedUrl } from '@/lib/localizedUrl';
 
 const props = defineProps<{
@@ -28,6 +29,16 @@ const open = ref(false);
 
 const otherLocale = computed(() => (props.locale === 'de' ? 'en' : 'de'));
 const otherLocaleLabel = computed(() => (props.locale === 'de' ? 'EN' : 'DE'));
+type SharedLanguage = { code: string; native_name: string; flag: string | null };
+const sharedLanguages = computed<SharedLanguage[]>(
+    () => (page.props.adminLanguages as SharedLanguage[] | undefined) ?? [],
+);
+const currentLangFlag = computed<string | null>(
+    () => sharedLanguages.value.find((l) => l.code === props.locale)?.flag ?? null,
+);
+const otherLangFlag = computed<string | null>(
+    () => sharedLanguages.value.find((l) => l.code === otherLocale.value)?.flag ?? null,
+);
 
 // Build the equivalent URL in the other locale. Strip any existing locale
 // prefix (/de, /en), then re-add the locale segment only when the target is
@@ -341,7 +352,8 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                         :href="switchHref"
                         class="mv-lang-switch hidden sm:inline-flex"
                     >
-                        {{ otherLocaleLabel }}
+                        <FlagImage :code="otherLangFlag" size="sm" />
+                        <span>{{ otherLocaleLabel }}</span>
                     </Link>
                     <a
                         href="#angebot"
@@ -467,8 +479,11 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                         class="mv-offcanvas__lang"
                         @click="open = false"
                     >
-                        {{ props.locale.toUpperCase() }} /
-                        {{ otherLocaleLabel }}
+                        <FlagImage :code="currentLangFlag" size="sm" />
+                        <span>{{ props.locale.toUpperCase() }}</span>
+                        <span aria-hidden="true">/</span>
+                        <FlagImage :code="otherLangFlag" size="sm" />
+                        <span>{{ otherLocaleLabel }}</span>
                     </Link>
                     <div class="mv-offcanvas__socials">
                         <a

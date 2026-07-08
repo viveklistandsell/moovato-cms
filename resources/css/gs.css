@@ -935,6 +935,7 @@
 
 .mv-header .mv-lang-switch {
     align-items: center;
+    gap: 8px;
     font-size: 13px;
     font-weight: 600;
     text-transform: uppercase;
@@ -943,7 +944,7 @@
     text-decoration: none;
     border: 1.5px solid rgba(15, 23, 42, 0.15);
     border-radius: 999px;
-    padding: 7px 12px;
+    padding: 6px 12px;
     transition: all 0.2s;
 }
 .mv-header .mv-lang-switch:hover {
@@ -1354,6 +1355,9 @@
     border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 .mv-offcanvas__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     color: var(--white);
     text-decoration: none;
     font-size: 14px;

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Directory;
 
+use App\Actions\Admin\Directory\State\ExportStatesToCsv;
+use App\Actions\Admin\Directory\State\ImportStatesFromCsv;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Directory\State\BulkActionStatesRequest;
+use App\Http\Requests\Admin\Directory\State\ImportStatesRequest;
 use App\Http\Requests\Admin\Directory\State\ReorderStatesRequest;
 use App\Http\Requests\Admin\Directory\State\StoreStateRequest;
 use App\Http\Requests\Admin\Directory\State\UpdateStateRequest;
@@ -14,9 +17,12 @@ use App\Models\State;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class StateController extends Controller
 {
@@ -121,7 +127,7 @@ final class StateController extends Controller
 
         return redirect()
             ->route('admin.directory.states.index')
-            ->with('toast', ['type' => 'success', 'message' => 'State created.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.locations.state_created_toast')]);
     }
 
     public function edit(State $state): Response
@@ -147,7 +153,7 @@ final class StateController extends Controller
 
         return redirect()
             ->route('admin.directory.states.index')
-            ->with('toast', ['type' => 'success', 'message' => 'State updated.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.locations.state_updated_toast')]);
     }
 
     public function destroy(State $state): RedirectResponse
@@ -158,7 +164,7 @@ final class StateController extends Controller
 
         return redirect()
             ->route('admin.directory.states.index')
-            ->with('toast', ['type' => 'success', 'message' => 'State deleted.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.locations.state_deleted_toast')]);
     }
 
     public function reorder(ReorderStatesRequest $request): RedirectResponse
@@ -177,7 +183,7 @@ final class StateController extends Controller
         if (count($validIds) !== count($orderedIds)) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Reorder rejected: some states do not belong to the selected country.',
+                'message' => __('admin.locations.state_reorder_rejected_toast'),
             ]);
         }
 
@@ -189,7 +195,67 @@ final class StateController extends Controller
             }
         });
 
-        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
+        return back()->with('toast', ['type' => 'success', 'message' => __('admin.locations.state_order_updated_toast')]);
+    }
+
+    /**
+     * Stream the states list as a CSV download. Respects the same
+     * `country_id` + search filters the Index page uses so admins can
+     * narrow the export by picking a country before clicking Export.
+     */
+    public function export(Request $request, ExportStatesToCsv $action): StreamedResponse
+    {
+        $countryId = $request->query('country_id');
+        $countryId = is_numeric($countryId) ? (int) $countryId : null;
+
+        return $action->handle([
+            'country_id' => $countryId,
+            'q' => mb_trim((string) $request->query('q', '')),
+        ]);
+    }
+
+    /**
+     * Static template CSV — same headers as export, three example rows,
+     * with permalink/status/sort_order intentionally blank on some rows
+     * to show they're optional.
+     */
+    public function sampleCsv(ExportStatesToCsv $action): StreamedResponse
+    {
+        return $action->sample();
+    }
+
+    /**
+     * Process a CSV upload. Partial-success semantics: good rows land in
+     * the DB, bad rows are collected and flashed to the next request so
+     * the Vue Index page can render a detailed error panel.
+     */
+    public function import(ImportStatesRequest $request, ImportStatesFromCsv $action): RedirectResponse
+    {
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        try {
+            $result = $action->handle($file);
+        } catch (RuntimeException $e) {
+            return back()->with('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+        }
+
+        $type = $result->hasErrors() ? 'warning' : 'success';
+        $summary = $result->hasErrors()
+            ? __('admin.locations.import_toast_summary_with_skipped', [
+                'created' => $result->created,
+                'updated' => $result->updated,
+                'skipped' => $result->skipped,
+            ])
+            : __('admin.locations.import_toast_summary', [
+                'created' => $result->created,
+                'updated' => $result->updated,
+            ]);
+
+        return redirect()
+            ->route('admin.directory.states.index')
+            ->with('toast', ['type' => $type, 'message' => $summary])
+            ->with('importResult', $result->toArray());
     }
 
     public function bulkAction(BulkActionStatesRequest $request): RedirectResponse
@@ -214,17 +280,17 @@ final class StateController extends Controller
             return State::query()->whereIn('id', $ids)->update($update);
         });
 
-        $verb = match ($action) {
-            'delete' => 'deleted',
-            'publish' => 'published',
-            'draft' => 'set to draft',
-            'inactive' => 'deactivated',
-            default => 'updated',
+        $key = match ($action) {
+            'delete' => 'admin.locations.state_bulk_deleted_toast',
+            'publish' => 'admin.locations.state_bulk_published_toast',
+            'draft' => 'admin.locations.state_bulk_draft_toast',
+            'inactive' => 'admin.locations.state_bulk_inactive_toast',
+            default => 'admin.locations.state_bulk_updated_toast',
         };
 
         return back()->with('toast', [
             'type' => 'success',
-            'message' => "{$count} state".($count === 1 ? '' : 's')." {$verb}.",
+            'message' => trans_choice($key, $count, ['count' => $count]),
         ]);
     }
 
