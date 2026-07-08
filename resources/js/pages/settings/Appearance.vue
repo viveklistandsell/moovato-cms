@@ -2,30 +2,27 @@
 import { Head } from '@inertiajs/vue3';
 import AppearanceTabs from '@/components/AppearanceTabs.vue';
 import Heading from '@/components/Heading.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
 import { edit } from '@/routes/appearance';
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Appearance settings',
-                href: edit(),
-            },
-        ],
-    },
-});
+const t = useT();
+
+setBreadcrumbs(() => [
+    { title: t('account_settings.appearance_head'), href: edit() },
+]);
 </script>
 
 <template>
-    <Head title="Appearance settings" />
+    <Head :title="t('account_settings.appearance_head')" />
 
-    <h1 class="sr-only">Appearance settings</h1>
+    <h1 class="sr-only">{{ t('account_settings.appearance_head') }}</h1>
 
     <div class="space-y-6">
         <Heading
             variant="small"
-            title="Appearance settings"
-            description="Update your account's appearance settings"
+            :title="t('account_settings.appearance_title')"
+            :description="t('account_settings.appearance_description')"
         />
         <AppearanceTabs />
     </div>

@@ -14,6 +14,7 @@ use App\Models\Page;
 use App\Models\PageCategory;
 use App\Models\PageTranslation;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -30,12 +31,17 @@ final class DashboardController extends Controller
     {
         $user = $request->user();
         $now = Carbon::now();
-        $weekAgo = $now->copy()->subDays(7);
-        $monthAgo = $now->copy()->subDays(30);
         $range = (string) $request->query('range', '30d');
         if (! in_array($range, ['7d', '30d', '90d', 'year'], true)) {
             $range = '30d';
         }
+
+        $rangeStart = match ($range) {
+            '7d' => $now->copy()->subDays(7),
+            '30d' => $now->copy()->subDays(30),
+            '90d' => $now->copy()->subDays(90),
+            'year' => $now->copy()->startOfYear(),
+        };
 
         return Inertia::render('Dashboard', [
             'welcome' => [
@@ -47,9 +53,9 @@ final class DashboardController extends Controller
                 'member_since' => $user?->created_at?->toIso8601String(),
             ],
             'range' => $range,
-            'achievements' => fn (): array => $this->achievements($weekAgo),
-            'kpis' => fn (): array => $this->kpis($weekAgo),
-            'chart' => fn (): array => $this->contentChart($now),
+            'achievements' => fn (): array => $this->achievements($rangeStart),
+            'kpis' => fn (): array => $this->kpis($rangeStart),
+            'chart' => fn (): array => $this->contentChart($now, $range),
             'topPosts' => fn (): array => $this->topPosts(),
             'recentPages' => fn (): array => $this->recentPages(),
             'recentPosts' => fn (): array => $this->recentPosts(),
@@ -58,7 +64,7 @@ final class DashboardController extends Controller
             ),
             'languageCoverage' => fn (): array => $this->languageCoverage(),
             'topCategories' => fn (): array => $this->topCategories(),
-            'attention' => fn (): array => $this->attention($monthAgo),
+            'attention' => fn (): array => $this->attention($rangeStart),
             'permissions' => [
                 'users_view' => $user?->can('users.view') ?? false,
                 'pages_create' => $user?->can('pages.create') ?? false,
@@ -81,14 +87,9 @@ final class DashboardController extends Controller
     }
 
     /**
-     * Achievements + streak badges shown in the welcome strip. All
-     * computed from existing data (no extra columns). Returned in
-     * display order; the welcome strip caps at the first 3 active
-     * ones so we never overflow the row.
-     *
      * @return array<int, array{key: string, icon: string, label: string, value: string|int, tone: string}>
      */
-    private function achievements(Carbon $weekAgo): array
+    private function achievements(Carbon $rangeStart): array
     {
         $badges = [];
         $today = Carbon::now()->startOfDay();
@@ -117,15 +118,14 @@ final class DashboardController extends Controller
             ];
         }
 
-        // 2. Weekly velocity — items created this week.
-        $thisWeek = Page::query()->where('created_at', '>=', $weekAgo)->count()
-            + Blog::query()->where('created_at', '>=', $weekAgo)->count();
-        if ($thisWeek >= 5) {
+        $inRange = Page::query()->where('created_at', '>=', $rangeStart)->count()
+            + Blog::query()->where('created_at', '>=', $rangeStart)->count();
+        if ($inRange >= 5) {
             $badges[] = [
-                'key' => 'weekly_velocity',
+                'key' => 'range_velocity',
                 'icon' => '⚡',
-                'label' => (string) trans('admin.achievements.weekly_velocity', ['count' => $thisWeek]),
-                'value' => $thisWeek,
+                'label' => (string) trans('admin.achievements.range_velocity', ['count' => $inRange]),
+                'value' => $inRange,
                 'tone' => 'orange',
             ];
         }
@@ -175,11 +175,11 @@ final class DashboardController extends Controller
      * @return array{
      *   pages: array{total: int, published: int, draft: int, inactive: int},
      *   posts: array{total: int, published: int, draft: int, inactive: int, views: int},
-     *   users: array{total: int, verified: int, unverified: int, new_this_week: int},
+     *   users: array{total: int, verified: int, unverified: int, new_in_range: int},
      *   media: array{files: int, folders: int, bytes: int}
      * }
      */
-    private function kpis(Carbon $weekAgo): array
+    private function kpis(Carbon $rangeStart): array
     {
         $pageCounts = Page::query()
             ->selectRaw('status, count(*) as c')
@@ -211,7 +211,7 @@ final class DashboardController extends Controller
                 'total' => User::query()->count(),
                 'verified' => User::query()->whereNotNull('email_verified_at')->count(),
                 'unverified' => User::query()->whereNull('email_verified_at')->count(),
-                'new_this_week' => User::query()->where('created_at', '>=', $weekAgo)->count(),
+                'new_in_range' => User::query()->where('created_at', '>=', $rangeStart)->count(),
             ],
             'media' => [
                 'files' => MediaFile::query()->count(),
@@ -222,10 +222,8 @@ final class DashboardController extends Controller
     }
 
     /**
-     * Last 12 ISO weeks of created pages/posts, bucketed for the stacked bar
-     * chart. We pull all rows from the cutoff onwards and bucket in PHP so the
-     * shape is identical across SQLite / MySQL / Postgres without driver-specific
-     * date functions.
+     * The wire field is still called `weeks` for FE backward compat;
+     * treat it as "bucket labels" — see resources/js/pages/Dashboard.vue.
      *
      * @return array{
      *   weeks: array<int, string>,
@@ -233,45 +231,78 @@ final class DashboardController extends Controller
      *   posts: array<int, int>
      * }
      */
-    private function contentChart(Carbon $now): array
+    private function contentChart(Carbon $now, string $range): array
     {
-        $cutoff = $now->copy()->startOfWeek()->subWeeks(11);
+        /** @var array{buckets: int, unit: 'day'|'week'|'month', format: string} $cfg */
+        $cfg = match ($range) {
+            '7d' => ['buckets' => 7, 'unit' => 'day', 'format' => 'DD MMM'],
+            '30d' => ['buckets' => 30, 'unit' => 'day', 'format' => 'DD MMM'],
+            '90d' => ['buckets' => 13, 'unit' => 'week', 'format' => 'DD MMM'],
+            'year' => ['buckets' => 12, 'unit' => 'month', 'format' => 'MMM'],
+            default => ['buckets' => 30, 'unit' => 'day', 'format' => 'DD MMM'],
+        };
 
-        $weekLabels = [];
-        $pagesByWeek = [];
-        $postsByWeek = [];
-        for ($i = 0; $i < 12; $i++) {
-            $start = $cutoff->copy()->addWeeks($i);
-            $key = $start->isoFormat('GGGG-[W]WW');
-            $weekLabels[] = $start->isoFormat('DD MMM');
-            $pagesByWeek[$key] = 0;
-            $postsByWeek[$key] = 0;
+        /**
+         * @var array<int, Carbon> $starts
+         */
+        $starts = [];
+        for ($i = $cfg['buckets'] - 1; $i >= 0; $i--) {
+            $starts[] = match ($cfg['unit']) {
+                'day' => $now->copy()->startOfDay()->subDays($i),
+                'week' => $now->copy()->startOfWeek()->subWeeks($i),
+                'month' => $now->copy()->startOfMonth()->subMonths($i),
+            };
         }
+
+        $labels = array_map(
+            fn (Carbon $c): string => $c->isoFormat($cfg['format']),
+            $starts,
+        );
+
+        $cutoff = $starts[0];
+        $bucketIndex = static function (CarbonInterface $c) use ($starts): ?int {
+            for ($i = count($starts) - 1; $i >= 0; $i--) {
+                if ($c->greaterThanOrEqualTo($starts[$i])) {
+                    return $i;
+                }
+            }
+
+            return null;
+        };
+
+        $pages = array_fill(0, $cfg['buckets'], 0);
+        $posts = array_fill(0, $cfg['buckets'], 0);
 
         Page::query()
             ->where('created_at', '>=', $cutoff)
             ->get(['created_at'])
-            ->each(function (Page $p) use (&$pagesByWeek): void {
-                $key = $p->created_at?->isoFormat('GGGG-[W]WW');
-                if ($key !== null && isset($pagesByWeek[$key])) {
-                    $pagesByWeek[$key]++;
+            ->each(function (Page $p) use (&$pages, $bucketIndex): void {
+                if ($p->created_at === null) {
+                    return;
+                }
+                $idx = $bucketIndex($p->created_at);
+                if ($idx !== null) {
+                    $pages[$idx]++;
                 }
             });
 
         Blog::query()
             ->where('created_at', '>=', $cutoff)
             ->get(['created_at'])
-            ->each(function (Blog $b) use (&$postsByWeek): void {
-                $key = $b->created_at?->isoFormat('GGGG-[W]WW');
-                if ($key !== null && isset($postsByWeek[$key])) {
-                    $postsByWeek[$key]++;
+            ->each(function (Blog $b) use (&$posts, $bucketIndex): void {
+                if ($b->created_at === null) {
+                    return;
+                }
+                $idx = $bucketIndex($b->created_at);
+                if ($idx !== null) {
+                    $posts[$idx]++;
                 }
             });
 
         return [
-            'weeks' => $weekLabels,
-            'pages' => array_values($pagesByWeek),
-            'posts' => array_values($postsByWeek),
+            'weeks' => $labels,
+            'pages' => $pages,
+            'posts' => $posts,
         ];
     }
 
@@ -428,7 +459,7 @@ final class DashboardController extends Controller
      *
      * @return array{page_drafts: int, post_drafts: int, unverified_users: int, missing_translations: int}
      */
-    private function attention(Carbon $monthAgo): array
+    private function attention(Carbon $rangeStart): array
     {
         $activeCodes = Language::query()
             ->where('status', true)
@@ -437,8 +468,6 @@ final class DashboardController extends Controller
 
         $missingTranslations = 0;
         if (count($activeCodes) > 1) {
-            // A page/post is "missing translations" when it doesn't have a row
-            // for every active language. We compute it per-content-type and sum.
             $configs = [
                 [PageTranslation::class, Page::class, 'page_id'],
                 [BlogTranslation::class, Blog::class, 'blog_id'],
@@ -462,7 +491,7 @@ final class DashboardController extends Controller
             'post_drafts' => Blog::query()->where('status', 'draft')->count(),
             'unverified_users' => User::query()
                 ->whereNull('email_verified_at')
-                ->where('created_at', '>=', $monthAgo)
+                ->where('created_at', '>=', $rangeStart)
                 ->count(),
             'missing_translations' => $missingTranslations,
         ];
