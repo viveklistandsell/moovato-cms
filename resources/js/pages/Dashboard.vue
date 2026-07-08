@@ -56,7 +56,7 @@ type Kpis = {
         total: number;
         verified: number;
         unverified: number;
-        new_this_week: number;
+        new_in_range: number;
     };
     media: { files: number; folders: number; bytes: number };
 };
@@ -128,6 +128,32 @@ const greeting = computed<string>(() => {
     return t('dashboard.greeting_hi');
 });
 
+const rangeLabel = computed<string>(() => {
+    switch (props.range) {
+        case '7d':
+            return t('date_range.last_7_days');
+        case '90d':
+            return t('date_range.last_90_days');
+        case 'year':
+            return t('date_range.this_year');
+        default:
+            return t('date_range.last_30_days');
+    }
+});
+
+const newInRangeLabel = computed<string>(() => {
+    switch (props.range) {
+        case '7d':
+            return t('dashboard.new_last_7d');
+        case '90d':
+            return t('dashboard.new_last_90d');
+        case 'year':
+            return t('dashboard.new_this_year');
+        default:
+            return t('dashboard.new_last_30d');
+    }
+});
+
 function formatDate(iso: string | null): string {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString(undefined, {
@@ -161,9 +187,10 @@ const heroTotal = computed<number>(() =>
 
 const heroDelta = computed<number | null>(() => {
     const totals = weekTotals.value;
-    if (totals.length < 12) return null;
-    const recent = totals.slice(-6).reduce((a, b) => a + b, 0);
-    const prior = totals.slice(0, 6).reduce((a, b) => a + b, 0);
+    if (totals.length < 4) return null;
+    const halfIdx = Math.floor(totals.length / 2);
+    const recent = totals.slice(halfIdx).reduce((a, b) => a + b, 0);
+    const prior = totals.slice(0, halfIdx).reduce((a, b) => a + b, 0);
     if (prior === 0) {
         return recent > 0 ? 100 : null;
     }
@@ -356,7 +383,7 @@ function publishedRatio(total: number, published: number): number {
                         class="inline-flex items-center gap-1.5 rounded-full bg-[var(--orange)]/15 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--orange)] ring-1 ring-inset ring-[var(--orange)]/30"
                     >
                         <Sparkles class="size-3" />
-                        {{ t('dashboard.hero_velocity') }}
+                        {{ t('dashboard.hero_velocity_range', { range: rangeLabel }) }}
                     </div>
                     <div class="mt-3 flex items-end gap-2">
                         <span class="text-4xl font-bold leading-none tracking-tight">
@@ -385,7 +412,7 @@ function publishedRatio(total: number, published: number): number {
                             {{ heroDelta }}%
                         </span>
                         <span class="text-[var(--linen)]/60">
-                            {{ t('dashboard.hero_vs_prior') }}
+                            {{ t('dashboard.hero_vs_prior_half') }}
                         </span>
                     </div>
                 </div>
@@ -543,8 +570,8 @@ function publishedRatio(total: number, published: number): number {
                         </div>
                     </div>
                     <p class="mt-2 text-xs text-muted-foreground">
-                        <span class="font-semibold text-foreground">+{{ kpis.users.new_this_week }}</span>
-                        {{ t('dashboard.new_this_week') }}
+                        <span class="font-semibold text-foreground">+{{ kpis.users.new_in_range }}</span>
+                        {{ newInRangeLabel }}
                     </p>
                     <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
@@ -609,7 +636,7 @@ function publishedRatio(total: number, published: number): number {
                         >
                             <TrendingUp class="size-3.5" />
                         </div>
-                        {{ t('dashboard.content_created_12_weeks') }}
+                        {{ t('dashboard.content_created_range', { range: rangeLabel }) }}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -617,7 +644,7 @@ function publishedRatio(total: number, published: number): number {
                         v-if="heroTotal === 0"
                         class="flex h-40 items-center justify-center text-sm text-muted-foreground"
                     >
-                        {{ t('dashboard.no_content_12_weeks') }}
+                        {{ t('dashboard.no_content_in_range', { range: rangeLabel }) }}
                     </div>
                     <div v-else>
                         <div class="flex h-48 gap-1.5">

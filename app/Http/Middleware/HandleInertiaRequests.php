@@ -88,7 +88,11 @@ final class HandleInertiaRequests extends Middleware
 
     private function isAdminRoute(Request $request): bool
     {
-        return $request->is('admin/*') || $request->is('admin') || $request->is('dashboard');
+        return $request->is('admin/*')
+            || $request->is('admin')
+            || $request->is('dashboard')
+            || $request->is('settings')
+            || $request->is('settings/*');
     }
 
     /**
