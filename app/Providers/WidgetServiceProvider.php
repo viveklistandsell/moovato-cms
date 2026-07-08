@@ -18,6 +18,7 @@ use App\Widgets\ContentStyle2\ContentStyle2Widget;
 use App\Widgets\Contracts\WidgetContract;
 use App\Widgets\Cta\CtaWidget;
 use App\Widgets\CtaBanner\CtaBannerWidget;
+use App\Widgets\CtaWork\CtaWorkWidget;
 use App\Widgets\DarkFeature\DarkFeatureWidget;
 use App\Widgets\DarkIntro\DarkIntroWidget;
 use App\Widgets\ExpertsChoice\ExpertsChoiceWidget;
@@ -57,6 +58,7 @@ use App\Widgets\TextColumns\TextColumnsWidget;
 use App\Widgets\TrustBar\TrustBarWidget;
 use App\Widgets\WhyChooseMedia\WhyChooseMediaWidget;
 use App\Widgets\WhyChooseUs\WhyChooseUsWidget;
+use App\Widgets\WorkProcess\WorkProcessWidget;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
@@ -78,6 +80,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ImageWidget::class,
         FeaturesWidget::class,
         CtaWidget::class,
+        CtaWorkWidget::class,
         FaqWidget::class,
         TestimonialWidget::class,
         TestimonialsShowcaseWidget::class,
@@ -120,6 +123,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         CompanyDirectoryWidget::class,
         ContactWidget::class,
         GetInTouchWidget::class,
+        WorkProcessWidget::class,
     ];
 
     public function register(): void

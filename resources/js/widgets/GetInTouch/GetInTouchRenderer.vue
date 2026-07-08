@@ -2,17 +2,23 @@
 import { ArrowRight, Megaphone, Zap } from 'lucide-vue-next';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
+type Settings = {
+    image_path?: string | null;
+    image_url?: string | null;
+};
+
 type Data = {
     eyebrow?: string;
     heading?: string;
     lead?: string;
+    image_alt?: string;
     primary_label?: string;
     primary_url?: string;
     secondary_label?: string;
     secondary_url?: string;
 };
 
-defineProps<{ settings: Record<string, unknown>; data: Data }>();
+defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
@@ -44,22 +50,36 @@ defineProps<{ settings: Record<string, unknown>; data: Data }>();
                     </div>
                 </div>
 
-                <div class="mv-getintouch__art" aria-hidden="true">
-                    <Zap
-                        class="mv-getintouch__bolt mv-getintouch__bolt--1"
-                        :size="34"
+                <div
+                    class="mv-getintouch__art"
+                    :class="{ 'mv-getintouch__art--image': settings.image_url }"
+                    :aria-hidden="settings.image_url ? undefined : true"
+                >
+                    <img
+                        v-if="settings.image_url"
+                        :src="settings.image_url"
+                        :alt="data.image_alt || ''"
+                        class="mv-getintouch__img"
+                        loading="lazy"
+                        decoding="async"
                     />
-                    <Zap
-                        class="mv-getintouch__bolt mv-getintouch__bolt--2"
-                        :size="26"
-                    />
-                    <Zap
-                        class="mv-getintouch__bolt mv-getintouch__bolt--3"
-                        :size="20"
-                    />
-                    <span class="mv-getintouch__megaphone"
-                        ><Megaphone :size="88"
-                    /></span>
+                    <template v-else>
+                        <Zap
+                            class="mv-getintouch__bolt mv-getintouch__bolt--1"
+                            :size="34"
+                        />
+                        <Zap
+                            class="mv-getintouch__bolt mv-getintouch__bolt--2"
+                            :size="26"
+                        />
+                        <Zap
+                            class="mv-getintouch__bolt mv-getintouch__bolt--3"
+                            :size="20"
+                        />
+                        <span class="mv-getintouch__megaphone"
+                            ><Megaphone :size="88"
+                        /></span>
+                    </template>
                 </div>
             </div>
         </div>

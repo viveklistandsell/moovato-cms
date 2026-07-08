@@ -9,25 +9,30 @@ test('contact widget is registered under the contact slug', function (): void {
     expect(app(WidgetRegistry::class)->resolve('contact'))->toBe(ContactWidget::class);
 });
 
-test('contact widget exposes editable copy and contact details', function (): void {
+test('contact widget exposes editable copy, contact details and a service list', function (): void {
     $data = ContactWidget::defaultData();
 
     expect($data)->toHaveKeys([
         'eyebrow',
         'heading_lead',
         'heading_highlight',
+        'description',
         'email',
         'phone',
         'address',
-        'name_field_label',
-        'email_field_label',
-        'message_field_label',
+        'phone_title',
+        'email_title',
+        'location_title',
+        'services',
+        'service_placeholder',
         'submit_label',
         'success_title',
         'success_text',
+        'watermark',
     ])
         ->and($data['email'])->toBe('hallo@moovato.de')
-        ->and(ContactWidget::defaultSettings())->toBe([]);
+        ->and($data['services'])->toBe(['Privat', 'Gewerbe', 'Fernumzug', 'Spezialtransport'])
+        ->and(ContactWidget::defaultSettings())->toHaveKey('map_embed_url');
 });
 
 test('contact widget exposes the picker metadata shape', function (): void {

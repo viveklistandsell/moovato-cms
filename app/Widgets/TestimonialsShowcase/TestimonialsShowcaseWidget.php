@@ -38,7 +38,10 @@ final class TestimonialsShowcaseWidget implements WidgetContract
 
     public static function defaultSettings(): array
     {
-        return [];
+        return [
+            'bg_image_path' => null,
+            'bg_image_url' => null,
+        ];
     }
 
     public static function defaultData(): array
@@ -100,7 +103,10 @@ final class TestimonialsShowcaseWidget implements WidgetContract
 
     public static function settingsRules(): array
     {
-        return [];
+        return [
+            'bg_image_path' => ['nullable', 'string', 'max:1000'],
+            'bg_image_url' => ['nullable', 'string', 'max:2000'],
+        ];
     }
 
     public static function dataRules(): array

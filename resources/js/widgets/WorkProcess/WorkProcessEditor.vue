@@ -3,22 +3,14 @@ import { Plus, Trash2 } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Item = {
-    rating: number;
-    rating_text: string;
-    quote: string;
-    name: string;
-    role: string;
+    title: string;
+    url: string;
+    icon: string;
+    image_alt: string;
     image_path: string | null;
     image_url: string | null;
 };
@@ -31,6 +23,8 @@ type Settings = {
 type Data = {
     eyebrow: string;
     heading: string;
+    description: string;
+    step_label: string;
     button_label: string;
     button_url: string;
     items: Item[];
@@ -43,11 +37,10 @@ function addItem(): void {
     data.value.items = [
         ...(data.value.items ?? []),
         {
-            rating: 5,
-            rating_text: '5,0 Bewertung',
-            quote: '',
-            name: '',
-            role: '',
+            title: '',
+            url: '',
+            icon: '',
+            image_alt: '',
             image_path: null,
             image_url: null,
         },
@@ -64,25 +57,38 @@ function removeItem(index: number): void {
         <div class="grid gap-4 md:grid-cols-2">
             <div class="grid gap-2">
                 <Label>Eyebrow</Label>
-                <Input v-model="data.eyebrow" placeholder="Kundenstimmen" />
+                <Input v-model="data.eyebrow" placeholder="Unser Ablauf" />
             </div>
             <div class="grid gap-2">
                 <Label>Heading</Label>
                 <Input
                     v-model="data.heading"
-                    placeholder="Echte Bewertungen von Umzügen in Berlin."
+                    placeholder="So läuft Ihr Umzug ab."
                 />
             </div>
-            <div class="grid gap-2">
-                <Label>Button label</Label>
-                <Input
-                    v-model="data.button_label"
-                    placeholder="Alle Bewertungen"
-                />
+            <div class="grid gap-2 md:col-span-2">
+                <Label>Description</Label>
+                <Textarea v-model="data.description" :rows="2" />
             </div>
             <div class="grid gap-2">
-                <Label>Button URL</Label>
-                <Input v-model="data.button_url" placeholder="/bewertungen" />
+                <Label>Step label</Label>
+                <Input v-model="data.step_label" placeholder="Schritt" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="grid gap-1">
+                    <Label class="text-xs">Button label</Label>
+                    <Input
+                        v-model="data.button_label"
+                        placeholder="Alle Leistungen"
+                    />
+                </div>
+                <div class="grid gap-1">
+                    <Label class="text-xs">Button URL</Label>
+                    <Input
+                        v-model="data.button_url"
+                        placeholder="/leistungen"
+                    />
+                </div>
             </div>
             <div class="grid gap-2 md:col-span-2">
                 <Label>Background image (optional)</Label>
@@ -102,7 +108,7 @@ function removeItem(index: number): void {
 
         <div class="space-y-3">
             <div class="flex items-center justify-between">
-                <Label class="text-sm font-semibold">Testimonials</Label>
+                <Label class="text-sm font-semibold">Steps</Label>
                 <Button
                     type="button"
                     variant="outline"
@@ -110,7 +116,7 @@ function removeItem(index: number): void {
                     @click="addItem"
                 >
                     <Plus class="size-4" />
-                    Add testimonial
+                    Add step
                 </Button>
             </div>
             <div
@@ -121,7 +127,7 @@ function removeItem(index: number): void {
                 <WidgetImageField
                     :path="item.image_path"
                     :url="item.image_url"
-                    aspect-class="size-24 rounded-full mx-auto"
+                    aspect-class="aspect-[4/3] w-full"
                     @update="
                         (v) => {
                             item.image_path = v.path;
@@ -130,41 +136,22 @@ function removeItem(index: number): void {
                     "
                 />
                 <div class="space-y-2">
-                    <Textarea
-                        v-model="item.quote"
-                        :rows="3"
-                        placeholder="Quote"
+                    <Input
+                        v-model="item.title"
+                        placeholder="Anfrage & Beratung"
                     />
                     <div class="grid grid-cols-2 gap-2">
-                        <Input v-model="item.name" placeholder="Name" />
+                        <Input v-model="item.url" placeholder="#anfrage" />
                         <Input
-                            v-model="item.role"
-                            placeholder="Privatumzug, Berlin-Mitte"
+                            v-model="item.icon"
+                            placeholder="Icon (lucide, z.B. Truck)"
                         />
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <Select
-                            :model-value="String(item.rating)"
-                            @update:model-value="
-                                (v) => (item.rating = Number(v))
-                            "
-                        >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="n in 5"
-                                    :key="n"
-                                    :value="String(n)"
-                                >
-                                    {{ n }} ★
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Input
-                            v-model="item.rating_text"
-                            placeholder="5,0 Bewertung"
-                        />
-                    </div>
+                    <Input v-model="item.image_alt" placeholder="Alt text" />
+                    <p class="text-xs text-muted-foreground">
+                        Set a lucide icon name to show an icon instead of the
+                        image. Leave empty to use the uploaded image.
+                    </p>
                 </div>
                 <Button
                     type="button"

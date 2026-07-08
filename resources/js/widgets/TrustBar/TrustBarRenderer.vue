@@ -30,7 +30,7 @@ function ordinal(i: number): string {
 
 <template>
     <section
-        class="trust-bar"
+        class="trust-bar section-py"
         :class="`trust-bar--${settings.theme}`"
         :style="bgStyle"
     >

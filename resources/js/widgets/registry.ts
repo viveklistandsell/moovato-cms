@@ -20,6 +20,8 @@ import CtaEditor from './Cta/CtaEditor.vue';
 import CtaRenderer from './Cta/CtaRenderer.vue';
 import CtaBannerEditor from './CtaBanner/CtaBannerEditor.vue';
 import CtaBannerRenderer from './CtaBanner/CtaBannerRenderer.vue';
+import CtaWorkEditor from './CtaWork/CtaWorkEditor.vue';
+import CtaWorkRenderer from './CtaWork/CtaWorkRenderer.vue';
 import DarkFeatureEditor from './DarkFeature/DarkFeatureEditor.vue';
 import DarkFeatureRenderer from './DarkFeature/DarkFeatureRenderer.vue';
 import ExpertsChoiceEditor from './ExpertsChoice/ExpertsChoiceEditor.vue';
@@ -88,6 +90,8 @@ import TrustBarEditor from './TrustBar/TrustBarEditor.vue';
 import TrustBarRenderer from './TrustBar/TrustBarRenderer.vue';
 import WhyChooseUsEditor from './WhyChooseUs/WhyChooseUsEditor.vue';
 import WhyChooseUsRenderer from './WhyChooseUs/WhyChooseUsRenderer.vue';
+import WorkProcessEditor from './WorkProcess/WorkProcessEditor.vue';
+import WorkProcessRenderer from './WorkProcess/WorkProcessRenderer.vue';
 import type { WidgetRegistry } from './types';
 
 /**
@@ -102,6 +106,7 @@ export const widgetRegistry: WidgetRegistry = {
     page_banner: { editor: PageBannerEditor, renderer: PageBannerRenderer },
     orbit_banner: { editor: OrbitBannerEditor, renderer: OrbitBannerRenderer },
     cta_banner: { editor: CtaBannerEditor, renderer: CtaBannerRenderer },
+    cta_work: { editor: CtaWorkEditor, renderer: CtaWorkRenderer },
     text_block: { editor: TextBlockEditor, renderer: TextBlockRenderer },
     image: { editor: ImageEditor, renderer: ImageRenderer },
     features: { editor: FeaturesEditor, renderer: FeaturesRenderer },
@@ -198,6 +203,10 @@ export const widgetRegistry: WidgetRegistry = {
     },
     contact: { editor: ContactEditor, renderer: ContactRenderer },
     get_in_touch: { editor: GetInTouchEditor, renderer: GetInTouchRenderer },
+    work_process: {
+        editor: WorkProcessEditor,
+        renderer: WorkProcessRenderer,
+    },
 };
 
 export function getWidgetEntry(type: string) {

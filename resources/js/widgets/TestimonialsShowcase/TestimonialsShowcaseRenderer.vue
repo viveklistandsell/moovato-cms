@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight, Quote, Star } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Item = {
     rating?: number;
@@ -12,7 +13,10 @@ type Item = {
     image_url?: string | null;
 };
 
-type Settings = Record<string, never>;
+type Settings = {
+    bg_image_path?: string | null;
+    bg_image_url?: string | null;
+};
 
 type Data = {
     eyebrow?: string;
@@ -25,6 +29,12 @@ type Data = {
 const props = defineProps<{ settings: Settings; data: Data }>();
 
 const items = computed<Item[]>(() => props.data.items ?? []);
+
+const bgStyle = computed(() =>
+    props.settings.bg_image_url
+        ? { backgroundImage: `url('${props.settings.bg_image_url}')` }
+        : undefined,
+);
 const active = ref(0);
 const current = computed<Item | undefined>(() => items.value[active.value]);
 
@@ -58,7 +68,7 @@ function thumbStyle(i: number): Record<string, string> {
 </script>
 
 <template>
-    <section class="mv-testimonials section-py">
+    <section class="mv-testimonials section-py" :style="bgStyle">
         <div class="mv-testimonials__bg" aria-hidden="true"></div>
 
         <div class="relative z-[2] container-xl">
@@ -73,14 +83,11 @@ function thumbStyle(i: number): Record<string, string> {
                         {{ data.heading }}
                     </h2>
                 </div>
-                <a
+                <NextButton
                     v-if="data.button_label"
+                    :label="data.button_label"
                     :href="data.button_url || '#'"
-                    class="mv-testimonials__btn"
-                >
-                    {{ data.button_label }}
-                    <ArrowRight class="size-4" />
-                </a>
+                />
             </div>
 
             <div

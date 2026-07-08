@@ -78,6 +78,29 @@ function onChildrenUpdate(newChildren: TreeNode[]): void {
 // Convenience pass-throughs to the shared context.
 const draft = computed(() => ctx.itemDrafts.value[props.node.id]);
 const langs = computed<LocaleOption[]>(() => ctx.languages.value);
+
+// The "mega" token in css_class turns a top-level dropdown into a full-width
+// mega menu on the frontend. Managed via a checkbox so editors don't have to
+// remember the magic class name.
+const MEGA_CLASS = 'mega';
+
+function hasMegaClass(cls: string | null | undefined): boolean {
+    return (cls ?? '').split(/\s+/).includes(MEGA_CLASS);
+}
+
+function setMegaClass(on: boolean): void {
+    const d = draft.value;
+    if (!d) {
+        return;
+    }
+    const tokens = (d.css_class ?? '')
+        .split(/\s+/)
+        .filter((token) => token !== '' && token !== MEGA_CLASS);
+    if (on) {
+        tokens.push(MEGA_CLASS);
+    }
+    d.css_class = tokens.join(' ');
+}
 </script>
 
 <template>
@@ -203,6 +226,16 @@ const langs = computed<LocaleOption[]>(() => ctx.languages.value);
                             "
                         />
                         {{ t('menus.active') }}
+                    </label>
+                    <label
+                        v-if="depth === 0"
+                        class="flex cursor-pointer items-center gap-2 text-xs"
+                    >
+                        <Checkbox
+                            :model-value="hasMegaClass(draft.css_class)"
+                            @update:model-value="(v) => setMegaClass(v === true)"
+                        />
+                        {{ t('menus.megamenu') }}
                     </label>
                 </div>
             </div>

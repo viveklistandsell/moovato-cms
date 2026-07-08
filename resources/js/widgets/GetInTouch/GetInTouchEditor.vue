@@ -2,20 +2,25 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
-type Settings = Record<string, never>;
+type Settings = {
+    image_path: string | null;
+    image_url: string | null;
+};
 
 type Data = {
     eyebrow: string;
     heading: string;
     lead: string;
+    image_alt: string;
     primary_label: string;
     primary_url: string;
     secondary_label: string;
     secondary_url: string;
 };
 
-defineModel<Settings>('settings', { required: true });
+const settings = defineModel<Settings>('settings', { required: true });
 const data = defineModel<Data>('data', { required: true });
 </script>
 
@@ -40,6 +45,32 @@ const data = defineModel<Data>('data', { required: true });
         <div class="grid gap-2">
             <Label>Lead</Label>
             <Textarea v-model="data.lead" :rows="2" />
+        </div>
+
+        <div class="grid gap-2">
+            <Label>Image (optional)</Label>
+            <WidgetImageField
+                :path="settings.image_path"
+                :url="settings.image_url"
+                aspect-class="aspect-[4/3] w-full max-w-[320px]"
+                @update="
+                    (v) => {
+                        settings.image_path = v.path;
+                        settings.image_url = v.url;
+                    }
+                "
+            />
+            <p class="text-xs text-muted-foreground">
+                Leave empty to keep the decorative megaphone illustration.
+            </p>
+        </div>
+
+        <div class="grid gap-2">
+            <Label>Image alt text</Label>
+            <Input
+                v-model="data.image_alt"
+                placeholder="Moovato Umzugsteam in Berlin"
+            />
         </div>
 
         <div class="grid gap-4 md:grid-cols-2">
