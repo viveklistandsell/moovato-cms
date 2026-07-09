@@ -27,7 +27,6 @@ use App\Widgets\FaqMedia\FaqMediaWidget;
 use App\Widgets\FaqPage\FaqPageWidget;
 use App\Widgets\Features\FeaturesWidget;
 use App\Widgets\Gallery\GalleryWidget;
-use App\Widgets\GetInTouch\GetInTouchWidget;
 use App\Widgets\Hero\HeroWidget;
 use App\Widgets\Heronew\HeronewWidget;
 use App\Widgets\HowItWorks\HowItWorksWidget;
@@ -122,7 +121,6 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ComparisonWidget::class,
         CompanyDirectoryWidget::class,
         ContactWidget::class,
-        GetInTouchWidget::class,
         WorkProcessWidget::class,
     ];
 
