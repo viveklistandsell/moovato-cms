@@ -32,6 +32,9 @@ export type ItemDraft = {
 // user input. Stored as Refs so child components stay reactive without
 // per-level prop drilling.
 export type MenuTreeContext = {
+    // Mega menu only makes sense for the header menu — a footer never renders
+    // a full-width dropdown. Gates the "Mega menu" checkbox in MenuTreeNode.
+    allowMega: boolean;
     languages: Ref<LocaleOption[]>;
     defaultLang: Ref<string>;
     itemDrafts: Ref<Record<number, ItemDraft>>;

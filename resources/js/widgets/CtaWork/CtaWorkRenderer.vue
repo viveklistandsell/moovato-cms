@@ -27,12 +27,15 @@ const bgStyle = computed(() =>
 </script>
 
 <template>
-    <section class="mv-workcta">
+    <section class="mv-workcta section-py">
         <div class="mv-workcta__bg" :style="bgStyle" aria-hidden="true"></div>
         <div class="mv-workcta__inner container-xl">
             <h2 class="mv-workcta__title">
                 <span v-if="data.title_before">{{ data.title_before }}</span>
                 <img
+                    class="!mb-5
+                    
+                    "
                     v-if="settings.inline_image_url"
                     :src="settings.inline_image_url"
                     :alt="data.inline_image_alt || ''"

@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Admin\Page\Page;
 
+use App\Actions\Admin\Page\Widget\SyncPageWidgets;
 use App\Models\Page;
 use App\Models\PageTranslation;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+use function is_array;
+
 final readonly class UpdatePage
 {
+    public function __construct(private SyncPageWidgets $syncWidgets) {}
+
     /**
      * @param  array{
      *   user_id?: int|null,
@@ -20,7 +25,8 @@ final readonly class UpdatePage
      *   template?: string,
      *   is_home?: bool,
      *   status?: string,
-     *   translations: array<string, array{title?: ?string, permalink?: ?string}>
+     *   translations: array<string, array{title?: ?string, permalink?: ?string}>,
+     *   widgets?: array<int, array<string, mixed>>|null
      * }  $data
      */
     public function handle(Page $page, array $data): Page
@@ -86,7 +92,11 @@ final readonly class UpdatePage
                 ]);
             }
 
-            return $page->load(['translations', 'categories']);
+            if (array_key_exists('widgets', $data) && is_array($data['widgets'])) {
+                $this->syncWidgets->handle($page, $data['widgets']);
+            }
+
+            return $page->load(['translations', 'categories', 'widgets.translations']);
         });
     }
 }

@@ -176,10 +176,13 @@ function onMediaPicked(file: {
 
 function submit(): void {
     if (isEdit.value) {
-        form.transform((data) => ({ ...data, _method: 'put' })).post(
-            `/admin/pages/${props.page!.id}`,
-            { forceFormData: true },
-        );
+        form.transform((data) => ({
+            ...data,
+            _method: 'put',
+            // Persist the live widget stack alongside the page so "Save & Exit"
+            // saves widget edits too — not just the canvas's own Save button.
+            widgets: JSON.parse(JSON.stringify(editWidgets.value)),
+        })).post(`/admin/pages/${props.page!.id}`, { forceFormData: true });
     } else {
         form.post('/admin/pages', { forceFormData: true });
     }

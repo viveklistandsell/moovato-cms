@@ -10,6 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasColumn('blog_categories', 'banner')) {
+            return;
+        }
+
         Schema::table('blog_categories', function (Blueprint $table) {
             $table->dropColumn('banner');
         });

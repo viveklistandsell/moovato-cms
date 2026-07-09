@@ -201,6 +201,7 @@ function destroyItem(node: TreeNode): void {
 // Provide a single context object that every MenuTreeNode (at any depth)
 // injects. Avoids prop-drilling shared state through arbitrarily deep trees.
 const treeContext: MenuTreeContext = {
+    allowMega: props.menu.key !== 'footer',
     languages: languagesRef,
     defaultLang,
     itemDrafts,

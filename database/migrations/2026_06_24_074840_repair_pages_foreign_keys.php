@@ -33,6 +33,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // This is a MySQL-only repair (information_schema lookups, multi-table
+        // DELETE/UPDATE, ALTER … DROP FOREIGN KEY). On other drivers — e.g. the
+        // SQLite database used by the test suite — the schema was never broken,
+        // so there is nothing to repair. Bail out cleanly.
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Step 1 — clean up orphaned rows. Because the FKs were pointing at
         // a non-existent table, MySQL was silently allowing inserts that
         // referenced deleted pages. Those orphans have to be reconciled

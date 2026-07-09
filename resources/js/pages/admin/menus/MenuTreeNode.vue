@@ -228,7 +228,7 @@ function setMegaClass(on: boolean): void {
                         {{ t('menus.active') }}
                     </label>
                     <label
-                        v-if="depth === 0"
+                        v-if="depth === 0 && ctx.allowMega"
                         class="flex cursor-pointer items-center gap-2 text-xs"
                     >
                         <Checkbox
