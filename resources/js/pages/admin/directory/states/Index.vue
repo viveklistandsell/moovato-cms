@@ -17,6 +17,7 @@ import Heading from '@/components/Heading.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
+import SampleCsvPreview from '@/components/common/SampleCsvPreview.vue';
 import Pagination, {
     type PaginationMeta,
 } from '@/components/common/Pagination.vue';
@@ -209,6 +210,7 @@ function applyBulkAction(action: string): void {
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const showSamplePreview = ref(false);
 
 const importForm = useForm({
     file: null as File | null,
@@ -332,13 +334,7 @@ function exportUrl(): string {
                 <Button
                     variant="outline"
                     class="group relative h-9 gap-2.5 border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 px-4 font-medium text-slate-700 shadow-sm ring-1 ring-slate-100 transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:from-slate-100 hover:to-slate-200 hover:text-slate-900 hover:shadow-md hover:ring-slate-200 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900 dark:text-slate-100 dark:ring-slate-800/50 dark:hover:from-slate-700 dark:hover:to-slate-800 dark:hover:ring-slate-700"
-                    :disabled="isDownloading('/admin/directory/states/sample-csv')"
-                    @click="
-                        downloadCsv(
-                            '/admin/directory/states/sample-csv',
-                            'states-sample.csv',
-                        )
-                    "
+                    @click="showSamplePreview = true"
                 >
                     <span
                         class="flex size-5 items-center justify-center rounded-md bg-slate-200/80 text-slate-700 transition-all duration-200 group-hover:scale-110 group-hover:bg-slate-300 dark:bg-slate-700/60 dark:text-slate-200 dark:group-hover:bg-slate-600"
@@ -754,5 +750,11 @@ function exportUrl(): string {
                 <Pagination :pagination="pagination" :only="['states', 'pagination', 'filters']" />
             </CardContent>
         </Card>
+
+        <SampleCsvPreview
+            v-model:open="showSamplePreview"
+            url="/admin/directory/states/sample-csv"
+            fallback-filename="states-sample.csv"
+        />
     </div>
 </template>
