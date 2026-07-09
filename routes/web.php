@@ -40,10 +40,15 @@ use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConse
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\RobotsController;
 use App\Http\Controllers\Frontend\SitemapController;
+use App\Http\Controllers\StorageFallbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
+
+Route::get('storage/{path}', StorageFallbackController::class)
+    ->where('path', '.*')
+    ->name('storage.fallback');
 
 // Cookie consent audit endpoint
 Route::post('cookie-consent', [FrontendCookieConsentController::class, 'store'])

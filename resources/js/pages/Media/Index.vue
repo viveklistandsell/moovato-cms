@@ -159,6 +159,85 @@ function clearSelection(): void {
     selectedFolderIds.value = [];
 }
 
+// =====================================================================
+// Drag & drop — move files between folders and to/from root
+// =====================================================================
+
+const draggingFileIds = ref<number[]>([]);
+
+const dropTargetFolderId = ref<number | null | undefined>(undefined);
+
+const isDragging = computed<boolean>(() => draggingFileIds.value.length > 0);
+
+function onFileDragStart(file: MediaFileItem): void {
+    if (selectedIds.value.includes(file.id)) {
+        draggingFileIds.value = [...selectedIds.value];
+    } else {
+        draggingFileIds.value = [file.id];
+    }
+}
+
+function onFileDragEnd(): void {
+    draggingFileIds.value = [];
+    dropTargetFolderId.value = undefined;
+}
+
+function onFolderDragOver(folder: MediaFolderItem, event: DragEvent): void {
+    if (!isDragging.value) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTargetFolderId.value = folder.id;
+}
+
+function onFolderDragLeave(folder: MediaFolderItem): void {
+    if (dropTargetFolderId.value === folder.id) {
+        dropTargetFolderId.value = undefined;
+    }
+}
+
+function onFolderDrop(folder: MediaFolderItem): void {
+    moveDraggedFilesTo(folder.id);
+}
+
+function onBreadcrumbDragOver(
+    folderId: number | null,
+    event: DragEvent,
+): void {
+    if (!isDragging.value) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTargetFolderId.value = folderId;
+}
+
+function onBreadcrumbDragLeave(folderId: number | null): void {
+    if (dropTargetFolderId.value === folderId) {
+        dropTargetFolderId.value = undefined;
+    }
+}
+
+function onBreadcrumbDrop(folderId: number | null): void {
+    moveDraggedFilesTo(folderId);
+}
+
+function moveDraggedFilesTo(folderId: number | null): void {
+    const ids = [...draggingFileIds.value];
+    draggingFileIds.value = [];
+    dropTargetFolderId.value = undefined;
+    if (ids.length === 0) return;
+    if ((props.currentFolder?.id ?? null) === folderId) {
+        return;
+    }
+    router.post(
+        '/admin/media/files/bulk-move',
+        { ids, folder_id: folderId },
+        {
+            preserveScroll: true,
+            preserveState: false,
+            only: ['folders', 'files', 'tree', 'currentFolder', 'breadcrumbs'],
+        },
+    );
+}
+
 watch(
     () => props.files.data.map((f) => f.id).join(','),
     () => {
@@ -377,7 +456,14 @@ function onPreviewUpdated(file: MediaFileItem): void {
     <MediaLayout>
         <div class="flex h-full flex-1 flex-col gap-4 p-4">
             <header class="flex flex-wrap items-center justify-between gap-3">
-                <MediaBreadcrumbs :items="breadcrumbs" />
+                <MediaBreadcrumbs
+                    :items="breadcrumbs"
+                    :is-dragging="isDragging"
+                    :drop-target-folder-id="dropTargetFolderId"
+                    @dragover="onBreadcrumbDragOver"
+                    @dragleave="onBreadcrumbDragLeave"
+                    @drop="onBreadcrumbDrop"
+                />
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="relative">
                         <Search
@@ -589,10 +675,18 @@ function onPreviewUpdated(file: MediaFileItem): void {
                                 :key="folder.id"
                                 :folder="folder"
                                 :selected="isFolderSelected(folder.id)"
+                                :droppable="isDragging"
+                                :is-drop-target="
+                                    isDragging &&
+                                    dropTargetFolderId === folder.id
+                                "
                                 @rename="openRenameFolder"
                                 @move="openMoveFolder"
                                 @delete="openDeleteFolder"
                                 @toggle-select="toggleSelectFolder"
+                                @dragover="onFolderDragOver"
+                                @dragleave="onFolderDragLeave"
+                                @drop="onFolderDrop"
                             />
                         </div>
                     </section>
@@ -612,11 +706,14 @@ function onPreviewUpdated(file: MediaFileItem): void {
                                 :key="file.id"
                                 :file="file"
                                 :selected="isSelected(file.id)"
+                                :dragging="draggingFileIds.includes(file.id)"
                                 @open="openFile"
                                 @toggle-select="toggleSelect"
                                 @rename="openRenameFile"
                                 @move="openMoveFile"
                                 @delete="openDeleteFile"
+                                @dragstart="onFileDragStart"
+                                @dragend="onFileDragEnd"
                             />
                         </div>
                         <p
