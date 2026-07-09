@@ -156,7 +156,7 @@ const hasOwnBreadcrumb = computed(() =>
         <!-- DEFAULT only: centered prose with breadcrumb + page title +
              hero image. Fullwidth skips this so widgets sit edge-to-edge
              with no breadcrumb chrome on top. -->
-        <article v-if="!isFullwidth" class="container-xl py-10">
+        <article v-if="false" class="container-xl py-10">
             <nav
                 v-if="!page.is_home && !hasOwnBreadcrumb"
                 class="mv-pagebanner-crumbs mv-crumbs-onlight mb-6"

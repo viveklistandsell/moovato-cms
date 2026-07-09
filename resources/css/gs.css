@@ -658,6 +658,9 @@
 }
 .trust-bar__item--up .trust-bar__number {
     margin: 37px 0 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
 }
 .trust-bar__item:hover .trust-bar__number {
     -webkit-text-stroke: 1px var(--orange);
@@ -4542,7 +4545,6 @@
 
 .mv-aboutexp .ax-media {
     position: relative;
-    max-width: 480px;
     padding-bottom: 3rem;
     padding-right: 3rem;
 }
