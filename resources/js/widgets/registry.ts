@@ -48,8 +48,6 @@ import FeaturesEditor from './Features/FeaturesEditor.vue';
 import FeaturesRenderer from './Features/FeaturesRenderer.vue';
 import GalleryEditor from './Gallery/GalleryEditor.vue';
 import GalleryRenderer from './Gallery/GalleryRenderer.vue';
-import GetInTouchEditor from './GetInTouch/GetInTouchEditor.vue';
-import GetInTouchRenderer from './GetInTouch/GetInTouchRenderer.vue';
 import HeroEditor from './Hero/HeroEditor.vue';
 import HeroRenderer from './Hero/HeroRenderer.vue';
 import HeronewEditor from './Heronew/HeronewEditor.vue';
@@ -202,7 +200,6 @@ export const widgetRegistry: WidgetRegistry = {
         renderer: CompanyDirectoryRenderer,
     },
     contact: { editor: ContactEditor, renderer: ContactRenderer },
-    get_in_touch: { editor: GetInTouchEditor, renderer: GetInTouchRenderer },
     work_process: {
         editor: WorkProcessEditor,
         renderer: WorkProcessRenderer,
