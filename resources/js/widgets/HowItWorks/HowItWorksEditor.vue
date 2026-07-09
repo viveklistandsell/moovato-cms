@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 type Step = { icon: string; title: string; description: string };
 
@@ -62,9 +62,8 @@ function removeStep(index: number): void {
                 <Input v-model="step.icon" placeholder="Icon (lucide)" />
                 <div class="space-y-2">
                     <Input v-model="step.title" placeholder="Title" />
-                    <Textarea
+                    <RichTextEditor
                         v-model="step.description"
-                        :rows="2"
                         placeholder="Description"
                     />
                 </div>

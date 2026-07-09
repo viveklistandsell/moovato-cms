@@ -34,7 +34,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-aboutexp section-py">
         <div
-            class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-12"
+            class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
             <div class="ax-media">
                 <div class="ax-photo ax-photo--main">
@@ -114,16 +114,6 @@ defineProps<{ settings: Settings; data: Data }>();
                         v-if="data.founder_name"
                         class="flex items-center gap-3"
                     >
-                        <span class="ax-founder-avatar">
-                            <img
-                                v-if="settings.founder_url"
-                                :src="settings.founder_url"
-                                :alt="data.founder_alt || data.founder_name"
-                                loading="lazy"
-                                decoding="async"
-                            />
-                            <ImageIcon v-else class="size-5" />
-                        </span>
                         <span class="leading-tight">
                             <span
                                 class="block font-semibold text-[var(--midnight)]"

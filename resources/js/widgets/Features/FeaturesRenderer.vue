@@ -73,12 +73,11 @@ const iconWrapperClass = computed(() => {
                     <h3 v-if="item.title" class="mt-4 text-lg font-semibold">
                         {{ item.title }}
                     </h3>
-                    <p
+                    <div
                         v-if="item.description"
-                        class="mt-2 text-sm text-muted-foreground"
-                    >
-                        {{ item.description }}
-                    </p>
+                        class="mv-rte mt-2 text-sm text-muted-foreground"
+                        v-html="item.description"
+                    />
                 </div>
             </div>
         </div>

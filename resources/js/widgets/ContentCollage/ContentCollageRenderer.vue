@@ -28,7 +28,7 @@ function img(i: number): string | null {
 <template>
     <section class="mv-collage section-py">
         <div
-            class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-12"
+            class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
             <div
                 class="grid aspect-square grid-cols-2 grid-rows-2 gap-4"

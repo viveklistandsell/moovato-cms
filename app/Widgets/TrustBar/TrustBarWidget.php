@@ -8,9 +8,9 @@ use App\Widgets\Concerns\ProvidesWidgetDefaults;
 use App\Widgets\Contracts\WidgetContract;
 
 /**
- * Trust bar: a row of headline stats (big accent number + italic serif caption)
- * with an optional rotating circular-text badge. Dark by default; recolored to
- * the Moovato theme (orange numbers/badge on a midnight background).
+ * Trust fun fact: a staggered row of headline stats, each an outlined counter
+ * number, a notched divider and a circular badge (count + two-line caption with
+ * a gradient blob). Dark by default; recolored to the Moovato theme.
  */
 final class TrustBarWidget implements WidgetContract
 {
@@ -43,7 +43,8 @@ final class TrustBarWidget implements WidgetContract
     {
         return [
             'theme' => 'dark',  // dark | light
-            'show_badge' => true,
+            'bg_image_path' => null,
+            'bg_image_url' => null,
         ];
     }
 
@@ -57,9 +58,8 @@ final class TrustBarWidget implements WidgetContract
                 ['value' => '1.200+', 'line1' => 'Umzüge in Berlin', 'line2' => 'erfolgreich durchgeführt'],
                 ['value' => '4,9 ★', 'line1' => 'Google Bewertung', 'line2' => 'von zufriedenen Kunden'],
                 ['value' => '100%', 'line1' => 'Festpreisgarantie', 'line2' => 'ohne versteckte Kosten'],
+                ['value' => '24 Std.', 'line1' => 'Angebot erhalten', 'line2' => 'schnell & unverbindlich'],
             ],
-            'badge_text' => 'MOOVATO · UMZUG · BERLIN · ',
-            'badge_icon' => 'ArrowUpRight',
         ];
     }
 
@@ -70,7 +70,8 @@ final class TrustBarWidget implements WidgetContract
     {
         return [
             'theme' => ['required', 'in:dark,light'],
-            'show_badge' => ['boolean'],
+            'bg_image_path' => ['nullable', 'string', 'max:1000'],
+            'bg_image_url' => ['nullable', 'string', 'max:2000'],
         ];
     }
 
@@ -84,8 +85,6 @@ final class TrustBarWidget implements WidgetContract
             'stats.*.value' => ['nullable', 'string', 'max:24'],
             'stats.*.line1' => ['nullable', 'string', 'max:80'],
             'stats.*.line2' => ['nullable', 'string', 'max:80'],
-            'badge_text' => ['nullable', 'string', 'max:80'],
-            'badge_icon' => ['nullable', 'string', 'max:64'],
         ];
     }
 }

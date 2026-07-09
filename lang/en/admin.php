@@ -1050,6 +1050,7 @@ return [
         'navigation_label' => 'Navigation Label (:code)',
         'url_for_code' => 'URL (:code)',
         'css_class' => 'CSS class',
+        'megamenu' => 'Mega menu',
         'open_in_new_tab_short' => 'Open in new tab',
         'active' => 'Active',
         'remove' => 'Remove',

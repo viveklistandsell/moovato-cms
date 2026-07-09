@@ -15,7 +15,7 @@ defineProps<{ data: Data }>();
 
 <template>
     <section class="mv-textcols section-py">
-        <div class="container-xl grid gap-10 lg:grid-cols-2 lg:gap-12">
+        <div class="container-xl grid gap-10 lg:grid-cols-2 lg:gap-x-10">
             <div>
                 <h2
                     v-if="data.heading"

@@ -26,7 +26,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-teamcta section-py">
         <div
-            class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-12"
+            class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
             <div :class="settings.image_side === 'right' ? 'lg:order-1' : ''">
                 <span v-if="data.eyebrow" class="mv-teamcta-eyebrow">

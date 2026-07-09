@@ -48,7 +48,7 @@ const active = ref(0);
                 class="mb-5 flex justify-center"
             >
                 <div
-                    class="inline-flex gap-1.5 rounded-2xl bg-[var(--linen)] p-1.5"
+                    class="inline-flex gap-1.5 rounded-2xl bg-[var(--midnight)] p-1.5"
                 >
                     <button
                         v-for="(tab, ti) in data.tabs ?? []"
@@ -58,7 +58,7 @@ const active = ref(0);
                         :class="
                             active === ti
                                 ? 'bg-white text-[color:var(--midnight)] shadow-[0_4px_14px_rgba(15,23,42,0.08)]'
-                                : 'text-[color:var(--slate)] hover:text-[color:var(--midnight)]'
+                                : 'text-white hover:text-white'
                         "
                         @click="active = ti"
                     >

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -115,9 +116,8 @@ function removeFeature(index: number): void {
                         <Trash2 class="size-4 text-destructive" />
                     </Button>
                 </div>
-                <Textarea
+                <RichTextEditor
                     v-model="feature.description"
-                    :rows="2"
                     placeholder="Description"
                 />
             </div>

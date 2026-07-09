@@ -209,12 +209,11 @@ function reviewsLabel(count?: number): string {
                                 </div>
                             </div>
 
-                            <p
+                            <div
                                 v-if="company.description"
-                                class="mv-directory__desc"
-                            >
-                                {{ company.description }}
-                            </p>
+                                class="mv-rte mv-directory__desc"
+                                v-html="company.description"
+                            />
 
                             <div class="mv-directory__foot">
                                 <ul class="mv-directory__meta">

@@ -44,13 +44,27 @@ const props = defineProps<{
 // desktop = lg+ (>= 1024px). We only emit overrides when adjacent breakpoints
 // differ, so "show on all" produces no class at all.
 function visibilityClass(v?: WidgetVisibility): string {
-    if (!v) return '';
+    if (!v) {
+        return '';
+    }
+
     const { mobile, tablet, desktop } = v;
-    if (mobile && tablet && desktop) return '';
+
+    if (mobile && tablet && desktop) {
+        return '';
+    }
+
     const parts: string[] = [];
     parts.push(mobile ? 'block' : 'hidden');
-    if (tablet !== mobile) parts.push(tablet ? 'md:block' : 'md:hidden');
-    if (desktop !== tablet) parts.push(desktop ? 'lg:block' : 'lg:hidden');
+
+    if (tablet !== mobile) {
+        parts.push(tablet ? 'md:block' : 'md:hidden');
+    }
+
+    if (desktop !== tablet) {
+        parts.push(desktop ? 'lg:block' : 'lg:hidden');
+    }
+
     return parts.join(' ');
 }
 
@@ -83,6 +97,12 @@ const t = computed(() => ({
 const isFullwidth = computed(() => props.page.template === 'fullwidth');
 const isNolayout = computed(() => props.page.template === 'nolayout');
 // "default" is the implicit fallback.
+
+// Banner widgets render their own breadcrumb, so suppress the layout-level
+// breadcrumb when one is present to avoid showing it twice.
+const hasOwnBreadcrumb = computed(() =>
+    (props.widgets ?? []).some((w) => w.type === 'orbit_banner'),
+);
 </script>
 
 <template>
@@ -111,13 +131,15 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
 
     <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
     <FrontendLayout v-else>
-        <!-- DEFAULT only: centered prose with breadcrumb + page title +
-             hero image. Fullwidth skips this so widgets sit edge-to-edge
-             with no breadcrumb chrome on top. -->
-        <article v-if="!isFullwidth" class="container-xl py-10">
+        <!-- Breadcrumb: shown on every page EXCEPT the home page, for both
+             the default and fullwidth templates. Fullwidth gets its own thin
+             breadcrumb bar since it skips the prose article below. -->
+        <div
+            v-if="isFullwidth && !page.is_home && !hasOwnBreadcrumb"
+            class="container-xl pt-8"
+        >
             <nav
-                v-if="!page.is_home"
-                class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
+                class="mv-pagebanner-crumbs mv-crumbs-onlight"
                 aria-label="Breadcrumb"
             >
                 <Link
@@ -126,8 +148,28 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
                 >
                     {{ t.home }}
                 </Link>
-                <span>›</span>
-                <span class="line-clamp-1 text-foreground">
+                <span class="sep">›</span>
+                <span class="is-current line-clamp-1">{{ page.title }}</span>
+            </nav>
+        </div>
+
+        <!-- DEFAULT only: centered prose with breadcrumb + page title +
+             hero image. Fullwidth skips this so widgets sit edge-to-edge
+             with no breadcrumb chrome on top. -->
+        <article v-if="!isFullwidth" class="container-xl py-10">
+            <nav
+                v-if="!page.is_home && !hasOwnBreadcrumb"
+                class="mv-pagebanner-crumbs mv-crumbs-onlight mb-6"
+                aria-label="Breadcrumb"
+            >
+                <Link
+                    :href="localizedUrl(locale, '/')"
+                    class="hover:text-foreground"
+                >
+                    {{ t.home }}
+                </Link>
+                <span class="sep">›</span>
+                <span class="is-current line-clamp-1">
                     {{ page.title }}
                 </span>
             </nav>

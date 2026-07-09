@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -206,9 +207,8 @@ function move(index: number, delta: number): void {
                     </div>
                 </div>
 
-                <Textarea
+                <RichTextEditor
                     v-model="company.description"
-                    :rows="2"
                     placeholder="Short description"
                 />
 

@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { ArrowRight, Check, Star } from 'lucide-vue-next';
+import { ArrowRight, Check } from 'lucide-vue-next';
 import { computed } from 'vue';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 import NextButton from '@/widgets/shared/NextButton.vue';
@@ -50,7 +50,7 @@ const visiblePills = computed(() =>
                 <!-- LEFT -->
                 <div class="hero-content">
                     <div v-if="data.badge" class="hero-badge">
-                        <Star class="ico" :size="13" /> {{ data.badge }}
+                        {{ data.badge }}
                     </div>
 
                     <h1 class="hero-title">

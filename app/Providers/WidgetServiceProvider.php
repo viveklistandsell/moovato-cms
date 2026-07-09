@@ -11,18 +11,23 @@ use App\Widgets\Banner\BannerWidget;
 use App\Widgets\Blog\BlogWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
 use App\Widgets\Comparison\ComparisonWidget;
+use App\Widgets\Contact\ContactWidget;
 use App\Widgets\ContentCollage\ContentCollageWidget;
 use App\Widgets\ContentStyle1\ContentStyle1Widget;
 use App\Widgets\ContentStyle2\ContentStyle2Widget;
 use App\Widgets\Contracts\WidgetContract;
 use App\Widgets\Cta\CtaWidget;
+use App\Widgets\CtaBanner\CtaBannerWidget;
+use App\Widgets\CtaWork\CtaWorkWidget;
 use App\Widgets\DarkFeature\DarkFeatureWidget;
 use App\Widgets\DarkIntro\DarkIntroWidget;
 use App\Widgets\ExpertsChoice\ExpertsChoiceWidget;
 use App\Widgets\Faq\FaqWidget;
 use App\Widgets\FaqMedia\FaqMediaWidget;
+use App\Widgets\FaqPage\FaqPageWidget;
 use App\Widgets\Features\FeaturesWidget;
 use App\Widgets\Gallery\GalleryWidget;
+use App\Widgets\GetInTouch\GetInTouchWidget;
 use App\Widgets\Hero\HeroWidget;
 use App\Widgets\Heronew\HeronewWidget;
 use App\Widgets\HowItWorks\HowItWorksWidget;
@@ -47,11 +52,13 @@ use App\Widgets\StatsBand\StatsBandWidget;
 use App\Widgets\SupportingMedia\SupportingMediaWidget;
 use App\Widgets\TeamCta\TeamCtaWidget;
 use App\Widgets\Testimonial\TestimonialWidget;
+use App\Widgets\TestimonialsShowcase\TestimonialsShowcaseWidget;
 use App\Widgets\TextBlock\TextBlockWidget;
 use App\Widgets\TextColumns\TextColumnsWidget;
 use App\Widgets\TrustBar\TrustBarWidget;
 use App\Widgets\WhyChooseMedia\WhyChooseMediaWidget;
 use App\Widgets\WhyChooseUs\WhyChooseUsWidget;
+use App\Widgets\WorkProcess\WorkProcessWidget;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
@@ -68,12 +75,15 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         BannerWidget::class,
         PageBannerWidget::class,
         OrbitBannerWidget::class,
+        CtaBannerWidget::class,
         TextBlockWidget::class,
         ImageWidget::class,
         FeaturesWidget::class,
         CtaWidget::class,
+        CtaWorkWidget::class,
         FaqWidget::class,
         TestimonialWidget::class,
+        TestimonialsShowcaseWidget::class,
         GalleryWidget::class,
         HeronewWidget::class,
         TrustBarWidget::class,
@@ -87,6 +97,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         WhyChooseUsWidget::class,
         PartnersWidget::class,
         FaqMediaWidget::class,
+        FaqPageWidget::class,
         BlogWidget::class,
         MapWidget::class,
         PromoCtaWidget::class,
@@ -110,6 +121,9 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ContentCollageWidget::class,
         ComparisonWidget::class,
         CompanyDirectoryWidget::class,
+        ContactWidget::class,
+        GetInTouchWidget::class,
+        WorkProcessWidget::class,
     ];
 
     public function register(): void

@@ -22,10 +22,14 @@ defineProps<{ data: Data }>();
 <template>
     <section class="mv-experts section-py">
         <div
-            class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-12"
+            class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
             <div class="ec-card">
-                <span v-if="data.since_label" class="ec-since" aria-hidden="true">
+                <span
+                    v-if="data.since_label"
+                    class="ec-since"
+                    aria-hidden="true"
+                >
                     {{ data.since_label }}
                 </span>
 
@@ -70,9 +74,11 @@ defineProps<{ data: Data }>();
                     <h3 v-if="card.title" class="ec-feature-title">
                         {{ card.title }}
                     </h3>
-                    <p v-if="card.description" class="ec-feature-desc">
-                        {{ card.description }}
-                    </p>
+                    <div
+                        v-if="card.description"
+                        class="mv-rte ec-feature-desc"
+                        v-html="card.description"
+                    />
                     <span class="ec-feature-arrow" aria-hidden="true">
                         <ArrowRight class="size-4" />
                     </span>

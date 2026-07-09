@@ -33,7 +33,7 @@ function toggle(i: number): void {
 <template>
     <section class="mv-faqmedia section-py">
         <div
-            class="container-xl grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-16"
+            class="container-xl grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
             <div class="mv-faqmedia-media">
                 <span v-if="data.vertical_label" class="mv-faqmedia-vlabel">

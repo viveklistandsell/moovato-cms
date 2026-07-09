@@ -10,12 +10,18 @@ import BlogEditor from './Blog/BlogEditor.vue';
 import BlogRenderer from './Blog/BlogRenderer.vue';
 import CompanyDirectoryEditor from './CompanyDirectory/CompanyDirectoryEditor.vue';
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
+import ContactEditor from './Contact/ContactEditor.vue';
+import ContactRenderer from './Contact/ContactRenderer.vue';
 import ContentCollageEditor from './ContentCollage/ContentCollageEditor.vue';
 import ContentCollageRenderer from './ContentCollage/ContentCollageRenderer.vue';
 import ComparisonEditor from './Comparison/ComparisonEditor.vue';
 import ComparisonRenderer from './Comparison/ComparisonRenderer.vue';
 import CtaEditor from './Cta/CtaEditor.vue';
 import CtaRenderer from './Cta/CtaRenderer.vue';
+import CtaBannerEditor from './CtaBanner/CtaBannerEditor.vue';
+import CtaBannerRenderer from './CtaBanner/CtaBannerRenderer.vue';
+import CtaWorkEditor from './CtaWork/CtaWorkEditor.vue';
+import CtaWorkRenderer from './CtaWork/CtaWorkRenderer.vue';
 import DarkFeatureEditor from './DarkFeature/DarkFeatureEditor.vue';
 import DarkFeatureRenderer from './DarkFeature/DarkFeatureRenderer.vue';
 import ExpertsChoiceEditor from './ExpertsChoice/ExpertsChoiceEditor.vue';
@@ -36,10 +42,14 @@ import FaqEditor from './Faq/FaqEditor.vue';
 import FaqRenderer from './Faq/FaqRenderer.vue';
 import FaqMediaEditor from './FaqMedia/FaqMediaEditor.vue';
 import FaqMediaRenderer from './FaqMedia/FaqMediaRenderer.vue';
+import FaqPageEditor from './FaqPage/FaqPageEditor.vue';
+import FaqPageRenderer from './FaqPage/FaqPageRenderer.vue';
 import FeaturesEditor from './Features/FeaturesEditor.vue';
 import FeaturesRenderer from './Features/FeaturesRenderer.vue';
 import GalleryEditor from './Gallery/GalleryEditor.vue';
 import GalleryRenderer from './Gallery/GalleryRenderer.vue';
+import GetInTouchEditor from './GetInTouch/GetInTouchEditor.vue';
+import GetInTouchRenderer from './GetInTouch/GetInTouchRenderer.vue';
 import HeroEditor from './Hero/HeroEditor.vue';
 import HeroRenderer from './Hero/HeroRenderer.vue';
 import HeronewEditor from './Heronew/HeronewEditor.vue';
@@ -72,12 +82,16 @@ import ServicesCategoryGridEditor from './ServicesCategoryGrid/ServicesCategoryG
 import ServicesCategoryGridRenderer from './ServicesCategoryGrid/ServicesCategoryGridRenderer.vue';
 import TestimonialEditor from './Testimonial/TestimonialEditor.vue';
 import TestimonialRenderer from './Testimonial/TestimonialRenderer.vue';
+import TestimonialsShowcaseEditor from './TestimonialsShowcase/TestimonialsShowcaseEditor.vue';
+import TestimonialsShowcaseRenderer from './TestimonialsShowcase/TestimonialsShowcaseRenderer.vue';
 import TextBlockEditor from './TextBlock/TextBlockEditor.vue';
 import TextBlockRenderer from './TextBlock/TextBlockRenderer.vue';
 import TrustBarEditor from './TrustBar/TrustBarEditor.vue';
 import TrustBarRenderer from './TrustBar/TrustBarRenderer.vue';
 import WhyChooseUsEditor from './WhyChooseUs/WhyChooseUsEditor.vue';
 import WhyChooseUsRenderer from './WhyChooseUs/WhyChooseUsRenderer.vue';
+import WorkProcessEditor from './WorkProcess/WorkProcessEditor.vue';
+import WorkProcessRenderer from './WorkProcess/WorkProcessRenderer.vue';
 import type { WidgetRegistry } from './types';
 
 /**
@@ -91,12 +105,18 @@ export const widgetRegistry: WidgetRegistry = {
     banner: { editor: BannerEditor, renderer: BannerRenderer },
     page_banner: { editor: PageBannerEditor, renderer: PageBannerRenderer },
     orbit_banner: { editor: OrbitBannerEditor, renderer: OrbitBannerRenderer },
+    cta_banner: { editor: CtaBannerEditor, renderer: CtaBannerRenderer },
+    cta_work: { editor: CtaWorkEditor, renderer: CtaWorkRenderer },
     text_block: { editor: TextBlockEditor, renderer: TextBlockRenderer },
     image: { editor: ImageEditor, renderer: ImageRenderer },
     features: { editor: FeaturesEditor, renderer: FeaturesRenderer },
     cta: { editor: CtaEditor, renderer: CtaRenderer },
     faq: { editor: FaqEditor, renderer: FaqRenderer },
     testimonial: { editor: TestimonialEditor, renderer: TestimonialRenderer },
+    testimonials_showcase: {
+        editor: TestimonialsShowcaseEditor,
+        renderer: TestimonialsShowcaseRenderer,
+    },
     gallery: { editor: GalleryEditor, renderer: GalleryRenderer },
     trust_bar: { editor: TrustBarEditor, renderer: TrustBarRenderer },
     marquee: { editor: MarqueeEditor, renderer: MarqueeRenderer },
@@ -121,6 +141,7 @@ export const widgetRegistry: WidgetRegistry = {
     },
     partners: { editor: PartnersEditor, renderer: PartnersRenderer },
     faq_media: { editor: FaqMediaEditor, renderer: FaqMediaRenderer },
+    faq_page: { editor: FaqPageEditor, renderer: FaqPageRenderer },
     blog: { editor: BlogEditor, renderer: BlogRenderer },
     map: { editor: MapEditor, renderer: MapRenderer },
     promo_cta: { editor: PromoCtaEditor, renderer: PromoCtaRenderer },
@@ -179,6 +200,12 @@ export const widgetRegistry: WidgetRegistry = {
     company_directory: {
         editor: CompanyDirectoryEditor,
         renderer: CompanyDirectoryRenderer,
+    },
+    contact: { editor: ContactEditor, renderer: ContactRenderer },
+    get_in_touch: { editor: GetInTouchEditor, renderer: GetInTouchRenderer },
+    work_process: {
+        editor: WorkProcessEditor,
+        renderer: WorkProcessRenderer,
     },
 };
 

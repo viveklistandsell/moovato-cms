@@ -105,12 +105,11 @@ onBeforeUnmount(() => {
                             />
                             {{ step.title }}
                         </h3>
-                        <p
+                        <div
                             v-if="step.description"
-                            class="mv-howitworks__step-desc"
-                        >
-                            {{ step.description }}
-                        </p>
+                            class=" mv-howitworks__step-desc"
+                            v-html="step.description"
+                        />
                     </div>
                 </div>
             </div>

@@ -24,7 +24,7 @@ defineProps<{ settings: Settings; data: Data }>();
 <template>
     <section class="mv-darkfeature">
         <div
-            class="container-xl grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2 lg:gap-12"
+            class="container-xl grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2 lg:gap-x-10"
         >
             <div
                 class="mv-df-media"

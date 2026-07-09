@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted } from 'vue';
 import BackToTop from '@/components/frontend/BackToTop.vue';
 import CookieBanner from '@/components/frontend/CookieBanner.vue';
+import FloatingButtons from '@/components/frontend/FloatingButtons.vue';
 import SiteCursor from '@/components/frontend/SiteCursor.vue';
 import SiteFooter from '@/components/frontend/SiteFooter.vue';
 import SiteHeader from '@/components/frontend/SiteHeader.vue';
@@ -55,6 +56,7 @@ onUnmounted(() => {
             <slot />
         </main>
         <SiteFooter :locale="locale" />
+        <FloatingButtons :locale="locale" />
         <BackToTop v-if="showBackToTop" />
         <SiteCursor />
         <CookieBanner v-if="showCookieBanner" />

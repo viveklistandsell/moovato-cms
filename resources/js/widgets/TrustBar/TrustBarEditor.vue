@@ -10,19 +10,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Stat = { value: string; line1: string; line2: string };
 
 type Settings = {
     theme: 'dark' | 'light';
-    show_badge: boolean;
+    bg_image_path: string | null;
+    bg_image_url: string | null;
 };
 
 type Data = {
     stats: Stat[];
-    badge_text: string;
-    badge_icon: string;
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
@@ -58,14 +57,18 @@ function removeStat(index: number): void {
                     </SelectContent>
                 </Select>
             </div>
-
-            <div
-                class="flex items-center justify-between rounded-md border bg-muted/30 px-4 py-3"
-            >
-                <Label class="mb-0">Show circular badge</Label>
-                <Switch
-                    :model-value="settings.show_badge"
-                    @update:model-value="(v) => (settings.show_badge = v)"
+            <div class="grid gap-2">
+                <Label>Background image (optional)</Label>
+                <WidgetImageField
+                    :path="settings.bg_image_path"
+                    :url="settings.bg_image_url"
+                    aspect-class="aspect-[16/6] w-full"
+                    @update="
+                        (v) => {
+                            settings.bg_image_path = v.path;
+                            settings.bg_image_url = v.url;
+                        }
+                    "
                 />
             </div>
         </div>
@@ -108,21 +111,6 @@ function removeStat(index: number): void {
                 >
                     <Trash2 class="size-4 text-destructive" />
                 </Button>
-            </div>
-        </div>
-
-        <!-- Badge -->
-        <div v-if="settings.show_badge" class="grid gap-4 md:grid-cols-2">
-            <div class="grid gap-2">
-                <Label>Badge text (loops around the circle)</Label>
-                <Input
-                    v-model="data.badge_text"
-                    placeholder="TOGETHER · LET'S · WORK · "
-                />
-            </div>
-            <div class="grid gap-2">
-                <Label>Center icon (lucide)</Label>
-                <Input v-model="data.badge_icon" placeholder="ArrowUpRight" />
             </div>
         </div>
     </div>

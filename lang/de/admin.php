@@ -1050,6 +1050,7 @@ return [
         'navigation_label' => 'Navigationsbezeichnung (:code)',
         'url_for_code' => 'URL (:code)',
         'css_class' => 'CSS-Klasse',
+        'megamenu' => 'Mega-Menü',
         'open_in_new_tab_short' => 'In neuem Tab öffnen',
         'active' => 'Aktiv',
         'remove' => 'Entfernen',
