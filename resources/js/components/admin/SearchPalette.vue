@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
 import {
+    Boxes,
+    Building2,
     FileText,
     Files,
+    Globe,
     Image as ImageIcon,
+    Languages as LanguagesIcon,
     Loader2,
+    Map,
+    Menu as MenuIcon,
     Newspaper,
+    Package,
     Search,
     User as UserIcon,
 } from 'lucide-vue-next';
@@ -20,7 +27,18 @@ type SearchItem = {
 };
 
 type SearchGroup = {
-    key: 'pages' | 'posts' | 'media' | 'users';
+    key:
+        | 'pages'
+        | 'posts'
+        | 'media'
+        | 'users'
+        | 'countries'
+        | 'states'
+        | 'cities'
+        | 'service_parents'
+        | 'service_categories'
+        | 'languages'
+        | 'menus';
     label: string;
     items: SearchItem[];
 };
@@ -115,6 +133,13 @@ const GROUP_ICONS = {
     posts: Newspaper,
     media: ImageIcon,
     users: UserIcon,
+    countries: Globe,
+    states: Map,
+    cities: Building2,
+    service_parents: Boxes,
+    service_categories: Package,
+    languages: LanguagesIcon,
+    menus: MenuIcon,
 } as const;
 
 function iconFor(key: SearchGroup['key']): typeof FileText {

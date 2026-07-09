@@ -6,8 +6,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\Language;
 use App\Models\MediaFile;
+use App\Models\Menu;
 use App\Models\Page;
+use App\Models\ServiceCategory;
+use App\Models\ServiceParentCategory;
+use App\Models\State;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +26,8 @@ use Illuminate\Http\Request;
  * databases.
  *
  * Permissions are honoured per group — a user without `users.view` won't
- * see user results, etc.
+ * see user results, etc. Groups where the user has no matches at all are
+ * dropped from the payload so the UI never renders an empty section.
  */
 final class SearchController extends Controller
 {
@@ -118,6 +126,154 @@ final class SearchController extends Controller
                         'title' => $u->name,
                         'subtitle' => $u->email,
                         'href' => '/admin/users?focus='.$u->id,
+                    ])
+                    ->all(),
+            ];
+        }
+
+        if ($user?->can('locations.view')) {
+            $groups[] = [
+                'key' => 'countries',
+                'label' => 'Countries',
+                'items' => Country::query()
+                    ->where(function ($q) use ($like): void {
+                        $q->where('name', 'like', $like)
+                            ->orWhere('iso_code', 'like', $like);
+                    })
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'name', 'iso_code', 'status'])
+                    ->map(fn (Country $c): array => [
+                        'id' => $c->id,
+                        'title' => $c->name,
+                        'subtitle' => $c->iso_code.' · '.$c->status,
+                        'href' => "/admin/directory/countries/{$c->id}/edit",
+                    ])
+                    ->all(),
+            ];
+
+            $groups[] = [
+                'key' => 'states',
+                'label' => 'States',
+                'items' => State::query()
+                    ->with('country:id,name,iso_code')
+                    ->where(function ($q) use ($like): void {
+                        $q->where('name', 'like', $like)
+                            ->orWhere('code', 'like', $like);
+                    })
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'country_id', 'name', 'code', 'status'])
+                    ->map(fn (State $s): array => [
+                        'id' => $s->id,
+                        'title' => $s->name,
+                        'subtitle' => ($s->country?->name ?? '—').' · '.$s->code.' · '.$s->status,
+                        'href' => "/admin/directory/states/{$s->id}/edit",
+                    ])
+                    ->all(),
+            ];
+
+            $groups[] = [
+                'key' => 'cities',
+                'label' => 'Cities',
+                'items' => City::query()
+                    ->with('state:id,name')
+                    ->where(function ($q) use ($like): void {
+                        $q->where('name', 'like', $like)
+                            ->orWhere('postal_code', 'like', $like);
+                    })
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'state_id', 'name', 'postal_code', 'status'])
+                    ->map(fn (City $c): array => [
+                        'id' => $c->id,
+                        'title' => $c->name,
+                        'subtitle' => ($c->state?->name ?? '—')
+                            .($c->postal_code !== null ? ' · '.$c->postal_code : '')
+                            .' · '.$c->status,
+                        'href' => "/admin/directory/cities/{$c->id}/edit",
+                    ])
+                    ->all(),
+            ];
+        }
+
+        if ($user?->can('service_categories.view')) {
+            $groups[] = [
+                'key' => 'service_parents',
+                'label' => 'Parent categories',
+                'items' => ServiceParentCategory::query()
+                    ->where('name', 'like', $like)
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'name', 'status'])
+                    ->map(fn (ServiceParentCategory $p): array => [
+                        'id' => $p->id,
+                        'title' => $p->name,
+                        'subtitle' => (string) $p->status,
+                        'href' => "/admin/services/parent-categories/{$p->id}/edit",
+                    ])
+                    ->all(),
+            ];
+
+            $groups[] = [
+                'key' => 'service_categories',
+                'label' => 'Service categories',
+                'items' => ServiceCategory::query()
+                    ->with('parentCategory:id,name')
+                    ->where('name', 'like', $like)
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'parent_category_id', 'name', 'status'])
+                    ->map(fn (ServiceCategory $c): array => [
+                        'id' => $c->id,
+                        'title' => $c->name,
+                        'subtitle' => ($c->parentCategory?->name ?? '—').' · '.$c->status,
+                        'href' => "/admin/services/categories/{$c->id}/edit",
+                    ])
+                    ->all(),
+            ];
+        }
+
+        if ($user !== null) {
+            $groups[] = [
+                'key' => 'languages',
+                'label' => 'Languages',
+                'items' => Language::query()
+                    ->where(function ($q) use ($like): void {
+                        $q->where('name', 'like', $like)
+                            ->orWhere('native_name', 'like', $like)
+                            ->orWhere('code', 'like', $like);
+                    })
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'name', 'native_name', 'code'])
+                    ->map(fn (Language $l): array => [
+                        'id' => $l->id,
+                        'title' => $l->name.' ('.$l->native_name.')',
+                        'subtitle' => mb_strtoupper($l->code),
+                        'href' => "/admin/languages/{$l->id}/edit",
+                    ])
+                    ->all(),
+            ];
+        }
+
+        if ($user?->can('menus.view')) {
+            $groups[] = [
+                'key' => 'menus',
+                'label' => 'Menus',
+                'items' => Menu::query()
+                    ->where(function ($q) use ($like): void {
+                        $q->where('name', 'like', $like)
+                            ->orWhere('key', 'like', $like);
+                    })
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'name', 'key'])
+                    ->map(fn (Menu $m): array => [
+                        'id' => $m->id,
+                        'title' => $m->name,
+                        'subtitle' => (string) $m->key,
+                        'href' => "/admin/menus/{$m->id}/edit",
                     ])
                     ->all(),
             ];
