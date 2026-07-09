@@ -646,6 +646,24 @@ return [
         'state_bulk_draft_toast' => ':count Bundesland als Entwurf gespeichert.|:count Bundesländer als Entwurf gespeichert.',
         'state_bulk_inactive_toast' => ':count Bundesland deaktiviert.|:count Bundesländer deaktiviert.',
         'state_bulk_updated_toast' => ':count Bundesland aktualisiert.|:count Bundesländer aktualisiert.',
+
+        // Stadt-Toasts (CRUD / Reorder / Massenaktionen).
+        'city_created_toast' => 'Stadt erstellt.',
+        'city_updated_toast' => 'Stadt aktualisiert.',
+        'city_deleted_toast' => 'Stadt gelöscht.',
+        'city_order_updated_toast' => 'Reihenfolge aktualisiert.',
+        'city_reorder_rejected_toast' => 'Neuanordnung abgelehnt: Einige Städte gehören nicht zum ausgewählten Bundesland.',
+        'city_bulk_deleted_toast' => ':count Stadt gelöscht.|:count Städte gelöscht.',
+        'city_bulk_published_toast' => ':count Stadt veröffentlicht.|:count Städte veröffentlicht.',
+        'city_bulk_draft_toast' => ':count Stadt als Entwurf gespeichert.|:count Städte als Entwurf gespeichert.',
+        'city_bulk_inactive_toast' => ':count Stadt deaktiviert.|:count Städte deaktiviert.',
+        'city_bulk_marked_popular_toast' => ':count Stadt als beliebt markiert.|:count Städte als beliebt markiert.',
+        'city_bulk_unmarked_popular_toast' => ':count Markierung entfernt.|:count Markierungen entfernt.',
+        'city_bulk_updated_toast' => ':count Stadt aktualisiert.|:count Städte aktualisiert.',
+
+        // City-spezifische Import-Fehler.
+        'import_error_unknown_state' => "Unbekanntes Bundesland (ISO ':iso', Code ':code') — kein passendes Bundesland gefunden.",
+        'import_error_duplicate_city' => 'Duplikat von Zeile :first_row: Permalink \':permalink\' erscheint bereits in dieser Datei.',
     ],
 
     'service_parent_categories' => [

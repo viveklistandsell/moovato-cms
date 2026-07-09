@@ -646,6 +646,29 @@ return [
         'state_bulk_draft_toast' => ':count state set to draft.|:count states set to draft.',
         'state_bulk_inactive_toast' => ':count state deactivated.|:count states deactivated.',
         'state_bulk_updated_toast' => ':count state updated.|:count states updated.',
+
+        // City CRUD / reorder / bulk toasts — same shape as the state
+        // ones above, but for the Cities module.
+        'city_created_toast' => 'City created.',
+        'city_updated_toast' => 'City updated.',
+        'city_deleted_toast' => 'City deleted.',
+        'city_order_updated_toast' => 'Order updated.',
+        'city_reorder_rejected_toast' => 'Reorder rejected: some cities do not belong to the selected state.',
+        'city_bulk_deleted_toast' => ':count city deleted.|:count cities deleted.',
+        'city_bulk_published_toast' => ':count city published.|:count cities published.',
+        'city_bulk_draft_toast' => ':count city set to draft.|:count cities set to draft.',
+        'city_bulk_inactive_toast' => ':count city deactivated.|:count cities deactivated.',
+        'city_bulk_marked_popular_toast' => ':count city marked popular.|:count cities marked popular.',
+        'city_bulk_unmarked_popular_toast' => ':count city unmarked.|:count cities unmarked.',
+        'city_bulk_updated_toast' => ':count city updated.|:count cities updated.',
+
+        // City CSV import errors — reuses the shared file-level ones
+        // (file_not_accessible / file_open_failed / file_empty /
+        // missing_columns / duplicate_row from the states section).
+        // These two are city-specific: state lookup by (iso, code) and
+        // duplicate (state_id, permalink) within a single file.
+        'import_error_unknown_state' => "Unknown state (ISO ':iso', code ':code') — no matching state found.",
+        'import_error_duplicate_city' => 'Duplicate of row :first_row: permalink \':permalink\' appears earlier in this file.',
     ],
 
     'service_parent_categories' => [

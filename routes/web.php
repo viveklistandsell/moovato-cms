@@ -177,6 +177,12 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->name('cities.reorder');
             Route::post('cities/bulk-action', [AdminCityController::class, 'bulkAction'])
                 ->name('cities.bulk-action');
+            Route::get('cities/export', [AdminCityController::class, 'export'])
+                ->name('cities.export');
+            Route::get('cities/sample-csv', [AdminCityController::class, 'sampleCsv'])
+                ->name('cities.sample-csv');
+            Route::post('cities/import', [AdminCityController::class, 'import'])
+                ->name('cities.import');
             Route::resource('cities', AdminCityController::class)
                 ->parameters(['cities' => 'city'])
                 ->except('show');

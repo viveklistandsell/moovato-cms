@@ -210,9 +210,6 @@ function applyBulkAction(action: string): void {
 }
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-
-// Controls the SampleCsvPreview dialog: click opens the preview, the
-// Download button inside the dialog triggers the actual file download.
 const showSamplePreview = ref(false);
 
 const importForm = useForm({

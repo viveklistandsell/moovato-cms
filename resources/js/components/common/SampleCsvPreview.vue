@@ -19,14 +19,6 @@ import {
 } from '@/components/ui/dialog';
 import { useT } from '@/composables/useT';
 
-/**
- * Preview dialog for a server-generated sample CSV. Fetches the CSV
- * once when opened, renders the header + first N rows in a table so
- * the admin can see the column shape before committing to download.
- *
- * The download button reuses the already-fetched content as a Blob —
- * no second server round-trip. `v-model:open` for external control.
- */
 const props = defineProps<{
     open: boolean;
     url: string;
@@ -69,11 +61,6 @@ const MONO_COLUMNS = new Set([
     'lang',
 ]);
 
-/**
- * Columns whose values map to a small colored pill instead of raw
- * text — the admin can see at a glance what statuses the sample
- * demonstrates without parsing the string.
- */
 const STATUS_COLUMNS = new Set(['status']);
 
 function isMonoColumn(col: string): boolean {
@@ -196,21 +183,9 @@ function parseCsv(text: string): ParsedCsv {
 
 <template>
     <Dialog :open="open" @update:open="(v) => emit('update:open', v)">
-        <!--
-            Sizing: w-[95vw] fills the viewport (minus a 2.5vw margin on
-            each side) on any screen. `sm:max-w-6xl` (72rem / 1152px)
-            caps the width on desktop so the dialog never grows so wide
-            the eye can't track a row. IMPORTANT: the max-width must be
-            `sm:`-prefixed to override shadcn's DialogContent default of
-            `sm:max-w-lg` — an unprefixed `max-w-*` is a different class
-            family in tailwind-merge and does NOT override the sm: one.
-            The table body's `overflow-x-auto` still handles wider CSVs
-            gracefully at any size.
-        -->
         <DialogContent
             class="w-[95vw] gap-0 overflow-hidden p-0 sm:max-w-6xl sm:rounded-2xl"
         >
-            <!-- Header: emerald icon chip + title + description + meta row -->
             <DialogHeader
                 class="space-y-0 border-b bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/40 px-6 py-5 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20"
             >
@@ -233,7 +208,6 @@ function parseCsv(text: string): ParsedCsv {
                                 t('locations.csv_sample_preview_description')
                             }}
                         </DialogDescription>
-                        <!-- Meta strip: filename + columns + rows -->
                         <div
                             v-if="!loading && !errorMessage && columnCount > 0"
                             class="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]"
@@ -382,7 +356,6 @@ function parseCsv(text: string): ParsedCsv {
                 </div>
             </div>
 
-            <!-- Footer: hint on left, actions on right -->
             <DialogFooter
                 class="items-center justify-between gap-3 border-t bg-muted/30 px-6 py-4 sm:flex sm:flex-row"
             >

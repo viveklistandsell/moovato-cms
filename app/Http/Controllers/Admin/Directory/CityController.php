@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Directory;
 
+use App\Actions\Admin\Directory\City\ExportCitiesToCsv;
+use App\Actions\Admin\Directory\City\ImportCitiesFromCsv;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Directory\City\BulkActionCitiesRequest;
+use App\Http\Requests\Admin\Directory\City\ImportCitiesRequest;
 use App\Http\Requests\Admin\Directory\City\ReorderCitiesRequest;
 use App\Http\Requests\Admin\Directory\City\StoreCityRequest;
 use App\Http\Requests\Admin\Directory\City\UpdateCityRequest;
@@ -15,9 +18,12 @@ use App\Models\State;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class CityController extends Controller
 {
@@ -136,7 +142,7 @@ final class CityController extends Controller
 
         return redirect()
             ->route('admin.directory.cities.index')
-            ->with('toast', ['type' => 'success', 'message' => 'City created.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.locations.city_created_toast')]);
     }
 
     public function edit(City $city): Response
@@ -167,7 +173,7 @@ final class CityController extends Controller
 
         return redirect()
             ->route('admin.directory.cities.index')
-            ->with('toast', ['type' => 'success', 'message' => 'City updated.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.locations.city_updated_toast')]);
     }
 
     public function destroy(City $city): RedirectResponse
@@ -178,7 +184,7 @@ final class CityController extends Controller
 
         return redirect()
             ->route('admin.directory.cities.index')
-            ->with('toast', ['type' => 'success', 'message' => 'City deleted.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.locations.city_deleted_toast')]);
     }
 
     public function reorder(ReorderCitiesRequest $request): RedirectResponse
@@ -196,7 +202,7 @@ final class CityController extends Controller
         if (count($validIds) !== count($orderedIds)) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Reorder rejected: some cities do not belong to the selected state.',
+                'message' => __('admin.locations.city_reorder_rejected_toast'),
             ]);
         }
 
@@ -208,7 +214,7 @@ final class CityController extends Controller
             }
         });
 
-        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
+        return back()->with('toast', ['type' => 'success', 'message' => __('admin.locations.city_order_updated_toast')]);
     }
 
     public function bulkAction(BulkActionCitiesRequest $request): RedirectResponse
@@ -235,20 +241,67 @@ final class CityController extends Controller
             return City::query()->whereIn('id', $ids)->update($update);
         });
 
-        $verb = match ($action) {
-            'delete' => 'deleted',
-            'publish' => 'published',
-            'draft' => 'set to draft',
-            'inactive' => 'deactivated',
-            'mark_popular' => 'marked popular',
-            'unmark_popular' => 'unmarked',
-            default => 'updated',
+        $key = match ($action) {
+            'delete' => 'admin.locations.city_bulk_deleted_toast',
+            'publish' => 'admin.locations.city_bulk_published_toast',
+            'draft' => 'admin.locations.city_bulk_draft_toast',
+            'inactive' => 'admin.locations.city_bulk_inactive_toast',
+            'mark_popular' => 'admin.locations.city_bulk_marked_popular_toast',
+            'unmark_popular' => 'admin.locations.city_bulk_unmarked_popular_toast',
+            default => 'admin.locations.city_bulk_updated_toast',
         };
 
         return back()->with('toast', [
             'type' => 'success',
-            'message' => "{$count} ".($count === 1 ? 'city' : 'cities')." {$verb}.",
+            'message' => trans_choice($key, $count, ['count' => $count]),
         ]);
+    }
+    public function export(Request $request, ExportCitiesToCsv $action): StreamedResponse
+    {
+        $countryId = $request->query('country_id');
+        $countryId = is_numeric($countryId) ? (int) $countryId : null;
+        $stateId = $request->query('state_id');
+        $stateId = is_numeric($stateId) ? (int) $stateId : null;
+        $popular = $request->query('popular');
+
+        return $action->handle([
+            'country_id' => $countryId,
+            'state_id' => $stateId,
+            'popular' => is_string($popular) ? $popular : null,
+            'q' => mb_trim((string) $request->query('q', '')),
+        ]);
+    }
+    public function sampleCsv(ExportCitiesToCsv $action): StreamedResponse
+    {
+        return $action->sample();
+    }
+    public function import(ImportCitiesRequest $request, ImportCitiesFromCsv $action): RedirectResponse
+    {
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        try {
+            $result = $action->handle($file);
+        } catch (RuntimeException $e) {
+            return back()->with('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+        }
+
+        $type = $result->hasErrors() ? 'warning' : 'success';
+        $summary = $result->hasErrors()
+            ? __('admin.locations.import_toast_summary_with_skipped', [
+                'created' => $result->created,
+                'updated' => $result->updated,
+                'skipped' => $result->skipped,
+            ])
+            : __('admin.locations.import_toast_summary', [
+                'created' => $result->created,
+                'updated' => $result->updated,
+            ]);
+
+        return redirect()
+            ->route('admin.directory.cities.index')
+            ->with('toast', ['type' => $type, 'message' => $summary])
+            ->with('importResult', $result->toArray());
     }
 
     /**
