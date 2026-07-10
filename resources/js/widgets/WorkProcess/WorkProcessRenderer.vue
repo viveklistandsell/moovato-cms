@@ -44,7 +44,7 @@ function ordinal(i: number): string {
 
 // Each connector grows taller than the last so the cards descend a staircase.
 function connectorStyle(i: number): Record<string, string> {
-    return { '--wp-connector': `${20 + i * 40}px` };
+    return { '--wp-connector': `${i * 40}px` };
 }
 </script>
 

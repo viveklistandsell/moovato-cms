@@ -204,6 +204,7 @@ function thumbStyle(i: number): Record<string, string> {
                             </button>
                             <button
                                 type="button"
+                                class="mv-testimonials__nav-next"
                                 aria-label="Nächste Bewertung"
                                 @click="go(1)"
                             >
