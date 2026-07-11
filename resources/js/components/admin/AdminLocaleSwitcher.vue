@@ -36,8 +36,6 @@ const current = computed<Language | null>(
         null,
 );
 
-
-
 const open = ref<boolean>(false);
 const saving = ref<boolean>(false);
 const trigger = ref<HTMLElement | null>(null);
@@ -117,6 +115,7 @@ onBeforeUnmount(() => {
                 @click="pick(lang.code)"
             >
                 <span class="flex items-center gap-2">
+                    <FlagImage :code="lang.flag" size="sm" />
                     <span class="font-semibold">
                         {{ lang.code.toUpperCase() }}
                     </span>
