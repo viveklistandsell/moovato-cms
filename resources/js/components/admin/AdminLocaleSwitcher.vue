@@ -36,6 +36,16 @@ const current = computed<Language | null>(
         null,
 );
 
+const localeFlagCode: Record<string, string> = { de: 'de', en: 'gb' };
+
+function resolveFlagCode(lang: Language): string {
+    const flag = (lang.flag ?? '').trim();
+    if (/^[a-zA-Z]{2}$/.test(flag)) {
+        return flag.toLowerCase();
+    }
+    return localeFlagCode[lang.code] ?? lang.code;
+}
+
 const open = ref<boolean>(false);
 const saving = ref<boolean>(false);
 const trigger = ref<HTMLElement | null>(null);
@@ -91,8 +101,8 @@ onBeforeUnmount(() => {
             :disabled="saving"
             @click="toggle"
         >
-            <Globe v-if="!current?.flag" class="size-3.5" />
-            <FlagImage v-else :code="current.flag" size="sm" />
+            <Globe v-if="!current" class="size-3.5" />
+            <FlagImage v-else :code="resolveFlagCode(current)" size="sm" />
             <span class="hidden md:inline">
                 {{ current ? current.code.toUpperCase() : '—' }}
             </span>
@@ -115,7 +125,7 @@ onBeforeUnmount(() => {
                 @click="pick(lang.code)"
             >
                 <span class="flex items-center gap-2">
-                    <FlagImage :code="lang.flag" size="sm" />
+                    <FlagImage :code="resolveFlagCode(lang)" size="sm" />
                     <span class="font-semibold">
                         {{ lang.code.toUpperCase() }}
                     </span>
