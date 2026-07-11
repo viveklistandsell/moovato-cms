@@ -7,6 +7,8 @@ import { onMounted, onUnmounted, ref } from 'vue';
  * Styling lives in resources/css/gs.css (.back-to-top) and uses theme tokens.
  */
 const visible = ref(false);
+const launching = ref(false);
+let launchTimer: ReturnType<typeof setTimeout> | undefined;
 
 function onScroll(): void {
     visible.value = window.scrollY > 300;
@@ -16,6 +18,18 @@ function scrollToTop(): void {
     const reduceMotion = window.matchMedia(
         '(prefers-reduced-motion: reduce)',
     ).matches;
+
+    if (!reduceMotion) {
+        clearTimeout(launchTimer);
+        launching.value = false;
+        requestAnimationFrame(() => {
+            launching.value = true;
+        });
+        launchTimer = setTimeout(() => {
+            launching.value = false;
+        }, 950);
+    }
+
     window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
 }
 
@@ -26,6 +40,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.removeEventListener('scroll', onScroll);
+    clearTimeout(launchTimer);
 });
 </script>
 
@@ -33,10 +48,13 @@ onUnmounted(() => {
     <button
         type="button"
         class="back-to-top"
-        :class="{ 'is-visible': visible }"
+        :class="{ 'is-visible': visible, 'is-launching': launching }"
         aria-label="Back to top"
         @click="scrollToTop"
     >
+        <span class="back-to-top__lines" aria-hidden="true">
+            <i></i><i></i><i></i>
+        </span>
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 3465 5197.5" style="enable-background:new 0 0 3465 5197.5;" xml:space="preserve">
 <g id="Bg">
 	<rect style="opacity:0;fill:#FFFFFF;" width="3465" height="5197.5"/>

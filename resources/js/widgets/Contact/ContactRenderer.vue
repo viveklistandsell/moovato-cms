@@ -32,6 +32,13 @@ type Data = {
 
 const props = defineProps<{ settings: Settings; data: Data }>();
 
+const DEFAULT_MAP_EMBED_URL =
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5136022.174842897!2d5.1650989727241!3d51.05634991980449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479a721ec2b1be6b%3A0x75e85d6b8e91e55b!2sGermany!5e0!3m2!1sen!2sin!4v1783491787088!5m2!1sen!2sin';
+
+const mapSrc = computed<string>(
+    () => props.settings.map_embed_url || DEFAULT_MAP_EMBED_URL,
+);
+
 const services = computed<string[]>(() => props.data.services ?? []);
 
 const submitted = ref(false);
@@ -131,7 +138,8 @@ function submit(): void {
                             class="mv-contact__info__card mv-contact__info__card--map"
                         >
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5136022.174842897!2d5.1650989727241!3d51.05634991980449!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x479a721ec2b1be6b%3A0x75e85d6b8e91e55b!2sGermany!5e0!3m2!1sen!2sin!4v1783491787088!5m2!1sen!2sin"
+                                :src="mapSrc"
+                                title="Standort auf der Karte"
                                 width="100%"
                                 height="200"
                                 loading="lazy"
@@ -139,21 +147,11 @@ function submit(): void {
                                 allowfullscreen
                             ></iframe>
                         </div>
+                        
                     </div>
                     
 
-                    <div
-                        v-if="settings.map_embed_url"
-                        class="mv-contact__map"
-                    >
-                        <iframe
-                            :src="settings.map_embed_url"
-                            title="Standort auf der Karte"
-                            loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade"
-                            allowfullscreen
-                        ></iframe>
-                    </div>
+                    
                 </div>
 
                 <!-- RIGHT: form -->

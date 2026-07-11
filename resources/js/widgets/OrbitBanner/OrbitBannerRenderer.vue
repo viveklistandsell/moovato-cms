@@ -149,7 +149,7 @@ const crumbs = computed<Crumb[]>(() => {
 
             <div
                 v-if="settings.image_url"
-                class="mv-orbitbanner-media relative mx-auto w-full max-w-sm lg:justify-self-end"
+                class="mv-orbitbanner-media relative mr-auto ml-5 w-full max-w-[220px] sm:mx-auto sm:max-w-sm lg:justify-self-end"
             >
                 <img
                     :src="settings.image_url"

@@ -104,7 +104,7 @@ defineProps<{ settings: Settings; data: Data }>();
                     </li>
                 </ul>
 
-                <div class="mt-10 flex flex-wrap items-center gap-6">
+                <div class="mt-10 flex flex-col sm:flex-row flex-wrap items-center gap-6">
                     <NextButton
                         v-if="data.button_label"
                         :label="data.button_label"
