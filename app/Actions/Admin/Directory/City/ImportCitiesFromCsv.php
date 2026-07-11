@@ -151,26 +151,37 @@ final readonly class ImportCitiesFromCsv
             $seenKeys[$key] = $rowNumber;
         }
 
-        if ($status === '') {
-            $status = 'published';
-        }
-        $sortOrder = $sortOrderRaw === '' ? null : (int) $sortOrderRaw;
-        $isPopular = $this->parseBool($isPopularRaw);
+        $existingCity = City::query()
+            ->where('state_id', $stateId)
+            ->where('permalink', $permalink)
+            ->first();
+        $existingId = $existingCity?->id;
+
+        $statusValue = $status !== ''
+            ? $status
+            : ((string) ($existingCity?->status ?? 'published'));
+
+        $postalCodeValue = $postalCode !== ''
+            ? $postalCode
+            : ($existingCity?->postal_code);
+
+        $isPopularValue = $isPopularRaw !== ''
+            ? $this->parseBool($isPopularRaw)
+            : ((bool) ($existingCity?->is_popular ?? false));
+
+        $sortOrderValue = $sortOrderRaw !== ''
+            ? (int) $sortOrderRaw
+            : ($existingCity?->sort_order);
 
         $data = [
             'state_id' => $stateId,
             'name' => $name,
             'permalink' => $permalink,
-            'postal_code' => $postalCode === '' ? null : $postalCode,
-            'is_popular' => $isPopular,
-            'status' => $status,
-            'sort_order' => $sortOrder,
+            'postal_code' => $postalCodeValue,
+            'is_popular' => $isPopularValue,
+            'status' => $statusValue,
+            'sort_order' => $sortOrderValue,
         ];
-
-        $existingId = City::query()
-            ->where('state_id', $stateId)
-            ->where('permalink', $permalink)
-            ->value('id');
 
         $rules = [
             'state_id' => ['required', 'integer', 'exists:states,id'],
@@ -216,6 +227,7 @@ final readonly class ImportCitiesFromCsv
 
         $city->reorderToCurrentPosition();
     }
+
     private function parseBool(string $raw): bool
     {
         $lower = mb_strtolower($raw);

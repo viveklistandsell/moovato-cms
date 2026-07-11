@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'name', 'icon',
+    'name', 'image',
     'is_featured', 'is_popular', 'status', 'sort_order',
 ])]
 final class ServiceParentCategory extends Model
@@ -20,6 +20,7 @@ final class ServiceParentCategory extends Model
     {
         return ((int) self::query()->max('sort_order')) + 1;
     }
+
     public static function compactSiblings(): void
     {
         $siblings = self::query()
@@ -34,6 +35,7 @@ final class ServiceParentCategory extends Model
             }
         }
     }
+
     public function reorderToCurrentPosition(): void
     {
         $siblings = self::query()

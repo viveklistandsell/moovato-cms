@@ -32,7 +32,7 @@ final class UpdateServiceParentCategoryRequest extends FormRequest
             ->get(['code', 'lang_is_default']);
 
         $rules = [
-            'icon' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'string', 'max:255'],
             'status' => ['required', Rule::in(['published', 'draft', 'inactive'])],
             'is_featured' => ['boolean'],
             'is_popular' => ['boolean'],

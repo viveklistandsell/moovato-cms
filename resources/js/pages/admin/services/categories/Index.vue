@@ -28,7 +28,6 @@ import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
 import { useAdminLanguage, useFormatDate } from '@/composables/useAdminLocale';
 import { useT } from '@/composables/useT';
-import { getIcon } from '@/lib/iconMap';
 
 const formatDate = useFormatDate();
 const t = useT();
@@ -52,7 +51,8 @@ type Category = {
     parent_category_id: number;
     parent_name: string | null;
     parent_translations: Record<string, string>;
-    icon: string | null;
+    image: string | null;
+    image_url: string | null;
     status: string;
     is_featured: boolean;
     is_popular: boolean;
@@ -304,7 +304,7 @@ function applyBulkAction(action: string): void {
                                         :direction="sortDir" @sort="toggleSort" />
                                 </th>
                                 <th class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase">
-                                    Icon
+                                    {{ t('service_categories.col_image') }}
                                 </th>
                                 <th class="px-4 py-3">
                                     <SortableColumn column="translations" :label="t('table.col_translations')"
@@ -384,10 +384,17 @@ function applyBulkAction(action: string): void {
                                     <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <div v-if="getIcon(node.icon)"
-                                        class="inline-flex size-8 items-center justify-center rounded-md bg-muted text-foreground"
-                                        :title="node.icon ?? ''">
-                                        <component :is="getIcon(node.icon)" class="size-4" />
+                                    <div
+                                        v-if="node.image_url"
+                                        class="inline-flex size-10 overflow-hidden rounded-md border border-border bg-muted"
+                                        :title="node.displayName"
+                                    >
+                                        <img
+                                            :src="node.image_url"
+                                            :alt="node.displayName"
+                                            class="size-full object-cover"
+                                            loading="lazy"
+                                        />
                                     </div>
                                     <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>

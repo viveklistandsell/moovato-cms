@@ -664,6 +664,7 @@ return [
         // City-spezifische Import-Fehler.
         'import_error_unknown_state' => "Unbekanntes Bundesland (ISO ':iso', Code ':code') — kein passendes Bundesland gefunden.",
         'import_error_duplicate_city' => 'Duplikat von Zeile :first_row: Permalink \':permalink\' erscheint bereits in dieser Datei.',
+        'import_error_duplicate_parent' => 'Duplikat von Zeile :first_row: permalink_de \':permalink\' erscheint bereits in dieser Datei.',
     ],
 
     'service_parent_categories' => [
@@ -679,6 +680,22 @@ return [
         'empty' => 'Noch keine Elternkategorien. Beginne mit den vier Kern-Services: Umzüge, Spezialtransport, Möbelmontage, Entrümpelung.',
         'col_children_count' => 'Untergeordnete',
         'children_count_hint' => '{count, plural, one{Diese Elternkategorie hat # untergeordnete Kategorie.} other{Diese Elternkategorie hat # untergeordnete Kategorien.}} Diese werden auf der Seite "Dienstleistungskategorien" verwaltet.',
+
+        // CRUD- / Reorder-Toasts.
+        'parent_created_toast' => 'Elternkategorie erstellt.',
+        'parent_updated_toast' => 'Elternkategorie aktualisiert.',
+        'parent_deleted_toast' => 'Elternkategorie gelöscht.',
+        'order_updated_toast' => 'Reihenfolge aktualisiert.',
+        // Pipe-getrennte Pluralformen — via trans_choice aufgelöst.
+        'bulk_deleted_toast' => ':count Elternkategorie gelöscht.|:count Elternkategorien gelöscht.',
+        'bulk_published_toast' => ':count Elternkategorie veröffentlicht.|:count Elternkategorien veröffentlicht.',
+        'bulk_draft_toast' => ':count Elternkategorie als Entwurf gespeichert.|:count Elternkategorien als Entwurf gespeichert.',
+        'bulk_inactive_toast' => ':count Elternkategorie deaktiviert.|:count Elternkategorien deaktiviert.',
+        'bulk_marked_featured_toast' => ':count Elternkategorie als hervorgehoben markiert.|:count Elternkategorien als hervorgehoben markiert.',
+        'bulk_unmarked_featured_toast' => ':count Elternkategorie Markierung entfernt.|:count Elternkategorien Markierungen entfernt.',
+        'bulk_marked_popular_toast' => ':count Elternkategorie als beliebt markiert.|:count Elternkategorien als beliebt markiert.',
+        'bulk_unmarked_popular_toast' => ':count Elternkategorie Markierung entfernt.|:count Elternkategorien Markierungen entfernt.',
+        'bulk_updated_toast' => ':count Elternkategorie aktualisiert.|:count Elternkategorien aktualisiert.',
     ],
 
     'service_categories' => [
@@ -714,9 +731,12 @@ return [
         'field_parent' => 'Übergeordnete Kategorie',
         'field_parent_placeholder' => 'Keine (Hauptkategorie)',
         'field_parent_none' => '— Hauptkategorie —',
-        'field_icon' => 'Icon',
-        'field_icon_placeholder' => 'Icon auswählen',
-        'field_icon_none' => '— Kein Icon —',
+        'field_image' => 'Bild',
+        'field_image_upload' => 'Bild hochladen',
+        'field_image_replace' => 'Bild ersetzen',
+        'field_image_remove' => 'Entfernen',
+        'field_image_hint' => 'Aus der Medienbibliothek wählen oder neu hochladen. 16:9 empfohlen.',
+        'col_image' => 'Bild',
         'field_is_featured' => 'Hervorgehoben (Kacheln auf der Startseite)',
         'field_is_featured_hint' => 'Wird im Kachelraster auf der Startseite oben angezeigt.',
         'field_is_popular' => 'Beliebt (Widget "Beliebte Kategorien")',

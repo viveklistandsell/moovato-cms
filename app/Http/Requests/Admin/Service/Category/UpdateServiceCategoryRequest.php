@@ -33,7 +33,7 @@ final class UpdateServiceCategoryRequest extends FormRequest
 
         $rules = [
             'parent_category_id' => ['required', 'integer', 'exists:service_parent_categories,id'],
-            'icon' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'string', 'max:255'],
             'status' => ['required', Rule::in(['published', 'draft', 'inactive'])],
             'is_featured' => ['boolean'],
             'is_popular' => ['boolean'],

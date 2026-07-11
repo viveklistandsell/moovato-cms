@@ -15,7 +15,7 @@ final readonly class UpdateServiceParentCategory
 {
     /**
      * @param  array{
-     *   icon?: string|null,
+     *   image?: string|null,
      *   status?: string,
      *   is_featured?: bool,
      *   is_popular?: bool,
@@ -39,7 +39,7 @@ final readonly class UpdateServiceParentCategory
 
             $parent->update([
                 'name' => $primary['name'],
-                'icon' => $data['icon'] ?? $parent->icon,
+                'image' => $data['image'] ?? $parent->image,
                 'status' => $data['status'] ?? $parent->status,
                 'is_featured' => $data['is_featured'] ?? $parent->is_featured,
                 'is_popular' => $data['is_popular'] ?? $parent->is_popular,

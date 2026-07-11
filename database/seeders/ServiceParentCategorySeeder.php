@@ -22,7 +22,6 @@ final class ServiceParentCategorySeeder extends Seeder
     {
         $parents = [
             [
-                'icon' => 'Boxes',
                 'is_featured' => true,
                 'is_popular' => false,
                 'de' => [
@@ -37,7 +36,6 @@ final class ServiceParentCategorySeeder extends Seeder
                 ],
             ],
             [
-                'icon' => 'Package',
                 'is_featured' => true,
                 'is_popular' => false,
                 'de' => [
@@ -52,7 +50,6 @@ final class ServiceParentCategorySeeder extends Seeder
                 ],
             ],
             [
-                'icon' => 'Wrench',
                 'is_featured' => true,
                 'is_popular' => true,
                 'de' => [
@@ -67,7 +64,6 @@ final class ServiceParentCategorySeeder extends Seeder
                 ],
             ],
             [
-                'icon' => 'Trash2',
                 'is_featured' => true,
                 'is_popular' => true,
                 'de' => [
@@ -82,7 +78,6 @@ final class ServiceParentCategorySeeder extends Seeder
                 ],
             ],
             [
-                'icon' => 'Warehouse',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -103,7 +98,7 @@ final class ServiceParentCategorySeeder extends Seeder
             $parent = ServiceParentCategory::query()->updateOrCreate(
                 ['name' => $data['de']['name']],
                 [
-                    'icon' => $data['icon'],
+                    'image' => null,
                     'is_featured' => $data['is_featured'],
                     'is_popular' => $data['is_popular'],
                     'status' => 'published',

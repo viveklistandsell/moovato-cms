@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'parent_category_id', 'name', 'icon',
+    'parent_category_id', 'name', 'image',
     'is_featured', 'is_popular', 'status', 'sort_order',
 ])]
 final class ServiceCategory extends Model

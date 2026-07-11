@@ -17,7 +17,6 @@ final class ServiceCategorySeeder extends Seeder
             // ────────── Under Umzüge ──────────
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Home',
                 'is_featured' => false,
                 'is_popular' => true,
                 'de' => [
@@ -33,7 +32,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Building2',
                 'is_featured' => false,
                 'is_popular' => true,
                 'de' => [
@@ -49,7 +47,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Truck',
                 'is_featured' => false,
                 'is_popular' => true,
                 'de' => [
@@ -65,7 +62,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Users',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -81,7 +77,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'PackageOpen',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -97,7 +92,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Building',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -113,7 +107,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'HousePlus',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -129,7 +122,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Briefcase',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -145,7 +137,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Umzüge',
-                'icon' => 'Stethoscope',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -163,7 +154,6 @@ final class ServiceCategorySeeder extends Seeder
             // ────────── Under Spezialtransport ──────────
             [
                 'parent_key' => 'Spezialtransport',
-                'icon' => 'Music',
                 'is_featured' => false,
                 'is_popular' => true,
                 'de' => [
@@ -179,7 +169,6 @@ final class ServiceCategorySeeder extends Seeder
             ],
             [
                 'parent_key' => 'Spezialtransport',
-                'icon' => 'Palette',
                 'is_featured' => false,
                 'is_popular' => false,
                 'de' => [
@@ -219,7 +208,7 @@ final class ServiceCategorySeeder extends Seeder
                 ['name' => $data['de']['name']],
                 [
                     'parent_category_id' => $parentId,
-                    'icon' => $data['icon'],
+                    'image' => null,
                     'is_featured' => $data['is_featured'],
                     'is_popular' => $data['is_popular'],
                     'status' => 'published',

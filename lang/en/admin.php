@@ -684,6 +684,23 @@ return [
         'empty' => 'No parent categories yet. Start with the four core services: Moves, Special Transport, Furniture Assembly, House Clearance.',
         'col_children_count' => 'Sub-categories',
         'children_count_hint' => '{count, plural, one{This parent has # sub-category.} other{This parent has # sub-categories.}} They are managed on the "Service Categories" page.',
+
+        // CRUD / reorder toasts (translated from the previously
+        // hardcoded English strings in ParentCategoryController).
+        'parent_created_toast' => 'Parent category created.',
+        'parent_updated_toast' => 'Parent category updated.',
+        'parent_deleted_toast' => 'Parent category deleted.',
+        'order_updated_toast' => 'Order updated.',
+        // Pipe-separated Laravel plural forms — resolved via trans_choice.
+        'bulk_deleted_toast' => ':count parent category deleted.|:count parent categories deleted.',
+        'bulk_published_toast' => ':count parent category published.|:count parent categories published.',
+        'bulk_draft_toast' => ':count parent category set to draft.|:count parent categories set to draft.',
+        'bulk_inactive_toast' => ':count parent category deactivated.|:count parent categories deactivated.',
+        'bulk_marked_featured_toast' => ':count parent category marked featured.|:count parent categories marked featured.',
+        'bulk_unmarked_featured_toast' => ':count parent category unmarked.|:count parent categories unmarked.',
+        'bulk_marked_popular_toast' => ':count parent category marked popular.|:count parent categories marked popular.',
+        'bulk_unmarked_popular_toast' => ':count parent category unmarked.|:count parent categories unmarked.',
+        'bulk_updated_toast' => ':count parent category updated.|:count parent categories updated.',
     ],
 
     'service_categories' => [
@@ -719,9 +736,12 @@ return [
         'field_parent' => 'Parent category',
         'field_parent_placeholder' => 'None (top level)',
         'field_parent_none' => '— Top level —',
-        'field_icon' => 'Icon',
-        'field_icon_placeholder' => 'Pick an icon',
-        'field_icon_none' => '— No icon —',
+        'field_image' => 'Image',
+        'field_image_upload' => 'Upload image',
+        'field_image_replace' => 'Replace image',
+        'field_image_remove' => 'Remove',
+        'field_image_hint' => 'Pick from the media library or upload a new file. 16:9 works best.',
+        'col_image' => 'Image',
         'field_is_featured' => 'Featured (homepage tile grid)',
         'field_is_featured_hint' => 'Shown prominently in the homepage tile grid.',
         'field_is_popular' => 'Popular ("Popular categories" widget)',

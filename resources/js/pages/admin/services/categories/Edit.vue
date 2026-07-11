@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save } from 'lucide-vue-next';
+import { ArrowLeft, Image as ImageIcon, Save, Upload, X } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
+import MediaPicker from '@/components/common/MediaPicker.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -27,7 +28,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useAdminLanguage } from '@/composables/useAdminLocale';
 import { useT } from '@/composables/useT';
-import { getIcon, iconOptions } from '@/lib/iconMap';
 import { slugify } from '@/lib/slug';
 
 const t = useT();
@@ -42,7 +42,8 @@ type Translation = {
 type Category = {
     id: number;
     parent_category_id: number | null;
-    icon: string | null;
+    image: string | null;
+    image_url: string | null;
     status: string;
     is_featured: boolean;
     is_popular: boolean;
@@ -101,7 +102,7 @@ const initialTranslations: Record<string, Translation> = Object.fromEntries(
 
 const form = useForm<{
     parent_category_id: number | null;
-    icon: string;
+    image: string;
     status: string;
     is_featured: boolean;
     is_popular: boolean;
@@ -112,13 +113,26 @@ const form = useForm<{
         props.category?.parent_category_id ??
         props.parentOptions[0]?.id ??
         null,
-    icon: props.category?.icon ?? '',
+    image: props.category?.image ?? '',
     status: props.category?.status ?? 'published',
     is_featured: props.category?.is_featured ?? false,
     is_popular: props.category?.is_popular ?? false,
     sort_order: props.category?.sort_order ?? props.nextSortOrder,
     translations: initialTranslations,
 });
+
+const imagePreview = ref<string | null>(props.category?.image_url ?? null);
+const pickerOpen = ref(false);
+
+function onMediaPicked(file: { path: string; url: string; name: string }): void {
+    form.image = file.path;
+    imagePreview.value = file.url;
+}
+
+function removeImage(): void {
+    form.image = '';
+    imagePreview.value = null;
+}
 
 const activeLocale = ref(
     props.languages.find((l) => l.is_default)?.code ??
@@ -309,44 +323,52 @@ const errorFor = (code: string, field: keyof Translation) =>
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="icon">{{ t('service_categories.field_icon') }}</Label>
-                            <Select
-                                :model-value="form.icon || 'none'"
-                                @update:model-value="
-                                    (v) =>
-                                        (form.icon =
-                                            typeof v === 'string' && v !== 'none'
-                                                ? v
-                                                : '')
-                                "
+                            <Label>{{ t('service_categories.field_image') }}</Label>
+                            <div
+                                class="flex aspect-video w-full items-center justify-center overflow-hidden rounded-md border border-dashed bg-muted"
                             >
-                                <SelectTrigger id="icon">
-                                    <div class="flex items-center gap-2">
-                                        <component
-                                            v-if="getIcon(form.icon)"
-                                            :is="getIcon(form.icon)"
-                                            class="size-4"
-                                        />
-                                        <SelectValue :placeholder="t('service_categories.field_icon_placeholder')" />
-                                    </div>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">
-                                        {{ t('service_categories.field_icon_none') }}
-                                    </SelectItem>
-                                    <SelectItem
-                                        v-for="opt in iconOptions"
-                                        :key="opt.value"
-                                        :value="opt.value"
-                                    >
-                                        <div class="flex items-center gap-2">
-                                            <component :is="getIcon(opt.value)" class="size-4" />
-                                            <span>{{ opt.label }}</span>
-                                        </div>
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <InputError :message="form.errors.icon" />
+                                <img
+                                    v-if="imagePreview"
+                                    :src="imagePreview"
+                                    :alt="form.translations[activeLocale]?.name || ''"
+                                    class="size-full object-cover"
+                                />
+                                <ImageIcon
+                                    v-else
+                                    class="size-8 text-muted-foreground"
+                                />
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    class="flex-1"
+                                    @click="pickerOpen = true"
+                                >
+                                    <Upload class="size-4" />
+                                    {{
+                                        imagePreview
+                                            ? t('service_categories.field_image_replace')
+                                            : t('service_categories.field_image_upload')
+                                    }}
+                                </Button>
+                                <Button
+                                    v-if="imagePreview"
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    class="text-destructive"
+                                    @click="removeImage"
+                                >
+                                    <X class="size-4" />
+                                    {{ t('service_categories.field_image_remove') }}
+                                </Button>
+                            </div>
+                            <p class="text-xs text-muted-foreground">
+                                {{ t('service_categories.field_image_hint') }}
+                            </p>
+                            <InputError :message="form.errors.image" />
                         </div>
 
                         <div class="grid gap-2">
@@ -415,5 +437,6 @@ const errorFor = (code: string, field: keyof Translation) =>
                 </div>
             </div>
         </form>
+        <MediaPicker v-model:open="pickerOpen" @pick="onMediaPicked" />
     </div>
 </template>

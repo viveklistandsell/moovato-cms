@@ -6951,6 +6951,29 @@
     color: var(--white);
 }
 
+.mv-services-grid__image {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 0.75rem;
+    background: var(--linen);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.06);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.mv-services-grid__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.mv-services-grid__tile:hover .mv-services-grid__image,
+.mv-services-grid__tile:focus-visible .mv-services-grid__image {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px -6px rgba(15, 23, 42, 0.2);
+}
+
 .mv-services-grid__name {
     font-size: 0.875rem;
     font-weight: 600;

@@ -207,6 +207,12 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->name('parent-categories.bulk-action');
             Route::get('parent-categories/options', [AdminServiceParentCategoryController::class, 'options'])
                 ->name('parent-categories.options');
+            Route::get('parent-categories/export', [AdminServiceParentCategoryController::class, 'export'])
+                ->name('parent-categories.export');
+            Route::get('parent-categories/sample-csv', [AdminServiceParentCategoryController::class, 'sampleCsv'])
+                ->name('parent-categories.sample-csv');
+            Route::post('parent-categories/import', [AdminServiceParentCategoryController::class, 'import'])
+                ->name('parent-categories.import');
             Route::resource('parent-categories', AdminServiceParentCategoryController::class)
                 ->parameters(['parent-categories' => 'category'])
                 ->except('show');

@@ -7,7 +7,8 @@ type Category = {
     id: number;
     name: string;
     permalink: string;
-    icon: string | null;
+    image: string | null;
+    image_url: string | null;
     short_description: string | null;
     url: string;
     is_featured: boolean;
@@ -92,9 +93,19 @@ const gridColsClass = computed<string>(() => {
                     :href="category.url"
                     class="mv-services-grid__tile"
                 >
-                    <span class="mv-services-grid__icon">
+                    <span
+                        v-if="category.image_url"
+                        class="mv-services-grid__image"
+                    >
+                        <img
+                            :src="category.image_url"
+                            :alt="category.name"
+                            loading="lazy"
+                        />
+                    </span>
+                    <span v-else class="mv-services-grid__icon">
                         <WidgetIcon
-                            :name="category.icon ?? 'LayoutGrid'"
+                            name="LayoutGrid"
                             fallback="LayoutGrid"
                             class="size-7"
                         />

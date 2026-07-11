@@ -276,7 +276,10 @@ final class CategoryController extends Controller
                     ->mapWithKeys(fn ($t): array => [$t->lang => $t->name])
                     ->all()
                 : [],
-            'icon' => $category->icon,
+            'image' => $category->image,
+            'image_url' => $category->image !== null
+                ? '/storage/'.mb_ltrim($category->image, '/')
+                : null,
             'status' => $category->status,
             'is_featured' => $category->is_featured,
             'is_popular' => $category->is_popular,

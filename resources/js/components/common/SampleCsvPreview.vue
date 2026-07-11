@@ -63,6 +63,25 @@ const MONO_COLUMNS = new Set([
 
 const STATUS_COLUMNS = new Set(['status']);
 
+/**
+ * Columns whose values are typically long prose (multi-sentence
+ * descriptions, short bios, tag-lines). These wrap onto multiple lines
+ * inside a capped-width cell so the whole row stays visible without
+ * horizontal scrolling on wide CSVs. Detection is by substring on the
+ * header (e.g. `short_description_de`, `description`, `desc`) — matches
+ * every CSV in the project without needing a hardcoded list.
+ */
+function isLongTextColumn(col: string): boolean {
+    const lower = col.toLowerCase();
+    return (
+        lower.includes('description') ||
+        lower.includes('short_desc') ||
+        lower === 'desc' ||
+        lower.includes('notes') ||
+        lower.includes('summary')
+    );
+}
+
 function isMonoColumn(col: string): boolean {
     return MONO_COLUMNS.has(col.toLowerCase());
 }
@@ -184,7 +203,7 @@ function parseCsv(text: string): ParsedCsv {
 <template>
     <Dialog :open="open" @update:open="(v) => emit('update:open', v)">
         <DialogContent
-            class="w-[95vw] gap-0 overflow-hidden p-0 sm:max-w-6xl sm:rounded-2xl"
+            class="w-[95vw] gap-0 overflow-hidden p-0 sm:max-w-8xl sm:rounded-2xl"
         >
             <DialogHeader
                 class="space-y-0 border-b bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/40 px-6 py-5 dark:from-emerald-950/40 dark:via-background dark:to-emerald-950/20"
@@ -276,7 +295,18 @@ function parseCsv(text: string): ParsedCsv {
                     <div
                         class="max-h-[52vh] overflow-auto rounded-xl border bg-card shadow-sm"
                     >
-                        <table class="w-full border-collapse text-xs">
+                        <!--
+                            Compact table: tight padding + text-[11px]
+                            so 11-column CSVs (parent categories) fit in
+                            view. Long-text columns (short_description_*)
+                            switch from `whitespace-nowrap` to wrapping
+                            with a capped `max-w-[220px]` so the row grows
+                            in HEIGHT rather than requiring a horizontal
+                            scroll. Short codes and structural cells stay
+                            single-line. `align-top` keeps wrapped cells
+                            aligned with single-line siblings.
+                        -->
+                        <table class="w-full border-collapse text-[11px] leading-tight">
                             <thead
                                 class="sticky top-0 z-10 border-b bg-muted/80 backdrop-blur"
                             >
@@ -284,11 +314,14 @@ function parseCsv(text: string): ParsedCsv {
                                     <th
                                         v-for="col in parsed.header"
                                         :key="col"
-                                        class="border-r border-border/50 px-3.5 py-2.5 text-left font-bold tracking-wide whitespace-nowrap text-foreground uppercase last:border-r-0"
+                                        class="border-r border-border/50 px-2.5 py-2 text-left align-top font-bold tracking-wide text-foreground uppercase last:border-r-0"
                                         :class="[
                                             isMonoColumn(col)
                                                 ? 'font-mono normal-case tracking-normal'
                                                 : '',
+                                            isLongTextColumn(col)
+                                                ? 'min-w-[160px] max-w-[220px] whitespace-normal break-words'
+                                                : 'whitespace-nowrap',
                                         ]"
                                     >
                                         {{ col }}
@@ -309,13 +342,18 @@ function parseCsv(text: string): ParsedCsv {
                                     <td
                                         v-for="(cell, cIdx) in row"
                                         :key="cIdx"
-                                        class="border-r border-border/40 px-3.5 py-2 whitespace-nowrap last:border-r-0"
+                                        class="border-r border-border/40 px-2.5 py-1.5 align-top last:border-r-0"
                                         :class="[
                                             isMonoColumn(
                                                 parsed.header[cIdx] ?? '',
                                             )
-                                                ? 'font-mono text-[11px]'
+                                                ? 'font-mono'
                                                 : '',
+                                            isLongTextColumn(
+                                                parsed.header[cIdx] ?? '',
+                                            )
+                                                ? 'min-w-[160px] max-w-[220px] whitespace-normal break-words'
+                                                : 'whitespace-nowrap',
                                             cell === ''
                                                 ? 'text-muted-foreground/60 italic'
                                                 : 'text-foreground/90',

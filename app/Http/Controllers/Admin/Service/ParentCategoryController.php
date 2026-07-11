@@ -6,9 +6,12 @@ namespace App\Http\Controllers\Admin\Service;
 
 use App\Actions\Admin\Service\ParentCategory\CreateServiceParentCategory;
 use App\Actions\Admin\Service\ParentCategory\DeleteServiceParentCategory;
+use App\Actions\Admin\Service\ParentCategory\ExportParentCategoriesToCsv;
+use App\Actions\Admin\Service\ParentCategory\ImportParentCategoriesFromCsv;
 use App\Actions\Admin\Service\ParentCategory\UpdateServiceParentCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Service\ParentCategory\BulkActionServiceParentCategoriesRequest;
+use App\Http\Requests\Admin\Service\ParentCategory\ImportParentCategoriesRequest;
 use App\Http\Requests\Admin\Service\ParentCategory\ReorderServiceParentCategoriesRequest;
 use App\Http\Requests\Admin\Service\ParentCategory\StoreServiceParentCategoryRequest;
 use App\Http\Requests\Admin\Service\ParentCategory\UpdateServiceParentCategoryRequest;
@@ -19,10 +22,12 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Admin surface for the top-level "parent" service categories — the
@@ -116,7 +121,7 @@ final class ParentCategoryController extends Controller
 
         return redirect()
             ->route('admin.services.parent-categories.index')
-            ->with('toast', ['type' => 'success', 'message' => 'Parent category created.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.service_parent_categories.parent_created_toast')]);
     }
 
     public function edit(ServiceParentCategory $category): Response
@@ -142,7 +147,7 @@ final class ParentCategoryController extends Controller
 
         return redirect()
             ->route('admin.services.parent-categories.index')
-            ->with('toast', ['type' => 'success', 'message' => 'Parent category updated.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.service_parent_categories.parent_updated_toast')]);
     }
 
     public function destroy(ServiceParentCategory $category, DeleteServiceParentCategory $action): RedirectResponse
@@ -156,8 +161,9 @@ final class ParentCategoryController extends Controller
 
         return redirect()
             ->route('admin.services.parent-categories.index')
-            ->with('toast', ['type' => 'success', 'message' => 'Parent category deleted.']);
+            ->with('toast', ['type' => 'success', 'message' => __('admin.service_parent_categories.parent_deleted_toast')]);
     }
+
     public function reorder(ReorderServiceParentCategoriesRequest $request): RedirectResponse
     {
         /** @var array{ordered_ids: array<int, int>} $data */
@@ -172,7 +178,7 @@ final class ParentCategoryController extends Controller
             }
         });
 
-        return back()->with('toast', ['type' => 'success', 'message' => 'Order updated.']);
+        return back()->with('toast', ['type' => 'success', 'message' => __('admin.service_parent_categories.order_updated_toast')]);
     }
 
     public function bulkAction(
@@ -216,22 +222,82 @@ final class ParentCategoryController extends Controller
             return ServiceParentCategory::query()->whereIn('id', $ids)->update($update);
         });
 
-        $verb = match ($action) {
-            'delete' => 'deleted',
-            'publish' => 'published',
-            'draft' => 'set to draft',
-            'inactive' => 'deactivated',
-            'mark_featured' => 'marked featured',
-            'unmark_featured' => 'unmarked featured',
-            'mark_popular' => 'marked popular',
-            'unmark_popular' => 'unmarked popular',
-            default => 'updated',
+        // Each bulk verb maps to its own lang key with pipe-separated
+        // singular/plural forms. trans_choice picks the right side based
+        // on $count and applies correct pluralization automatically.
+        $key = match ($action) {
+            'delete' => 'admin.service_parent_categories.bulk_deleted_toast',
+            'publish' => 'admin.service_parent_categories.bulk_published_toast',
+            'draft' => 'admin.service_parent_categories.bulk_draft_toast',
+            'inactive' => 'admin.service_parent_categories.bulk_inactive_toast',
+            'mark_featured' => 'admin.service_parent_categories.bulk_marked_featured_toast',
+            'unmark_featured' => 'admin.service_parent_categories.bulk_unmarked_featured_toast',
+            'mark_popular' => 'admin.service_parent_categories.bulk_marked_popular_toast',
+            'unmark_popular' => 'admin.service_parent_categories.bulk_unmarked_popular_toast',
+            default => 'admin.service_parent_categories.bulk_updated_toast',
         };
 
         return back()->with('toast', [
             'type' => 'success',
-            'message' => "{$count} parent categor".($count === 1 ? 'y' : 'ies')." {$verb}.",
+            'message' => trans_choice($key, $count, ['count' => $count]),
         ]);
+    }
+
+    /**
+     * Stream the parent categories as a CSV download. Respects the same
+     * search / status filters the Index page uses so admins can narrow
+     * the export before clicking Export.
+     */
+    public function export(Request $request, ExportParentCategoriesToCsv $action): StreamedResponse
+    {
+        return $action->handle([
+            'q' => mb_trim((string) $request->query('q', '')),
+            'status' => mb_trim((string) $request->query('status', '')),
+        ]);
+    }
+
+    /**
+     * Static template CSV — same headers as export, 5 example rows using
+     * the actual Moovato service umbrellas. Mixed filled/empty optional
+     * cells so admins see what's required vs. auto-derived.
+     */
+    public function sampleCsv(ExportParentCategoriesToCsv $action): StreamedResponse
+    {
+        return $action->sample();
+    }
+
+    /**
+     * Process a CSV upload. Partial-success semantics: good rows land in
+     * the DB, bad rows are collected and flashed to the next request so
+     * the Vue Index page can render a detailed error panel.
+     */
+    public function import(ImportParentCategoriesRequest $request, ImportParentCategoriesFromCsv $action): RedirectResponse
+    {
+        /** @var UploadedFile $file */
+        $file = $request->file('file');
+
+        try {
+            $result = $action->handle($file);
+        } catch (RuntimeException $e) {
+            return back()->with('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+        }
+
+        $type = $result->hasErrors() ? 'warning' : 'success';
+        $summary = $result->hasErrors()
+            ? __('admin.locations.import_toast_summary_with_skipped', [
+                'created' => $result->created,
+                'updated' => $result->updated,
+                'skipped' => $result->skipped,
+            ])
+            : __('admin.locations.import_toast_summary', [
+                'created' => $result->created,
+                'updated' => $result->updated,
+            ]);
+
+        return redirect()
+            ->route('admin.services.parent-categories.index')
+            ->with('toast', ['type' => $type, 'message' => $summary])
+            ->with('importResult', $result->toArray());
     }
 
     /**
@@ -273,7 +339,10 @@ final class ParentCategoryController extends Controller
         return [
             'id' => $category->id,
             'name' => $category->name,
-            'icon' => $category->icon,
+            'image' => $category->image,
+            'image_url' => $category->image !== null
+                ? '/storage/'.mb_ltrim($category->image, '/')
+                : null,
             'status' => $category->status,
             'is_featured' => $category->is_featured,
             'is_popular' => $category->is_popular,

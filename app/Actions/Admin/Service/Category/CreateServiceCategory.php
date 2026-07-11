@@ -15,7 +15,7 @@ final readonly class CreateServiceCategory
     /**
      * @param  array{
      *   parent_category_id: int,
-     *   icon?: string|null,
+     *   image?: string|null,
      *   status?: string,
      *   is_featured?: bool,
      *   is_popular?: bool,
@@ -44,7 +44,7 @@ final readonly class CreateServiceCategory
             $category = ServiceCategory::query()->create([
                 'name' => $primary['name'],
                 'parent_category_id' => $parentCategoryId,
-                'icon' => $data['icon'] ?? null,
+                'image' => $data['image'] ?? null,
                 'status' => $data['status'] ?? 'published',
                 'is_featured' => $data['is_featured'] ?? false,
                 'is_popular' => $data['is_popular'] ?? false,

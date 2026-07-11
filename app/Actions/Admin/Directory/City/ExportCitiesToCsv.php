@@ -90,6 +90,7 @@ final readonly class ExportCitiesToCsv
             'Pragma' => 'no-cache',
         ]);
     }
+
     public function sample(): StreamedResponse
     {
         return new StreamedResponse(function (): void {
@@ -102,11 +103,13 @@ final readonly class ExportCitiesToCsv
                 'country_iso', 'state_code', 'name', 'permalink',
                 'postal_code', 'is_popular', 'status', 'sort_order',
             ]);
+            fputcsv($out, ['IN', 'BR', 'Bihar', 'Chapra', '841301', 'yes', 'published', '1']);
+            fputcsv($out, ['IN', 'CH', 'Chandigarh', 'chandigarh', '160001', 'yes', 'published', '1']);
+            fputcsv($out, ['IN', 'MH', 'Mumbai', 'mumbai', '400001', 'yes', 'published', '1']);
             fputcsv($out, ['DE', 'BE', 'Berlin', 'berlin', '10115', 'yes', 'published', '1']);
             fputcsv($out, ['DE', 'BY', 'München', 'muenchen', '80331', 'yes', 'published', '2']);
             fputcsv($out, ['DE', 'BY', 'Nürnberg', '', '90402', 'no', 'published', '']);
             fputcsv($out, ['DE', 'BW', 'Stuttgart', '', '', '', '', '']);
-            fputcsv($out, ['IN', 'MH', 'Mumbai', 'mumbai', '400001', 'yes', 'published', '1']);
 
             fclose($out);
         }, 200, [

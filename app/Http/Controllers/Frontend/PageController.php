@@ -227,7 +227,7 @@ final class PageController extends Controller
      * tile even for a parent that hasn't been fully translated.
      *
      * @param  array<string, mixed>  $settings
-     * @return array<int, array{id: int, name: string, permalink: string, icon: ?string, short_description: ?string, url: string, is_featured: bool, is_popular: bool}>
+     * @return array<int, array{id: int, name: string, permalink: string, image: ?string, image_url: ?string, short_description: ?string, url: string, is_featured: bool, is_popular: bool}>
      */
     private function resolveServiceParentCategories(array $settings, string $locale): array
     {
@@ -263,7 +263,10 @@ final class PageController extends Controller
                     'id' => $p->id,
                     'name' => $name,
                     'permalink' => $permalink,
-                    'icon' => $p->icon,
+                    'image' => $p->image,
+                    'image_url' => $p->image !== null
+                        ? '/storage/'.mb_ltrim($p->image, '/')
+                        : null,
                     'short_description' => $tr?->short_description,
                     'url' => $this->localizedPath($locale, '/services/'.$permalink),
                     'is_featured' => (bool) $p->is_featured,
