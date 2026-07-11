@@ -33,20 +33,12 @@ type SharedLanguage = { code: string; native_name: string; flag: string | null }
 const sharedLanguages = computed<SharedLanguage[]>(
     () => (page.props.adminLanguages as SharedLanguage[] | undefined) ?? [],
 );
-const localeFlagCode: Record<string, string> = { de: 'de', en: 'gb' };
-
-function resolveFlagCode(locale: string): string {
-    const flag = (
-        sharedLanguages.value.find((l) => l.code === locale)?.flag ?? ''
-    ).trim();
-    if (/^[a-zA-Z]{2}$/.test(flag)) {
-        return flag.toLowerCase();
-    }
-    return localeFlagCode[locale] ?? locale;
-}
-
-const currentLangFlag = computed<string>(() => resolveFlagCode(props.locale));
-const otherLangFlag = computed<string>(() => resolveFlagCode(otherLocale.value));
+const currentLangFlag = computed<string | null>(
+    () => sharedLanguages.value.find((l) => l.code === props.locale)?.flag ?? null,
+);
+const otherLangFlag = computed<string | null>(
+    () => sharedLanguages.value.find((l) => l.code === otherLocale.value)?.flag ?? null,
+);
 
 // Build the equivalent URL in the other locale. Strip any existing locale
 // prefix (/de, /en), then re-add the locale segment only when the target is
@@ -136,33 +128,33 @@ function isSpaLink(href: string): boolean {
 const t = computed(() =>
     props.locale === 'de'
         ? {
-            emailLabel: 'E-Mail',
-            callLabel: 'Anrufen',
-            hours: 'Mo–Fr 8–18 Uhr',
-            cta: 'Angebot anfordern',
-            sendMessage: 'Nachricht senden',
-            callUs: 'Anrufen',
-            openingHours: 'Öffnungszeiten',
-            visitUs: 'Besuchen Sie uns',
-            letsTalk: 'Kontakt aufnehmen',
-            home: 'Startseite',
-            services: 'Leistungen',
-            menu: 'Menü',
-        }
+              emailLabel: 'E-Mail',
+              callLabel: 'Anrufen',
+              hours: 'Mo–Fr 8–18 Uhr',
+              cta: 'Angebot anfordern',
+              sendMessage: 'Nachricht senden',
+              callUs: 'Anrufen',
+              openingHours: 'Öffnungszeiten',
+              visitUs: 'Besuchen Sie uns',
+              letsTalk: 'Kontakt aufnehmen',
+              home: 'Startseite',
+              services: 'Leistungen',
+              menu: 'Menü',
+          }
         : {
-            emailLabel: 'Email',
-            callLabel: 'Call',
-            hours: 'Mon–Fri 8am–6pm',
-            cta: 'Get a quote',
-            sendMessage: 'Send a message',
-            callUs: 'Call us',
-            openingHours: 'Opening hours',
-            visitUs: 'Visit Us',
-            letsTalk: "Let's talk",
-            home: 'Home',
-            services: 'Services',
-            menu: 'Menu',
-        },
+              emailLabel: 'Email',
+              callLabel: 'Call',
+              hours: 'Mon–Fri 8am–6pm',
+              cta: 'Get a quote',
+              sendMessage: 'Send a message',
+              callUs: 'Call us',
+              openingHours: 'Opening hours',
+              visitUs: 'Visit Us',
+              letsTalk: "Let's talk",
+              home: 'Home',
+              services: 'Services',
+              menu: 'Menu',
+          },
 );
 
 type SiteSettings = {
@@ -239,24 +231,25 @@ const socials = computed<
     return out;
 });
 
-const expandedMenus = ref<Set<string>>(new Set());
-
-function toggleSubmenu(label: string): void {
-    const next = new Set(expandedMenus.value);
-    if (next.has(label)) {
-        next.delete(label);
-    } else {
-        next.add(label);
-    }
-    expandedMenus.value = next;
-}
+const socialLinks = computed<
+    Array<{ abbr: string; label: string; href: string }>
+>(() => {
+    const s = siteSettings.value;
+    const out: Array<{ abbr: string; label: string; href: string }> = [];
+    if (s.facebook_url)
+        out.push({ abbr: 'FB', label: 'Facebook', href: s.facebook_url });
+    if (s.twitter_url)
+        out.push({ abbr: 'X', label: 'Twitter', href: s.twitter_url });
+    if (s.instagram_url)
+        out.push({ abbr: 'IN', label: 'Instagram', href: s.instagram_url });
+    if (s.linkedin_url)
+        out.push({ abbr: 'LN', label: 'LinkedIn', href: s.linkedin_url });
+    return out;
+});
 
 watch(open, (isOpen) => {
     if (typeof document !== 'undefined') {
         document.body.style.overflow = isOpen ? 'hidden' : '';
-    }
-    if (!isOpen) {
-        expandedMenus.value = new Set();
     }
 });
 
@@ -285,30 +278,31 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     <header class="mv-header" :class="headerSticky ? 'sticky top-0 z-40' : ''">
         <!-- ===== TOP BAR ===== -->
         <div class="topbar">
-            <div class="topbar-inner relative z-[1] container-xl flex flex-wrap items-center justify-between gap-6">
+            <div
+                class="topbar-inner relative z-[1] container-xl flex flex-wrap items-center justify-between gap-6"
+            >
                 <div class="topbar-welcome inline-flex items-center gap-2">
-                    <span class="ico">
-                        <Clock :size="12" />
-                    </span>
+                    <span class="ico"><Clock :size="12" /></span>
                     <strong>{{ t.openingHours }}:</strong> {{ t.hours }}
                     <div class="topbar-socials">
-                        <a v-for="s in socials" :key="s.label" :href="s.href" :aria-label="s.label">
+                        <a
+                            v-for="s in socials"
+                            :key="s.label"
+                            :href="s.href"
+                            :aria-label="s.label"
+                        >
                             <component :is="s.icon" :size="12" />
                         </a>
                     </div>
                 </div>
                 <div class="topbar-contacts">
                     <div v-for="email in emails" :key="email" class="item">
-                        <span class="ico">
-                            <Mail :size="12" />
-                        </span>
+                        <span class="ico"><Mail :size="12" /></span>
                         {{ t.emailLabel }}:
                         <a :href="`mailto:${email}`">{{ email }}</a>
                     </div>
                     <div v-for="phone in phones" :key="phone.tel" class="item">
-                        <span class="ico">
-                            <Phone :size="12" />
-                        </span>
+                        <span class="ico"><Phone :size="12" /></span>
                         {{ t.callLabel }}:
                         <a :href="`tel:${phone.tel}`">{{ phone.display }}</a>
                     </div>
@@ -318,26 +312,57 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
         <!-- ===== NAVIGATION (sticky) ===== -->
         <nav class="border-b border-[rgba(15,23,42,0.06)] bg-white py-[12px]">
-            <div class="container-xl flex items-center justify-center gap-0 sm:gap-8 sm:justify-between">
+            <div class="container-xl flex items-center justify-between gap-8">
                 <Link :href="home" class="flex items-center no-underline">
-                    <img :src="logoUrl ?? '/logo.svg'" :alt="siteName" class="h-18 w-auto" />
+                    <img
+                        :src="logoUrl ?? '/logo.svg'"
+                        :alt="siteName"
+                        class="h-18 w-auto"
+                    />
                 </Link>
 
-                <ul class="hidden list-none gap-6 lg:flex lg:flex-1 lg:justify-center">
-                    <li v-for="item in navItems" :key="item.label" class="mv-nav-item" :class="item.cssClass">
-                        <component :is="isSpaLink(item.href) ? Link : 'a'" :href="item.href"
-                            :target="item.newTab ? '_blank' : undefined" :rel="item.newTab ? 'noopener noreferrer' : undefined
-                                " class="mv-nav-link">
+                <ul
+                    class="hidden list-none gap-9 lg:flex lg:flex-1 lg:justify-center"
+                >
+                    <li
+                        v-for="item in navItems"
+                        :key="item.label"
+                        class="mv-nav-item"
+                        :class="item.cssClass"
+                    >
+                        <component
+                            :is="isSpaLink(item.href) ? Link : 'a'"
+                            :href="item.href"
+                            :target="item.newTab ? '_blank' : undefined"
+                            :rel="
+                                item.newTab ? 'noopener noreferrer' : undefined
+                            "
+                            class="mv-nav-link"
+                        >
                             {{ item.label }}
-                            <ChevronDown v-if="item.children.length" :size="14" />
+                            <ChevronDown
+                                v-if="item.children.length"
+                                :size="14"
+                            />
                         </component>
                         <ul v-if="item.children.length" class="mv-nav-sub">
-                            <li v-for="child in item.children" :key="child.label">
-                                <component :is="isSpaLink(child.href) ? Link : 'a'" :href="child.href" :target="child.newTab ? '_blank' : undefined
-                                    " :rel="child.newTab
+                            <li
+                                v-for="child in item.children"
+                                :key="child.label"
+                            >
+                                <component
+                                    :is="isSpaLink(child.href) ? Link : 'a'"
+                                    :href="child.href"
+                                    :target="
+                                        child.newTab ? '_blank' : undefined
+                                    "
+                                    :rel="
+                                        child.newTab
                                             ? 'noopener noreferrer'
                                             : undefined
-                                        " class="mv-nav-sublink">
+                                    "
+                                    class="mv-nav-sublink"
+                                >
                                     {{ child.label }}
                                 </component>
                             </li>
@@ -346,16 +371,27 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 </ul>
 
                 <div class="flex items-center gap-4">
-                    <Link v-if="showLanguageSwitcher" :href="switchHref" class="mv-lang-switch hidden sm:inline-flex">
+                    <Link
+                        v-if="showLanguageSwitcher"
+                        :href="switchHref"
+                        class="mv-lang-switch hidden sm:inline-flex"
+                    >
                         <FlagImage :code="otherLangFlag" size="sm" />
                         <span>{{ otherLocaleLabel }}</span>
                     </Link>
-                    <a href="#angebot" class="mv-header-cta hidden lg:inline-flex">
-                        {{ t.cta }}
-                        <ArrowRight :size="14" />
+                    <a
+                        href="#angebot"
+                        class="mv-header-cta hidden lg:inline-flex"
+                    >
+                        {{ t.cta }} <ArrowRight :size="14" />
                     </a>
-                    <button type="button" class="mv-header-toggle hidden md:inline-flex lg:hidden" :aria-expanded="open"
-                        aria-label="Open menu" @click="open = true">
+                    <button
+                        type="button"
+                        class="mv-header-toggle hidden md:inline-flex lg:hidden"
+                        :aria-expanded="open"
+                        aria-label="Open menu"
+                        @click="open = true"
+                    >
                         <Menu :size="20" />
                     </button>
                 </div>
@@ -364,75 +400,25 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
         <!-- ===== FULL-SCREEN OFFCANVAS (teleported to end of <body>) ===== -->
         <Teleport to="body">
-            <div class="mv-offcanvas" :class="{ 'is-open': open }" role="dialog" aria-modal="true" :aria-hidden="!open"
-                :aria-label="t.menu">
-                <button type="button" class="mv-offcanvas__close" aria-label="Close menu" @click="open = false">
+            <div
+                class="mv-offcanvas"
+                :class="{ 'is-open': open }"
+                role="dialog"
+                aria-modal="true"
+                :aria-hidden="!open"
+                :aria-label="t.menu"
+            >
+                <button
+                    type="button"
+                    class="mv-offcanvas__close"
+                    aria-label="Close menu"
+                    @click="open = false"
+                >
                     <X :size="24" />
                 </button>
 
                 <div class="mv-offcanvas__inner">
                     <div class="mv-offcanvas__body">
-
-
-                        <!-- Big nav -->
-                        <nav class="mv-offcanvas__nav">
-                            <template v-for="item in navItems" :key="item.label">
-                                <div v-if="item.children.length" class="mv-offcanvas__group">
-                                    <div class="mv-offcanvas__navrow">
-                                        <component :is="isSpaLink(item.href) ? Link : 'a'
-                                            " :href="item.href" :target="item.newTab
-                                                    ? '_blank'
-                                                    : undefined
-                                                " :rel="item.newTab
-                                                    ? 'noopener noreferrer'
-                                                    : undefined
-                                                " @click="open = false">
-                                            {{ item.label }}
-                                        </component>
-                                        <button type="button" class="mv-offcanvas__toggle" :class="{
-                                            'is-open': expandedMenus.has(
-                                                item.label,
-                                            ),
-                                        }" :aria-expanded="expandedMenus.has(item.label)
-                                                " :aria-label="`${item.label} submenu`" @click="toggleSubmenu(item.label)">
-                                            <ChevronDown :size="22" />
-                                        </button>
-                                    </div>
-                                    <div class="mv-offcanvas__submenu" :class="{
-                                        'is-open': expandedMenus.has(
-                                            item.label,
-                                        ),
-                                    }">
-                                        <div class="mv-offcanvas__submenu-inner">
-                                            <component :is="isSpaLink(child.href)
-                                                    ? Link
-                                                    : 'a'
-                                                " v-for="child in item.children" :key="child.label" :href="child.href"
-                                                :target="child.newTab
-                                                        ? '_blank'
-                                                        : undefined
-                                                    " :rel="child.newTab
-                                                        ? 'noopener noreferrer'
-                                                        : undefined
-                                                    " class="mv-offcanvas__subnav" @click="open = false">
-                                                {{ child.label }}
-                                            </component>
-                                        </div>
-                                    </div>
-                                </div>
-                                <component :is="isSpaLink(item.href) ? Link : 'a'" v-else :href="item.href"
-                                    :target="item.newTab ? '_blank' : undefined" :rel="item.newTab
-                                            ? 'noopener noreferrer'
-                                            : undefined
-                                        " @click="open = false">
-                                    {{ item.label }}
-                                </component>
-                            </template>
-                            <a href="#angebot" @click="open = false">{{
-                                t.letsTalk
-                                }}</a>
-                        </nav>
-
                         <!-- Contact -->
                         <div class="mv-offcanvas__contact">
                             <div class="mv-offcanvas__contact-row">
@@ -440,8 +426,12 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                                     <p class="mv-offcanvas__label">
                                         {{ t.sendMessage }}
                                     </p>
-                                    <a v-for="email in emails" :key="email" :href="`mailto:${email}`"
-                                        class="mv-offcanvas__muted-link">
+                                    <a
+                                        v-for="email in emails"
+                                        :key="email"
+                                        :href="`mailto:${email}`"
+                                        class="mv-offcanvas__muted-link"
+                                    >
                                         {{ email }}
                                     </a>
                                 </div>
@@ -449,78 +439,142 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                                     <p class="mv-offcanvas__label">
                                         {{ t.callUs }}
                                     </p>
-                                    <a v-for="phone in phones" :key="phone.tel" :href="`tel:${phone.tel}`"
-                                        class="mv-offcanvas__muted-link">
+                                    <a
+                                        v-for="phone in phones"
+                                        :key="phone.tel"
+                                        :href="`tel:${phone.tel}`"
+                                        class="mv-offcanvas__muted-link"
+                                    >
                                         {{ phone.display }}
                                     </a>
-
+                                    <span class="mv-offcanvas__muted-link">
+                                        {{ t.openingHours }}: {{ t.hours }}
+                                    </span>
                                 </div>
                             </div>
-
-                            <div>
+                            <div class="mv-offcanvas__visit">
                                 <p class="mv-offcanvas__label">
-                                    {{ t.openingHours }}
-                                </p>
-                                <p class="mv-offcanvas__muted">{{ t.hours }}</p>
-                            </div>
-                            
-                        </div>
-                    </div>
-
-                    <!-- Footer row: language switch + socials -->
-                    <div class="mv-offcanvas__footer">
-                        <div class="mv-offcanvas__visit">
-                                <p class="mv-offcanvas__label mb-2 mt-0">
                                     {{ t.visitUs }}
                                 </p>
                                 <p class="mv-offcanvas__muted">{{ address }}</p>
                             </div>
-                            <div class="mv-offcanvas__foot">
-                        <Link v-if="showLanguageSwitcher" :href="switchHref" class="mv-offcanvas__lang"
-                            @click="open = false">
-                            <FlagImage :code="currentLangFlag" size="sm" />
-                            <span>{{ props.locale.toUpperCase() }}</span>
-                            <span aria-hidden="true">/</span>
-                            <FlagImage :code="otherLangFlag" size="sm" />
-                            <span>{{ otherLocaleLabel }}</span>
-                        </Link>
-                        <div class="mv-offcanvas__socials">
-                            <a v-for="s in socials" :key="s.label" :href="s.href" :aria-label="s.label" target="_blank"
-                                rel="noopener noreferrer">
-                                <component :is="s.icon" :size="18" />
-                            </a>
-                        </div></div>
+                        </div>
+
+                        <!-- Big nav -->
+                        <nav class="mv-offcanvas__nav">
+                            <template
+                                v-for="item in navItems"
+                                :key="item.label"
+                            >
+                                <component
+                                    :is="isSpaLink(item.href) ? Link : 'a'"
+                                    :href="item.href"
+                                    :target="item.newTab ? '_blank' : undefined"
+                                    :rel="
+                                        item.newTab
+                                            ? 'noopener noreferrer'
+                                            : undefined
+                                    "
+                                    @click="open = false"
+                                >
+                                    {{ item.label }}
+                                </component>
+                                <component
+                                    :is="isSpaLink(child.href) ? Link : 'a'"
+                                    v-for="child in item.children"
+                                    :key="child.label"
+                                    :href="child.href"
+                                    :target="
+                                        child.newTab ? '_blank' : undefined
+                                    "
+                                    :rel="
+                                        child.newTab
+                                            ? 'noopener noreferrer'
+                                            : undefined
+                                    "
+                                    class="mv-offcanvas__subnav"
+                                    @click="open = false"
+                                >
+                                    {{ child.label }}
+                                </component>
+                            </template>
+                            <a href="#angebot" @click="open = false">{{
+                                t.letsTalk
+                            }}</a>
+                        </nav>
+                    </div>
+
+                <!-- Footer row: language switch + socials -->
+                <div class="mv-offcanvas__foot">
+                    <Link
+                        v-if="showLanguageSwitcher"
+                        :href="switchHref"
+                        class="mv-offcanvas__lang"
+                        @click="open = false"
+                    >
+                        <FlagImage :code="currentLangFlag" size="sm" />
+                        <span>{{ props.locale.toUpperCase() }}</span>
+                        <span aria-hidden="true">/</span>
+                        <FlagImage :code="otherLangFlag" size="sm" />
+                        <span>{{ otherLocaleLabel }}</span>
+                    </Link>
+                    <div class="mv-offcanvas__socials">
+                        <a
+                            v-for="s in socialLinks"
+                            :key="s.abbr"
+                            :href="s.href"
+                            :aria-label="s.label"
+                        >
+                            {{ s.abbr }}
+                        </a>
                     </div>
                 </div>
             </div>
+            </div>
         </Teleport>
 
-        <nav class="fixed inset-x-0 bottom-0 z-50 flex items-end justify-around border-t border-[rgba(15,23,42,0.08)] bg-white px-2 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-6px_24px_rgba(15,23,42,0.08)] md:hidden"
-            aria-label="Mobile">
-            <Link :href="home"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]">
+        <nav
+            class="fixed inset-x-0 bottom-0 z-50 flex items-end justify-around border-t border-[rgba(15,23,42,0.08)] bg-white px-2 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-[0_-6px_24px_rgba(15,23,42,0.08)] md:hidden"
+            aria-label="Mobile"
+        >
+            <Link
+                :href="home"
+                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
+            >
                 <Home :size="20" />
                 <span>{{ t.home }}</span>
             </Link>
-            <a v-if="phones.length > 0" :href="`tel:${phones[0].tel}`"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]">
+            <a
+                v-if="phones.length > 0"
+                :href="`tel:${phones[0].tel}`"
+                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
+            >
                 <Phone :size="20" />
                 <span>{{ t.callLabel }}</span>
             </a>
-            <a href="#angebot" class="flex flex-1 flex-col items-center" :aria-label="t.cta">
+            <a
+                href="#angebot"
+                class="flex flex-1 flex-col items-center"
+                :aria-label="t.cta"
+            >
                 <span
-                    class="-mt-[65px] flex size-14 items-center justify-center rounded-full border-4 border-white bg-[var(--orange)] text-white ">
+                    class="-mt-[65px] flex size-14 items-center justify-center rounded-full border-4 border-white bg-[var(--orange)] text-white shadow-[0_8px_24px_rgba(255,87,34,0.45)]"
+                >
                     <ClipboardList :size="24" />
                 </span>
             </a>
-            <a href="#leistungen"
-                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]">
+            <a
+                href="#leistungen"
+                class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
+            >
                 <Truck :size="20" />
                 <span>{{ t.services }}</span>
             </a>
-            <button type="button"
+            <button
+                type="button"
                 class="flex flex-1 flex-col items-center gap-1 py-1 text-[11px] font-medium text-[color:var(--midnight)] transition-colors hover:text-[color:var(--orange)]"
-                @click="open = true">
+                @click="open = true"
+            >
                 <Menu :size="20" />
                 <span>{{ t.menu }}</span>
             </button>
