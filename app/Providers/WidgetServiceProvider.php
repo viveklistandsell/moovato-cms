@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Widgets\About\AboutWidget;
 use App\Widgets\AboutExperience\AboutExperienceWidget;
 use App\Widgets\AboutStats\AboutStatsWidget;
+use App\Widgets\AssistantTools\AssistantToolsWidget;
 use App\Widgets\Banner\BannerWidget;
 use App\Widgets\Blog\BlogWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
@@ -21,6 +22,7 @@ use App\Widgets\CtaBanner\CtaBannerWidget;
 use App\Widgets\CtaWork\CtaWorkWidget;
 use App\Widgets\DarkFeature\DarkFeatureWidget;
 use App\Widgets\DarkIntro\DarkIntroWidget;
+use App\Widgets\DashboardPromo\DashboardPromoWidget;
 use App\Widgets\ExpertsChoice\ExpertsChoiceWidget;
 use App\Widgets\Faq\FaqWidget;
 use App\Widgets\FaqMedia\FaqMediaWidget;
@@ -85,6 +87,8 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         TestimonialsShowcaseWidget::class,
         GalleryWidget::class,
         HeronewWidget::class,
+        DashboardPromoWidget::class,
+        AssistantToolsWidget::class,
         TrustBarWidget::class,
         MarqueeWidget::class,
         QuoteFormWidget::class,
