@@ -117,13 +117,13 @@ const active = ref(0);
                             <template v-if="tab.mode === 'check'">
                                 <span
                                     v-if="row.left"
-                                    class="inline-flex size-8 items-center justify-center rounded-full bg-[var(--orange)] text-white"
+                                    class="inline-flex size-6 items-center justify-center rounded-full bg-[var(--orange)] text-white"
                                 >
                                     <Check :size="16" />
                                 </span>
                                 <span
                                     v-else
-                                    class="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(15,23,42,0.05)] text-[color:var(--slate-light)]"
+                                    class="inline-flex size-6 items-center justify-center rounded-full bg-[rgba(15,23,42,0.05)] text-[color:var(--slate-light)]"
                                 >
                                     <X :size="16" />
                                 </span>
@@ -140,13 +140,13 @@ const active = ref(0);
                             <template v-if="tab.mode === 'check'">
                                 <span
                                     v-if="row.right"
-                                    class="inline-flex size-8 items-center justify-center rounded-full bg-[var(--orange)] text-white"
+                                    class="inline-flex size-6 items-center justify-center rounded-full bg-[var(--orange)] text-white"
                                 >
                                     <Check :size="16" />
                                 </span>
                                 <span
                                     v-else
-                                    class="inline-flex size-8 items-center justify-center rounded-full bg-[rgba(15,23,42,0.05)] text-[color:var(--slate-light)]"
+                                    class="inline-flex size-6 items-center justify-center rounded-full bg-[rgba(15,23,42,0.05)] text-[color:var(--slate-light)]"
                                 >
                                     <X :size="16" />
                                 </span>

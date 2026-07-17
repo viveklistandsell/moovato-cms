@@ -15,6 +15,7 @@ import LocaleTabs from '@/components/common/LocaleTabs.vue';
 import MultiSelect from '@/components/common/MultiSelect.vue';
 import WidgetsCanvas from '@/components/admin/widgets/WidgetsCanvas.vue';
 import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
+import { getWidgetEntry } from '@/widgets/registry';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -176,15 +177,27 @@ function onMediaPicked(file: {
 
 function submit(): void {
     if (isEdit.value) {
-        form.transform((data) => ({
-            ...data,
-            _method: 'put',
-            // Persist the live widget stack alongside the page so "Save & Exit"
-            // saves widget edits too — not just the canvas's own Save button.
-            widgets: JSON.parse(JSON.stringify(editWidgets.value)),
-        })).post(`/admin/pages/${props.page!.id}`, { forceFormData: true });
+        // Persist the live widget stack alongside the page so "Save & Exit"
+        // saves widget edits too — not just the canvas's own Save button.
+        //
+        // Send a real PUT with a JSON body. Forcing multipart form-data
+        // flattens the nested widget array into thousands of fields, which
+        // trips PHP's max_input_vars limit — that silently drops the _method
+        // field, so the spoofed PUT arrives as a POST and 405s. Images are
+        // uploaded separately and referenced by path, so this form never
+        // carries a File and never needs multipart.
+        // Drop any widget whose type is no longer registered (e.g. a block
+        // left over from a widget that was removed). The backend rejects
+        // unknown types (Rule::in), which would 422 the whole save.
+        const widgets = (
+            JSON.parse(JSON.stringify(editWidgets.value)) as WidgetInstance[]
+        ).filter((w) => getWidgetEntry(w.type) !== null);
+
+        form.transform((data) => ({ ...data, widgets })).put(
+            `/admin/pages/${props.page!.id}`,
+        );
     } else {
-        form.post('/admin/pages', { forceFormData: true });
+        form.post('/admin/pages');
     }
 }
 

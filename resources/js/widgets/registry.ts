@@ -4,6 +4,8 @@ import AboutExperienceEditor from './AboutExperience/AboutExperienceEditor.vue';
 import AboutExperienceRenderer from './AboutExperience/AboutExperienceRenderer.vue';
 import AboutStatsEditor from './AboutStats/AboutStatsEditor.vue';
 import AboutStatsRenderer from './AboutStats/AboutStatsRenderer.vue';
+import AssistantToolsEditor from './AssistantTools/AssistantToolsEditor.vue';
+import AssistantToolsRenderer from './AssistantTools/AssistantToolsRenderer.vue';
 import BannerEditor from './Banner/BannerEditor.vue';
 import BannerRenderer from './Banner/BannerRenderer.vue';
 import BlogEditor from './Blog/BlogEditor.vue';
@@ -23,6 +25,8 @@ import CtaBannerRenderer from './CtaBanner/CtaBannerRenderer.vue';
 import CtaWorkEditor from './CtaWork/CtaWorkEditor.vue';
 import CtaWorkRenderer from './CtaWork/CtaWorkRenderer.vue';
 import DarkFeatureEditor from './DarkFeature/DarkFeatureEditor.vue';
+import DashboardPromoEditor from './DashboardPromo/DashboardPromoEditor.vue';
+import DashboardPromoRenderer from './DashboardPromo/DashboardPromoRenderer.vue';
 import DarkFeatureRenderer from './DarkFeature/DarkFeatureRenderer.vue';
 import ExpertsChoiceEditor from './ExpertsChoice/ExpertsChoiceEditor.vue';
 import ExpertsChoiceRenderer from './ExpertsChoice/ExpertsChoiceRenderer.vue';
@@ -100,6 +104,14 @@ import type { WidgetRegistry } from './types';
 export const widgetRegistry: WidgetRegistry = {
     hero: { editor: HeroEditor, renderer: HeroRenderer },
     heronew: { editor: HeronewEditor, renderer: HeronewRenderer },
+    dashboard_promo: {
+        editor: DashboardPromoEditor,
+        renderer: DashboardPromoRenderer,
+    },
+    assistant_tools: {
+        editor: AssistantToolsEditor,
+        renderer: AssistantToolsRenderer,
+    },
     banner: { editor: BannerEditor, renderer: BannerRenderer },
     page_banner: { editor: PageBannerEditor, renderer: PageBannerRenderer },
     orbit_banner: { editor: OrbitBannerEditor, renderer: OrbitBannerRenderer },
