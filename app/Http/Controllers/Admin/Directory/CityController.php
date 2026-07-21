@@ -32,6 +32,7 @@ final class CityController extends Controller
         'name' => 'name',
         'state' => 'state',
         'postal_code' => 'postal_code',
+        'districts_count' => 'districts_count',
         'status' => 'status',
         'popular' => 'is_popular',
         'created_at' => 'created_at',
@@ -49,7 +50,9 @@ final class CityController extends Controller
         $sortDir = $request->query('sort_dir', 'asc') === 'desc' ? 'desc' : 'asc';
         $perPage = max(5, min(100, (int) $request->query('per_page', '10')));
 
-        $query = City::query()->with('state:id,country_id,name,code');
+        $query = City::query()
+            ->with('state:id,country_id,name,code')
+            ->withCount('districts');
 
         if ($stateId !== null) {
             $query->where('state_id', $stateId);
@@ -321,6 +324,7 @@ final class CityController extends Controller
             'is_popular' => $city->is_popular,
             'status' => $city->status,
             'sort_order' => $city->sort_order,
+            'districts_count' => (int) ($city->districts_count ?? 0),
             'created_at' => $city->created_at?->toIso8601String(),
             'updated_at' => $city->updated_at?->toIso8601String(),
         ];

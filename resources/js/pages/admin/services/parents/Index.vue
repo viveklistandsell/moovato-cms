@@ -15,6 +15,7 @@ import {
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
@@ -692,7 +693,7 @@ function exportUrl(): string {
                                             :variant="node.translations[lang.code] ? 'secondary' : 'outline'"
                                             class="text-[10px]"
                                         >
-                                            <span v-if="lang.flag">{{ lang.flag }}</span>
+                                            <FlagImage v-if="lang.flag" :code="lang.flag" size="xs" />
                                             {{ lang.code.toUpperCase() }}
                                             <span v-if="!node.translations[lang.code]" class="opacity-50">·{{ t('table.translation_missing') }}</span>
                                         </Badge>

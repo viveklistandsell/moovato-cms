@@ -208,6 +208,7 @@ return [
         'countries' => 'Countries',
         'states' => 'States',
         'cities' => 'Cities',
+        'districts' => 'Districts',
         'services_management' => 'Services',
         'service_parent_categories' => 'Parent Categories',
         'service_categories' => 'Service Categories',
@@ -584,6 +585,7 @@ return [
         'filter_popular_none' => 'Non-popular only',
         'col_state' => 'State',
         'col_postal_code' => 'Postal code',
+        'col_districts' => 'Districts',
         'col_popular' => 'Popular',
         'bulk_mark_popular' => 'Mark as popular',
         'bulk_unmark_popular' => 'Remove "popular"',
@@ -669,6 +671,52 @@ return [
         // duplicate (state_id, permalink) within a single file.
         'import_error_unknown_state' => "Unknown state (ISO ':iso', code ':code') — no matching state found.",
         'import_error_duplicate_city' => 'Duplicate of row :first_row: permalink \':permalink\' appears earlier in this file.',
+
+        // Districts (Bezirke) — geo tier below City.
+        'districts_title' => 'Districts',
+        'districts_description' => 'Manage the neighborhoods / Bezirke inside each city (Mitte, Kreuzberg, …).',
+        'district_create' => 'New district',
+        'district_edit_title' => 'Edit district',
+        'district_create_title' => 'Create district',
+        'district_edit_description' => 'Update this district. Change the city to move it — sibling order is renumbered automatically.',
+        'district_create_description' => 'Add a new district inside a city. Berlin has 12 Bezirke; other cities may have their own Stadtbezirke.',
+        'district_form_title' => 'District details',
+        'district_form_description' => 'Select the city this district belongs to and fill in the identifying fields.',
+        'all_districts' => 'All districts',
+        'districts_total' => '{total, plural, one{# district in total} other{# districts in total}}',
+        'no_districts_yet' => 'No districts yet. Use "New district" to add one.',
+        'search_districts_placeholder' => 'Search districts…',
+        'col_city' => 'City',
+        'field_country_hint_district' => 'Cascade filter — the district is only linked to the city below.',
+        'field_name_placeholder_district' => 'e.g. Mitte, Friedrichshain-Kreuzberg',
+        'field_code_placeholder_district' => 'e.g. MI, FK',
+        'field_code_hint_district' => 'Optional short identifier (2–8 chars). Must be unique per city when set.',
+        'field_permalink_hint_district' => 'Used in URLs like /berlin/mitte/. Lowercase letters, numbers and hyphens only.',
+        'field_postal_code_prefix' => 'Postal code prefix',
+        'field_postal_code_prefix_placeholder' => 'e.g. 10115',
+        'field_postal_code_prefix_hint' => 'Optional — a representative prefix helps auto-suggest districts from postal codes.',
+        'field_is_popular_district' => 'Show as popular district',
+
+        // District CRUD toasts.
+        'district_created_toast' => 'District created.',
+        'district_updated_toast' => 'District updated.',
+        'district_deleted_toast' => 'District deleted.',
+        'district_order_updated_toast' => 'Order updated.',
+        'district_reorder_rejected_toast' => 'Reorder rejected: some districts do not belong to the selected city.',
+
+        // District bulk actions.
+        'district_bulk_deleted_toast' => ':count district deleted.|:count districts deleted.',
+        'district_bulk_published_toast' => ':count district published.|:count districts published.',
+        'district_bulk_draft_toast' => ':count district set to draft.|:count districts set to draft.',
+        'district_bulk_inactive_toast' => ':count district deactivated.|:count districts deactivated.',
+        'district_bulk_marked_popular_toast' => ':count district marked popular.|:count districts marked popular.',
+        'district_bulk_unmarked_popular_toast' => ':count district unmarked.|:count districts unmarked.',
+        'district_bulk_updated_toast' => ':count district updated.|:count districts updated.',
+
+        // District UI hints + import errors.
+        'districts_drag_hint' => 'Filter by a single city (no search / no sort) to enable drag-and-drop reordering.',
+        'import_error_unknown_city' => 'Unknown city — check country_iso, state_code, city_permalink.',
+        'import_error_duplicate_district' => 'Duplicate row: this district permalink appears more than once for the same city.',
     ],
 
     'service_parent_categories' => [

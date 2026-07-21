@@ -13,6 +13,7 @@ import {
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
@@ -687,9 +688,11 @@ function applyBulkAction(action: string): void {
                                             "
                                             class="text-[10px]"
                                         >
-                                            <span v-if="lang.flag">{{
-                                                lang.flag
-                                            }}</span>
+                                            <FlagImage
+                                                v-if="lang.flag"
+                                                :code="lang.flag"
+                                                size="xs"
+                                            />
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="

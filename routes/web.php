@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Directory\CityController as AdminCityController;
 use App\Http\Controllers\Admin\Directory\CountryController as AdminCountryController;
+use App\Http\Controllers\Admin\Directory\DistrictController as AdminDistrictController;
 use App\Http\Controllers\Admin\Directory\StateController as AdminStateController;
 use App\Http\Controllers\Admin\LanguageController as AdminLanguageController;
 use App\Http\Controllers\Admin\MediaController;
@@ -190,6 +191,19 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->name('cities.import');
             Route::resource('cities', AdminCityController::class)
                 ->parameters(['cities' => 'city'])
+                ->except('show');
+            Route::post('districts/reorder', [AdminDistrictController::class, 'reorder'])
+                ->name('districts.reorder');
+            Route::post('districts/bulk-action', [AdminDistrictController::class, 'bulkAction'])
+                ->name('districts.bulk-action');
+            Route::get('districts/export', [AdminDistrictController::class, 'export'])
+                ->name('districts.export');
+            Route::get('districts/sample-csv', [AdminDistrictController::class, 'sampleCsv'])
+                ->name('districts.sample-csv');
+            Route::post('districts/import', [AdminDistrictController::class, 'import'])
+                ->name('districts.import');
+            Route::resource('districts', AdminDistrictController::class)
+                ->parameters(['districts' => 'district'])
                 ->except('show');
         });
 

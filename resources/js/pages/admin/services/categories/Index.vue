@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { GripVertical, Pencil, Plus, Star, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
@@ -403,7 +404,7 @@ function applyBulkAction(action: string): void {
                                         <Badge v-for="lang in languages" :key="lang.code"
                                             :variant="node.translations[lang.code] ? 'secondary' : 'outline'"
                                             class="text-[10px]">
-                                            <span v-if="lang.flag">{{ lang.flag }}</span>
+                                            <FlagImage v-if="lang.flag" :code="lang.flag" size="xs" />
                                             {{ lang.code.toUpperCase() }}
                                             <span v-if="!node.translations[lang.code]" class="opacity-50">·{{
                                                 t('table.translation_missing') }}</span>

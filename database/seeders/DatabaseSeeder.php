@@ -20,6 +20,7 @@ final class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             StateSeeder::class,
             CitySeeder::class,
+            DistrictSeeder::class,
             ServiceParentCategorySeeder::class,
             ServiceCategorySeeder::class,
         ]);

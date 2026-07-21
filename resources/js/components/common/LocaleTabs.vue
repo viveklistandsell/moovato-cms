@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T">
+import FlagImage from '@/components/common/FlagImage.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export type LocaleOption = {
@@ -30,9 +31,7 @@ defineEmits<{
                 :key="lang.code"
                 :value="lang.code"
             >
-                <span v-if="lang.flag" class="text-base leading-none">{{
-                    lang.flag
-                }}</span>
+                <FlagImage v-if="lang.flag" :code="lang.flag" size="sm" />
                 <span class="font-medium">{{ lang.native_name }}</span>
                 <span
                     v-if="lang.is_default"

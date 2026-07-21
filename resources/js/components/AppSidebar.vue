@@ -5,6 +5,7 @@ import {
     Bot,
     Building2,
     ChevronRight,
+    Compass,
     Database,
     Download,
     Flag,
@@ -127,6 +128,7 @@ const directoryItems = computed<NavItem[]>(() => [
     { title: t('sidebar.countries'), href: '/admin/directory/countries', icon: Flag },
     { title: t('sidebar.states'), href: '/admin/directory/states', icon: MapIcon },
     { title: t('sidebar.cities'), href: '/admin/directory/cities', icon: Building2 },
+    { title: t('sidebar.districts'), href: '/admin/directory/districts', icon: Compass },
 ]);
 
 const servicesItems = computed<NavItem[]>(() => [

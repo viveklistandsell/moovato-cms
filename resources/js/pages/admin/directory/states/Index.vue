@@ -2,6 +2,7 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import {
     AlertTriangle,
+    Building2,
     Download,
     FileSpreadsheet,
     GripVertical,
@@ -697,7 +698,16 @@ function exportUrl(): string {
                                     <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <span class="text-xs">{{ s.cities_count }}</span>
+                                    <Link
+                                        v-if="s.cities_count > 0"
+                                        :href="`/admin/directory/cities?state_id=${s.id}`"
+                                        class="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 transition-colors hover:border-indigo-300 hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200 dark:hover:bg-indigo-900"
+                                        :title="t('locations.cities')"
+                                    >
+                                        <Building2 class="size-3" />
+                                        {{ s.cities_count }}
+                                    </Link>
+                                    <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <Badge

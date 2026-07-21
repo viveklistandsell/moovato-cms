@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { GripVertical, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
+import { GripVertical, Map, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
@@ -375,7 +375,16 @@ function applyBulkAction(action: string): void {
                                     <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <span class="text-xs">{{ c.states_count }}</span>
+                                    <Link
+                                        v-if="c.states_count > 0"
+                                        :href="`/admin/directory/states?country_id=${c.id}`"
+                                        class="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 transition-colors hover:border-indigo-300 hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200 dark:hover:bg-indigo-900"
+                                        :title="t('locations.states')"
+                                    >
+                                        <Map class="size-3" />
+                                        {{ c.states_count }}
+                                    </Link>
+                                    <span v-else class="text-xs text-muted-foreground">—</span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <Badge

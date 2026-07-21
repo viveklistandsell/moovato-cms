@@ -7,30 +7,38 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'state_id', 'name', 'permalink', 'postal_code',
+    'city_id', 'name', 'code', 'permalink', 'postal_code_prefix',
     'is_popular', 'status', 'sort_order',
 ])]
-final class City extends Model
+final class District extends Model
 {
-    protected $table = 'cities';
+    protected $table = 'districts';
 
-    public static function nextSortOrder(?int $stateId = null): int
+    /**
+     * Next sort_order for a new sibling within the given city scope.
+     * Districts are flat under a city (no self-hierarchy in this MVP),
+     * so sort_order only needs to be unique per city_id.
+     */
+    public static function nextSortOrder(?int $cityId = null): int
     {
         $query = self::query();
-        if ($stateId !== null) {
-            $query->where('state_id', $stateId);
+        if ($cityId !== null) {
+            $query->where('city_id', $cityId);
         }
 
         return ((int) $query->max('sort_order')) + 1;
     }
 
-    public static function compactSiblings(int $stateId): void
+    /**
+     * Renumber a city's districts 1..N to close any gaps left after a
+     * delete or a cross-city move. Same pattern as City::compactSiblings.
+     */
+    public static function compactSiblings(int $cityId): void
     {
         $siblings = self::query()
-            ->where('state_id', $stateId)
+            ->where('city_id', $cityId)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
@@ -43,10 +51,16 @@ final class City extends Model
         }
     }
 
+    /**
+     * Insert this district at the position implied by its current
+     * `sort_order`, shifting siblings 1..N to close/create the gap.
+     * Called after create/update so a manual sort_order edit takes
+     * effect against the actual sibling list.
+     */
     public function reorderToCurrentPosition(): void
     {
         $siblings = self::query()
-            ->where('state_id', $this->state_id)
+            ->where('city_id', $this->city_id)
             ->where('id', '!=', $this->id)
             ->orderBy('sort_order')
             ->orderBy('id')
@@ -63,13 +77,9 @@ final class City extends Model
         }
     }
 
-    public function state(): BelongsTo
+    public function city(): BelongsTo
     {
-        return $this->belongsTo(State::class);
-    }
-    public function districts(): HasMany
-    {
-        return $this->hasMany(District::class);
+        return $this->belongsTo(City::class);
     }
 
     protected function casts(): array

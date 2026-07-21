@@ -3,6 +3,7 @@ import { router } from '@inertiajs/vue3';
 import {
     Boxes,
     Building2,
+    Compass,
     FileText,
     Files,
     Globe,
@@ -35,6 +36,7 @@ type SearchGroup = {
         | 'countries'
         | 'states'
         | 'cities'
+        | 'districts'
         | 'service_parents'
         | 'service_categories'
         | 'languages'
@@ -136,6 +138,7 @@ const GROUP_ICONS = {
     countries: Globe,
     states: Map,
     cities: Building2,
+    districts: Compass,
     service_parents: Boxes,
     service_categories: Package,
     languages: LanguagesIcon,

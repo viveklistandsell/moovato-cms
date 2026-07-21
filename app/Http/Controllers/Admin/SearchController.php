@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\District;
 use App\Models\Language;
 use App\Models\MediaFile;
 use App\Models\Menu;
@@ -192,6 +193,30 @@ final class SearchController extends Controller
                             .($c->postal_code !== null ? ' · '.$c->postal_code : '')
                             .' · '.$c->status,
                         'href' => "/admin/directory/cities/{$c->id}/edit",
+                    ])
+                    ->all(),
+            ];
+
+            $groups[] = [
+                'key' => 'districts',
+                'label' => 'Districts',
+                'items' => District::query()
+                    ->with('city:id,name')
+                    ->where(function ($q) use ($like): void {
+                        $q->where('name', 'like', $like)
+                            ->orWhere('code', 'like', $like)
+                            ->orWhere('postal_code_prefix', 'like', $like);
+                    })
+                    ->orderByDesc('updated_at')
+                    ->limit(self::PER_GROUP)
+                    ->get(['id', 'city_id', 'name', 'code', 'postal_code_prefix', 'status'])
+                    ->map(fn (District $d): array => [
+                        'id' => $d->id,
+                        'title' => $d->name,
+                        'subtitle' => ($d->city?->name ?? '—')
+                            .($d->code !== null ? ' · '.$d->code : '')
+                            .' · '.$d->status,
+                        'href' => "/admin/directory/districts/{$d->id}/edit",
                     ])
                     ->all(),
             ];

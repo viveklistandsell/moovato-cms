@@ -208,6 +208,7 @@ return [
         'countries' => 'Länder',
         'states' => 'Bundesländer',
         'cities' => 'Städte',
+        'districts' => 'Bezirke',
         'services_management' => 'Dienstleistungen',
         'service_parent_categories' => 'Elternkategorien',
         'service_categories' => 'Dienstleistungskategorien',
@@ -584,6 +585,7 @@ return [
         'filter_popular_none' => 'Nur normale',
         'col_state' => 'Bundesland',
         'col_postal_code' => 'PLZ',
+        'col_districts' => 'Bezirke',
         'col_popular' => 'Beliebt',
         'bulk_mark_popular' => 'Als beliebt markieren',
         'bulk_unmark_popular' => '"Beliebt" entfernen',
@@ -665,6 +667,52 @@ return [
         'import_error_unknown_state' => "Unbekanntes Bundesland (ISO ':iso', Code ':code') — kein passendes Bundesland gefunden.",
         'import_error_duplicate_city' => 'Duplikat von Zeile :first_row: Permalink \':permalink\' erscheint bereits in dieser Datei.',
         'import_error_duplicate_parent' => 'Duplikat von Zeile :first_row: permalink_de \':permalink\' erscheint bereits in dieser Datei.',
+
+        // Districts (Bezirke) — Geoebene unterhalb der Stadt.
+        'districts_title' => 'Stadtbezirke',
+        'districts_description' => 'Verwalte die Bezirke innerhalb jeder Stadt (Mitte, Kreuzberg, …).',
+        'district_create' => 'Neuer Bezirk',
+        'district_edit_title' => 'Bezirk bearbeiten',
+        'district_create_title' => 'Bezirk erstellen',
+        'district_edit_description' => 'Diesen Bezirk aktualisieren. Beim Wechsel der Stadt wird die Reihenfolge automatisch neu nummeriert.',
+        'district_create_description' => 'Neuen Bezirk innerhalb einer Stadt anlegen. Berlin hat 12 Bezirke; andere Städte haben ihre eigenen Stadtbezirke.',
+        'district_form_title' => 'Bezirk-Details',
+        'district_form_description' => 'Wähle die Stadt, zu der dieser Bezirk gehört, und fülle die identifizierenden Felder aus.',
+        'all_districts' => 'Alle Bezirke',
+        'districts_total' => '{total, plural, one{# Bezirk insgesamt} other{# Bezirke insgesamt}}',
+        'no_districts_yet' => 'Noch keine Bezirke. Verwende „Neuer Bezirk", um einen hinzuzufügen.',
+        'search_districts_placeholder' => 'Bezirke suchen…',
+        'col_city' => 'Stadt',
+        'field_country_hint_district' => 'Kaskadenfilter — der Bezirk ist nur mit der Stadt unten verknüpft.',
+        'field_name_placeholder_district' => 'z. B. Mitte, Friedrichshain-Kreuzberg',
+        'field_code_placeholder_district' => 'z. B. MI, FK',
+        'field_code_hint_district' => 'Optionaler Kurzcode (2–8 Zeichen). Muss pro Stadt eindeutig sein, wenn gesetzt.',
+        'field_permalink_hint_district' => 'Wird in URLs wie /berlin/mitte/ verwendet. Nur Kleinbuchstaben, Zahlen und Bindestriche.',
+        'field_postal_code_prefix' => 'Postleitzahl-Präfix',
+        'field_postal_code_prefix_placeholder' => 'z. B. 10115',
+        'field_postal_code_prefix_hint' => 'Optional — ein repräsentatives Präfix hilft, Bezirke aus Postleitzahlen abzuleiten.',
+        'field_is_popular_district' => 'Als beliebten Bezirk anzeigen',
+
+        // Bezirk-CRUD-Toasts.
+        'district_created_toast' => 'Bezirk erstellt.',
+        'district_updated_toast' => 'Bezirk aktualisiert.',
+        'district_deleted_toast' => 'Bezirk gelöscht.',
+        'district_order_updated_toast' => 'Reihenfolge aktualisiert.',
+        'district_reorder_rejected_toast' => 'Neuanordnung abgelehnt: Einige Bezirke gehören nicht zur gewählten Stadt.',
+
+        // Bezirk-Bulk-Aktionen.
+        'district_bulk_deleted_toast' => ':count Bezirk gelöscht.|:count Bezirke gelöscht.',
+        'district_bulk_published_toast' => ':count Bezirk veröffentlicht.|:count Bezirke veröffentlicht.',
+        'district_bulk_draft_toast' => ':count Bezirk als Entwurf gespeichert.|:count Bezirke als Entwurf gespeichert.',
+        'district_bulk_inactive_toast' => ':count Bezirk deaktiviert.|:count Bezirke deaktiviert.',
+        'district_bulk_marked_popular_toast' => ':count Bezirk als beliebt markiert.|:count Bezirke als beliebt markiert.',
+        'district_bulk_unmarked_popular_toast' => ':count Bezirk entmarkiert.|:count Bezirke entmarkiert.',
+        'district_bulk_updated_toast' => ':count Bezirk aktualisiert.|:count Bezirke aktualisiert.',
+
+        // Bezirk-UI-Hinweise + Import-Fehler.
+        'districts_drag_hint' => 'Nach einer einzelnen Stadt filtern (keine Suche / keine Sortierung), um die Drag-and-Drop-Sortierung zu aktivieren.',
+        'import_error_unknown_city' => 'Unbekannte Stadt — country_iso, state_code, city_permalink prüfen.',
+        'import_error_duplicate_district' => 'Doppelte Zeile: Dieser Bezirks-Permalink kommt in derselben Stadt mehrfach vor.',
     ],
 
     'service_parent_categories' => [
