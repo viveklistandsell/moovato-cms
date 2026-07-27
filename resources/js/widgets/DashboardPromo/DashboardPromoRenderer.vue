@@ -31,7 +31,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-dashpromo section-py">
+    <section class="mv-dashpromo section-py bg-white">
         <div class="container-xl">
             <div class="mv-dashpromo-hero">
                 <div class="mv-dashpromo-hero-content">

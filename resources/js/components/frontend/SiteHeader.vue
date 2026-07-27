@@ -259,9 +259,31 @@ function onKeydown(e: KeyboardEvent): void {
     }
 }
 
-onMounted(() => window.addEventListener('keydown', onKeydown));
+// Reveal-on-scroll sticky: the header stays in normal flow at the top and
+// only pins itself once the user has scrolled past its own height, sliding
+// back into view. A spacer keeps the layout from jumping when it detaches.
+const headerEl = ref<HTMLElement | null>(null);
+const headerHeight = ref(0);
+const isStuck = ref(false);
+
+function onScroll(): void {
+    if (!headerSticky.value) {
+        isStuck.value = false;
+        return;
+    }
+    const threshold = headerHeight.value || 200;
+    isStuck.value = window.scrollY > threshold;
+}
+
+onMounted(() => {
+    window.addEventListener('keydown', onKeydown);
+    headerHeight.value = headerEl.value?.offsetHeight ?? 0;
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+});
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('scroll', onScroll);
     if (typeof document !== 'undefined') {
         document.body.style.overflow = '';
     }
@@ -275,7 +297,12 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 </script>
 
 <template>
-    <header class="mv-header" :class="headerSticky ? 'sticky top-0 z-40' : ''">
+    <div>
+    <header
+        ref="headerEl"
+        class="mv-header"
+        :class="{ 'is-stuck': isStuck }"
+    >
         <!-- ===== TOP BAR ===== -->
         <div class="topbar">
             <div
@@ -580,4 +607,11 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
             </button>
         </nav>
     </header>
+    <div
+        v-if="isStuck"
+        class="mv-header-spacer"
+        :style="{ height: headerHeight + 'px' }"
+        aria-hidden="true"
+    ></div>
+    </div>
 </template>
