@@ -9,6 +9,7 @@ use App\Models\Blog;
 use App\Models\BlogCategory;
 use App\Models\BlogTag;
 use App\Models\BlogTranslation;
+use App\Models\Language;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -163,10 +164,27 @@ final class BlogController extends Controller
             ->map(fn (Blog $b): array => $this->presentCard($b, $locale))
             ->all();
 
+        $defaultLang = Language::query()
+            ->where('lang_is_default', true)
+            ->where('status', true)
+            ->value('code') ?? 'de';
+
+        $localeAlternates = [];
+        foreach ($post->translations as $t) {
+            $slug = $t->permalink ?? $post->permalink;
+            if (empty($slug)) {
+                continue;
+            }
+            $localeAlternates[$t->lang] = $t->lang === $defaultLang
+                ? "/blog/{$slug}"
+                : "/{$t->lang}/blog/{$slug}";
+        }
+
         return Inertia::render('frontend/blog/Show', [
             'locale' => $locale,
             'post' => $this->presentDetail($post, $locale),
             'related' => $related,
+            'localeAlternates' => $localeAlternates,
         ]);
     }
 

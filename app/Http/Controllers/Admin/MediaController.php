@@ -7,12 +7,25 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MediaFile;
 use App\Models\MediaFolder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class MediaController extends Controller
 {
+    public function lookup(Request $request): JsonResponse
+    {
+        $path = (string) $request->query('path', '');
+        if ($path === '') {
+            return response()->json(['id' => null], 422);
+        }
+
+        $file = MediaFile::query()->where('path', $path)->first(['id']);
+
+        return response()->json(['id' => $file?->id]);
+    }
+
     public function index(Request $request): Response
     {
         $folderId = $request->integer('folder') ?: null;

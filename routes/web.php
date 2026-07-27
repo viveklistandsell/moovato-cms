@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminLocaleController;
 use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryController;
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
+use App\Http\Controllers\Admin\Companies\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Directory\CityController as AdminCityController;
 use App\Http\Controllers\Admin\Directory\CountryController as AdminCountryController;
@@ -37,6 +38,7 @@ use App\Http\Controllers\Admin\User\PermissionController as AdminPermissionContr
 use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
+use App\Http\Controllers\Frontend\CompanyController as FrontendCompanyController;
 use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\RobotsController;
@@ -65,6 +67,12 @@ Route::middleware('locale')->group(function (): void {
     Route::get('blog/{permalink}', [FrontendBlogController::class, 'show'])
         ->where('permalink', '[a-z0-9-]+')
         ->name('blog.show');
+
+    Route::get('companies', [FrontendCompanyController::class, 'index'])
+        ->name('companies.index');
+    Route::get('company/{permalink}', [FrontendCompanyController::class, 'show'])
+        ->where('permalink', '[a-z0-9-]+')
+        ->name('companies.show');
 });
 
 // Non-default locales (EN, ...) keep the /{locale}/ prefix.
@@ -81,6 +89,12 @@ Route::prefix('{locale}')
         Route::get('blog/{permalink}', [FrontendBlogController::class, 'show'])
             ->where('permalink', '[a-z0-9-]+')
             ->name('blog.show');
+
+        Route::get('companies', [FrontendCompanyController::class, 'index'])
+            ->name('companies.index');
+        Route::get('company/{permalink}', [FrontendCompanyController::class, 'show'])
+            ->where('permalink', '[a-z0-9-]+')
+            ->name('companies.show');
     });
 
 // Canonical: old /de/* URLs 301-redirect to the unprefixed root.
@@ -96,7 +110,7 @@ Route::get('/de/{rest?}', function (?string $rest = null) {
 // segments at the URL boundary.
 Route::middleware('locale')
     ->get('/{permalink}', [FrontendPageController::class, 'show'])
-    ->where('permalink', '(?!admin|blog|de|en|login|register|dashboard|forgot-password|reset-password|email|user|two-factor-challenge|logout|settings|_boost|storage|build)[a-z0-9-]+')
+    ->where('permalink', '(?!admin|blog|companies|company|de|en|login|register|dashboard|forgot-password|reset-password|email|user|two-factor-challenge|logout|settings|_boost|storage|build)[a-z0-9-]+')
     ->name('pages.show');
 
 Route::prefix('{locale}')
@@ -104,7 +118,7 @@ Route::prefix('{locale}')
     ->middleware('locale')
     ->name('localized.')
     ->get('/{permalink}', [FrontendPageController::class, 'show'])
-    ->where('permalink', '(?!blog)[a-z0-9-]+')
+    ->where('permalink', '(?!blog|companies|company)[a-z0-9-]+')
     ->name('pages.show');
 
 Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void {
@@ -229,6 +243,16 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->name('parent-categories.import');
             Route::resource('parent-categories', AdminServiceParentCategoryController::class)
                 ->parameters(['parent-categories' => 'category'])
+                ->except('show');
+        });
+
+        Route::middleware('permission:companies.view')->group(function (): void {
+            Route::post('companies/reorder', [AdminCompanyController::class, 'reorder'])
+                ->name('companies.reorder');
+            Route::post('companies/bulk-action', [AdminCompanyController::class, 'bulkAction'])
+                ->name('companies.bulk-action');
+            Route::resource('companies', AdminCompanyController::class)
+                ->parameters(['companies' => 'company'])
                 ->except('show');
         });
 
@@ -423,6 +447,7 @@ Route::middleware(['auth', 'verified', 'admin', 'admin.locale'])
     ->name('admin.')
     ->group(function (): void {
         Route::get('media', [MediaController::class, 'index'])->name('media.index');
+        Route::get('media/lookup', [MediaController::class, 'lookup'])->name('media.lookup');
 
         Route::post('media/folders', [MediaFolderController::class, 'store'])->name('media.folders.store');
         Route::post('media/folders/bulk-delete', [MediaFolderController::class, 'bulkDestroy'])->name('media.folders.bulk-delete');

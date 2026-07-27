@@ -40,15 +40,22 @@ const otherLangFlag = computed<string | null>(
     () => sharedLanguages.value.find((l) => l.code === otherLocale.value)?.flag ?? null,
 );
 
-// Build the equivalent URL in the other locale. Strip any existing locale
-// prefix (/de, /en), then re-add the locale segment only when the target is
-// not the default locale.
 const switchHref = computed(() => {
+    const alternates = (page.props.localeAlternates as Record<string, string> | undefined) ?? null;
+    const target = alternates?.[otherLocale.value];
+    if (typeof target === 'string' && target.length > 0) {
+        const url = page.url ?? '/';
+        const [, query = ''] = url.split('?');
+
+        return query !== '' ? `${target}?${query}` : target;
+    }
+
     const url = page.url ?? '/';
     const [pathOnly, query = ''] = url.split('?');
     const withoutPrefix = pathOnly.replace(/^\/(de|en)(?=\/|$)/, '') || '/';
-    const target = localizedUrl(otherLocale.value, withoutPrefix);
-    return query !== '' ? `${target}?${query}` : target;
+    const fallback = localizedUrl(otherLocale.value, withoutPrefix);
+
+    return query !== '' ? `${fallback}?${query}` : fallback;
 });
 
 const home = computed(() => localizedUrl(props.locale, '/'));

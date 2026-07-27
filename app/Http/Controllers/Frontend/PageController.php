@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
+use App\Models\Language;
 use App\Models\Page;
 use App\Models\PageTranslation;
 use App\Models\PageWidget;
@@ -42,13 +43,6 @@ final class PageController extends Controller
     {
         $locale = App::getLocale();
         $permalink = (string) $request->route('permalink');
-
-        // Permalink identifies the page (a translation in ANY language is
-        // enough to find it); the locale prefix decides which translation
-        // gets rendered. We 404 only when the active locale has no
-        // translation for that page — so /en/<slug> is a 404 if the page
-        // hasn't been translated to English, regardless of whether <slug>
-        // is the German permalink.
         $anyTranslation = PageTranslation::query()
             ->where('permalink', $permalink)
             ->first();
@@ -84,9 +78,31 @@ final class PageController extends Controller
     {
         $locale = App::getLocale();
         $tr = $page->translation($locale);
+        $defaultLang = Language::query()
+            ->where('lang_is_default', true)
+            ->where('status', true)
+            ->value('code') ?? 'de';
+
+        $localeAlternates = [];
+        if ($page->is_home) {
+            foreach ($page->translations as $t) {
+                $localeAlternates[$t->lang] = $t->lang === $defaultLang ? '/' : "/{$t->lang}/";
+            }
+        } else {
+            foreach ($page->translations as $t) {
+                $slug = $t->permalink ?? $page->permalink;
+                if (empty($slug)) {
+                    continue;
+                }
+                $localeAlternates[$t->lang] = $t->lang === $defaultLang
+                    ? "/{$slug}"
+                    : "/{$t->lang}/{$slug}";
+            }
+        }
 
         return Inertia::render('frontend/page/Index', [
             'locale' => $locale,
+            'localeAlternates' => $localeAlternates,
             'page' => [
                 'id' => $page->id,
                 'title' => $tr?->title ?? $page->title,
