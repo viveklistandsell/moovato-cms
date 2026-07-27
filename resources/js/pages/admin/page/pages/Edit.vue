@@ -112,15 +112,9 @@ const form = useForm({
     is_home: props.page?.is_home ?? false,
     status: props.page?.status ?? 'published',
     translations: initialTranslations,
-    // Only populated on CREATE — sent with the main page form so the very
-    // first save can persist page + widgets in one transaction. On EDIT,
-    // widgets live in a sibling ref and sync via their own endpoint.
     widgets: [],
 });
 
-// On edit, the widget card is controlled by this local ref. Its Save button
-// (rendered by WidgetsCanvas because pageId is provided) syncs widgets
-// independently of the main page form.
 const editWidgets = ref<WidgetInstance[]>(props.pageWidgets ?? []);
 
 const activeLocale = ref(
@@ -159,9 +153,6 @@ function removeImage(): void {
     imagePreview.value = null;
 }
 
-// In-form media picker modal. Click "Upload" to open the library popup,
-// pick an existing image or upload a new one, and the chosen file's path
-// is applied to image_path + preview. The form stays open the whole time.
 const pickerOpen = ref(false);
 
 function onMediaPicked(file: {
@@ -177,18 +168,6 @@ function onMediaPicked(file: {
 
 function submit(): void {
     if (isEdit.value) {
-        // Persist the live widget stack alongside the page so "Save & Exit"
-        // saves widget edits too — not just the canvas's own Save button.
-        //
-        // Send a real PUT with a JSON body. Forcing multipart form-data
-        // flattens the nested widget array into thousands of fields, which
-        // trips PHP's max_input_vars limit — that silently drops the _method
-        // field, so the spoofed PUT arrives as a POST and 405s. Images are
-        // uploaded separately and referenced by path, so this form never
-        // carries a File and never needs multipart.
-        // Drop any widget whose type is no longer registered (e.g. a block
-        // left over from a widget that was removed). The backend rejects
-        // unknown types (Rule::in), which would 422 the whole save.
         const widgets = (
             JSON.parse(JSON.stringify(editWidgets.value)) as WidgetInstance[]
         ).filter((w) => getWidgetEntry(w.type) !== null);

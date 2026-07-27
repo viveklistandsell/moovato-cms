@@ -9,16 +9,22 @@ const props = withDefaults(
     { size: 'sm' },
 );
 
-/**
- * A raw 2-letter ASCII code (case-insensitive) is treated as an ISO
- * country code — anything else (emoji, longer strings) renders as text
- * so nothing regresses for languages saved before the switch.
- */
 const isoCode = computed<string | null>(() => {
     const v = (props.code ?? '').trim();
-    if (v.length !== 2) return null;
-    if (!/^[a-zA-Z]{2}$/.test(v)) return null;
-    return v.toLowerCase();
+
+    if (/^[a-zA-Z]{2}$/.test(v)) {
+        return v.toLowerCase();
+    }
+
+    const points = Array.from(v).map((ch) => ch.codePointAt(0) ?? 0);
+    if (
+        points.length === 2 &&
+        points.every((cp) => cp >= 0x1f1e6 && cp <= 0x1f1ff)
+    ) {
+        return points.map((cp) => String.fromCharCode(cp - 0x1f1e6 + 97)).join('');
+    }
+
+    return null;
 });
 
 const sizeClass = computed<string>(() => {

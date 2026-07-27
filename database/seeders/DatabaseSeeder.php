@@ -23,6 +23,7 @@ final class DatabaseSeeder extends Seeder
             DistrictSeeder::class,
             ServiceParentCategorySeeder::class,
             ServiceCategorySeeder::class,
+            CompanySeeder::class,
         ]);
     }
 }

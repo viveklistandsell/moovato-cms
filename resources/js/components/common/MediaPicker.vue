@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     ArrowUpDown,
+    Check,
     ChevronLeft,
     Eye,
     Folder,
@@ -86,21 +87,22 @@ const open = defineModel<boolean>('open', { required: true });
 const props = withDefaults(
     defineProps<{
         accept?: 'image' | 'video' | 'any';
+        multiple?: boolean;
     }>(),
-    { accept: 'image' },
+    { accept: 'image', multiple: false },
 );
 
+type PickedFile = {
+    path: string;
+    url: string;
+    name: string;
+    thumb_path?: string | null;
+    thumb_url?: string | null;
+};
+
 const emit = defineEmits<{
-    (
-        e: 'pick',
-        file: {
-            path: string;
-            url: string;
-            name: string;
-            thumb_path?: string | null;
-            thumb_url?: string | null;
-        },
-    ): void;
+    (e: 'pick', file: PickedFile): void;
+    (e: 'pickMany', files: PickedFile[]): void;
 }>();
 
 const search = ref('');
@@ -420,15 +422,57 @@ function jumpToCrumb(idx: number): void {
 }
 
 function pickFile(f: PickerFile): void {
-    emit('pick', {
-        path: f.path,
-        url: f.url,
-        name: f.name,
-        thumb_path: f.thumb_path,
-        thumb_url: f.thumb_url,
-    });
+    if (!props.multiple) {
+        emit('pick', {
+            path: f.path,
+            url: f.url,
+            name: f.name,
+            thumb_path: f.thumb_path,
+            thumb_url: f.thumb_url,
+        });
+        open.value = false;
+
+        return;
+    }
+    toggleSelect(f);
+}
+
+const selectedFiles = ref<Map<number, PickedFile>>(new Map());
+
+function isSelected(f: PickerFile): boolean {
+    return selectedFiles.value.has(f.id);
+}
+
+function toggleSelect(f: PickerFile): void {
+    const next = new Map(selectedFiles.value);
+    if (next.has(f.id)) {
+        next.delete(f.id);
+    } else {
+        next.set(f.id, {
+            path: f.path,
+            url: f.url,
+            name: f.name,
+            thumb_path: f.thumb_path,
+            thumb_url: f.thumb_url,
+        });
+    }
+    selectedFiles.value = next;
+}
+
+function confirmMultiSelect(): void {
+    if (selectedFiles.value.size === 0) {
+        return;
+    }
+    emit('pickMany', Array.from(selectedFiles.value.values()));
+    selectedFiles.value = new Map();
     open.value = false;
 }
+
+watch(open, (isOpen) => {
+    if (!isOpen) {
+        selectedFiles.value = new Map();
+    }
+});
 
 function openTrash(): void {
     window.open('/admin/media/trash', '_blank', 'noopener');
@@ -772,13 +816,22 @@ const folderLabel = computed(() =>
                             v-for="file in files"
                             :key="file.id"
                             class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
-                            :class="
-                                draggedFileId === file.id ? 'opacity-40' : ''
-                            "
+                            :class="[
+                                draggedFileId === file.id ? 'opacity-40' : '',
+                                multiple && isSelected(file) ? 'ring-2 ring-primary border-primary' : '',
+                            ]"
                             draggable="true"
                             @dragstart="onFileDragStart($event, file)"
                             @dragend="onDragEnd"
                         >
+                            <div
+                                v-if="multiple && isSelected(file)"
+                                class="absolute top-2 left-2 z-10 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
+                                title="Selected"
+                            >
+                                <Check class="size-3.5" />
+                            </div>
+
                             <!-- Hover actions: preview + delete -->
                             <div
                                 class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
@@ -842,17 +895,43 @@ const folderLabel = computed(() =>
 
             <!-- Footer -->
             <div
-                class="flex items-center justify-end gap-2 border-t bg-muted/40 px-6 py-3"
+                class="flex items-center justify-between gap-2 border-t bg-muted/40 px-6 py-3"
             >
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    @click="open = false"
+                <p
+                    v-if="multiple"
+                    class="text-xs text-muted-foreground"
                 >
-                    <X class="size-4" />
-                    Close
-                </Button>
+                    <span
+                        v-if="selectedFiles.size > 0"
+                        class="font-medium text-foreground"
+                    >
+                        {{ selectedFiles.size }} selected
+                    </span>
+                    <span v-else>Click a file to select it — browse folders freely.</span>
+                </p>
+                <span v-else />
+
+                <div class="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="open = false"
+                    >
+                        <X class="size-4" />
+                        Close
+                    </Button>
+                    <Button
+                        v-if="multiple"
+                        type="button"
+                        size="sm"
+                        :disabled="selectedFiles.size === 0"
+                        @click="confirmMultiSelect"
+                    >
+                        <Check class="size-4" />
+                        Add {{ selectedFiles.size > 0 ? selectedFiles.size : '' }}
+                    </Button>
+                </div>
             </div>
         </DialogContent>
     </Dialog>

@@ -78,6 +78,7 @@ final class RoleSeeder extends Seeder
                     'menus.view', 'menus.create', 'menus.update', 'menus.delete',
                     'locations.view', 'locations.create', 'locations.update', 'locations.delete',
                     'service_categories.view', 'service_categories.create', 'service_categories.update', 'service_categories.delete',
+                    'companies.view', 'companies.create', 'companies.update', 'companies.delete',
                     'settings.activity',
                 ],
             ],
@@ -92,6 +93,7 @@ final class RoleSeeder extends Seeder
                     'blog.view', 'blog.create', 'blog.update', 'blog.publish',
                     'media.view', 'media.upload',
                     'menus.view', 'menus.update',
+                    'companies.view', 'companies.create', 'companies.update',
                 ],
             ],
             [

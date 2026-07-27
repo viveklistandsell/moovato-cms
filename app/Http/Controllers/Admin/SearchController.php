@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\City;
+use App\Models\Company;
+use App\Models\CompanyTranslation;
 use App\Models\Country;
 use App\Models\District;
 use App\Models\Language;
@@ -254,6 +256,37 @@ final class SearchController extends Controller
                         'title' => $c->name,
                         'subtitle' => ($c->parentCategory?->name ?? '—').' · '.$c->status,
                         'href' => "/admin/services/categories/{$c->id}/edit",
+                    ])
+                    ->all(),
+            ];
+        }
+
+        if ($user?->can('companies.view')) {
+            $companyIds = CompanyTranslation::query()
+                ->where(function ($q) use ($like): void {
+                    $q->where('name', 'like', $like)
+                        ->orWhere('permalink', 'like', $like);
+                })
+                ->limit(self::PER_GROUP * 2)
+                ->pluck('company_id')
+                ->unique()
+                ->take(self::PER_GROUP)
+                ->all();
+
+            $groups[] = [
+                'key' => 'companies',
+                'label' => 'Companies',
+                'items' => Company::query()
+                    ->with(['primaryCity:id,name', 'translations:id,company_id,lang,name'])
+                    ->whereIn('id', $companyIds)
+                    ->get(['id', 'primary_city_id', 'verified', 'status'])
+                    ->map(fn (Company $c): array => [
+                        'id' => $c->id,
+                        'title' => $c->translation()?->name ?? '—',
+                        'subtitle' => ($c->primaryCity?->name ?? '—')
+                            .($c->verified ? ' · ✓' : '')
+                            .' · '.$c->status,
+                        'href' => "/admin/companies/{$c->id}/edit",
                     ])
                     ->all(),
             ];

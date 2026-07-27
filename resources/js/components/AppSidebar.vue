@@ -13,16 +13,19 @@ import {
     Mail as MailIcon,
     Map as MapIcon,
     Boxes,
+    Briefcase,
     Files,
     FolderTree,
     ImagePlay,
     KeyRound,
     Languages,
     LayoutGrid,
+    List,
     ListTree,
     Menu as MenuIcon,
     Navigation,
     Newspaper,
+    Plus,
     Server,
     Settings2Icon,
     ShieldCheck,
@@ -136,6 +139,11 @@ const servicesItems = computed<NavItem[]>(() => [
     { title: t('sidebar.service_categories'), href: '/admin/services/categories', icon: FolderTree },
 ]);
 
+const companiesItems = computed<NavItem[]>(() => [
+    { title: t('sidebar.all_companies'), href: '/admin/companies', icon: List },
+    { title: t('sidebar.add_company'), href: '/admin/companies/create', icon: Plus },
+]);
+
 const navigationItems = computed<NavItem[]>(() => [
     { title: t('sidebar.header_menu'), href: '/admin/menus/header', icon: MenuIcon },
     { title: t('sidebar.footer_menu'), href: '/admin/menus/footer', icon: MenuIcon },
@@ -167,6 +175,11 @@ const isDirectorySectionActive = computed(() =>
 
 const isServicesSectionActive = computed(() =>
     servicesItems.value.some((item) => isCurrentUrl(item.href)),
+);
+
+const isCompaniesSectionActive = computed(() =>
+    companiesItems.value.some((item) => isCurrentUrl(item.href)) ||
+    (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin/companies')),
 );
 
 const isNavigationSectionActive = computed(() =>
@@ -369,6 +382,49 @@ const isUserSectionActive = computed(
                                 <SidebarMenuSub>
                                     <SidebarMenuSubItem
                                         v-for="item in servicesItems"
+                                        :key="item.title"
+                                    >
+                                        <SidebarMenuSubButton
+                                            as-child
+                                            :is-active="isCurrentUrl(item.href)"
+                                            :class="BRAND_SUB_CLASS"
+                                        >
+                                            <Link :href="item.href">
+                                                <component :is="item.icon" />
+                                                <span>{{ item.title }}</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                    <Collapsible
+                        :default-open="isCompaniesSectionActive"
+                        class="group/collapsible"
+                        as-child
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger as-child>
+                                <SidebarMenuButton
+                                    as-child
+                                    :tooltip="t('sidebar.companies')"
+                                    :is-active="isCompaniesSectionActive"
+                                    :class="BRAND_BUTTON_CLASS"
+                                >
+                                    <Link :href="companiesItems[0].href">
+                                        <Briefcase />
+                                        <span>{{ t('sidebar.companies') }}</span>
+                                        <ChevronRight
+                                            class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                                        />
+                                    </Link>
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    <SidebarMenuSubItem
+                                        v-for="item in companiesItems"
                                         :key="item.title"
                                     >
                                         <SidebarMenuSubButton
