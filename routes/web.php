@@ -41,6 +41,7 @@ use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\CompanyController as FrontendCompanyController;
 use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
+use App\Http\Controllers\Frontend\PlaceSearchController;
 use App\Http\Controllers\Frontend\RobotsController;
 use App\Http\Controllers\Frontend\SitemapController;
 use App\Http\Controllers\StorageFallbackController;
@@ -57,6 +58,14 @@ Route::get('storage/{path}', StorageFallbackController::class)
 Route::post('cookie-consent', [FrontendCookieConsentController::class, 'store'])
     ->middleware('throttle:30,1')
     ->name('cookie-consent.store');
+
+// Google Places proxy used by the moving cost calculator widget.
+Route::middleware('throttle:60,1')->group(function (): void {
+    Route::get('places/suggest', [PlaceSearchController::class, 'suggest'])
+        ->name('places.suggest');
+    Route::get('places/resolve', [PlaceSearchController::class, 'resolve'])
+        ->name('places.resolve');
+});
 
 // Default-locale (DE) routes live at the root with no /de prefix.
 Route::middleware('locale')->group(function (): void {
@@ -251,6 +260,8 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->name('companies.reorder');
             Route::post('companies/bulk-action', [AdminCompanyController::class, 'bulkAction'])
                 ->name('companies.bulk-action');
+            Route::get('companies/lookup', [AdminCompanyController::class, 'lookup'])
+                ->name('companies.lookup');
             Route::resource('companies', AdminCompanyController::class)
                 ->parameters(['companies' => 'company'])
                 ->except('show');

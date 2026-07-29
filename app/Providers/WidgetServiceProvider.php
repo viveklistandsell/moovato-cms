@@ -11,12 +11,14 @@ use App\Widgets\AssistantTools\AssistantToolsWidget;
 use App\Widgets\Banner\BannerWidget;
 use App\Widgets\Blog\BlogWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
+use App\Widgets\CompanyTopList\CompanyTopListWidget;
 use App\Widgets\Comparison\ComparisonWidget;
 use App\Widgets\Contact\ContactWidget;
 use App\Widgets\ContentCollage\ContentCollageWidget;
 use App\Widgets\ContentStyle1\ContentStyle1Widget;
 use App\Widgets\ContentStyle2\ContentStyle2Widget;
 use App\Widgets\Contracts\WidgetContract;
+use App\Widgets\CostCalculator\CostCalculatorWidget;
 use App\Widgets\Cta\CtaWidget;
 use App\Widgets\CtaBanner\CtaBannerWidget;
 use App\Widgets\CtaWork\CtaWorkWidget;
@@ -96,6 +98,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ServicesCategoryGridWidget::class,
         HowItWorksWidget::class,
         PricingWidget::class,
+        CostCalculatorWidget::class,
         ReviewsWidget::class,
         WhyChooseUsWidget::class,
         PartnersWidget::class,
@@ -124,6 +127,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ContentCollageWidget::class,
         ComparisonWidget::class,
         CompanyDirectoryWidget::class,
+        CompanyTopListWidget::class,
         ContactWidget::class,
         WorkProcessWidget::class,
     ];

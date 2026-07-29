@@ -20,6 +20,7 @@ use App\Models\ServiceCategory;
 use App\Models\ServiceParentCategory;
 use App\Models\State;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +157,55 @@ final class CompanyController extends Controller
                 'links' => $paginated->linkCollection()->toArray(),
             ],
         ]);
+    }
+
+    /**
+     * Slim JSON list of companies for the `company_top_list` widget picker.
+     * Pass `q` to search by name, or `ids[]` to re-hydrate an existing pick
+     * (order is restored by the caller, not here).
+     */
+    public function lookup(Request $request): JsonResponse
+    {
+        $search = mb_trim((string) $request->query('q', ''));
+
+        /** @var list<int> $ids */
+        $ids = array_values(array_filter(
+            array_map('intval', (array) $request->query('ids', [])),
+            fn (int $id): bool => $id > 0,
+        ));
+
+        $query = Company::query()->with(['translations', 'primaryCity']);
+
+        if ($ids !== []) {
+            $query->whereIn('id', $ids);
+        } elseif ($search !== '') {
+            $query->whereHas(
+                'translations',
+                fn (Builder $q) => $q->where('name', 'like', '%'.$search.'%'),
+            );
+        }
+
+        $companies = $query
+            ->orderByDesc('is_top_rated')
+            ->orderByDesc('rating_avg')
+            ->orderByDesc('review_count')
+            ->limit(30)
+            ->get()
+            ->map(fn (Company $company): array => [
+                'id' => (int) $company->id,
+                'name' => (string) ($company->translation()?->name ?? ''),
+                'city' => $company->primaryCity?->name,
+                'rating_avg' => (float) $company->rating_avg,
+                'review_count' => (int) $company->review_count,
+                'verified' => (bool) $company->verified,
+                'logo_url' => $company->logo !== null
+                    ? '/storage/'.mb_ltrim($company->logo, '/')
+                    : null,
+            ])
+            ->values()
+            ->all();
+
+        return response()->json(['companies' => $companies]);
     }
 
     public function create(): Response
