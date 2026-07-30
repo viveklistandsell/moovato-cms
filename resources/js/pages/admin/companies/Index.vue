@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
     BadgeCheck,
     Briefcase,
+    ExternalLink,
     GripVertical,
     Pencil,
     Plus,
@@ -10,7 +11,6 @@ import {
     Trash2,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import { toast } from 'vue-sonner';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
     type BulkAction,
@@ -37,7 +37,9 @@ import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useDragReorder } from '@/composables/common/useDragReorder';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
+import { useAdminLanguage } from '@/composables/useAdminLocale';
 import { useT } from '@/composables/useT';
+import { localizedUrl } from '@/lib/localizedUrl';
 
 const t = useT();
 
@@ -101,8 +103,7 @@ const props = defineProps<{
     pagination: PaginationMeta;
 }>();
 
-const page = usePage<{ locale?: string }>();
-const currentLocale = computed<string>(() => (page.props.locale as string) ?? 'de');
+const currentLocale = useAdminLanguage();
 
 function displayName(row: Company): string {
     return (
@@ -117,6 +118,12 @@ function displayPermalink(row: Company): string | null {
         row.translations[0]?.permalink ??
         null
     );
+}
+function publicUrl(row: Company): string | null {
+    const preferred = row.translations.find((t) => t.lang === currentLocale.value);
+    const source = preferred ?? row.translations[0];
+    if (!source?.permalink) return null;
+    return localizedUrl(source.lang, `/company/${source.permalink}`);
 }
 
 const { search, sortBy, sortDir, perPage, setSearch, toggleSort, setPerPage, resetAll } =
@@ -625,12 +632,20 @@ function performDelete(c: Company): void {
                                             <Briefcase class="size-4" />
                                         </div>
                                         <div class="min-w-0">
-                                            <Link
-                                                :href="`/admin/companies/${row.id}/edit`"
-                                                class="font-medium hover:underline"
+                                            <a
+                                                v-if="publicUrl(row)"
+                                                :href="publicUrl(row)!"
+                                                target="_blank"
+                                                rel="noopener"
+                                                class="inline-flex items-center gap-1 font-medium hover:underline"
+                                                :title="`Open public page: ${publicUrl(row)}`"
                                             >
                                                 {{ displayName(row) }}
-                                            </Link>
+                                                <ExternalLink class="size-3 text-muted-foreground" />
+                                            </a>
+                                            <span v-else class="font-medium">
+                                                {{ displayName(row) }}
+                                            </span>
                                             <p
                                                 v-if="displayPermalink(row)"
                                                 class="mt-0.5 truncate text-xs text-muted-foreground"

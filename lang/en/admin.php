@@ -1846,6 +1846,12 @@ return [
         'section_faq_desc' => 'Per-company Q&A shown on the public detail page — big SEO win.',
         'section_external_reviews' => 'External review sources',
         'section_external_reviews_desc' => 'Optional — import rating + count from Google to show as combined score.',
+        'section_internal_ratings' => 'Internal ratings',
+        'section_internal_ratings_desc' => 'Manual override — auto-computed from real reviews once the Reviews module is live.',
+        'field_rating_avg' => 'Rating (0–10)',
+        'field_review_count' => 'Review count',
+        'field_recommend_pct' => 'Recommend %',
+        'field_rating_breakdown' => 'Star breakdown',
 
         // fields
         'field_verified' => 'Verified',

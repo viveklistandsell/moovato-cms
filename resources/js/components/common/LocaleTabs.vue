@@ -24,19 +24,23 @@ defineEmits<{
     <Tabs
         :model-value="modelValue"
         @update:model-value="(v) => $emit('update:modelValue', v as string)"
+        class="mv-locale-tabs"
     >
-        <TabsList>
+        <TabsList
+            class="!h-auto !w-fit gap-1 rounded-xl border border-border !bg-muted/60 shadow-inner"
+        >
             <TabsTrigger
                 v-for="lang in languages"
                 :key="lang.code"
                 :value="lang.code"
+                class="!h-9 gap-2 rounded-lg !px-4 text-sm data-[state=active]:!bg-background data-[state=active]:!shadow-md data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
             >
                 <FlagImage v-if="lang.flag" :code="lang.flag" size="sm" />
-                <span class="font-medium">{{ lang.native_name }}</span>
+                <span>{{ lang.native_name }}</span>
                 <span
                     v-if="lang.is_default"
-                    class="text-[10px] tracking-wide text-muted-foreground uppercase"
-                    >(default)</span
+                    class="rounded-sm bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium tracking-wide text-primary uppercase"
+                    >default</span
                 >
             </TabsTrigger>
         </TabsList>

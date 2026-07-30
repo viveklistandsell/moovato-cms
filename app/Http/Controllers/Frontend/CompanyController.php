@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Company;
 use App\Models\CompanyTranslation;
+use App\Models\District;
 use App\Models\Language;
 use App\Models\ServiceCategory;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,9 +41,16 @@ final class CompanyController extends Controller
         $locale = App::getLocale();
         $cityId = self::intQuery($request, 'city');
         $districtId = self::intQuery($request, 'district');
-        $serviceId = self::intQuery($request, 'service');
+        $serviceIds = self::intArrayQuery($request, 'services');
+        if ($serviceIds === [] && ($legacy = self::intQuery($request, 'service')) !== null) {
+            $serviceIds = [$legacy];
+        }
         $verifiedOnly = $request->query('verified') === '1';
+        $topRatedOnly = $request->query('top_rated') === '1';
         $minRating = (float) $request->query('min_rating', '0');
+        $minReviews = (int) $request->query('min_reviews', '0');
+        $priceMin = self::floatQuery($request, 'price_min');
+        $priceMax = self::floatQuery($request, 'price_max');
         $sort = $request->query('sort');
         $sort = is_string($sort) && in_array($sort, self::SORT_OPTIONS, true) ? $sort : 'relevant';
 
@@ -62,14 +70,31 @@ final class CompanyController extends Controller
         } elseif ($cityId !== null) {
             $query->where('primary_city_id', $cityId);
         }
-        if ($serviceId !== null) {
-            $query->whereHas('services', fn (Builder $q) => $q->where('service_categories.id', $serviceId));
+        if ($serviceIds !== []) {
+            $query->whereHas('services', fn (Builder $q) => $q->whereIn('service_categories.id', $serviceIds));
         }
         if ($verifiedOnly) {
             $query->where('verified', true);
         }
+        if ($topRatedOnly) {
+            $query->where('is_top_rated', true);
+        }
         if ($minRating > 0) {
             $query->where('rating_avg', '>=', $minRating);
+        }
+        if ($minReviews > 0) {
+            $query->where('review_count', '>=', $minReviews);
+        }
+        if ($priceMin !== null || $priceMax !== null) {
+            $query->whereHas('services', function (Builder $q) use ($priceMin, $priceMax): void {
+                $q->whereNotNull('company_services.price_from');
+                if ($priceMin !== null) {
+                    $q->where('company_services.price_from', '>=', $priceMin);
+                }
+                if ($priceMax !== null) {
+                    $q->where('company_services.price_from', '<=', $priceMax);
+                }
+            });
         }
 
         match ($sort) {
@@ -92,11 +117,17 @@ final class CompanyController extends Controller
             'locale' => $locale,
             'companies' => $companies,
             'cities' => $this->presentCities(),
+            'districts' => $this->presentDistricts(),
             'services' => $this->presentServices($locale),
             'activeCityId' => $cityId,
-            'activeServiceId' => $serviceId,
+            'activeDistrictId' => $districtId,
+            'activeServiceIds' => $serviceIds,
             'verifiedOnly' => $verifiedOnly,
+            'topRatedOnly' => $topRatedOnly,
             'minRating' => $minRating,
+            'minReviews' => $minReviews,
+            'priceMin' => $priceMin,
+            'priceMax' => $priceMax,
             'sort' => $sort,
             'pagination' => [
                 'current_page' => $paginated->currentPage(),
@@ -168,6 +199,37 @@ final class CompanyController extends Controller
         $v = $request->query($key);
 
         return is_numeric($v) ? (int) $v : null;
+    }
+
+    private static function floatQuery(Request $request, string $key): ?float
+    {
+        $v = $request->query($key);
+
+        return is_numeric($v) ? (float) $v : null;
+    }
+
+    /**
+     * Parses a query param as an array of ints. Accepts both the
+     * `?services[]=1&services[]=2` bracket form and the comma-delimited
+     * `?services=1,2` form so shareable URLs stay short.
+     *
+     * @return array<int, int>
+     */
+    private static function intArrayQuery(Request $request, string $key): array
+    {
+        $raw = $request->query($key);
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+
+        $values = is_array($raw) ? $raw : explode(',', (string) $raw);
+
+        return collect($values)
+            ->filter(fn ($v) => is_numeric($v))
+            ->map(fn ($v): int => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /* ---------------------------------------------------------- presenters */
@@ -319,6 +381,28 @@ final class CompanyController extends Controller
             ->orderBy('name')
             ->get(['id', 'name'])
             ->map(fn (City $c): array => ['id' => $c->id, 'name' => $c->name])
+            ->all();
+    }
+
+    /**
+     * All districts across all cities — the filter sidebar filters them
+     * client-side by the chosen city, so we ship the full list once
+     * instead of round-tripping on every city change.
+     *
+     * @return array<int, array{id: int, city_id: int, name: string}>
+     */
+    private function presentDistricts(): array
+    {
+        return District::query()
+            ->where('status', 'published')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'city_id', 'name'])
+            ->map(fn (District $d): array => [
+                'id' => $d->id,
+                'city_id' => $d->city_id,
+                'name' => $d->name,
+            ])
             ->all();
     }
 

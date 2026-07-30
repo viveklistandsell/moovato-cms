@@ -344,6 +344,7 @@ final class CompanyController extends Controller
         return collect($data)->only([
             'primary_city_id', 'primary_district_id', 'street', 'postal_code',
             'logo', 'cover', 'verified', 'is_top_rated', 'plan_tier',
+            'rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown',
             'google_rating', 'google_review_count',
             'founded_year', 'employee_count', 'status', 'sort_order',
         ])->all();
@@ -521,6 +522,10 @@ final class CompanyController extends Controller
             'verified' => (bool) $company->verified,
             'is_top_rated' => (bool) $company->is_top_rated,
             'plan_tier' => $company->plan_tier,
+            'rating_avg' => (float) $company->rating_avg,
+            'review_count' => (int) $company->review_count,
+            'recommend_pct' => (int) $company->recommend_pct,
+            'rating_breakdown' => $company->rating_breakdown,
             'google_rating' => $company->google_rating,
             'google_review_count' => (int) $company->google_review_count,
             'founded_year' => $company->founded_year,
