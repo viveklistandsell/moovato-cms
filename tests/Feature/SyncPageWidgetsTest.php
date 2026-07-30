@@ -12,10 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-$page = null;
-$action = null;
-
-beforeEach(function () use (&$page, &$action): void {
+beforeEach(function (): void {
     Language::query()->create([
         'code' => 'de',
         'name' => 'German',
@@ -33,7 +30,7 @@ beforeEach(function () use (&$page, &$action): void {
         'sort_order' => 2,
     ]);
 
-    $page = Page::query()->create([
+    $this->page = Page::query()->create([
         'title' => 'Home',
         'permalink' => 'home',
         'content' => null,
@@ -41,7 +38,7 @@ beforeEach(function () use (&$page, &$action): void {
         'is_home' => true,
         'status' => 'published',
     ]);
-    $action = app(SyncPageWidgets::class);
+    $this->action = app(SyncPageWidgets::class);
 });
 
 test('it creates widgets with per-language translations and assigns positions', function (): void {
@@ -55,11 +52,11 @@ test('it creates widgets with per-language translations and assigns positions', 
             ],
         ],
         [
-            'type' => 'cta',
-            'settings' => ['variant' => 'brand', 'alignment' => 'center'],
+            'type' => 'cta_banner',
+            'settings' => ['image_path' => null, 'image_url' => null],
             'translations' => [
-                'de' => ['title' => 'Jetzt starten'],
-                'en' => ['title' => 'Get started'],
+                'de' => ['heading' => 'Jetzt starten'],
+                'en' => ['heading' => 'Get started'],
             ],
         ],
     ]);
@@ -69,7 +66,7 @@ test('it creates widgets with per-language translations and assigns positions', 
     expect($widgets)->toHaveCount(2)
         ->and($widgets[0]->type)->toBe('hero')
         ->and($widgets[0]->position)->toBe(0)
-        ->and($widgets[1]->type)->toBe('cta')
+        ->and($widgets[1]->type)->toBe('cta_banner')
         ->and($widgets[1]->position)->toBe(1);
 
     expect(PageWidgetTranslation::query()->where('page_widget_id', $widgets[0]->id)->count())->toBe(2);
@@ -122,19 +119,19 @@ test('it updates an existing widget by id and rewrites its translations', functi
 test('it deletes widgets that are missing from the incoming stack', function (): void {
     $this->action->handle($this->page, [
         ['type' => 'hero', 'settings' => ['alignment' => 'center', 'overlay' => true, 'height' => 'lg'], 'translations' => ['de' => ['title' => 'A']]],
-        ['type' => 'banner', 'settings' => ['variant' => 'info', 'dismissible' => false], 'translations' => ['de' => ['message' => 'B']]],
+        ['type' => 'text_block', 'settings' => ['width' => 'narrow', 'alignment' => 'left', 'background' => 'none'], 'translations' => ['de' => ['heading' => 'B']]],
     ]);
 
     expect($this->page->widgets()->count())->toBe(2);
 
-    // Now resync with only the first widget — the banner should be removed.
+    // Now resync with only the first widget — the text block should be removed.
     $hero = $this->page->widgets()->where('type', 'hero')->first();
     $this->action->handle($this->page, [
         ['id' => $hero->id, 'type' => 'hero', 'settings' => $hero->settings, 'translations' => ['de' => ['title' => 'A']]],
     ]);
 
     expect($this->page->widgets()->count())->toBe(1)
-        ->and(PageWidget::query()->where('page_id', $this->page->id)->where('type', 'banner')->count())->toBe(0);
+        ->and(PageWidget::query()->where('page_id', $this->page->id)->where('type', 'text_block')->count())->toBe(0);
 });
 
 test('it ignores unknown widget types instead of failing', function (): void {

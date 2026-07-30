@@ -8,10 +8,8 @@ use App\Widgets\About\AboutWidget;
 use App\Widgets\AboutExperience\AboutExperienceWidget;
 use App\Widgets\AboutStats\AboutStatsWidget;
 use App\Widgets\AssistantTools\AssistantToolsWidget;
-use App\Widgets\Banner\BannerWidget;
 use App\Widgets\Blog\BlogWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
-use App\Widgets\CompanyTopList\CompanyTopListWidget;
 use App\Widgets\Comparison\ComparisonWidget;
 use App\Widgets\Contact\ContactWidget;
 use App\Widgets\ContentCollage\ContentCollageWidget;
@@ -19,7 +17,6 @@ use App\Widgets\ContentStyle1\ContentStyle1Widget;
 use App\Widgets\ContentStyle2\ContentStyle2Widget;
 use App\Widgets\Contracts\WidgetContract;
 use App\Widgets\CostCalculator\CostCalculatorWidget;
-use App\Widgets\Cta\CtaWidget;
 use App\Widgets\CtaBanner\CtaBannerWidget;
 use App\Widgets\CtaWork\CtaWorkWidget;
 use App\Widgets\DarkFeature\DarkFeatureWidget;
@@ -39,7 +36,6 @@ use App\Widgets\Map\MapWidget;
 use App\Widgets\Marquee\MarqueeWidget;
 use App\Widgets\MediaChecklist\MediaChecklistWidget;
 use App\Widgets\OrbitBanner\OrbitBannerWidget;
-use App\Widgets\PageBanner\PageBannerWidget;
 use App\Widgets\Partners\PartnersWidget;
 use App\Widgets\Pricing\PricingWidget;
 use App\Widgets\PromoCta\PromoCtaWidget;
@@ -51,10 +47,8 @@ use App\Widgets\ServicesCategoryGrid\ServicesCategoryGridWidget;
 use App\Widgets\SplitMedia\SplitMediaWidget;
 use App\Widgets\SplitMediaLeft\SplitMediaLeftWidget;
 use App\Widgets\StatFeatures\StatFeaturesWidget;
-use App\Widgets\StatsBand\StatsBandWidget;
 use App\Widgets\SupportingMedia\SupportingMediaWidget;
 use App\Widgets\TeamCta\TeamCtaWidget;
-use App\Widgets\Testimonial\TestimonialWidget;
 use App\Widgets\TestimonialsShowcase\TestimonialsShowcaseWidget;
 use App\Widgets\TextBlock\TextBlockWidget;
 use App\Widgets\TextColumns\TextColumnsWidget;
@@ -75,17 +69,13 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
     /** @var array<int, class-string<WidgetContract>> */
     public const WIDGETS = [
         HeroWidget::class,
-        BannerWidget::class,
-        PageBannerWidget::class,
         OrbitBannerWidget::class,
         CtaBannerWidget::class,
         TextBlockWidget::class,
         ImageWidget::class,
         FeaturesWidget::class,
-        CtaWidget::class,
         CtaWorkWidget::class,
         FaqWidget::class,
-        TestimonialWidget::class,
         TestimonialsShowcaseWidget::class,
         GalleryWidget::class,
         HeronewWidget::class,
@@ -116,7 +106,6 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         DarkFeatureWidget::class,
         TeamCtaWidget::class,
         StatFeaturesWidget::class,
-        StatsBandWidget::class,
         WhyChooseMediaWidget::class,
         SupportingMediaWidget::class,
         DarkIntroWidget::class,
@@ -127,7 +116,6 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ContentCollageWidget::class,
         ComparisonWidget::class,
         CompanyDirectoryWidget::class,
-        CompanyTopListWidget::class,
         ContactWidget::class,
         WorkProcessWidget::class,
     ];

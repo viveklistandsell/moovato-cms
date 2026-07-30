@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
-    BadgeCheck,
-    Briefcase,
-    ChevronRight,
+    ArrowRight,
+    Building2,
+    MapPin,
+    RotateCcw,
     Search,
+    ShieldCheck,
+    SlidersHorizontal,
     Star,
 } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import { localizedUrl } from '@/lib/localizedUrl';
 
 type City = { id: number; name: string };
@@ -63,13 +66,16 @@ const props = defineProps<{
 const t = computed(() => ({
     home: props.locale === 'de' ? 'Startseite' : 'Home',
     breadcrumb: props.locale === 'de' ? 'Umzugsunternehmen' : 'Moving companies',
-    heading: props.locale === 'de' ? 'Umzugsunternehmen finden' : 'Find moving companies',
+    eyebrow: props.locale === 'de' ? 'Geprüfte Partner in Berlin' : 'Vetted partners in Berlin',
+    heading_lead: props.locale === 'de' ? 'Umzugsunternehmen' : 'Find moving',
+    heading_accent: props.locale === 'de' ? 'finden' : 'companies',
     subheading: props.locale === 'de'
         ? 'Vergleichen Sie geprüfte Umzugsunternehmen — Preise, Bewertungen, Verfügbarkeit auf einen Blick.'
         : 'Compare vetted moving companies — prices, ratings and availability at a glance.',
     total_hits: (n: number) => props.locale === 'de' ? `${n} Ergebnisse` : `${n} results`,
     results: props.locale === 'de' ? 'Ergebnisse' : 'Results',
     filters: props.locale === 'de' ? 'Filter' : 'Filters',
+    filters_toggle: props.locale === 'de' ? 'Filter anzeigen' : 'Show filters',
     city: props.locale === 'de' ? 'Stadt' : 'City',
     service: props.locale === 'de' ? 'Leistung' : 'Service',
     all_cities: props.locale === 'de' ? 'Alle Städte' : 'All cities',
@@ -87,17 +93,23 @@ const t = computed(() => ({
     trust: props.locale === 'de' ? 'Vertrauen' : 'Trust',
     reset: props.locale === 'de' ? 'Filter zurücksetzen' : 'Reset filters',
     sort_by: props.locale === 'de' ? 'Sortieren' : 'Sort by',
-    sort_relevant: props.locale === 'de' ? 'Am relevantesten' : 'Most relevant',
+    sort_relevant: props.locale === 'de' ? 'Relevanz' : 'Relevance',
     sort_rating: props.locale === 'de' ? 'Beste Bewertung' : 'Highest rating',
-    sort_newest: props.locale === 'de' ? 'Neueste zuerst' : 'Newest first',
+    sort_newest: props.locale === 'de' ? 'Neueste' : 'Newest',
     request_quote: props.locale === 'de' ? 'Angebot anfordern' : 'Request a quote',
     details: props.locale === 'de' ? 'Details' : 'Details',
     top_rated: props.locale === 'de' ? 'Top-bewertetes Umzugsunternehmen' : 'Top-rated moving company',
+    top_rated_short: props.locale === 'de' ? 'Top bewertet' : 'Top rated',
     verified: props.locale === 'de' ? 'Verifiziert' : 'Verified',
     reviews_short: props.locale === 'de' ? 'Bewertungen' : 'reviews',
+    stat_offers: props.locale === 'de' ? 'Anbieter im Vergleich' : 'Providers compared',
+    stat_cities: props.locale === 'de' ? 'Städte & Bezirke' : 'Cities & districts',
+    stat_services: props.locale === 'de' ? 'Leistungen' : 'Services',
+    more_cities: (n: number) => props.locale === 'de' ? `+${n} weitere` : `+${n} more`,
     empty: props.locale === 'de'
         ? 'Keine Unternehmen für die aktuelle Auswahl gefunden. Filter zurücksetzen und erneut versuchen.'
         : 'No companies match the current filters. Reset and try again.',
+    empty_title: props.locale === 'de' ? 'Keine Treffer' : 'No matches',
     search_placeholder: props.locale === 'de' ? 'Umzugsunternehmen…' : 'Moving companies…',
 }));
 
@@ -130,6 +142,13 @@ function toggleService(id: number): void {
     }
     applyFilters();
 }
+const filtersOpen = ref<boolean>(false);
+
+const sortOptions = computed(() => [
+    { value: 'relevant', label: t.value.sort_relevant },
+    { value: 'rating', label: t.value.sort_rating },
+    { value: 'newest', label: t.value.sort_newest },
+]);
 
 function applyFilters(): void {
     const params: Record<string, string | number> = {};
@@ -150,6 +169,14 @@ function applyFilters(): void {
         preserveScroll: true,
         preserveState: false,
     });
+}
+
+function selectSort(value: string): void {
+    if (localSort.value === value) {
+        return;
+    }
+    localSort.value = value;
+    applyFilters();
 }
 
 function resetFilters(): void {
@@ -180,6 +207,23 @@ const hasFilters = computed(
         localSort.value !== 'relevant',
 );
 
+const activeFilterCount = computed(() => {
+    let count = 0;
+    if (localCity.value !== null) count++;
+    if (localDistrict.value !== null) count++;
+    if (localServices.value.length > 0) count++;
+    if (localVerified.value) count++;
+    if (localTopRated.value) count++;
+    if (localMinRating.value > 0) count++;
+    if (localMinReviews.value > 0) count++;
+    if (localPriceMin.value !== '') count++;
+    if (localPriceMax.value !== '') count++;
+    if (localSort.value !== 'relevant') count++;
+    return count;
+});
+
+const ratingProgress = computed(() => `${(localMinRating.value / 10) * 100}%`);
+
 function detailUrl(c: Company): string {
     return localizedUrl(props.locale, `/company/${c.permalink}`);
 }
@@ -187,39 +231,99 @@ function assetUrl(path: string | null): string | null {
     if (!path) return null;
     return path.startsWith('http') ? path : `/storage/${path}`;
 }
+
+const sectionRef = ref<HTMLElement | null>(null);
+let revealObserver: IntersectionObserver | null = null;
+
+onMounted(() => {
+    const root = sectionRef.value;
+    if (!root) {
+        return;
+    }
+    const targets = root.querySelectorAll<HTMLElement>('[data-mv-reveal]');
+    if (typeof IntersectionObserver === 'undefined') {
+        targets.forEach((el) => el.classList.add('is-revealed'));
+        return;
+    }
+
+    revealObserver = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-revealed');
+                    revealObserver?.unobserve(entry.target);
+                }
+            });
+        },
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    );
+
+    targets.forEach((el) => revealObserver!.observe(el));
+});
+
+onBeforeUnmount(() => {
+    revealObserver?.disconnect();
+    revealObserver = null;
+});
 </script>
 
 <template>
     <Head :title="t.breadcrumb" />
 
-    <div class="mv-companies-index bg-[var(--paper)] py-8 md:py-12">
-        <div class="container-xl">
-            <!-- Breadcrumb -->
-            <nav class="mb-4 flex items-center gap-1.5 text-xs text-[var(--slate)]">
-                <Link :href="localizedUrl(locale, '/')" class="hover:text-[var(--midnight)] hover:underline">
+    <div
+        ref="sectionRef"
+        class="mv-companies-index relative overflow-hidden bg-[var(--paper)] px-0 pt-8 pb-20 md:pt-14 md:pb-28"
+    >
+        <div class="container-xl relative">
+            <nav
+                class="mv-ci-crumb flex items-center gap-2 text-[11px] font-medium tracking-[0.14em] text-[var(--slate-light)] uppercase"
+            >
+                <Link :href="localizedUrl(locale, '/')" class="transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-[var(--orange)]">
                     {{ t.home }}
                 </Link>
-                <span>›</span>
+                <span aria-hidden="true" class="text-[var(--linen)]">—</span>
                 <span class="text-[var(--midnight)]">{{ t.breadcrumb }}</span>
             </nav>
 
-            <!-- Heading -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-semibold text-[var(--midnight)] md:text-4xl">
-                    {{ t.heading }}
-                </h1>
-                <p class="mt-2 max-w-2xl text-sm text-[var(--slate)] md:text-base">
-                    {{ t.subheading }}
-                </p>
-            </div>
+            <header
+                class="mt-8 grid items-end gap-10 md:mt-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16"
+                data-mv-reveal
+            >
+                <div class="max-w-2xl">
+                    <span class="mv-ci-eyebrow">
+                        <span aria-hidden="true" class="mv-ci-eyebrow-dot"></span>
+                        {{ t.eyebrow }}
+                    </span>
+                    <h1 class="mv-ci-title mt-5">
+                        {{ t.heading_lead }}
+                        <em>{{ t.heading_accent }}</em>
+                    </h1>
+                    <p class="mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)] md:text-lg">
+                        {{ t.subheading }}
+                    </p>
+                </div>
 
-            <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
-                <!-- Filter sidebar -->
-                <aside class="mv-filters space-y-4">
-                    <div class="rounded-lg border border-[var(--linen)] bg-white p-4 shadow-sm">
-                        <h2 class="mb-3 text-sm font-semibold text-[var(--midnight)]">
-                            {{ t.filters }}
-                        </h2>
+                <ul class="mv-ci-stats grid grid-cols-3 gap-2 sm:gap-3">
+                    <li class="mv-ci-stat-shell">
+                        <div class="mv-ci-stat-core">
+                            <span class="mv-ci-stat-value">{{ pagination.total }}</span>
+                            <span class="mv-ci-stat-label">{{ t.stat_offers }}</span>
+                        </div>
+                    </li>
+                    <li class="mv-ci-stat-shell">
+                        <div class="mv-ci-stat-core">
+                            <span class="mv-ci-stat-value">{{ cities.length }}</span>
+                            <span class="mv-ci-stat-label">{{ t.stat_cities }}</span>
+                        </div>
+                    </li>
+                    <li class="mv-ci-stat-shell">
+                        <div class="mv-ci-stat-core">
+                            <span class="mv-ci-stat-value">{{ services.length }}</span>
+                            <span class="mv-ci-stat-label">{{ t.stat_services }}</span>
+                        </div>
+                    </li>
+                </ul>
+            </header>
 
                         <div class="space-y-5">
                             <div class="space-y-3">
@@ -377,187 +481,307 @@ function assetUrl(path: string | null): string | null {
                             >
                                 {{ t.reset }}
                             </button>
+            <div class="mt-12 grid gap-6 md:mt-16 lg:grid-cols-[300px_1fr] lg:gap-6">
+                <aside class="mv-ci-rail self-start lg:sticky lg:top-24" data-mv-reveal>
+                    <button
+                        type="button"
+                        class="mv-ci-filter-toggle flex w-full items-center justify-between gap-3 lg:hidden"
+                        :aria-expanded="filtersOpen"
+                        aria-controls="mv-ci-filter-panel"
+                        @click="filtersOpen = !filtersOpen"
+                    >
+                        <span class="flex items-center gap-2.5">
+                            <SlidersHorizontal :stroke-width="1.25" class="size-4 text-[var(--orange)]" />
+                            {{ filtersOpen ? t.filters : t.filters_toggle }}
+                        </span>
+                        <span v-if="activeFilterCount > 0" class="mv-ci-count">{{ activeFilterCount }}</span>
+                    </button>
+
+                    <div
+                        id="mv-ci-filter-panel"
+                        class="mv-ci-shell mt-3 lg:mt-0"
+                        :class="filtersOpen ? 'block' : 'hidden lg:block'"
+                    >
+                        <div class="mv-ci-core p-5 md:p-6">
+                            <div class="flex items-center justify-between gap-3">
+                                <h2 class="flex items-center gap-2.5 text-sm font-semibold tracking-tight text-[var(--midnight)]">
+                                    <SlidersHorizontal :stroke-width="1.25" class="size-4 text-[var(--orange)]" />
+                                    {{ t.filters }}
+                                </h2>
+                                <span v-if="activeFilterCount > 0" class="mv-ci-count">{{ activeFilterCount }}</span>
+                            </div>
+
+                            <div class="mt-6 space-y-6">
+                                <div>
+                                    <label for="mv-ci-city" class="mv-ci-label">{{ t.city }}</label>
+                                    <div class="mv-ci-select">
+                                        <select id="mv-ci-city" v-model="localCity" @change="applyFilters">
+                                            <option :value="null">{{ t.all_cities }}</option>
+                                            <option v-for="c in cities" :key="c.id" :value="c.id">
+                                                {{ c.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="mv-ci-service" class="mv-ci-label">{{ t.service }}</label>
+                                    <div class="mv-ci-select">
+                                        <select id="mv-ci-service" v-model="localService" @change="applyFilters">
+                                            <option :value="null">{{ t.all_services }}</option>
+                                            <option v-for="s in services" :key="s.id" :value="s.id">
+                                                {{ s.name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-baseline justify-between gap-3">
+                                        <label for="mv-ci-rating" class="mv-ci-label mb-0">{{ t.min_rating }}</label>
+                                        <span class="mv-ci-rating-chip">
+                                            {{ localMinRating > 0 ? localMinRating.toFixed(1) : '—' }}
+                                        </span>
+                                    </div>
+                                    <input
+                                        id="mv-ci-rating"
+                                        v-model.number="localMinRating"
+                                        type="range"
+                                        min="0"
+                                        max="10"
+                                        step="0.5"
+                                        class="mv-ci-range mt-4"
+                                        :style="{ '--mv-ci-progress': ratingProgress }"
+                                        @change="applyFilters"
+                                    />
+                                </div>
+
+                                <label class="mv-ci-toggle group">
+                                    <input
+                                        v-model="localVerified"
+                                        type="checkbox"
+                                        class="peer sr-only"
+                                        @change="applyFilters"
+                                    />
+                                    <span class="mv-ci-toggle-track">
+                                        <span class="mv-ci-toggle-knob"></span>
+                                    </span>
+                                    <span class="flex items-center gap-1.5 text-sm font-medium text-[var(--midnight)]">
+                                        <ShieldCheck :stroke-width="1.25" class="size-4 text-[var(--orange)]" />
+                                        {{ t.verified_only }}
+                                    </span>
+                                </label>
+
+                                <button
+                                    v-if="hasFilters"
+                                    type="button"
+                                    class="mv-ci-reset group flex w-full items-center justify-center gap-2"
+                                    @click="resetFilters"
+                                >
+                                    <RotateCcw
+                                        :stroke-width="1.25"
+                                        class="size-3.5 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-rotate-180"
+                                    />
+                                    {{ t.reset }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </aside>
 
-                <!-- Result list -->
-                <div class="mv-results min-w-0">
-                    <div class="mb-4 flex items-center justify-between gap-4">
-                        <h2 class="text-lg font-semibold text-[var(--midnight)]">
+                <div class="mv-ci-results min-w-0">
+                    <div
+                        class="flex flex-col gap-4 border-b border-[color-mix(in_srgb,var(--linen)_70%,transparent)] pb-5 sm:flex-row sm:items-end sm:justify-between"
+                        data-mv-reveal
+                    >
+                        <h2 class="text-xl font-semibold tracking-tight text-[var(--midnight)]">
                             {{ t.results }}
-                            <span class="ml-1 text-sm font-normal text-[var(--slate)]">
-                                ({{ t.total_hits(pagination.total) }})
+                            <span class="ml-1.5 text-sm font-normal text-[var(--slate-light)]">
+                                {{ t.total_hits(pagination.total) }}
                             </span>
                         </h2>
-                        <div class="flex items-center gap-2">
-                            <span class="hidden text-xs text-[var(--slate)] md:inline">{{ t.sort_by }}:</span>
-                            <select
-                                v-model="localSort"
-                                class="rounded-md border border-[var(--linen)] bg-white px-2.5 py-1.5 text-sm font-medium text-[var(--midnight)] focus:border-[var(--orange)] focus:outline-none"
-                                @change="applyFilters"
-                            >
-                                <option value="relevant">{{ t.sort_relevant }}</option>
-                                <option value="rating">{{ t.sort_rating }}</option>
-                                <option value="newest">{{ t.sort_newest }}</option>
-                            </select>
+
+                        <div class="flex items-center gap-3">
+                            <span class="hidden text-[11px] font-medium tracking-[0.14em] text-[var(--slate-light)] uppercase md:inline">
+                                {{ t.sort_by }}
+                            </span>
+                            <div class="mv-ci-segment" role="group" :aria-label="t.sort_by">
+                                <button
+                                    v-for="option in sortOptions"
+                                    :key="option.value"
+                                    type="button"
+                                    class="mv-ci-segment-btn"
+                                    :class="{ 'is-active': localSort === option.value }"
+                                    :aria-pressed="localSort === option.value"
+                                    @click="selectSort(option.value)"
+                                >
+                                    {{ option.label }}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Empty state -->
-                    <div
-                        v-if="companies.length === 0"
-                        class="rounded-lg border border-dashed border-[var(--linen)] bg-white p-12 text-center"
-                    >
-                        <Search class="mx-auto mb-3 size-8 text-[var(--slate-light)]" />
-                        <p class="text-sm text-[var(--slate)]">{{ t.empty }}</p>
+                    <div v-if="companies.length === 0" class="mv-ci-shell mt-8" data-mv-reveal>
+                        <div class="mv-ci-core mv-ci-empty">
+                            <span class="mv-ci-empty-orb">
+                                <Search :stroke-width="1.25" class="size-6 text-[var(--orange)]" />
+                            </span>
+                            <h3 class="mt-6 text-lg font-semibold tracking-tight text-[var(--midnight)]">
+                                {{ t.empty_title }}
+                            </h3>
+                            <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--slate)]">
+                                {{ t.empty }}
+                            </p>
+                            <button
+                                v-if="hasFilters"
+                                type="button"
+                                class="mv-ci-reset mx-auto mt-6 inline-flex items-center justify-center gap-2"
+                                @click="resetFilters"
+                            >
+                                <RotateCcw :stroke-width="1.25" class="size-3.5" />
+                                {{ t.reset }}
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Card list -->
-                    <ul v-else class="flex flex-col gap-4">
+                    <ul v-else class="mt-8 flex flex-col gap-5">
                         <li
-                            v-for="c in companies"
+                            v-for="(c, idx) in companies"
                             :key="c.id"
-                            class="mv-card relative overflow-hidden rounded-lg border border-[var(--linen)] bg-white shadow-sm transition-shadow hover:shadow-md"
+                            class="mv-ci-shell mv-ci-card group"
+                            :class="{ 'is-top': c.is_top_rated }"
+                            :style="{ '--mv-ci-delay': `${Math.min(idx, 6) * 70}ms` }"
+                            data-mv-reveal
                         >
-                            <!--
-                                Top-rated badge — inline pill anchored to the
-                                top-left corner. Only the pill (not the whole
-                                card header band) has the dark background, so
-                                the rest of the card stays clean.
-                            -->
-                            <span
-                                v-if="c.is_top_rated"
-                                class="absolute top-0 left-0 inline-flex items-center gap-1 rounded-br-md bg-[var(--midnight)] px-3 py-1 text-[10px] font-semibold tracking-wide text-white uppercase shadow-sm"
-                            >
-                                <Star class="size-3 fill-amber-400 text-amber-400" />
-                                {{ t.top_rated }}
-                            </span>
-
-                            <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-[160px_1fr_auto] md:items-center pt-7">
-                                <!-- Logo / cover thumbnail -->
-                                <Link :href="detailUrl(c)" class="block">
-                                    <div
-                                        class="flex aspect-[16/10] w-full items-center justify-center overflow-hidden rounded-md border border-[var(--linen)] bg-[var(--linen)]/40 md:aspect-[4/3]"
-                                    >
+                            <article class="mv-ci-core grid grid-cols-1 gap-5 p-4 sm:p-5 md:grid-cols-[minmax(0,150px)_1fr] lg:grid-cols-[minmax(0,150px)_1fr_auto] lg:items-center lg:gap-7">
+                                <Link :href="detailUrl(c)" class="mv-ci-thumb group/thumb" :aria-label="c.name">
+                                    <span class="mv-ci-thumb-core">
                                         <img
                                             v-if="c.logo"
                                             :src="assetUrl(c.logo)!"
                                             :alt="c.name"
-                                            class="size-full object-cover"
+                                            loading="lazy"
+                                            class="size-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover/thumb:scale-[1.04]"
                                         />
-                                        <Briefcase v-else class="size-8 text-[var(--slate-light)]" />
-                                    </div>
+                                        <Building2 v-else :stroke-width="1" class="size-9 text-[var(--slate-light)]" />
+                                    </span>
                                 </Link>
 
-                                <!-- Middle content -->
                                 <div class="min-w-0">
-                                    <div class="mb-1.5 flex flex-wrap items-center gap-2">
-                                        <span class="text-lg font-bold text-[var(--midnight)]">
-                                            {{ c.rating_avg > 0 ? c.rating_avg.toFixed(1) : '—' }}
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                        <span v-if="c.rating_avg > 0" class="mv-ci-score">
+                                            <span class="mv-ci-score-value">{{ c.rating_avg.toFixed(1) }}</span>
+                                            <span class="mv-ci-stars" :aria-label="`${c.rating_avg.toFixed(1)} / 10`">
+                                                <Star
+                                                    v-for="n in 5"
+                                                    :key="n"
+                                                    :stroke-width="1.25"
+                                                    class="size-3.5"
+                                                    :class="c.rating_avg / 2 >= n
+                                                        ? 'fill-[var(--yellow-dark)] text-[var(--yellow-dark)]'
+                                                        : 'text-[var(--linen)]'"
+                                                />
+                                            </span>
                                         </span>
-                                        <div v-if="c.rating_avg > 0" class="flex items-center gap-0.5 text-amber-400">
-                                            <Star
-                                                v-for="n in 5"
-                                                :key="n"
-                                                class="size-4"
-                                                :class="c.rating_avg / 2 >= n ? 'fill-current' : ''"
-                                            />
-                                        </div>
-                                        <span v-if="c.review_count > 0" class="text-sm text-[var(--slate)]">
-                                            {{ c.review_count }}
+                                        <span v-if="c.review_count > 0" class="text-xs text-[var(--slate-light)]">
+                                            {{ c.review_count }} {{ t.reviews_short }}
+                                        </span>
+                                        <span v-if="c.is_top_rated" class="mv-ci-pill-top" :title="t.top_rated">
+                                            <Star :stroke-width="0" class="size-3 fill-[var(--yellow-dark)]" />
+                                            {{ t.top_rated_short }}
                                         </span>
                                     </div>
-                                    <Link
-                                        :href="detailUrl(c)"
-                                        class="flex flex-wrap items-center gap-1.5"
-                                    >
-                                        <h3 class="text-xl font-bold text-[var(--midnight)] hover:text-[var(--orange)]">
+
+                                    <h3 class="mt-3 flex flex-wrap items-center gap-2">
+                                        <Link :href="detailUrl(c)" class="mv-ci-name">
                                             {{ c.name }}
-                                        </h3>
-                                        <BadgeCheck v-if="c.verified" class="size-5 fill-blue-500 text-white" :title="t.verified" />
-                                    </Link>
+                                        </Link>
+                                        <ShieldCheck
+                                            v-if="c.verified"
+                                            :stroke-width="1.5"
+                                            class="size-4 shrink-0 text-[var(--orange)]"
+                                            :aria-label="t.verified"
+                                        />
+                                    </h3>
+
                                     <p
-                                        v-if="c.coverage_cities.length > 0"
-                                        class="text-sm text-[var(--slate)]"
+                                        v-if="c.coverage_cities.length > 0 || c.city_name"
+                                        class="mt-2 flex items-center gap-1.5 text-sm text-[var(--slate)]"
                                     >
-                                        {{ c.coverage_cities.slice(0, 3).join(' · ') }}
+                                        <MapPin :stroke-width="1.25" class="size-3.5 shrink-0 text-[var(--slate-light)]" />
+                                        <span class="min-w-0 truncate">
+                                            {{ c.coverage_cities.length > 0
+                                                ? c.coverage_cities.slice(0, 3).join(' · ')
+                                                : c.city_name }}
+                                        </span>
                                         <span
                                             v-if="c.coverage_cities.length > 3"
-                                            class="text-xs text-[var(--slate-light)]"
+                                            class="shrink-0 text-xs text-[var(--slate-light)]"
                                         >
-                                            + {{ c.coverage_cities.length - 3 }} more
+                                            {{ t.more_cities(c.coverage_cities.length - 3) }}
                                         </span>
                                     </p>
-                                    <p
-                                        v-else-if="c.city_name"
-                                        class="text-sm text-[var(--slate)]"
-                                    >
-                                        {{ c.city_name }}
-                                    </p>
+
                                     <p
                                         v-if="c.short_description"
-                                        class="mt-2 line-clamp-2 text-sm text-[var(--slate)]"
+                                        class="mt-3 line-clamp-2 max-w-xl text-sm leading-relaxed text-[var(--slate)]"
                                     >
                                         {{ c.short_description }}
                                     </p>
-                                    <div
+
+                                    <ul
                                         v-if="c.primary_services.length > 0"
-                                        class="mt-2 flex flex-wrap items-center gap-1.5"
+                                        class="mt-4 flex flex-wrap items-center gap-2"
                                     >
-                                        <span
+                                        <li
                                             v-for="(name, sIdx) in c.primary_services"
                                             :key="sIdx"
-                                            class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700"
+                                            class="mv-ci-pill-service"
                                         >
-                                            <Star class="size-3 fill-emerald-500 text-emerald-500" />
+                                            <span aria-hidden="true" class="mv-ci-pill-dot"></span>
                                             {{ name }}
-                                        </span>
-                                    </div>
+                                        </li>
+                                    </ul>
                                 </div>
 
-                                <!-- CTA buttons -->
-                                <div class="flex w-full flex-col gap-2 md:w-40">
+                                <div class="flex w-full flex-col gap-2.5 md:flex-row lg:w-44 lg:flex-col">
                                     <Link
                                         :href="detailUrl(c)"
-                                        class="mv-btn-primary flex items-center justify-center gap-1.5 rounded-md bg-[var(--orange)] px-4 py-2 text-sm font-medium text-white hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                                        class="mv-directory__btn mv-directory__btn--solid"
                                     >
                                         {{ t.request_quote }}
-                                        <ChevronRight class="size-3.5" />
+                                        <ArrowRight :stroke-width="2" class="size-4 shrink-0" />
                                     </Link>
                                     <Link
                                         :href="detailUrl(c)"
-                                        class="flex items-center justify-center gap-1.5 rounded-md border border-[var(--orange)] px-4 py-2 text-sm font-medium text-[var(--orange)] hover:bg-[var(--orange-soft)]"
+                                        class="mv-directory__btn mv-directory__btn--ghost"
                                     >
                                         {{ t.details }}
-                                        <ChevronRight class="size-3.5" />
                                     </Link>
                                 </div>
-                            </div>
+                            </article>
                         </li>
                     </ul>
 
-                    <!-- Pagination -->
                     <nav
                         v-if="pagination.last_page > 1"
-                        class="mt-6 flex items-center justify-center gap-1"
+                        class="mt-10 flex justify-center"
+                        :aria-label="t.results"
+                        data-mv-reveal
                     >
-                        <Link
-                            v-for="(link, idx) in pagination.links"
-                            :key="idx"
-                            :href="link.url ?? '#'"
-                            :class="[
-                                'inline-flex min-w-9 items-center justify-center rounded-md border border-[var(--linen)] px-3 py-1.5 text-sm',
-                                link.active
-                                    ? 'border-[var(--orange)] bg-[var(--orange)] text-white'
-                                    : link.url
-                                      ? 'bg-white text-[var(--midnight)] hover:border-[var(--orange)] hover:text-[var(--orange)]'
-                                      : 'cursor-not-allowed bg-white text-[var(--slate-light)]',
-                            ]"
-                            :aria-disabled="!link.url"
-                            :tabindex="link.url ? 0 : -1"
-                            v-html="link.label"
-                        />
+                        <div class="mv-ci-pager-shell">
+                            <Link
+                                v-for="(link, idx) in pagination.links"
+                                :key="idx"
+                                :href="link.url ?? '#'"
+                                class="mv-ci-pager-link"
+                                :class="{ 'is-active': link.active, 'is-disabled': !link.url }"
+                                :aria-current="link.active ? 'page' : undefined"
+                                :aria-disabled="!link.url"
+                                :tabindex="link.url ? 0 : -1"
+                                v-html="link.label"
+                            />
+                        </div>
                     </nav>
                 </div>
             </div>

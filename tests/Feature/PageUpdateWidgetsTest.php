@@ -46,9 +46,9 @@ test('save and exit persists the widget stack through the page update endpoint',
         ],
         'widgets' => [
             [
-                'type' => 'cta',
-                'settings' => ['variant' => 'brand', 'alignment' => 'center'],
-                'translations' => ['de' => ['title' => 'Jetzt buchen']],
+                'type' => 'cta_banner',
+                'settings' => ['image_path' => null, 'image_url' => null],
+                'translations' => ['de' => ['heading' => 'Jetzt buchen']],
             ],
         ],
     ])->assertRedirect(route('admin.pages.index'));
@@ -56,11 +56,11 @@ test('save and exit persists the widget stack through the page update endpoint',
     $widgets = $page->fresh()->widgets()->get();
 
     expect($widgets)->toHaveCount(1)
-        ->and($widgets[0]->type)->toBe('cta')
+        ->and($widgets[0]->type)->toBe('cta_banner')
         ->and($widgets[0]->position)->toBe(0);
 
     $translation = $widgets[0]->translations()->where('lang', 'de')->first();
-    expect($translation->data['title'])->toBe('Jetzt buchen');
+    expect($translation->data['heading'])->toBe('Jetzt buchen');
 });
 
 test('an update that omits the widgets key leaves the existing stack untouched', function (): void {
@@ -72,7 +72,7 @@ test('an update that omits the widgets key leaves the existing stack untouched',
         'is_home' => false,
         'translations' => ['de' => ['title' => 'Startseite', 'permalink' => 'startseite']],
         'widgets' => [
-            ['type' => 'cta', 'settings' => ['variant' => 'brand', 'alignment' => 'center']],
+            ['type' => 'cta_banner', 'settings' => ['image_path' => null, 'image_url' => null]],
         ],
     ]);
 
@@ -98,7 +98,7 @@ test('sending an empty widgets array clears the stack', function (): void {
         'is_home' => false,
         'translations' => ['de' => ['title' => 'Startseite', 'permalink' => 'startseite']],
         'widgets' => [
-            ['type' => 'cta', 'settings' => ['variant' => 'brand', 'alignment' => 'center']],
+            ['type' => 'cta_banner', 'settings' => ['image_path' => null, 'image_url' => null]],
         ],
     ]);
 
