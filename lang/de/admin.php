@@ -1847,6 +1847,12 @@ return [
         'section_faq_desc' => 'Unternehmensspezifische Fragen & Antworten auf der öffentlichen Detailseite — großer SEO-Gewinn.',
         'section_external_reviews' => 'Externe Bewertungsquellen',
         'section_external_reviews_desc' => 'Optional — Bewertung und Anzahl von Google importieren, um sie als kombinierte Punktzahl anzuzeigen.',
+        'section_internal_ratings' => 'Interne Bewertungen',
+        'section_internal_ratings_desc' => 'Manuelle Übersteuerung — wird aus echten Bewertungen automatisch berechnet, sobald das Bewertungsmodul live ist.',
+        'field_rating_avg' => 'Bewertung (0–10)',
+        'field_review_count' => 'Anzahl Bewertungen',
+        'field_recommend_pct' => 'Weiterempfehlung %',
+        'field_rating_breakdown' => 'Sterne-Verteilung',
 
         'field_verified' => 'Verifiziert',
         'field_verified_hint' => 'Zeigt ein blaues Häkchen auf Karte + Detailseite.',

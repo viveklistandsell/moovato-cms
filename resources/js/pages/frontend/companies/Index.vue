@@ -14,6 +14,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { localizedUrl } from '@/lib/localizedUrl';
 
 type City = { id: number; name: string };
+type District = { id: number; city_id: number; name: string };
 type Service = { id: number; name: string };
 
 type Company = {
@@ -41,11 +42,17 @@ const props = defineProps<{
     locale: string;
     companies: Company[];
     cities: City[];
+    districts: District[];
     services: Service[];
     activeCityId: number | null;
-    activeServiceId: number | null;
+    activeDistrictId: number | null;
+    activeServiceIds: number[];
     verifiedOnly: boolean;
+    topRatedOnly: boolean;
     minRating: number;
+    minReviews: number;
+    priceMin: number | null;
+    priceMax: number | null;
     sort: string;
     pagination: {
         current_page: number;
@@ -73,8 +80,17 @@ const t = computed(() => ({
     service: props.locale === 'de' ? 'Leistung' : 'Service',
     all_cities: props.locale === 'de' ? 'Alle Städte' : 'All cities',
     all_services: props.locale === 'de' ? 'Alle Leistungen' : 'All services',
+    district: props.locale === 'de' ? 'Bezirk' : 'District',
+    all_districts: props.locale === 'de' ? 'Alle Bezirke' : 'All districts',
     verified_only: props.locale === 'de' ? 'Nur verifiziert' : 'Verified only',
+    top_rated_only: props.locale === 'de' ? 'Nur Top-bewertet' : 'Top-rated only',
     min_rating: props.locale === 'de' ? 'Mindestbewertung' : 'Min. rating',
+    min_reviews: props.locale === 'de' ? 'Mindestanzahl Bewertungen' : 'Min. reviews',
+    price_range: props.locale === 'de' ? 'Preisspanne (€)' : 'Price range (€)',
+    price_from: props.locale === 'de' ? 'ab' : 'from',
+    price_to: props.locale === 'de' ? 'bis' : 'to',
+    location: props.locale === 'de' ? 'Standort' : 'Location',
+    trust: props.locale === 'de' ? 'Vertrauen' : 'Trust',
     reset: props.locale === 'de' ? 'Filter zurücksetzen' : 'Reset filters',
     sort_by: props.locale === 'de' ? 'Sortieren' : 'Sort by',
     sort_relevant: props.locale === 'de' ? 'Relevanz' : 'Relevance',
@@ -98,24 +114,29 @@ const t = computed(() => ({
 }));
 
 const localCity = ref<number | null>(props.activeCityId);
-const localService = ref<number | null>(props.activeServiceId);
+const localDistrict = ref<number | null>(props.activeDistrictId);
+const localServices = ref<number[]>([...props.activeServiceIds]);
 const localVerified = ref<boolean>(props.verifiedOnly);
+const localTopRated = ref<boolean>(props.topRatedOnly);
 const localMinRating = ref<number>(props.minRating);
+const localMinReviews = ref<number>(props.minReviews);
+const localPriceMin = ref<string>(props.priceMin !== null ? String(props.priceMin) : '');
+const localPriceMax = ref<string>(props.priceMax !== null ? String(props.priceMax) : '');
 const localSort = ref<string>(props.sort);
-const filtersOpen = ref<boolean>(false);
-
-const sortOptions = computed(() => [
-    { value: 'relevant', label: t.value.sort_relevant },
-    { value: 'rating', label: t.value.sort_rating },
-    { value: 'newest', label: t.value.sort_newest },
-]);
 
 function applyFilters(): void {
     const params: Record<string, string | number> = {};
     if (localCity.value !== null) params.city = localCity.value;
-    if (localService.value !== null) params.service = localService.value;
+    if (localDistrict.value !== null) params.district = localDistrict.value;
+    if (localServices.value.length > 0) params.services = localServices.value.join(',');
     if (localVerified.value) params.verified = '1';
+    if (localTopRated.value) params.top_rated = '1';
     if (localMinRating.value > 0) params.min_rating = localMinRating.value;
+    if (localMinReviews.value > 0) params.min_reviews = localMinReviews.value;
+    const pMin = Number(localPriceMin.value);
+    const pMax = Number(localPriceMax.value);
+    if (localPriceMin.value !== '' && Number.isFinite(pMin) && pMin > 0) params.price_min = pMin;
+    if (localPriceMax.value !== '' && Number.isFinite(pMax) && pMax > 0) params.price_max = pMax;
     if (localSort.value !== 'relevant') params.sort = localSort.value;
 
     router.get(localizedUrl(props.locale, '/companies'), params, {
@@ -134,9 +155,14 @@ function selectSort(value: string): void {
 
 function resetFilters(): void {
     localCity.value = null;
-    localService.value = null;
+    localDistrict.value = null;
+    localServices.value = [];
     localVerified.value = false;
+    localTopRated.value = false;
     localMinRating.value = 0;
+    localMinReviews.value = 0;
+    localPriceMin.value = '';
+    localPriceMax.value = '';
     localSort.value = 'relevant';
     router.get(localizedUrl(props.locale, '/companies'));
 }
@@ -144,9 +170,14 @@ function resetFilters(): void {
 const hasFilters = computed(
     () =>
         localCity.value !== null ||
-        localService.value !== null ||
+        localDistrict.value !== null ||
+        localServices.value.length > 0 ||
         localVerified.value ||
+        localTopRated.value ||
         localMinRating.value > 0 ||
+        localMinReviews.value > 0 ||
+        localPriceMin.value !== '' ||
+        localPriceMax.value !== '' ||
         localSort.value !== 'relevant',
 );
 
@@ -292,66 +323,65 @@ onBeforeUnmount(() => {
                                 <span v-if="activeFilterCount > 0" class="mv-ci-count">{{ activeFilterCount }}</span>
                             </div>
 
-                            <div class="mt-6 space-y-6">
-                                <div>
-                                    <label for="mv-ci-city" class="mv-ci-label">{{ t.city }}</label>
-                                    <div class="mv-ci-select">
-                                        <select id="mv-ci-city" v-model="localCity" @change="applyFilters">
-                                            <option :value="null">{{ t.all_cities }}</option>
-                                            <option v-for="c in cities" :key="c.id" :value="c.id">
-                                                {{ c.name }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label for="mv-ci-service" class="mv-ci-label">{{ t.service }}</label>
-                                    <div class="mv-ci-select">
-                                        <select id="mv-ci-service" v-model="localService" @change="applyFilters">
-                                            <option :value="null">{{ t.all_services }}</option>
-                                            <option v-for="s in services" :key="s.id" :value="s.id">
-                                                {{ s.name }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="flex items-baseline justify-between gap-3">
-                                        <label for="mv-ci-rating" class="mv-ci-label mb-0">{{ t.min_rating }}</label>
-                                        <span class="mv-ci-rating-chip">
-                                            {{ localMinRating > 0 ? localMinRating.toFixed(1) : '—' }}
-                                        </span>
-                                    </div>
-                                    <input
-                                        id="mv-ci-rating"
-                                        v-model.number="localMinRating"
-                                        type="range"
-                                        min="0"
-                                        max="10"
-                                        step="0.5"
-                                        class="mv-ci-range mt-4"
-                                        :style="{ '--mv-ci-progress': ratingProgress }"
-                                        @change="applyFilters"
-                                    />
-                                </div>
-
-                                <label class="mv-ci-toggle group">
-                                    <input
-                                        v-model="localVerified"
-                                        type="checkbox"
-                                        class="peer sr-only"
-                                        @change="applyFilters"
-                                    />
-                                    <span class="mv-ci-toggle-track">
-                                        <span class="mv-ci-toggle-knob"></span>
-                                    </span>
-                                    <span class="flex items-center gap-1.5 text-sm font-medium text-[var(--midnight)]">
-                                        <ShieldCheck :stroke-width="1.25" class="size-4 text-[var(--orange)]" />
-                                        {{ t.verified_only }}
-                                    </span>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
+                                    {{ t.city }}
                                 </label>
+                                <select
+                                    v-model="localCity"
+                                    class="w-full rounded-md border border-[var(--linen)] bg-white px-2.5 py-2 text-sm focus:border-[var(--orange)] focus:outline-none"
+                                    @change="applyFilters"
+                                >
+                                    <option :value="null">{{ t.all_cities }}</option>
+                                    <option v-for="c in cities" :key="c.id" :value="c.id">
+                                        {{ c.name }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
+                                    {{ t.service }}
+                                </label>
+                                <select
+                                    v-model="localService"
+                                    class="w-full rounded-md border border-[var(--linen)] bg-white px-2.5 py-2 text-sm focus:border-[var(--orange)] focus:outline-none"
+                                    @change="applyFilters"
+                                >
+                                    <option :value="null">{{ t.all_services }}</option>
+                                    <option v-for="s in services" :key="s.id" :value="s.id">
+                                        {{ s.name }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
+                                    {{ t.min_rating }}: {{ localMinRating > 0 ? localMinRating.toFixed(1) : '—' }}
+                                </label>
+                                <input
+                                    v-model.number="localMinRating"
+                                    type="range"
+                                    min="0"
+                                    max="10"
+                                    step="0.5"
+                                    class="w-full accent-[var(--orange)]"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <label class="flex cursor-pointer items-center gap-2">
+                                <input
+                                    v-model="localVerified"
+                                    type="checkbox"
+                                    class="size-4 accent-[var(--orange)]"
+                                    @change="applyFilters"
+                                />
+                                <span class="text-sm text-[var(--midnight)]">
+                                    {{ t.verified_only }}
+                                </span>
+                            </label>
 
                                 <button
                                     v-if="hasFilters"

@@ -123,6 +123,10 @@ type CompanyForEdit = {
     verified: boolean;
     is_top_rated: boolean;
     plan_tier: string;
+    rating_avg: number | string | null;
+    review_count: number;
+    recommend_pct: number;
+    rating_breakdown: Record<string, number> | null;
     google_rating: number | string | null;
     google_review_count: number;
     founded_year: number | null;
@@ -220,6 +224,16 @@ const form = useForm({
     verified: props.company?.verified ?? false,
     is_top_rated: props.company?.is_top_rated ?? false,
     plan_tier: props.company?.plan_tier ?? 'free',
+    rating_avg: props.company?.rating_avg ?? null,
+    review_count: props.company?.review_count ?? 0,
+    recommend_pct: props.company?.recommend_pct ?? 0,
+    rating_breakdown: {
+        5: Number(props.company?.rating_breakdown?.['5'] ?? 0),
+        4: Number(props.company?.rating_breakdown?.['4'] ?? 0),
+        3: Number(props.company?.rating_breakdown?.['3'] ?? 0),
+        2: Number(props.company?.rating_breakdown?.['2'] ?? 0),
+        1: Number(props.company?.rating_breakdown?.['1'] ?? 0),
+    } as Record<string, number>,
     google_rating: props.company?.google_rating ?? undefined,
     google_review_count: props.company?.google_review_count ?? 0,
     founded_year: props.company?.founded_year ?? null,
@@ -277,13 +291,6 @@ const permalinkTouched = ref<Record<string, boolean>>(
     ),
 );
 
-/**
- * Name input handler — looks the row up by *lang code* (not array index)
- * so slot re-renders can't hand us the wrong row. Plain property
- * mutation (NOT splice) keeps the same object reference alive so the
- * permalink input's v-model binding never gets swapped out mid-keystroke
- * — matches Pages' pattern exactly.
- */
 function onNameInput(lang: string, val: string): void {
     const idx = form.translations.findIndex((t) => t.lang === lang);
     if (idx === -1) return;
@@ -293,11 +300,6 @@ function onNameInput(lang: string, val: string): void {
     }
 }
 
-/**
- * Any keystroke in the permalink input freezes auto-slug for that
- * locale. Clearing the field back to empty un-freezes so the admin can
- * regenerate by re-typing the name.
- */
 function onPermalinkInput(code: string): void {
     const idx = form.translations.findIndex((t) => t.lang === code);
     permalinkTouched.value[code] = idx === -1 ? true : Boolean(form.translations[idx].permalink);
@@ -1528,8 +1530,77 @@ function submit(): void {
                     </div>
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>{{ t('companies.section_internal_ratings') }}</CardTitle>
+                    <CardDescription>{{ t('companies.section_internal_ratings_desc') }}</CardDescription>
+                </CardHeader>
+                <CardContent class="flex flex-col gap-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="grid gap-2">
+                            <Label for="rating-avg">{{ t('companies.field_rating_avg') }}</Label>
+                            <Input
+                                id="rating-avg"
+                                v-model="form.rating_avg"
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="10"
+                                placeholder="9.5"
+                            />
+                        </div>
+                        <div class="grid gap-2">
+                            <Label for="review-count">{{ t('companies.field_review_count') }}</Label>
+                            <Input
+                                id="review-count"
+                                v-model="form.review_count"
+                                type="number"
+                                min="0"
+                                placeholder="284"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid gap-2">
+                        <Label for="recommend-pct">
+                            {{ t('companies.field_recommend_pct') }}
+                            <span class="text-xs text-muted-foreground">(0–100)</span>
+                        </Label>
+                        <Input
+                            id="recommend-pct"
+                            v-model="form.recommend_pct"
+                            type="number"
+                            min="0"
+                            max="100"
+                            placeholder="98"
+                        />
+                    </div>
+                    <div class="grid gap-2">
+                        <Label>{{ t('companies.field_rating_breakdown') }}</Label>
+                        <div class="flex flex-col gap-1.5">
+                            <div
+                                v-for="stars in [5, 4, 3, 2, 1]"
+                                :key="stars"
+                                class="flex items-center gap-2"
+                            >
+                                <span class="flex w-6 items-center gap-0.5 text-xs font-medium text-muted-foreground">
+                                    {{ stars }}
+                                    <Star class="size-3 fill-amber-400 text-amber-400" />
+                                </span>
+                                <Input
+                                    :id="`breakdown-${stars}`"
+                                    v-model.number="form.rating_breakdown[stars]"
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    class="!h-8 flex-1 !text-sm"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
-            <!-- External reviews / Google (moved from main column) -->
+            <!-- External reviews / Google -->
             <Card>
                 <CardHeader>
                     <CardTitle>{{ t('companies.section_external_reviews') }}</CardTitle>

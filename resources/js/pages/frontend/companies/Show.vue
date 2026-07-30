@@ -82,6 +82,12 @@ const t = computed(() => ({
     home: props.locale === 'de' ? 'Startseite' : 'Home',
     breadcrumb_list: props.locale === 'de' ? 'Umzugsunternehmen' : 'Moving companies',
     based_on: (n: number) => props.locale === 'de' ? `basierend auf ${n} Bewertungen` : `based on ${n} reviews`,
+    based_on_combined: (own: number, google: number) => props.locale === 'de'
+        ? `basierend auf ${own} eigenen + ${google} Google-Bewertungen`
+        : `based on ${own} own + ${google} Google reviews`,
+    google_only: (n: number) => props.locale === 'de'
+        ? `basierend auf ${n} Google-Bewertungen`
+        : `based on ${n} Google reviews`,
     request_quote: props.locale === 'de' ? 'Angebot anfordern' : 'Request a quote',
     write_review: props.locale === 'de' ? 'Bewertung schreiben' : 'Write a review',
     top_rated: props.locale === 'de' ? 'Top-bewertetes Umzugsunternehmen' : 'Top-rated moving company',
@@ -223,24 +229,40 @@ const ratingBreakdown = computed(() => {
                             {{ company.name }}
                             <BadgeCheck v-if="company.verified" class="size-6 fill-blue-500 text-white" :title="t.verified" />
                         </h1>
-                        <div v-if="company.review_count > 0" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                        <div
+                            v-if="company.review_count > 0 || Number(company.google_review_count) > 0"
+                            class="mt-2 flex flex-wrap items-center gap-2 text-sm"
+                        >
                             <span class="text-2xl font-bold text-[var(--midnight)]">
-                                {{ company.rating_avg.toFixed(1) }}
+                                {{ company.review_count > 0
+                                    ? company.rating_avg.toFixed(1)
+                                    : Number(company.google_rating ?? 0).toFixed(1) }}
                             </span>
                             <div class="flex items-center gap-0.5 text-amber-400">
                                 <Star
                                     v-for="n in 5"
                                     :key="n"
                                     class="size-4"
-                                    :class="company.rating_avg / 2 >= n ? 'fill-current' : ''"
+                                    :class="(company.review_count > 0
+                                        ? company.rating_avg / 2
+                                        : Number(company.google_rating ?? 0) / 2) >= n ? 'fill-current' : ''"
                                 />
                             </div>
-                            <span class="text-[var(--slate)]">{{ t.based_on(company.review_count) }}</span>
+                            <span class="text-[var(--slate)]">
+                                {{ company.review_count > 0 && Number(company.google_review_count) > 0
+                                    ? t.based_on_combined(company.review_count, Number(company.google_review_count))
+                                    : company.review_count > 0
+                                        ? t.based_on(company.review_count)
+                                        : t.google_only(Number(company.google_review_count)) }}
+                            </span>
                             <span
-                                v-if="company.google_review_count > 0"
-                                class="text-xs text-[var(--slate-light)]"
+                                v-if="company.review_count > 0 && Number(company.google_review_count) > 0 && company.google_rating"
+                                class="inline-flex items-center gap-1 rounded-full border border-[var(--linen)] bg-white px-2 py-0.5 text-xs font-medium text-[var(--slate)]"
+                                title="Google rating"
                             >
-                                + Google
+                                <span class="font-bold text-blue-600">G</span>
+                                <Star class="size-3 fill-amber-400 text-amber-400" />
+                                {{ Number(company.google_rating).toFixed(1) }}
                             </span>
                         </div>
 
