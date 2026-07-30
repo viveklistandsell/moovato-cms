@@ -324,163 +324,6 @@ onBeforeUnmount(() => {
                     </li>
                 </ul>
             </header>
-
-                        <div class="space-y-5">
-                            <div class="space-y-3">
-                                <p class="text-[10px] font-semibold tracking-wider text-[var(--slate)] uppercase">
-                                    {{ t.location }}
-                                </p>
-                                <div>
-                                    <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
-                                        {{ t.city }}
-                                    </label>
-                                    <select
-                                        v-model="localCity"
-                                        class="w-full rounded-md border border-[var(--linen)] bg-white px-2.5 py-2 text-sm focus:border-[var(--orange)] focus:outline-none"
-                                        @change="applyFilters"
-                                    >
-                                        <option :value="null">{{ t.all_cities }}</option>
-                                        <option v-for="c in cities" :key="c.id" :value="c.id">
-                                            {{ c.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div v-if="localCity !== null && filteredDistricts.length > 0">
-                                    <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
-                                        {{ t.district }}
-                                    </label>
-                                    <select
-                                        v-model="localDistrict"
-                                        class="w-full rounded-md border border-[var(--linen)] bg-white px-2.5 py-2 text-sm focus:border-[var(--orange)] focus:outline-none"
-                                        @change="applyFilters"
-                                    >
-                                        <option :value="null">{{ t.all_districts }}</option>
-                                        <option v-for="d in filteredDistricts" :key="d.id" :value="d.id">
-                                            {{ d.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- ★ TRUST — rating slider, review-count slider, verified + top-rated toggles -->
-                            <div class="space-y-3 border-t border-[var(--linen)] pt-4">
-                                <p class="text-[10px] font-semibold tracking-wider text-[var(--slate)] uppercase">
-                                    {{ t.trust }}
-                                </p>
-
-                                <div>
-                                    <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
-                                        {{ t.min_rating }}: {{ localMinRating > 0 ? localMinRating.toFixed(1) : '—' }}
-                                    </label>
-                                    <input
-                                        v-model.number="localMinRating"
-                                        type="range"
-                                        min="0"
-                                        max="10"
-                                        step="0.5"
-                                        class="w-full accent-[var(--orange)]"
-                                        @change="applyFilters"
-                                    />
-                                </div>
-                                <div>
-                                    <label class="mb-1.5 block text-xs font-medium text-[var(--slate)]">
-                                        {{ t.min_reviews }}: {{ localMinReviews > 0 ? localMinReviews : '—' }}
-                                    </label>
-                                    <input
-                                        v-model.number="localMinReviews"
-                                        type="range"
-                                        min="0"
-                                        max="500"
-                                        step="10"
-                                        class="w-full accent-[var(--orange)]"
-                                        @change="applyFilters"
-                                    />
-                                </div>
-
-                                <label class="flex cursor-pointer items-center gap-2">
-                                    <input
-                                        v-model="localVerified"
-                                        type="checkbox"
-                                        class="size-4 accent-[var(--orange)]"
-                                        @change="applyFilters"
-                                    />
-                                    <span class="text-sm text-[var(--midnight)]">
-                                        {{ t.verified_only }}
-                                    </span>
-                                </label>
-
-                                <label class="flex cursor-pointer items-center gap-2">
-                                    <input
-                                        v-model="localTopRated"
-                                        type="checkbox"
-                                        class="size-4 accent-[var(--orange)]"
-                                        @change="applyFilters"
-                                    />
-                                    <span class="text-sm text-[var(--midnight)]">
-                                        {{ t.top_rated_only }}
-                                    </span>
-                                </label>
-                            </div>
-
-                            <div v-if="services.length > 0" class="space-y-2 border-t border-[var(--linen)] pt-4">
-                                <p class="text-[10px] font-semibold tracking-wider text-[var(--slate)] uppercase">
-                                    {{ t.service }}
-                                </p>
-                                <div class="max-h-48 space-y-1.5 overflow-y-auto pr-1">
-                                    <label
-                                        v-for="s in services"
-                                        :key="s.id"
-                                        class="flex cursor-pointer items-center gap-2"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            :checked="localServices.includes(s.id)"
-                                            class="size-4 accent-[var(--orange)]"
-                                            @change="() => toggleService(s.id)"
-                                        />
-                                        <span class="text-sm text-[var(--midnight)]">{{ s.name }}</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="space-y-2 border-t border-[var(--linen)] pt-4">
-                                <p class="text-[10px] font-semibold tracking-wider text-[var(--slate)] uppercase">
-                                    {{ t.price_range }}
-                                </p>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex-1">
-                                        <label class="mb-1 block text-[10px] text-[var(--slate)]">{{ t.price_from }}</label>
-                                        <input
-                                            v-model="localPriceMin"
-                                            type="number"
-                                            min="0"
-                                            placeholder="0"
-                                            class="w-full rounded-md border border-[var(--linen)] bg-white px-2 py-1.5 text-sm focus:border-[var(--orange)] focus:outline-none"
-                                            @change="applyFilters"
-                                        />
-                                    </div>
-                                    <div class="flex-1">
-                                        <label class="mb-1 block text-[10px] text-[var(--slate)]">{{ t.price_to }}</label>
-                                        <input
-                                            v-model="localPriceMax"
-                                            type="number"
-                                            min="0"
-                                            placeholder="∞"
-                                            class="w-full rounded-md border border-[var(--linen)] bg-white px-2 py-1.5 text-sm focus:border-[var(--orange)] focus:outline-none"
-                                            @change="applyFilters"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button
-                                v-if="hasFilters"
-                                type="button"
-                                class="w-full rounded-md border border-[var(--linen)] px-3 py-1.5 text-xs font-medium text-[var(--slate)] hover:border-[var(--orange)] hover:text-[var(--orange)]"
-                                @click="resetFilters"
-                            >
-                                {{ t.reset }}
-                            </button>
             <div class="mt-12 grid gap-6 md:mt-16 lg:grid-cols-[300px_1fr] lg:gap-6">
                 <aside class="mv-ci-rail self-start lg:sticky lg:top-24" data-mv-reveal>
                     <button
@@ -512,6 +355,7 @@ onBeforeUnmount(() => {
                             </div>
 
                             <div class="mt-6 space-y-6">
+                                <!-- 📍 LOCATION — City → District cascade -->
                                 <div>
                                     <label for="mv-ci-city" class="mv-ci-label">{{ t.city }}</label>
                                     <div class="mv-ci-select">
@@ -524,18 +368,44 @@ onBeforeUnmount(() => {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label for="mv-ci-service" class="mv-ci-label">{{ t.service }}</label>
+                                <div v-if="localCity !== null && filteredDistricts.length > 0">
+                                    <label for="mv-ci-district" class="mv-ci-label">{{ t.district }}</label>
                                     <div class="mv-ci-select">
-                                        <select id="mv-ci-service" v-model="localService" @change="applyFilters">
-                                            <option :value="null">{{ t.all_services }}</option>
-                                            <option v-for="s in services" :key="s.id" :value="s.id">
-                                                {{ s.name }}
+                                        <select id="mv-ci-district" v-model="localDistrict" @change="applyFilters">
+                                            <option :value="null">{{ t.all_districts }}</option>
+                                            <option v-for="d in filteredDistricts" :key="d.id" :value="d.id">
+                                                {{ d.name }}
                                             </option>
                                         </select>
                                     </div>
                                 </div>
 
+                                <!--
+                                    🚚 SERVICES — multi-select checklist. Every
+                                    picked service becomes a chip in the URL
+                                    (`?services=1,2`), OR semantics on the
+                                    backend query.
+                                -->
+                                <div>
+                                    <label class="mv-ci-label">{{ t.service }}</label>
+                                    <div class="mt-2 max-h-44 space-y-1.5 overflow-y-auto pr-1">
+                                        <label
+                                            v-for="s in services"
+                                            :key="s.id"
+                                            class="flex cursor-pointer items-center gap-2 rounded-md px-1 py-0.5 hover:bg-[var(--orange-soft)]/40"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                :checked="localServices.includes(s.id)"
+                                                class="size-4 accent-[var(--orange)]"
+                                                @change="() => toggleService(s.id)"
+                                            />
+                                            <span class="text-sm text-[var(--midnight)]">{{ s.name }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- ★ TRUST — rating + review-count sliders -->
                                 <div>
                                     <div class="flex items-baseline justify-between gap-3">
                                         <label for="mv-ci-rating" class="mv-ci-label mb-0">{{ t.min_rating }}</label>
@@ -556,6 +426,55 @@ onBeforeUnmount(() => {
                                     />
                                 </div>
 
+                                <div>
+                                    <div class="flex items-baseline justify-between gap-3">
+                                        <label for="mv-ci-reviews" class="mv-ci-label mb-0">{{ t.min_reviews }}</label>
+                                        <span class="mv-ci-rating-chip">
+                                            {{ localMinReviews > 0 ? localMinReviews : '—' }}
+                                        </span>
+                                    </div>
+                                    <input
+                                        id="mv-ci-reviews"
+                                        v-model.number="localMinReviews"
+                                        type="range"
+                                        min="0"
+                                        max="500"
+                                        step="10"
+                                        class="mv-ci-range mt-4"
+                                        @change="applyFilters"
+                                    />
+                                </div>
+
+                                <!-- 💶 PRICE — from/to (€) — filters pivot's price_from -->
+                                <div>
+                                    <label class="mv-ci-label">{{ t.price_range }}</label>
+                                    <div class="mt-2 grid grid-cols-2 gap-2">
+                                        <label class="flex flex-col gap-1">
+                                            <span class="text-[10px] text-[var(--slate)]">{{ t.price_from }}</span>
+                                            <input
+                                                v-model="localPriceMin"
+                                                type="number"
+                                                min="0"
+                                                placeholder="0"
+                                                class="h-9 rounded-md border border-[var(--linen)] bg-white px-2.5 text-sm focus:border-[var(--orange)] focus:outline-none"
+                                                @change="applyFilters"
+                                            />
+                                        </label>
+                                        <label class="flex flex-col gap-1">
+                                            <span class="text-[10px] text-[var(--slate)]">{{ t.price_to }}</span>
+                                            <input
+                                                v-model="localPriceMax"
+                                                type="number"
+                                                min="0"
+                                                placeholder="∞"
+                                                class="h-9 rounded-md border border-[var(--linen)] bg-white px-2.5 text-sm focus:border-[var(--orange)] focus:outline-none"
+                                                @change="applyFilters"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Verified + Top-rated toggles (share the existing mv-ci-toggle style) -->
                                 <label class="mv-ci-toggle group">
                                     <input
                                         v-model="localVerified"
@@ -569,6 +488,22 @@ onBeforeUnmount(() => {
                                     <span class="flex items-center gap-1.5 text-sm font-medium text-[var(--midnight)]">
                                         <ShieldCheck :stroke-width="1.25" class="size-4 text-[var(--orange)]" />
                                         {{ t.verified_only }}
+                                    </span>
+                                </label>
+
+                                <label class="mv-ci-toggle group">
+                                    <input
+                                        v-model="localTopRated"
+                                        type="checkbox"
+                                        class="peer sr-only"
+                                        @change="applyFilters"
+                                    />
+                                    <span class="mv-ci-toggle-track">
+                                        <span class="mv-ci-toggle-knob"></span>
+                                    </span>
+                                    <span class="flex items-center gap-1.5 text-sm font-medium text-[var(--midnight)]">
+                                        <Star :stroke-width="1.25" class="size-4 fill-[var(--yellow-dark)] text-[var(--yellow-dark)]" />
+                                        {{ t.top_rated_only }}
                                     </span>
                                 </label>
 
