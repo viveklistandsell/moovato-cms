@@ -6,12 +6,10 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
-use App\Models\Company;
 use App\Models\Language;
 use App\Models\Page;
 use App\Models\PageTranslation;
 use App\Models\PageWidget;
-use App\Models\ServiceCategory;
 use App\Models\ServiceParentCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -161,10 +159,6 @@ final class PageController extends Controller
                     $settings['categories'] = $this->resolveServiceParentCategories($settings, $locale);
                 }
 
-                if ($w->type === 'company_top_list') {
-                    $settings['items'] = $this->resolveTopCompanies($settings, $locale);
-                }
-
                 return [
                     'type' => $w->type,
                     'settings' => $settings,
@@ -231,85 +225,6 @@ final class PageController extends Controller
                     'category' => $category !== null ? ($ctr?->name ?? $category->name) : null,
                 ];
             })
-            ->all();
-    }
-
-    /**
-     * Resolve the companies rendered by a `company_top_list` widget. In manual
-     * mode the editor's pick order wins; in auto mode published companies are
-     * ranked by top-rated flag, rating and review count. Injected into the
-     * widget's settings at render time — never persisted.
-     *
-     * @param  array<string, mixed>  $settings
-     * @return array<int, array{id: int, name: string, href: string, city: ?string, logo_url: ?string, verified: bool, is_top_rated: bool, rating_avg: float, review_count: int, recommend_pct: int, services: array<int, array{id: int, name: string}>}>
-     */
-    private function resolveTopCompanies(array $settings, string $locale): array
-    {
-        $limit = max(1, min(30, (int) ($settings['limit'] ?? 10)));
-        $manual = ($settings['mode'] ?? 'auto') === 'manual';
-
-        /** @var list<int> $ids */
-        $ids = array_values(array_filter(
-            array_map('intval', (array) ($settings['company_ids'] ?? [])),
-            fn (int $id): bool => $id > 0,
-        ));
-
-        if ($manual && $ids === []) {
-            return [];
-        }
-
-        $query = Company::query()
-            ->with(['translations', 'primaryCity', 'services.translations'])
-            ->where('status', 'published');
-
-        if ((bool) ($settings['only_verified'] ?? false)) {
-            $query->where('verified', true);
-        }
-
-        if ($manual) {
-            $companies = $query->whereIn('id', $ids)->get()
-                ->sortBy(fn (Company $c): int => array_search($c->id, $ids, true) ?: 0)
-                ->take($limit);
-        } else {
-            $companies = $query
-                ->orderByDesc('is_top_rated')
-                ->orderByDesc('rating_avg')
-                ->orderByDesc('review_count')
-                ->limit($limit)
-                ->get();
-        }
-
-        return $companies
-            ->map(function (Company $company) use ($locale): array {
-                $tr = $company->translation($locale);
-                $permalink = (string) ($tr?->permalink ?? '');
-
-                return [
-                    'id' => (int) $company->id,
-                    'name' => (string) ($tr?->name ?? ''),
-                    'href' => $permalink !== ''
-                        ? $this->localizedPath($locale, '/company/'.$permalink)
-                        : '#',
-                    'city' => $company->primaryCity?->name,
-                    'logo_url' => $company->logo !== null
-                        ? '/storage/'.mb_ltrim($company->logo, '/')
-                        : null,
-                    'verified' => (bool) $company->verified,
-                    'is_top_rated' => (bool) $company->is_top_rated,
-                    'rating_avg' => (float) $company->rating_avg,
-                    'review_count' => (int) $company->review_count,
-                    'recommend_pct' => (int) $company->recommend_pct,
-                    'services' => $company->services
-                        ->map(fn (ServiceCategory $service): array => [
-                            'id' => (int) $service->id,
-                            'name' => (string) ($service->translation($locale)?->name ?? ''),
-                        ])
-                        ->filter(fn (array $service): bool => $service['name'] !== '')
-                        ->values()
-                        ->all(),
-                ];
-            })
-            ->values()
             ->all();
     }
 

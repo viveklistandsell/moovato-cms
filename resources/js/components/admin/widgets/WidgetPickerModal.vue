@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { Search, X } from 'lucide-vue-next';
+import { computed, nextTick, ref, watch } from 'vue';
 import {
     Dialog,
     DialogContent,
@@ -7,6 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 import type { WidgetMeta } from '@/widgets/types';
 
@@ -20,9 +22,37 @@ const emit = defineEmits<{
     (e: 'pick', widget: WidgetMeta): void;
 }>();
 
+const search = ref('');
+const searchInput = ref<InstanceType<typeof Input> | null>(null);
+
+watch(open, (isOpen) => {
+    search.value = '';
+
+    if (isOpen) {
+        void nextTick(() => {
+            (searchInput.value?.$el as HTMLInputElement | undefined)?.focus();
+        });
+    }
+});
+
+const filtered = computed<WidgetMeta[]>(() => {
+    const needle = search.value.trim().toLowerCase();
+
+    if (needle === '') {
+        return props.widgets;
+    }
+
+    return props.widgets.filter((w) =>
+        [w.label, w.type, w.category ?? '']
+            .join(' ')
+            .toLowerCase()
+            .includes(needle),
+    );
+});
+
 const grouped = computed<Record<string, WidgetMeta[]>>(() => {
     const out: Record<string, WidgetMeta[]> = {};
-    for (const w of props.widgets) {
+    for (const w of filtered.value) {
         const key = w.category || 'other';
         if (!out[key]) out[key] = [];
         out[key].push(w);
@@ -59,7 +89,37 @@ function choose(widget: WidgetMeta): void {
                 </DialogDescription>
             </DialogHeader>
 
+            <div class="relative">
+                <Search
+                    class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    ref="searchInput"
+                    v-model="search"
+                    type="text"
+                    placeholder="Search widgets by name or type…"
+                    class="pl-9"
+                    @keydown.esc.stop="search = ''"
+                />
+                <button
+                    v-if="search !== ''"
+                    type="button"
+                    class="absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground transition hover:text-foreground"
+                    @click="search = ''"
+                >
+                    <span class="sr-only">Clear search</span>
+                    <X class="size-4" />
+                </button>
+            </div>
+
             <div class="max-h-[60vh] space-y-6 overflow-y-auto pr-1">
+                <p
+                    v-if="filtered.length === 0"
+                    class="py-10 text-center text-sm text-muted-foreground"
+                >
+                    No widgets match “{{ search }}”.
+                </p>
+
                 <div v-for="category in categoriesSorted" :key="category">
                     <h3
                         class="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase"

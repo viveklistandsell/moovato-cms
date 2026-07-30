@@ -6,24 +6,18 @@ import AboutStatsEditor from './AboutStats/AboutStatsEditor.vue';
 import AboutStatsRenderer from './AboutStats/AboutStatsRenderer.vue';
 import AssistantToolsEditor from './AssistantTools/AssistantToolsEditor.vue';
 import AssistantToolsRenderer from './AssistantTools/AssistantToolsRenderer.vue';
-import BannerEditor from './Banner/BannerEditor.vue';
-import BannerRenderer from './Banner/BannerRenderer.vue';
 import BlogEditor from './Blog/BlogEditor.vue';
 import BlogRenderer from './Blog/BlogRenderer.vue';
 import CompanyDirectoryEditor from './CompanyDirectory/CompanyDirectoryEditor.vue';
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
 import ContactEditor from './Contact/ContactEditor.vue';
 import ContactRenderer from './Contact/ContactRenderer.vue';
-import CompanyTopListEditor from './CompanyTopList/CompanyTopListEditor.vue';
-import CompanyTopListRenderer from './CompanyTopList/CompanyTopListRenderer.vue';
 import CostCalculatorEditor from './CostCalculator/CostCalculatorEditor.vue';
 import CostCalculatorRenderer from './CostCalculator/CostCalculatorRenderer.vue';
 import ContentCollageEditor from './ContentCollage/ContentCollageEditor.vue';
 import ContentCollageRenderer from './ContentCollage/ContentCollageRenderer.vue';
 import ComparisonEditor from './Comparison/ComparisonEditor.vue';
 import ComparisonRenderer from './Comparison/ComparisonRenderer.vue';
-import CtaEditor from './Cta/CtaEditor.vue';
-import CtaRenderer from './Cta/CtaRenderer.vue';
 import CtaBannerEditor from './CtaBanner/CtaBannerEditor.vue';
 import CtaBannerRenderer from './CtaBanner/CtaBannerRenderer.vue';
 import CtaWorkEditor from './CtaWork/CtaWorkEditor.vue';
@@ -40,8 +34,6 @@ import SplitMediaEditor from './SplitMedia/SplitMediaEditor.vue';
 import SplitMediaRenderer from './SplitMedia/SplitMediaRenderer.vue';
 import StatFeaturesEditor from './StatFeatures/StatFeaturesEditor.vue';
 import StatFeaturesRenderer from './StatFeatures/StatFeaturesRenderer.vue';
-import StatsBandEditor from './StatsBand/StatsBandEditor.vue';
-import StatsBandRenderer from './StatsBand/StatsBandRenderer.vue';
 import TeamCtaEditor from './TeamCta/TeamCtaEditor.vue';
 import TeamCtaRenderer from './TeamCta/TeamCtaRenderer.vue';
 import TextColumnsEditor from './TextColumns/TextColumnsEditor.vue';
@@ -70,8 +62,6 @@ import MarqueeEditor from './Marquee/MarqueeEditor.vue';
 import MarqueeRenderer from './Marquee/MarqueeRenderer.vue';
 import OrbitBannerEditor from './OrbitBanner/OrbitBannerEditor.vue';
 import OrbitBannerRenderer from './OrbitBanner/OrbitBannerRenderer.vue';
-import PageBannerEditor from './PageBanner/PageBannerEditor.vue';
-import PageBannerRenderer from './PageBanner/PageBannerRenderer.vue';
 import PartnersEditor from './Partners/PartnersEditor.vue';
 import PartnersRenderer from './Partners/PartnersRenderer.vue';
 import PricingEditor from './Pricing/PricingEditor.vue';
@@ -86,8 +76,6 @@ import ServiceCardsEditor from './ServiceCards/ServiceCardsEditor.vue';
 import ServiceCardsRenderer from './ServiceCards/ServiceCardsRenderer.vue';
 import ServicesCategoryGridEditor from './ServicesCategoryGrid/ServicesCategoryGridEditor.vue';
 import ServicesCategoryGridRenderer from './ServicesCategoryGrid/ServicesCategoryGridRenderer.vue';
-import TestimonialEditor from './Testimonial/TestimonialEditor.vue';
-import TestimonialRenderer from './Testimonial/TestimonialRenderer.vue';
 import TestimonialsShowcaseEditor from './TestimonialsShowcase/TestimonialsShowcaseEditor.vue';
 import TestimonialsShowcaseRenderer from './TestimonialsShowcase/TestimonialsShowcaseRenderer.vue';
 import TextBlockEditor from './TextBlock/TextBlockEditor.vue';
@@ -116,17 +104,13 @@ export const widgetRegistry: WidgetRegistry = {
         editor: AssistantToolsEditor,
         renderer: AssistantToolsRenderer,
     },
-    banner: { editor: BannerEditor, renderer: BannerRenderer },
-    page_banner: { editor: PageBannerEditor, renderer: PageBannerRenderer },
     orbit_banner: { editor: OrbitBannerEditor, renderer: OrbitBannerRenderer },
     cta_banner: { editor: CtaBannerEditor, renderer: CtaBannerRenderer },
     cta_work: { editor: CtaWorkEditor, renderer: CtaWorkRenderer },
     text_block: { editor: TextBlockEditor, renderer: TextBlockRenderer },
     image: { editor: ImageEditor, renderer: ImageRenderer },
     features: { editor: FeaturesEditor, renderer: FeaturesRenderer },
-    cta: { editor: CtaEditor, renderer: CtaRenderer },
     faq: { editor: FaqEditor, renderer: FaqRenderer },
-    testimonial: { editor: TestimonialEditor, renderer: TestimonialRenderer },
     testimonials_showcase: {
         editor: TestimonialsShowcaseEditor,
         renderer: TestimonialsShowcaseRenderer,
@@ -187,7 +171,6 @@ export const widgetRegistry: WidgetRegistry = {
         editor: StatFeaturesEditor,
         renderer: StatFeaturesRenderer,
     },
-    stats_band: { editor: StatsBandEditor, renderer: StatsBandRenderer },
     why_choose_media: {
         editor: MediaChecklistEditor,
         renderer: MediaChecklistRenderer,
@@ -218,10 +201,6 @@ export const widgetRegistry: WidgetRegistry = {
     company_directory: {
         editor: CompanyDirectoryEditor,
         renderer: CompanyDirectoryRenderer,
-    },
-    company_top_list: {
-        editor: CompanyTopListEditor,
-        renderer: CompanyTopListRenderer,
     },
     contact: { editor: ContactEditor, renderer: ContactRenderer },
     work_process: {
