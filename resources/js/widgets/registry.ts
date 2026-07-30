@@ -14,6 +14,10 @@ import CompanyDirectoryEditor from './CompanyDirectory/CompanyDirectoryEditor.vu
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
 import ContactEditor from './Contact/ContactEditor.vue';
 import ContactRenderer from './Contact/ContactRenderer.vue';
+import CompanyTopListEditor from './CompanyTopList/CompanyTopListEditor.vue';
+import CompanyTopListRenderer from './CompanyTopList/CompanyTopListRenderer.vue';
+import CostCalculatorEditor from './CostCalculator/CostCalculatorEditor.vue';
+import CostCalculatorRenderer from './CostCalculator/CostCalculatorRenderer.vue';
 import ContentCollageEditor from './ContentCollage/ContentCollageEditor.vue';
 import ContentCollageRenderer from './ContentCollage/ContentCollageRenderer.vue';
 import ComparisonEditor from './Comparison/ComparisonEditor.vue';
@@ -144,6 +148,10 @@ export const widgetRegistry: WidgetRegistry = {
         renderer: HowItWorksRenderer,
     },
     pricing: { editor: PricingEditor, renderer: PricingRenderer },
+    cost_calculator: {
+        editor: CostCalculatorEditor,
+        renderer: CostCalculatorRenderer,
+    },
     reviews: { editor: ReviewsEditor, renderer: ReviewsRenderer },
     why_choose_us: {
         editor: WhyChooseUsEditor,
@@ -210,6 +218,10 @@ export const widgetRegistry: WidgetRegistry = {
     company_directory: {
         editor: CompanyDirectoryEditor,
         renderer: CompanyDirectoryRenderer,
+    },
+    company_top_list: {
+        editor: CompanyTopListEditor,
+        renderer: CompanyTopListRenderer,
     },
     contact: { editor: ContactEditor, renderer: ContactRenderer },
     work_process: {

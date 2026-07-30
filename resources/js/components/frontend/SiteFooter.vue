@@ -163,9 +163,9 @@ const socials = computed<Array<{ label: string; icon: typeof Facebook; href: str
     <footer class="mv-footer">
         <div
             :class="[
-                'container-xl hidden gap-y-10 pt-16 pb-12 md:grid md:grid-cols-2 lg:gap-x-14',
+                'container-xl hidden gap-y-10 pt-16 pb-12 md:grid md:grid-cols-2 lg:gap-x-10',
                 footerColumns.length >= 2
-                    ? 'lg:grid-cols-[1.2fr_1fr_1fr_1.2fr]'
+                    ? 'lg:grid-cols-[1.5fr_1fr_1fr_1fr]'
                     : 'lg:grid-cols-[1.2fr_1.4fr_1fr]',
             ]"
         >

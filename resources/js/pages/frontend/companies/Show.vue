@@ -293,7 +293,7 @@ const ratingBreakdown = computed(() => {
         <div class="container-xl py-8">
             <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
                 <!-- Main content -->
-                <div class="min-w-0 space-y-8">
+                <div class="min-w-0 space-y-6">
                     <!-- Services grid -->
                     <section class="rounded-lg border border-[var(--linen)] bg-white p-6 shadow-sm">
                         <h2 class="mb-4 text-xl font-bold text-[var(--midnight)]">

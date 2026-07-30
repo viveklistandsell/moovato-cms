@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -26,6 +28,13 @@ return [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
+
+    'google' => [
+        'places_key' => env('GOOGLE_PLACES_API_KEY'),
+        'places_regions' => array_values(array_filter(
+            explode(',', (string) env('GOOGLE_PLACES_REGIONS', 'de'))
+        )),
     ],
 
     'slack' => [

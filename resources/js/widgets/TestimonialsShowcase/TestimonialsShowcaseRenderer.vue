@@ -123,9 +123,9 @@ function thumbStyle(i: number): Record<string, string> {
                             <Quote class="size-5" />
                         </span>
                     </button>
-                    <span class="mv-testimonials__thumb-quote">
+                    <!-- <span class="mv-testimonials__thumb-quote">
                         <Quote class="size-8" />
-                    </span>
+                    </span> -->
                 </div>
 
                 <div v-if="current" class="mv-testimonials__item">
