@@ -19,10 +19,18 @@ type Page = {
     categories: Category[];
 };
 
+type WidgetVisibility = {
+    desktop: boolean;
+    tablet: boolean;
+    mobile: boolean;
+};
+
 type WidgetPayload = {
     type: string;
     settings: Record<string, unknown>;
     data: Record<string, unknown>;
+    visibility?: WidgetVisibility;
+    css_class?: string;
 };
 
 const props = defineProps<{
@@ -31,10 +39,53 @@ const props = defineProps<{
     widgets?: WidgetPayload[];
 }>();
 
+// Map per-breakpoint visibility booleans into Tailwind utilities. Tailwind's
+// breakpoints we map onto: mobile = base (< 768px), tablet = md (768-1023px),
+// desktop = lg+ (>= 1024px). We only emit overrides when adjacent breakpoints
+// differ, so "show on all" produces no class at all.
+function visibilityClass(v?: WidgetVisibility): string {
+    if (!v) {
+        return '';
+    }
+
+    const { mobile, tablet, desktop } = v;
+
+    if (mobile && tablet && desktop) {
+        return '';
+    }
+
+    const parts: string[] = [];
+    parts.push(mobile ? 'block' : 'hidden');
+
+    if (tablet !== mobile) {
+        parts.push(tablet ? 'md:block' : 'md:hidden');
+    }
+
+    if (desktop !== tablet) {
+        parts.push(desktop ? 'lg:block' : 'lg:hidden');
+    }
+
+    return parts.join(' ');
+}
+
 const widgetStack = computed(() =>
     (props.widgets ?? [])
-        .map((w) => ({ widget: w, entry: getWidgetEntry(w.type) }))
-        .filter((row): row is { widget: WidgetPayload; entry: NonNullable<ReturnType<typeof getWidgetEntry>> } => row.entry !== null),
+        .map((w) => ({
+            widget: w,
+            entry: getWidgetEntry(w.type),
+            wrapperClass: [visibilityClass(w.visibility), w.css_class ?? '']
+                .filter(Boolean)
+                .join(' '),
+        }))
+        .filter(
+            (
+                row,
+            ): row is {
+                widget: WidgetPayload;
+                entry: NonNullable<ReturnType<typeof getWidgetEntry>>;
+                wrapperClass: string;
+            } => row.entry !== null,
+        ),
 );
 
 // app.ts skips FrontendLayout for this page — we own the chrome decision
@@ -46,6 +97,12 @@ const t = computed(() => ({
 const isFullwidth = computed(() => props.page.template === 'fullwidth');
 const isNolayout = computed(() => props.page.template === 'nolayout');
 // "default" is the implicit fallback.
+
+// Banner widgets render their own breadcrumb, so suppress the layout-level
+// breadcrumb when one is present to avoid showing it twice.
+const hasOwnBreadcrumb = computed(() =>
+    (props.widgets ?? []).some((w) => w.type === 'orbit_banner'),
+);
 </script>
 
 <template>
@@ -61,14 +118,12 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
     </Head>
 
     <!-- NO LAYOUT: bare widgets, no header/footer/breadcrumb -->
-    <div
-        v-if="isNolayout"
-        class="min-h-screen bg-background text-foreground"
-    >
+    <div v-if="isNolayout" class="min-h-screen bg-background text-foreground">
         <component
             :is="row.entry.renderer"
             v-for="(row, i) in widgetStack"
             :key="i"
+            :class="row.wrapperClass || undefined"
             :settings="row.widget.settings"
             :data="row.widget.data"
         />
@@ -76,66 +131,16 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
 
     <!-- DEFAULT or FULL WIDTH: wrap in FrontendLayout (header + footer) -->
     <FrontendLayout v-else>
-        <!-- FULL WIDTH: cover-image hero, edge-to-edge content, wider reading column -->
-        <article v-if="isFullwidth" class="w-full">
-            <div
-                v-if="page.image_url"
-                class="relative h-[60vh] w-full overflow-hidden bg-muted"
-            >
-                <img
-                    :src="page.image_url"
-                    :alt="page.title"
-                    class="size-full object-cover"
-                />
-                <div
-                    class="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent"
-                />
-                <div
-                    class="absolute inset-x-0 bottom-0 mx-auto max-w-5xl px-4 pb-10"
-                >
-                    <h1
-                        class="text-4xl font-extrabold tracking-tight text-foreground drop-shadow-sm sm:text-5xl md:text-6xl"
-                    >
-                        {{ page.title }}
-                    </h1>
-                </div>
-            </div>
-
-            <header v-else class="mx-auto max-w-5xl px-4 pb-2 pt-12">
-                <nav
-                    class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                    <Link
-                        :href="localizedUrl(locale, '/')"
-                        class="hover:text-foreground"
-                    >
-                        {{ t.home }}
-                    </Link>
-                    <span>›</span>
-                    <span class="line-clamp-1 text-foreground">
-                        {{ page.title }}
-                    </span>
-                </nav>
-                <h1
-                    class="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
-                >
-                    {{ page.title }}
-                </h1>
-            </header>
-
-            <component
-                :is="row.entry.renderer"
-                v-for="(row, i) in widgetStack"
-                :key="i"
-                :settings="row.widget.settings"
-                :data="row.widget.data"
-            />
-        </article>
-
-        <!-- DEFAULT: centered prose with breadcrumb and hero image -->
-        <article v-else class="mx-auto max-w-3xl px-4 py-10">
+        <!-- Breadcrumb: shown on every page EXCEPT the home page, for both
+             the default and fullwidth templates. Fullwidth gets its own thin
+             breadcrumb bar since it skips the prose article below. -->
+        <div
+            v-if="isFullwidth && !page.is_home && !hasOwnBreadcrumb"
+            class="container-xl pt-8"
+        >
             <nav
-                class="mb-6 flex items-center gap-2 text-sm text-muted-foreground"
+                class="mv-pagebanner-crumbs mv-crumbs-onlight"
+                aria-label="Breadcrumb"
             >
                 <Link
                     :href="localizedUrl(locale, '/')"
@@ -143,8 +148,28 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
                 >
                     {{ t.home }}
                 </Link>
-                <span>›</span>
-                <span class="line-clamp-1 text-foreground">
+                <span class="sep">›</span>
+                <span class="is-current line-clamp-1">{{ page.title }}</span>
+            </nav>
+        </div>
+
+        <!-- DEFAULT only: centered prose with breadcrumb + page title +
+             hero image. Fullwidth skips this so widgets sit edge-to-edge
+             with no breadcrumb chrome on top. -->
+        <article v-if="false" class="container-xl py-10">
+            <nav
+                v-if="!page.is_home && !hasOwnBreadcrumb"
+                class="mv-pagebanner-crumbs mv-crumbs-onlight mb-6"
+                aria-label="Breadcrumb"
+            >
+                <Link
+                    :href="localizedUrl(locale, '/')"
+                    class="hover:text-foreground"
+                >
+                    {{ t.home }}
+                </Link>
+                <span class="sep">›</span>
+                <span class="is-current line-clamp-1">
                     {{ page.title }}
                 </span>
             </nav>
@@ -167,10 +192,12 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
             </div>
         </article>
 
+        <!-- Widgets render once for BOTH templates (default + fullwidth). -->
         <component
             :is="row.entry.renderer"
             v-for="(row, i) in widgetStack"
             :key="i"
+            :class="row.wrapperClass || undefined"
             :settings="row.widget.settings"
             :data="row.widget.data"
         />

@@ -1,0 +1,121 @@
+<script setup lang="ts">
+import { Head, useForm } from '@inertiajs/vue3';
+import { Save } from 'lucide-vue-next';
+import Heading from '@/components/Heading.vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.settings'), href: '/admin/settings/identity' },
+    { title: t('sidebar.security'), href: '/admin/settings/security' },
+]);
+
+type Settings = {
+    require_2fa_for_admins: boolean;
+    session_lifetime_minutes: number | null;
+    login_throttle_attempts: number | null;
+};
+
+const props = defineProps<{ settings: Settings }>();
+
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
+
+const form = useForm({
+    require_2fa_for_admins: props.settings.require_2fa_for_admins,
+    session_lifetime_minutes: props.settings.session_lifetime_minutes,
+    login_throttle_attempts: props.settings.login_throttle_attempts,
+});
+
+function submit(): void {
+    form.put('/admin/settings/security', { preserveScroll: true });
+}
+</script>
+
+<template>
+    <Head :title="t('settings.security_title')" />
+
+    <div class="flex flex-col gap-6 p-4">
+        <Heading
+            :title="t('settings.security_title')"
+            :description="t('settings.security_description')"
+        />
+
+        <form class="flex flex-col gap-4" @submit.prevent="submit">
+            <Card>
+                <CardContent class="pt-6">
+                    <label class="flex cursor-pointer items-center gap-3 rounded-md border p-3 text-sm">
+                        <Switch
+                            :model-value="form.require_2fa_for_admins"
+                            @update:model-value="(v) => (form.require_2fa_for_admins = v as boolean)"
+                        />
+                        <span class="flex-1">
+                            <span class="block font-medium">{{ t('settings.security_require_2fa_label') }}</span>
+                            <span class="block text-xs text-muted-foreground">
+                                {{ t('settings.security_require_2fa_help') }}
+                            </span>
+                        </span>
+                    </label>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>{{ t('settings.security_sessions_card') }}</CardTitle>
+                </CardHeader>
+                <CardContent class="grid gap-3 sm:grid-cols-2">
+                    <div class="space-y-1">
+                        <Label for="session_lifetime_minutes">
+                            {{ t('settings.security_session_lifetime_label') }}
+                        </Label>
+                        <Input
+                            id="session_lifetime_minutes"
+                            v-model.number="form.session_lifetime_minutes"
+                            type="number"
+                            min="5"
+                            max="10080"
+                            step="5"
+                            placeholder="120"
+                        />
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.security_session_lifetime_help')" />
+                        <InputError
+                            :message="form.errors.session_lifetime_minutes"
+                        />
+                    </div>
+                    <div class="space-y-1">
+                        <Label for="login_throttle_attempts">
+                            {{ t('settings.security_login_throttle_label') }}
+                        </Label>
+                        <Input
+                            id="login_throttle_attempts"
+                            v-model.number="form.login_throttle_attempts"
+                            type="number"
+                            min="1"
+                            max="60"
+                            placeholder="5"
+                        />
+                        <p class="text-xs text-muted-foreground" v-html="t('settings.security_login_throttle_help')" />
+                        <InputError
+                            :message="form.errors.login_throttle_attempts"
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div class="flex justify-end">
+                <Button type="submit" :disabled="form.processing">
+                    <Save class="size-4" />
+                    {{ t('settings.security_save') }}
+                </Button>
+            </div>
+        </form>
+    </div>
+</template>

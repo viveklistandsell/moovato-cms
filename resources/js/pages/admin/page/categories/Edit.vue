@@ -24,7 +24,10 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
 import { slugify } from '@/lib/slug';
+
+const t = useT();
 
 type Translation = { title: string; permalink: string };
 
@@ -58,11 +61,10 @@ const props = defineProps<{
 const isEdit = computed(() => props.category !== null);
 
 setBreadcrumbs(() => [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Pages', href: '/admin/pages/categories' },
-    { title: 'Categories', href: '/admin/pages/categories' },
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.page_categories'), href: '/admin/pages/categories' },
     {
-        title: isEdit.value ? 'Edit category' : 'Create a new category',
+        title: isEdit.value ? t('pages.category_edit_title') : t('pages.category_create_title'),
         href: '#',
     },
 ]);
@@ -99,9 +101,9 @@ watch(
     () => form.translations,
     (translations) => {
         for (const code of Object.keys(translations)) {
-            const t = translations[code];
-            if (!permalinkTouched.value[code] && t.title.length > 0) {
-                t.permalink = slugify(t.title);
+            const tr = translations[code];
+            if (!permalinkTouched.value[code] && tr.title.length > 0) {
+                tr.permalink = slugify(tr.title);
             }
         }
     },
@@ -129,7 +131,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 </script>
 
 <template>
-    <Head :title="isEdit ? 'Edit category' : 'New category'" />
+    <Head :title="isEdit ? t('pages.category_edit_title') : t('pages.category_new')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-center gap-3">
@@ -139,11 +141,11 @@ const errorFor = (code: string, field: keyof Translation) =>
                 </Link>
             </Button>
             <Heading
-                :title="isEdit ? 'Edit category' : 'Create a new category'"
+                :title="isEdit ? t('pages.category_edit_title') : t('pages.category_create_title')"
                 :description="
                     isEdit
-                        ? 'Update translations and settings.'
-                        : 'German is required. English is optional.'
+                        ? t('pages.category_edit_description')
+                        : t('pages.category_create_description')
                 "
             />
         </div>
@@ -156,10 +158,9 @@ const errorFor = (code: string, field: keyof Translation) =>
             <div class="space-y-6 lg:col-span-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Translations</CardTitle>
+                        <CardTitle>{{ t('pages.translations_title') }}</CardTitle>
                         <CardDescription>
-                            Switch between German and English. Only German is
-                            required.
+                            {{ t('pages.translations_description') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -171,7 +172,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 <div class="space-y-5 pt-4">
                                     <div class="grid gap-2">
                                         <Label :for="`title-${code}`">
-                                            Title
+                                            {{ t('pages.category_title_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -187,7 +188,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             v-model="
                                                 form.translations[code].title
                                             "
-                                            placeholder="Category title"
+                                            :placeholder="t('pages.category_title_placeholder')"
                                         />
                                         <InputError
                                             :message="errorFor(code, 'title')"
@@ -196,7 +197,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                                     <div class="grid gap-2">
                                         <Label :for="`permalink-${code}`">
-                                            Permalink
+                                            {{ t('pages.permalink_label') }}
                                             <span
                                                 v-if="
                                                     languages.find(
@@ -207,9 +208,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                 >*</span
                                             >
                                         </Label>
-                                        <div
-                                            class="flex w-full items-stretch"
-                                        >
+                                        <div class="flex w-full items-stretch">
                                             <span
                                                 class="inline-flex shrink-0 items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground"
                                             >
@@ -221,21 +220,21 @@ const errorFor = (code: string, field: keyof Translation) =>
                                                     form.translations[code]
                                                         .permalink
                                                 "
-                                                placeholder="your-permalink"
-                                                class="placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:text-sm"
+                                                :placeholder="t('pages.permalink_placeholder')"
+                                                class="h-9 w-full min-w-0 rounded-r-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
                                                 @input="onPermalinkInput(code)"
                                             />
                                         </div>
                                         <p
                                             class="text-xs text-muted-foreground"
                                         >
-                                            Preview:
+                                            {{ t('pages.preview_label') }}:
                                             <span class="text-primary">
                                                 {{ urlPrefixes[code]
                                                 }}{{
                                                     form.translations[code]
                                                         .permalink ||
-                                                    'your-permalink'
+                                                    t('pages.permalink_placeholder')
                                                 }}
                                             </span>
                                         </p>
@@ -256,7 +255,7 @@ const errorFor = (code: string, field: keyof Translation) =>
             <div class="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Publish</CardTitle>
+                        <CardTitle>{{ t('pages.category_publish') }}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div class="flex items-center gap-2">
@@ -266,7 +265,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 class="flex-1"
                             >
                                 <Save class="size-4" />
-                                Save
+                                {{ t('pages.category_save') }}
                             </Button>
                             <Button
                                 as-child
@@ -276,7 +275,7 @@ const errorFor = (code: string, field: keyof Translation) =>
                             >
                                 <Link href="/admin/pages/categories">
                                     <X class="size-4" />
-                                    Cancel
+                                    {{ t('pages.category_cancel') }}
                                 </Link>
                             </Button>
                         </div>
@@ -285,11 +284,11 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Settings</CardTitle>
+                        <CardTitle>{{ t('pages.category_settings_title') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="grid gap-2">
-                            <Label for="parent">Parent category</Label>
+                            <Label for="parent">{{ t('pages.category_parent_label') }}</Label>
                             <Select
                                 :model-value="
                                     form.parent_id
@@ -305,12 +304,10 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 "
                             >
                                 <SelectTrigger id="parent" class="w-full">
-                                    <SelectValue placeholder="Top-level" />
+                                    <SelectValue :placeholder="t('pages.category_parent_placeholder')" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="none"
-                                        >— Top-level —</SelectItem
-                                    >
+                                    <SelectItem value="none">{{ t('pages.category_parent_top') }}</SelectItem>
                                     <SelectItem
                                         v-for="opt in parentOptions"
                                         :key="opt.id"
@@ -325,7 +322,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                         <div class="flex items-center justify-between">
                             <Label for="is_default" class="cursor-pointer">
-                                Default category
+                                {{ t('pages.category_default_label') }}
                             </Label>
                             <Switch
                                 id="is_default"
@@ -338,7 +335,7 @@ const errorFor = (code: string, field: keyof Translation) =>
 
                         <div class="grid gap-2">
                             <Label for="status">
-                                Status
+                                {{ t('common.status') }}
                                 <span class="text-destructive">*</span>
                             </Label>
                             <Select
@@ -351,22 +348,16 @@ const errorFor = (code: string, field: keyof Translation) =>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="published"
-                                        >Published</SelectItem
-                                    >
-                                    <SelectItem value="draft"
-                                        >Draft</SelectItem
-                                    >
-                                    <SelectItem value="inactive"
-                                        >Inactive</SelectItem
-                                    >
+                                    <SelectItem value="published">{{ t('status.published') }}</SelectItem>
+                                    <SelectItem value="draft">{{ t('status.draft') }}</SelectItem>
+                                    <SelectItem value="inactive">{{ t('status.inactive') }}</SelectItem>
                                 </SelectContent>
                             </Select>
                             <InputError :message="form.errors.status" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="sort_order">Sort order</Label>
+                            <Label for="sort_order">{{ t('pages.category_sort_order') }}</Label>
                             <Input
                                 id="sort_order"
                                 v-model.number="form.sort_order"

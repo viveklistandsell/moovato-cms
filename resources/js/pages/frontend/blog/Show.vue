@@ -158,9 +158,9 @@ function setupObserver(): void {
         { rootMargin: '-80px 0px -65% 0px', threshold: 0 },
     );
 
-    root.querySelectorAll<HTMLHeadingElement>(
-        'h1, h2, h3, h4, h5, h6',
-    ).forEach((h) => observer!.observe(h));
+    root.querySelectorAll<HTMLHeadingElement>('h1, h2, h3, h4, h5, h6').forEach(
+        (h) => observer!.observe(h),
+    );
 }
 
 function scrollToHeading(id: string, event: Event): void {
@@ -192,7 +192,11 @@ onBeforeUnmount(() => observer?.disconnect());
 <template>
     <Head>
         <title>{{ documentTitle }}</title>
-        <meta head-key="og:title" property="og:title" :content="documentTitle" />
+        <meta
+            head-key="og:title"
+            property="og:title"
+            :content="documentTitle"
+        />
         <meta
             v-if="post.image_url"
             head-key="og:image"
@@ -204,11 +208,17 @@ onBeforeUnmount(() => observer?.disconnect());
     <div class="mx-auto max-w-7xl px-4 py-10">
         <!-- Breadcrumb -->
         <nav class="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
-            <Link :href="localizedUrl(locale, '/')" class="hover:text-foreground">
+            <Link
+                :href="localizedUrl(locale, '/')"
+                class="hover:text-foreground"
+            >
                 {{ t.home }}
             </Link>
             <span>›</span>
-            <Link :href="localizedUrl(locale, '/blog')" class="hover:text-foreground">
+            <Link
+                :href="localizedUrl(locale, '/blog')"
+                class="hover:text-foreground"
+            >
                 {{ t.blog }}
             </Link>
             <span>›</span>
@@ -264,13 +274,16 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Categories -->
                 <div
                     v-if="post.categories.length > 0"
-                    class="mb-3 flex flex-wrap gap-2 text-sm font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400"
+                    class="mb-3 flex flex-wrap gap-2 text-sm font-semibold tracking-wider text-rose-600 uppercase dark:text-rose-400"
                 >
                     <Link
                         v-for="cat in post.categories"
                         :key="cat.id"
                         :href="
-                            localizedUrl(locale, `/blog?category=${cat.permalink}`)
+                            localizedUrl(
+                                locale,
+                                `/blog?category=${cat.permalink}`,
+                            )
                         "
                         class="hover:underline"
                     >
@@ -280,7 +293,7 @@ onBeforeUnmount(() => observer?.disconnect());
 
                 <!-- Title -->
                 <h1
-                    class="mb-4 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl md:text-5xl"
+                    class="mb-4 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl md:text-5xl"
                 >
                     {{ post.title }}
                 </h1>
@@ -289,9 +302,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <div
                     class="mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
                 >
-                    <span v-if="post.author"
-                        >{{ t.by }} {{ post.author }}</span
-                    >
+                    <span v-if="post.author">{{ t.by }} {{ post.author }}</span>
                     <span
                         v-if="formattedDate"
                         class="inline-flex items-center gap-1.5"
@@ -327,7 +338,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Short Description/Excerpt as lead-in -->
                 <p
                     v-if="post.excerpt"
-                    class="mb-8 border-l-4 border-primary/40 bg-muted/30 px-4 py-3 text-base italic leading-relaxed text-muted-foreground"
+                    class="mb-8 border-l-4 border-primary/40 bg-muted/30 px-4 py-3 text-base leading-relaxed text-muted-foreground italic"
                 >
                     {{ post.excerpt }}
                 </p>
@@ -336,7 +347,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <div
                     v-if="post.content"
                     ref="contentRef"
-                    class="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-bold prose-headings:scroll-mt-24 prose-a:text-primary prose-img:rounded-md"
+                    class="prose prose-neutral dark:prose-invert prose-headings:font-bold prose-headings:scroll-mt-24 prose-a:text-primary prose-img:rounded-md max-w-none"
                     v-html="post.content"
                 />
 

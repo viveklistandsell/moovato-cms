@@ -46,8 +46,8 @@ final class ImageWidget implements WidgetContract
     public static function defaultData(): array
     {
         return [
-            'alt' => '',
-            'caption' => '',
+            'alt' => 'Moovato Umzugsteam bei der Arbeit in Berlin',
+            'caption' => 'Unser erfahrenes Team sorgt für einen reibungslosen Umzug.',
         ];
     }
 

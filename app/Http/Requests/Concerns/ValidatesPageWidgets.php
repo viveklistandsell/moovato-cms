@@ -35,6 +35,11 @@ trait ValidatesPageWidgets
             'widgets.*.position' => ['nullable', 'integer', 'min:0'],
             'widgets.*.is_active' => ['nullable', 'boolean'],
             'widgets.*.settings' => ['nullable', 'array'],
+            'widgets.*.visibility' => ['nullable', 'array'],
+            'widgets.*.visibility.desktop' => ['nullable', 'boolean'],
+            'widgets.*.visibility.tablet' => ['nullable', 'boolean'],
+            'widgets.*.visibility.mobile' => ['nullable', 'boolean'],
+            'widgets.*.css_class' => ['nullable', 'string', 'max:64'],
             'widgets.*.translations' => ['nullable', 'array'],
             'widgets.*.translations.*' => ['array'],
         ];

@@ -33,12 +33,7 @@ function clear(): void {
             class="flex items-center justify-center overflow-hidden rounded-md border border-dashed bg-muted"
             :class="aspectClass ?? 'aspect-video w-full'"
         >
-            <img
-                v-if="url"
-                :src="url"
-                alt=""
-                class="size-full object-cover"
-            />
+            <img v-if="url" :src="url" alt="" class="size-full object-cover" />
             <ImageIcon v-else class="size-8 text-muted-foreground/40" />
         </div>
         <div class="flex items-center gap-2">

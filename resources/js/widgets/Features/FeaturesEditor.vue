@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 
 type Item = { icon: string; title: string; description: string };
 
@@ -55,7 +55,12 @@ function removeItem(index: number): void {
                 <Label>Columns</Label>
                 <Select
                     :model-value="String(settings.columns)"
-                    @update:model-value="(v) => (settings.columns = Number(v) as Settings['columns'])"
+                    @update:model-value="
+                        (v) =>
+                            (settings.columns = Number(
+                                v,
+                            ) as Settings['columns'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -69,7 +74,10 @@ function removeItem(index: number): void {
                 <Label>Icon style</Label>
                 <Select
                     :model-value="settings.icon_style"
-                    @update:model-value="(v) => (settings.icon_style = v as Settings['icon_style'])"
+                    @update:model-value="
+                        (v) =>
+                            (settings.icon_style = v as Settings['icon_style'])
+                    "
                 >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -102,9 +110,8 @@ function removeItem(index: number): void {
                 <Input v-model="item.icon" placeholder="Icon (lucide)" />
                 <div class="space-y-2">
                     <Input v-model="item.title" placeholder="Title" />
-                    <Textarea
+                    <RichTextEditor
                         v-model="item.description"
-                        :rows="2"
                         placeholder="Description"
                     />
                 </div>

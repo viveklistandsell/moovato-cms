@@ -7,12 +7,25 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MediaFile;
 use App\Models\MediaFolder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class MediaController extends Controller
 {
+    public function lookup(Request $request): JsonResponse
+    {
+        $path = (string) $request->query('path', '');
+        if ($path === '') {
+            return response()->json(['id' => null], 422);
+        }
+
+        $file = MediaFile::query()->where('path', $path)->first(['id']);
+
+        return response()->json(['id' => $file?->id]);
+    }
+
     public function index(Request $request): Response
     {
         $folderId = $request->integer('folder') ?: null;
@@ -102,23 +115,34 @@ final class MediaController extends Controller
             : (int) MediaFile::query()->where('folder_id', $folderId)->sum('size');
 
         $files = $filesQuery
+            ->with('user:id,name')
             ->paginate(60)
             ->withQueryString()
-            ->through(fn (MediaFile $file): array => [
-                'id' => $file->id,
-                'name' => $file->name,
-                'original_name' => $file->original_name,
-                'mime_type' => $file->mime_type,
-                'extension' => $file->extension,
-                'size' => $file->size,
-                'url' => $file->url,
-                'thumb_url' => $file->thumb_url,
-                'medium_url' => $file->medium_url,
-                'metadata' => $file->metadata,
-                'folder_id' => $file->folder_id,
-                'path' => $file->path,
-                'created_at' => $file->created_at?->toIso8601String(),
-            ]);
+            ->through(function (MediaFile $file): array {
+                $metadata = is_array($file->metadata) ? $file->metadata : [];
+
+                return [
+                    'id' => $file->id,
+                    'name' => $file->name,
+                    'original_name' => $file->original_name,
+                    'mime_type' => $file->mime_type,
+                    'extension' => $file->extension,
+                    'size' => $file->size,
+                    'url' => $file->url,
+                    'thumb_url' => $file->thumb_url,
+                    'medium_url' => $file->medium_url,
+                    'metadata' => $file->metadata,
+                    'folder_id' => $file->folder_id,
+                    'path' => $file->path,
+                    'uploader' => $file->user?->name,
+                    'alt_text' => $metadata['alt_text'] ?? null,
+                    'title' => $metadata['title'] ?? null,
+                    'caption' => $metadata['caption'] ?? null,
+                    'description' => $metadata['description'] ?? null,
+                    'created_at' => $file->created_at?->toIso8601String(),
+                    'updated_at' => $file->updated_at?->toIso8601String(),
+                ];
+            });
 
         return Inertia::render('Media/Index', [
             'currentFolder' => $folder

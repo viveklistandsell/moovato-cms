@@ -21,10 +21,7 @@ const { appearance, resolvedAppearance, updateAppearance } = useAppearance();
                 aria-label="Toggle theme"
                 title="Toggle theme"
             >
-                <Sun
-                    v-if="resolvedAppearance === 'light'"
-                    class="size-4"
-                />
+                <Sun v-if="resolvedAppearance === 'light'" class="size-4" />
                 <Moon v-else class="size-4" />
             </Button>
         </DropdownMenuTrigger>

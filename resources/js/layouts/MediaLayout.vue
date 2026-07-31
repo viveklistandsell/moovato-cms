@@ -12,7 +12,10 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/sonner';
+import { useT } from '@/composables/useT';
 import type { BreadcrumbItem } from '@/types';
+
+const t = useT();
 
 withDefaults(
     defineProps<{
@@ -38,7 +41,7 @@ const user = computed(() => page.props.auth.user);
                     class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeft class="h-4 w-4" />
-                    <span>Dashboard</span>
+                    <span>{{ t('media.dashboard_back') }}</span>
                 </Link>
                 <span class="h-5 w-px bg-border"></span>
                 <Link href="/dashboard" class="flex items-center gap-2">

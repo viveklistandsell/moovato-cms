@@ -2,6 +2,8 @@
 /bootstrap/ssr
 /node_modules
 /public/build
+/public/build.zip
+/public/*.zip
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage

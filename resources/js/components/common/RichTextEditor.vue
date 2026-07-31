@@ -61,6 +61,7 @@ import {
 } from 'lucide-vue-next';
 import { onClickOutside } from '@vueuse/core';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import MediaPicker from '@/components/common/MediaPicker.vue';
 
 const lowlight = createLowlight(common);
 
@@ -94,9 +95,7 @@ const FontSize = Extension.create({
             setFontSize:
                 (size: string) =>
                 ({ chain }: { chain: () => any }) =>
-                    chain()
-                        .setMark('textStyle', { fontSize: size })
-                        .run(),
+                    chain().setMark('textStyle', { fontSize: size }).run(),
             unsetFontSize:
                 () =>
                 ({ chain }: { chain: () => any }) =>
@@ -148,13 +147,17 @@ const editor = useEditor({
         TableRow,
         TableHeader,
         TableCell,
-        Youtube.configure({ controls: true, nocookie: true, width: 640, height: 360 }),
+        Youtube.configure({
+            controls: true,
+            nocookie: true,
+            width: 640,
+            height: 360,
+        }),
         CodeBlockLowlight.configure({ lowlight }),
     ],
     editorProps: {
         attributes: {
-            class:
-                'prose prose-sm dark:prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none',
+            class: 'prose prose-sm dark:prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none',
         },
     },
     onUpdate: ({ editor }) => {
@@ -172,7 +175,9 @@ watch(
         }
         const current = editor.value.getHTML();
         if (value !== current) {
-            editor.value.commands.setContent(value ?? '', { emitUpdate: false });
+            editor.value.commands.setContent(value ?? '', {
+                emitUpdate: false,
+            });
         }
     },
 );
@@ -200,19 +205,37 @@ function exec(callback: () => void): void {
 }
 
 const TEXT_COLORS = [
-    '#000000', '#404040', '#737373', '#a3a3a3',
-    '#ef4444', '#f97316', '#eab308', '#22c55e',
-    '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899',
+    '#000000',
+    '#404040',
+    '#737373',
+    '#a3a3a3',
+    '#ef4444',
+    '#f97316',
+    '#eab308',
+    '#22c55e',
+    '#06b6d4',
+    '#3b82f6',
+    '#8b5cf6',
+    '#ec4899',
 ];
 const HIGHLIGHT_COLORS = [
-    '#fef08a', '#fde68a', '#bbf7d0', '#a5f3fc',
-    '#bfdbfe', '#ddd6fe', '#fbcfe8', '#fecaca',
+    '#fef08a',
+    '#fde68a',
+    '#bbf7d0',
+    '#a5f3fc',
+    '#bfdbfe',
+    '#ddd6fe',
+    '#fbcfe8',
+    '#fecaca',
 ];
 const FONT_FAMILIES = [
     { label: 'Default', value: '' },
     { label: 'Sans-serif', value: 'ui-sans-serif, system-ui, sans-serif' },
     { label: 'Serif', value: 'ui-serif, Georgia, serif' },
-    { label: 'Monospace', value: 'ui-monospace, SFMono-Regular, Menlo, monospace' },
+    {
+        label: 'Monospace',
+        value: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    },
     { label: 'Inter', value: 'Inter, sans-serif' },
     { label: 'Georgia', value: 'Georgia, serif' },
     { label: 'Courier', value: 'Courier New, monospace' },
@@ -279,9 +302,13 @@ function setFontFamily(family: string) {
 }
 function setFontSize(size: string) {
     if (size === '') {
-        exec(() => (editor.value?.chain().focus() as any).unsetFontSize().run());
+        exec(() =>
+            (editor.value?.chain().focus() as any).unsetFontSize().run(),
+        );
     } else {
-        exec(() => (editor.value?.chain().focus() as any).setFontSize(size).run());
+        exec(() =>
+            (editor.value?.chain().focus() as any).setFontSize(size).run(),
+        );
     }
     sizeMenuOpen.value = false;
 }
@@ -332,15 +359,26 @@ function deleteTable() {
     exec(() => editor.value?.chain().focus().deleteTable().run());
     tableMenuOpen.value = false;
 }
-function insertVideo() {
-    if (!editor.value) {
-        return;
-    }
-    const url = window.prompt('YouTube URL or video URL:');
-    if (!url) {
-        return;
-    }
-    editor.value.commands.setYoutubeVideo({ src: url });
+// MediaPicker integration: the image and video toolbar buttons open the
+// in-form media library instead of the native window.prompt(). For images we
+// insert via TipTap's setImage command; for video files we insert a raw
+// <video controls> tag so the picked MP4/WebM file plays inline.
+const imagePickerOpen = ref(false);
+const videoPickerOpen = ref(false);
+
+function onPickImage(file: { path: string; url: string; name: string }): void {
+    if (!editor.value) return;
+    editor.value
+        .chain()
+        .focus()
+        .setImage({ src: file.url, alt: file.name })
+        .run();
+}
+
+function onPickVideo(file: { path: string; url: string; name: string }): void {
+    if (!editor.value) return;
+    const html = `<video controls preload="metadata" style="max-width:100%;height:auto" src="${file.url}"></video>`;
+    editor.value.chain().focus().insertContent(html).run();
 }
 function setLink() {
     if (!editor.value) {
@@ -364,16 +402,6 @@ function setLink() {
         .setLink({ href: url })
         .run();
 }
-function insertImage() {
-    if (!editor.value) {
-        return;
-    }
-    const url = window.prompt('Image URL:');
-    if (!url) {
-        return;
-    }
-    editor.value.chain().focus().setImage({ src: url }).run();
-}
 function toggleFullscreen() {
     isFullscreen.value = !isFullscreen.value;
 }
@@ -396,8 +424,12 @@ function onSourceInput(event: Event) {
 
 const tableActive = computed(() => isActive('table'));
 
-const charCount = computed(() => editor.value?.storage.characterCount?.characters() ?? 0);
-const wordCount = computed(() => editor.value?.storage.characterCount?.words() ?? 0);
+const charCount = computed(
+    () => editor.value?.storage.characterCount?.characters() ?? 0,
+);
+const wordCount = computed(
+    () => editor.value?.storage.characterCount?.words() ?? 0,
+);
 
 function toggleBold() {
     exec(() => editor.value?.chain().focus().toggleBold().run());
@@ -448,114 +480,503 @@ function redo() {
             class="flex flex-wrap items-center gap-0.5 border-b border-input bg-muted/40 p-1"
         >
             <!-- Text marks -->
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('bold') }" title="Bold (Ctrl+B)" @click="toggleBold"><Bold class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('italic') }" title="Italic (Ctrl+I)" @click="toggleItalic"><Italic class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('underline') }" title="Underline (Ctrl+U)" @click="toggleUnderline"><UnderlineIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('strike') }" title="Strikethrough" @click="toggleStrike"><Strikethrough class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('code') }" title="Inline code" @click="toggleCode"><Code class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('subscript') }" title="Subscript" @click="toggleSubscript"><SubscriptIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('superscript') }" title="Superscript" @click="toggleSuperscript"><SuperscriptIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Clear formatting" @click="clearFormat"><RemoveFormatting class="size-4" /></button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('bold') }"
+                title="Bold (Ctrl+B)"
+                @click="toggleBold"
+            >
+                <Bold class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('italic') }"
+                title="Italic (Ctrl+I)"
+                @click="toggleItalic"
+            >
+                <Italic class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('underline') }"
+                title="Underline (Ctrl+U)"
+                @click="toggleUnderline"
+            >
+                <UnderlineIcon class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('strike') }"
+                title="Strikethrough"
+                @click="toggleStrike"
+            >
+                <Strikethrough class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('code') }"
+                title="Inline code"
+                @click="toggleCode"
+            >
+                <Code class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('subscript') }"
+                title="Subscript"
+                @click="toggleSubscript"
+            >
+                <SubscriptIcon class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('superscript') }"
+                title="Superscript"
+                @click="toggleSuperscript"
+            >
+                <SuperscriptIcon class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                title="Clear formatting"
+                @click="clearFormat"
+            >
+                <RemoveFormatting class="size-4" />
+            </button>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
             <!-- Font family -->
             <div ref="fontMenuRef" class="relative">
-                <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" title="Font family" @click="fontMenuOpen = !fontMenuOpen"><Type class="size-4" /><ChevronDown class="size-3 opacity-60" /></button>
-                <div v-if="fontMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-48 rounded-md border bg-popover py-1 text-sm shadow-md">
-                    <button v-for="f in FONT_FAMILIES" :key="f.label" type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted" :style="f.value ? { fontFamily: f.value } : {}" @click="setFontFamily(f.value)">{{ f.label }}</button>
+                <button
+                    type="button"
+                    class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted"
+                    title="Font family"
+                    @click="fontMenuOpen = !fontMenuOpen"
+                >
+                    <Type class="size-4" /><ChevronDown
+                        class="size-3 opacity-60"
+                    />
+                </button>
+                <div
+                    v-if="fontMenuOpen"
+                    class="absolute top-full left-0 z-10 mt-1 w-48 rounded-md border bg-popover py-1 text-sm shadow-md"
+                >
+                    <button
+                        v-for="f in FONT_FAMILIES"
+                        :key="f.label"
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left hover:bg-muted"
+                        :style="f.value ? { fontFamily: f.value } : {}"
+                        @click="setFontFamily(f.value)"
+                    >
+                        {{ f.label }}
+                    </button>
                 </div>
             </div>
 
             <!-- Font size -->
             <div ref="sizeMenuRef" class="relative">
-                <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" title="Font size" @click="sizeMenuOpen = !sizeMenuOpen"><span class="px-1 text-xs font-semibold">A↕</span><ChevronDown class="size-3 opacity-60" /></button>
-                <div v-if="sizeMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-32 rounded-md border bg-popover py-1 text-sm shadow-md">
-                    <button v-for="s in FONT_SIZES" :key="s.label" type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted" :style="s.value ? { fontSize: s.value } : {}" @click="setFontSize(s.value)">{{ s.label }}</button>
+                <button
+                    type="button"
+                    class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted"
+                    title="Font size"
+                    @click="sizeMenuOpen = !sizeMenuOpen"
+                >
+                    <span class="px-1 text-xs font-semibold">A↕</span
+                    ><ChevronDown class="size-3 opacity-60" />
+                </button>
+                <div
+                    v-if="sizeMenuOpen"
+                    class="absolute top-full left-0 z-10 mt-1 w-32 rounded-md border bg-popover py-1 text-sm shadow-md"
+                >
+                    <button
+                        v-for="s in FONT_SIZES"
+                        :key="s.label"
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left hover:bg-muted"
+                        :style="s.value ? { fontSize: s.value } : {}"
+                        @click="setFontSize(s.value)"
+                    >
+                        {{ s.label }}
+                    </button>
                 </div>
             </div>
 
             <!-- Color -->
             <div ref="colorMenuRef" class="relative">
-                <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" title="Text color" @click="colorMenuOpen = !colorMenuOpen"><Palette class="size-4" /><ChevronDown class="size-3 opacity-60" /></button>
-                <div v-if="colorMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-44 rounded-md border bg-popover p-2 shadow-md">
+                <button
+                    type="button"
+                    class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted"
+                    title="Text color"
+                    @click="colorMenuOpen = !colorMenuOpen"
+                >
+                    <Palette class="size-4" /><ChevronDown
+                        class="size-3 opacity-60"
+                    />
+                </button>
+                <div
+                    v-if="colorMenuOpen"
+                    class="absolute top-full left-0 z-10 mt-1 w-44 rounded-md border bg-popover p-2 shadow-md"
+                >
                     <div class="grid grid-cols-6 gap-1">
-                        <button v-for="c in TEXT_COLORS" :key="c" type="button" class="size-6 rounded border transition-transform hover:scale-110" :style="{ backgroundColor: c }" :title="c" @click="setColor(c)" />
+                        <button
+                            v-for="c in TEXT_COLORS"
+                            :key="c"
+                            type="button"
+                            class="size-6 rounded border transition-transform hover:scale-110"
+                            :style="{ backgroundColor: c }"
+                            :title="c"
+                            @click="setColor(c)"
+                        />
                     </div>
-                    <button type="button" class="mt-2 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted" @click="unsetColor">Reset color</button>
+                    <button
+                        type="button"
+                        class="mt-2 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                        @click="unsetColor"
+                    >
+                        Reset color
+                    </button>
                 </div>
             </div>
 
             <!-- Highlight -->
             <div ref="highlightMenuRef" class="relative">
-                <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('highlight') }" title="Highlight" @click="highlightMenuOpen = !highlightMenuOpen"><Highlighter class="size-4" /><ChevronDown class="size-3 opacity-60" /></button>
-                <div v-if="highlightMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-44 rounded-md border bg-popover p-2 shadow-md">
+                <button
+                    type="button"
+                    class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted"
+                    :class="{
+                        'bg-muted text-foreground': isActive('highlight'),
+                    }"
+                    title="Highlight"
+                    @click="highlightMenuOpen = !highlightMenuOpen"
+                >
+                    <Highlighter class="size-4" /><ChevronDown
+                        class="size-3 opacity-60"
+                    />
+                </button>
+                <div
+                    v-if="highlightMenuOpen"
+                    class="absolute top-full left-0 z-10 mt-1 w-44 rounded-md border bg-popover p-2 shadow-md"
+                >
                     <div class="grid grid-cols-4 gap-1">
-                        <button v-for="c in HIGHLIGHT_COLORS" :key="c" type="button" class="size-7 rounded border transition-transform hover:scale-110" :style="{ backgroundColor: c }" :title="c" @click="setHighlight(c)" />
+                        <button
+                            v-for="c in HIGHLIGHT_COLORS"
+                            :key="c"
+                            type="button"
+                            class="size-7 rounded border transition-transform hover:scale-110"
+                            :style="{ backgroundColor: c }"
+                            :title="c"
+                            @click="setHighlight(c)"
+                        />
                     </div>
-                    <button type="button" class="mt-2 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted" @click="unsetHighlight">Remove highlight</button>
+                    <button
+                        type="button"
+                        class="mt-2 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+                        @click="unsetHighlight"
+                    >
+                        Remove highlight
+                    </button>
                 </div>
             </div>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
             <!-- Headings -->
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('heading', { level: 1 }) }" title="Heading 1" @click="toggleH(1)"><Heading1 class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('heading', { level: 2 }) }" title="Heading 2" @click="toggleH(2)"><Heading2 class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('heading', { level: 3 }) }" title="Heading 3" @click="toggleH(3)"><Heading3 class="size-4" /></button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{
+                    'bg-muted text-foreground': isActive('heading', {
+                        level: 1,
+                    }),
+                }"
+                title="Heading 1"
+                @click="toggleH(1)"
+            >
+                <Heading1 class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{
+                    'bg-muted text-foreground': isActive('heading', {
+                        level: 2,
+                    }),
+                }"
+                title="Heading 2"
+                @click="toggleH(2)"
+            >
+                <Heading2 class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{
+                    'bg-muted text-foreground': isActive('heading', {
+                        level: 3,
+                    }),
+                }"
+                title="Heading 3"
+                @click="toggleH(3)"
+            >
+                <Heading3 class="size-4" />
+            </button>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
             <!-- Lists -->
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('bulletList') }" title="Bullet list" @click="toggleBullet"><List class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('orderedList') }" title="Ordered list" @click="toggleOrdered"><ListOrdered class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('taskList') }" title="Task list (checkboxes)" @click="toggleTaskList"><ListChecks class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('blockquote') }" title="Quote" @click="toggleQuote"><Quote class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('codeBlock') }" title="Code block (with syntax highlighting)" @click="toggleCodeBlock"><FileCode class="size-4" /></button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('bulletList') }"
+                title="Bullet list"
+                @click="toggleBullet"
+            >
+                <List class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('orderedList') }"
+                title="Ordered list"
+                @click="toggleOrdered"
+            >
+                <ListOrdered class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('taskList') }"
+                title="Task list (checkboxes)"
+                @click="toggleTaskList"
+            >
+                <ListChecks class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('blockquote') }"
+                title="Quote"
+                @click="toggleQuote"
+            >
+                <Quote class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('codeBlock') }"
+                title="Code block (with syntax highlighting)"
+                @click="toggleCodeBlock"
+            >
+                <FileCode class="size-4" />
+            </button>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
             <!-- Alignment -->
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive({ textAlign: 'left' }) }" title="Align left" @click="setAlign('left')"><AlignLeft class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive({ textAlign: 'center' }) }" title="Align center" @click="setAlign('center')"><AlignCenter class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive({ textAlign: 'right' }) }" title="Align right" @click="setAlign('right')"><AlignRight class="size-4" /></button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{
+                    'bg-muted text-foreground': isActive({ textAlign: 'left' }),
+                }"
+                title="Align left"
+                @click="setAlign('left')"
+            >
+                <AlignLeft class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{
+                    'bg-muted text-foreground': isActive({
+                        textAlign: 'center',
+                    }),
+                }"
+                title="Align center"
+                @click="setAlign('center')"
+            >
+                <AlignCenter class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{
+                    'bg-muted text-foreground': isActive({
+                        textAlign: 'right',
+                    }),
+                }"
+                title="Align right"
+                @click="setAlign('right')"
+            >
+                <AlignRight class="size-4" />
+            </button>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
             <!-- Insert -->
             <div ref="tableMenuRef" class="relative">
-                <button type="button" class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': tableActive }" title="Table" @click="tableMenuOpen = !tableMenuOpen"><TableIcon class="size-4" /><ChevronDown class="size-3 opacity-60" /></button>
-                <div v-if="tableMenuOpen" class="absolute left-0 top-full z-10 mt-1 w-48 rounded-md border bg-popover py-1 text-sm shadow-md">
-                    <button type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted" @click="insertTable">Insert 3×3 table</button>
+                <button
+                    type="button"
+                    class="flex items-center gap-0.5 rounded p-1.5 hover:bg-muted"
+                    :class="{ 'bg-muted text-foreground': tableActive }"
+                    title="Table"
+                    @click="tableMenuOpen = !tableMenuOpen"
+                >
+                    <TableIcon class="size-4" /><ChevronDown
+                        class="size-3 opacity-60"
+                    />
+                </button>
+                <div
+                    v-if="tableMenuOpen"
+                    class="absolute top-full left-0 z-10 mt-1 w-48 rounded-md border bg-popover py-1 text-sm shadow-md"
+                >
+                    <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left hover:bg-muted"
+                        @click="insertTable"
+                    >
+                        Insert 3×3 table
+                    </button>
                     <div class="my-1 border-t" />
-                    <button type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted disabled:opacity-50" :disabled="!tableActive" @click="addRowAfter">Add row below</button>
-                    <button type="button" class="block w-full px-3 py-1.5 text-left hover:bg-muted disabled:opacity-50" :disabled="!tableActive" @click="addColAfter">Add column right</button>
+                    <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left hover:bg-muted disabled:opacity-50"
+                        :disabled="!tableActive"
+                        @click="addRowAfter"
+                    >
+                        Add row below
+                    </button>
+                    <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left hover:bg-muted disabled:opacity-50"
+                        :disabled="!tableActive"
+                        @click="addColAfter"
+                    >
+                        Add column right
+                    </button>
                     <div class="my-1 border-t" />
-                    <button type="button" class="block w-full px-3 py-1.5 text-left text-destructive hover:bg-muted disabled:opacity-50" :disabled="!tableActive" @click="deleteRow">Delete row</button>
-                    <button type="button" class="block w-full px-3 py-1.5 text-left text-destructive hover:bg-muted disabled:opacity-50" :disabled="!tableActive" @click="deleteCol">Delete column</button>
-                    <button type="button" class="block w-full px-3 py-1.5 text-left text-destructive hover:bg-muted disabled:opacity-50" :disabled="!tableActive" @click="deleteTable">Delete table</button>
+                    <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left text-destructive hover:bg-muted disabled:opacity-50"
+                        :disabled="!tableActive"
+                        @click="deleteRow"
+                    >
+                        Delete row
+                    </button>
+                    <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left text-destructive hover:bg-muted disabled:opacity-50"
+                        :disabled="!tableActive"
+                        @click="deleteCol"
+                    >
+                        Delete column
+                    </button>
+                    <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left text-destructive hover:bg-muted disabled:opacity-50"
+                        :disabled="!tableActive"
+                        @click="deleteTable"
+                    >
+                        Delete table
+                    </button>
                 </div>
             </div>
 
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': isActive('link') }" title="Link (Ctrl+K)" @click="setLink"><LinkIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Insert image" @click="insertImage"><ImageIcon class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" title="Insert YouTube video" @click="insertVideo"><Video class="size-4" /></button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': isActive('link') }"
+                title="Link (Ctrl+K)"
+                @click="setLink"
+            >
+                <LinkIcon class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                title="Insert image from media library"
+                @click="imagePickerOpen = true"
+            >
+                <ImageIcon class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                title="Insert video from media library"
+                @click="videoPickerOpen = true"
+            >
+                <Video class="size-4" />
+            </button>
 
             <span class="mx-1 h-5 w-px bg-border" />
 
             <!-- Source / fullscreen -->
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :class="{ 'bg-muted text-foreground': sourceMode }" title="View HTML source" @click="toggleSourceMode"><FileCode class="size-4" /></button>
-            <button type="button" class="rounded p-1.5 hover:bg-muted" :title="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'" @click="toggleFullscreen"><component :is="isFullscreen ? Minimize2 : Maximize2" class="size-4" /></button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :class="{ 'bg-muted text-foreground': sourceMode }"
+                title="View HTML source"
+                @click="toggleSourceMode"
+            >
+                <FileCode class="size-4" />
+            </button>
+            <button
+                type="button"
+                class="rounded p-1.5 hover:bg-muted"
+                :title="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+                @click="toggleFullscreen"
+            >
+                <component
+                    :is="isFullscreen ? Minimize2 : Maximize2"
+                    class="size-4"
+                />
+            </button>
 
             <span class="ml-auto flex items-center gap-0.5">
-                <button type="button" class="rounded p-1.5 hover:bg-muted disabled:opacity-40" title="Undo (Ctrl+Z)" :disabled="!editor?.can().undo()" @click="undo"><Undo class="size-4" /></button>
-                <button type="button" class="rounded p-1.5 hover:bg-muted disabled:opacity-40" title="Redo (Ctrl+Shift+Z)" :disabled="!editor?.can().redo()" @click="redo"><Redo class="size-4" /></button>
-                <button type="button" class="rounded p-1.5 hover:bg-muted" title="Keyboard shortcuts" @click="helpOpen = true"><Keyboard class="size-4" /></button>
+                <button
+                    type="button"
+                    class="rounded p-1.5 hover:bg-muted disabled:opacity-40"
+                    title="Undo (Ctrl+Z)"
+                    :disabled="!editor?.can().undo()"
+                    @click="undo"
+                >
+                    <Undo class="size-4" />
+                </button>
+                <button
+                    type="button"
+                    class="rounded p-1.5 hover:bg-muted disabled:opacity-40"
+                    title="Redo (Ctrl+Shift+Z)"
+                    :disabled="!editor?.can().redo()"
+                    @click="redo"
+                >
+                    <Redo class="size-4" />
+                </button>
+                <button
+                    type="button"
+                    class="rounded p-1.5 hover:bg-muted"
+                    title="Keyboard shortcuts"
+                    @click="helpOpen = true"
+                >
+                    <Keyboard class="size-4" />
+                </button>
             </span>
         </div>
 
         <!-- Body -->
-        <div class="bg-background dark:bg-input/30" :class="{ 'flex-1 overflow-y-auto': isFullscreen }">
+        <div
+            class="bg-background dark:bg-input/30"
+            :class="{ 'flex-1 overflow-y-auto': isFullscreen }"
+        >
             <textarea
                 v-if="sourceMode"
                 :value="sourceHtml"
@@ -568,35 +989,103 @@ function redo() {
         </div>
 
         <!-- Footer status bar -->
-        <div class="flex items-center justify-between border-t border-input bg-muted/30 px-3 py-1.5 text-[11px] text-muted-foreground">
+        <div
+            class="flex items-center justify-between border-t border-input bg-muted/30 px-3 py-1.5 text-[11px] text-muted-foreground"
+        >
             <span>{{ wordCount }} words · {{ charCount }} characters</span>
             <span v-if="isFullscreen">Press fullscreen icon to exit</span>
         </div>
 
         <!-- Help -->
-        <div v-if="helpOpen" class="absolute inset-0 z-20 flex items-center justify-center bg-black/50 p-4" @click.self="helpOpen = false">
-            <div class="w-full max-w-md rounded-md border bg-background p-5 shadow-xl">
+        <div
+            v-if="helpOpen"
+            class="absolute inset-0 z-20 flex items-center justify-center bg-black/50 p-4"
+            @click.self="helpOpen = false"
+        >
+            <div
+                class="w-full max-w-md rounded-md border bg-background p-5 shadow-xl"
+            >
                 <div class="mb-3 flex items-center justify-between">
                     <h3 class="text-base font-semibold">Keyboard shortcuts</h3>
-                    <button type="button" class="rounded p-1 hover:bg-muted" @click="helpOpen = false"><X class="size-4" /></button>
+                    <button
+                        type="button"
+                        class="rounded p-1 hover:bg-muted"
+                        @click="helpOpen = false"
+                    >
+                        <X class="size-4" />
+                    </button>
                 </div>
                 <dl class="space-y-1.5 text-sm">
-                    <div class="flex justify-between"><dt>Bold</dt><dd class="font-mono text-xs">Ctrl/⌘ + B</dd></div>
-                    <div class="flex justify-between"><dt>Italic</dt><dd class="font-mono text-xs">Ctrl/⌘ + I</dd></div>
-                    <div class="flex justify-between"><dt>Underline</dt><dd class="font-mono text-xs">Ctrl/⌘ + U</dd></div>
-                    <div class="flex justify-between"><dt>Strikethrough</dt><dd class="font-mono text-xs">Ctrl/⌘ + Shift + X</dd></div>
-                    <div class="flex justify-between"><dt>Heading 1 / 2 / 3</dt><dd class="font-mono text-xs">Ctrl/⌘ + Alt + 1 / 2 / 3</dd></div>
-                    <div class="flex justify-between"><dt>Bullet list</dt><dd class="font-mono text-xs">Ctrl/⌘ + Shift + 8</dd></div>
-                    <div class="flex justify-between"><dt>Ordered list</dt><dd class="font-mono text-xs">Ctrl/⌘ + Shift + 7</dd></div>
-                    <div class="flex justify-between"><dt>Task list</dt><dd class="font-mono text-xs">Ctrl/⌘ + Shift + 9</dd></div>
-                    <div class="flex justify-between"><dt>Blockquote</dt><dd class="font-mono text-xs">Ctrl/⌘ + Shift + B</dd></div>
-                    <div class="flex justify-between"><dt>Code block</dt><dd class="font-mono text-xs">Ctrl/⌘ + Alt + C</dd></div>
-                    <div class="flex justify-between"><dt>Link</dt><dd class="font-mono text-xs">Ctrl/⌘ + K</dd></div>
-                    <div class="flex justify-between"><dt>Undo / Redo</dt><dd class="font-mono text-xs">Ctrl/⌘ + Z / Shift + Z</dd></div>
+                    <div class="flex justify-between">
+                        <dt>Bold</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + B</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Italic</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + I</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Underline</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + U</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Strikethrough</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + Shift + X</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Heading 1 / 2 / 3</dt>
+                        <dd class="font-mono text-xs">
+                            Ctrl/⌘ + Alt + 1 / 2 / 3
+                        </dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Bullet list</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + Shift + 8</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Ordered list</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + Shift + 7</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Task list</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + Shift + 9</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Blockquote</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + Shift + B</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Code block</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + Alt + C</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Link</dt>
+                        <dd class="font-mono text-xs">Ctrl/⌘ + K</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt>Undo / Redo</dt>
+                        <dd class="font-mono text-xs">
+                            Ctrl/⌘ + Z / Shift + Z
+                        </dd>
+                    </div>
                 </dl>
-                <p class="mt-3 text-xs text-muted-foreground">Typography auto-formats: -- → —, ... → …, "x" → "x"</p>
+                <p class="mt-3 text-xs text-muted-foreground">
+                    Typography auto-formats: -- → —, ... → …, "x" → "x"
+                </p>
             </div>
         </div>
+
+        <!-- Media library pickers driven by the image and video toolbar buttons. -->
+        <MediaPicker
+            v-model:open="imagePickerOpen"
+            accept="image"
+            @pick="onPickImage"
+        />
+        <MediaPicker
+            v-model:open="videoPickerOpen"
+            accept="video"
+            @pick="onPickVideo"
+        />
     </div>
 </template>
 

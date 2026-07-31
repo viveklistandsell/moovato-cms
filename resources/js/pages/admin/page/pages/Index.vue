@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
+    Copy,
     ExternalLink,
+    Eye,
     Home,
     Image as ImageIcon,
     Pencil,
@@ -11,6 +13,7 @@ import {
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
@@ -37,8 +40,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
+import { useFormatDate } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const formatDate = useFormatDate();
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.pages'), href: '/admin/pages' },
+]);
 
 type Translation = {
     title: string;
@@ -100,24 +114,8 @@ const props = defineProps<{
     pagination: PaginationMeta;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Pages', href: '/admin/pages' },
-            { title: 'Pages', href: '/admin/pages' },
-        ],
-    },
-});
-
-function formatDate(iso: string | null): string {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 const {
     search,
@@ -199,12 +197,16 @@ function resetAllFilters(): void {
     sortBy.value = null;
     sortDir.value = 'asc';
     perPage.value = 10;
-    router.get('/admin/pages', {}, {
-        only: ['pages', 'pagination', 'filters'],
-        preserveScroll: true,
-        preserveState: true,
-        replace: true,
-    });
+    router.get(
+        '/admin/pages',
+        {},
+        {
+            only: ['pages', 'pagination', 'filters'],
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        },
+    );
 }
 
 // Active state for the "All" pill: no status filter AND not the Mine view.
@@ -228,7 +230,7 @@ type Pill = {
 const pills = computed<Pill[]>(() => [
     {
         key: 'all',
-        label: 'All',
+        label: t('table.pill_all'),
         count: props.statusCounts.all,
         active: allActive.value,
         activeClass: 'bg-neutral-900 text-white shadow-sm',
@@ -242,7 +244,7 @@ const pills = computed<Pill[]>(() => [
     },
     {
         key: 'mine',
-        label: 'Mine',
+        label: t('table.pill_mine'),
         count: props.statusCounts.mine,
         active: mineOnly.value,
         activeClass: 'bg-neutral-900 text-white shadow-sm',
@@ -252,7 +254,7 @@ const pills = computed<Pill[]>(() => [
     },
     {
         key: 'published',
-        label: 'Published',
+        label: t('table.pill_published'),
         count: props.statusCounts.published,
         active: statusFilter.value === 'published',
         activeClass: 'bg-emerald-500 text-white shadow-sm',
@@ -262,7 +264,7 @@ const pills = computed<Pill[]>(() => [
     },
     {
         key: 'draft',
-        label: 'Drafts',
+        label: t('table.pill_drafts'),
         count: props.statusCounts.draft,
         active: statusFilter.value === 'draft',
         activeClass: 'bg-amber-500 text-white shadow-sm',
@@ -272,7 +274,7 @@ const pills = computed<Pill[]>(() => [
     },
     {
         key: 'inactive',
-        label: 'Inactive',
+        label: t('table.pill_inactive'),
         count: props.statusCounts.inactive,
         active: statusFilter.value === 'inactive',
         activeClass: 'bg-rose-500 text-white shadow-sm',
@@ -293,7 +295,11 @@ const isFiltered = computed(
 );
 
 function confirmDelete(p: Page): boolean {
-    return confirm(`Delete page "${p.title}"?`);
+    return confirm(t('table.confirm_delete_named', { name: p.title }));
+}
+
+function confirmDuplicate(p: Page): boolean {
+    return confirm(t('table.confirm_duplicate_named', { name: p.title }));
 }
 
 const selection = useRowSelection();
@@ -305,17 +311,17 @@ const someOnPageSelected = computed(
     () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
-const bulkActions: BulkAction[] = [
-    { value: 'publish', label: 'Publish' },
-    { value: 'draft', label: 'Set to draft' },
-    { value: 'inactive', label: 'Mark inactive' },
+const bulkActions = computed<BulkAction[]>(() => [
+    { value: 'publish', label: t('table.bulk_publish') },
+    { value: 'draft', label: t('table.bulk_draft') },
+    { value: 'inactive', label: t('table.bulk_inactive') },
     {
         value: 'delete',
-        label: 'Delete',
+        label: t('table.bulk_delete'),
         destructive: true,
-        confirm: 'Delete {count} selected page(s)?',
+        confirm: t('table.bulk_confirm_delete'),
     },
-];
+]);
 
 function applyBulkAction(action: string): void {
     if (selection.isEmpty.value) return;
@@ -332,18 +338,18 @@ function applyBulkAction(action: string): void {
 </script>
 
 <template>
-    <Head title="Pages" />
+    <Head :title="t('pages.title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="Pages"
-                description="Manage CMS pages with multilingual translations."
+                :title="t('pages.title')"
+                :description="t('pages.description')"
             />
             <Button as-child>
                 <Link href="/admin/pages/create">
                     <Plus class="size-4" />
-                    New page
+                    {{ t('pages.create_button') }}
                 </Link>
             </Button>
         </div>
@@ -354,10 +360,14 @@ function applyBulkAction(action: string): void {
                     class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
                 >
                     <div>
-                        <CardTitle>All pages</CardTitle>
+                        <CardTitle>{{ t('table.all_pages') }}</CardTitle>
                         <CardDescription>
-                            {{ pagination.total }} total ·
-                            {{ languages.length }} languages active
+                            {{
+                                t('table.total_with_languages', {
+                                    total: pagination.total,
+                                    langs: languages.length,
+                                })
+                            }}
                         </CardDescription>
                     </div>
                     <div
@@ -366,19 +376,17 @@ function applyBulkAction(action: string): void {
                         <PerPageSelect
                             :model-value="perPage"
                             :options="[10, 25, 50, 100]"
-                            label="Per page"
                             @update:model-value="setPerPage"
                         />
                         <BulkActions
                             :actions="bulkActions"
                             :count="selection.count.value"
-                            label="Bulk action"
                             @action="applyBulkAction"
                         />
                         <SearchInput
                             :model-value="search"
                             :loading="isLoading"
-                            placeholder="Search title or permalink…"
+                            :placeholder="t('table.search_title_permalink')"
                             @search="setSearch"
                         />
                         <Button
@@ -388,7 +396,7 @@ function applyBulkAction(action: string): void {
                             @click="resetAllFilters"
                         >
                             <X class="size-4" />
-                            Clear
+                            {{ t('table.clear') }}
                         </Button>
                     </div>
                 </div>
@@ -402,7 +410,7 @@ function applyBulkAction(action: string): void {
                             v-for="pill in pills"
                             :key="pill.key"
                             type="button"
-                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            class="rounded-full px-4 py-1.5 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
                             :class="
                                 pill.active ? pill.activeClass : pill.idleClass
                             "
@@ -415,7 +423,7 @@ function applyBulkAction(action: string): void {
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-muted-foreground">
-                                Category
+                                {{ t('table.category_label') }}
                             </span>
                             <Select
                                 :model-value="
@@ -432,7 +440,7 @@ function applyBulkAction(action: string): void {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">
-                                        All categories
+                                        {{ t('table.category_all') }}
                                     </SelectItem>
                                     <SelectItem
                                         v-for="opt in categoryOptions"
@@ -447,7 +455,7 @@ function applyBulkAction(action: string): void {
 
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-muted-foreground">
-                                Language
+                                {{ t('table.language_label') }}
                             </span>
                             <Select
                                 :model-value="langFilter"
@@ -460,7 +468,7 @@ function applyBulkAction(action: string): void {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="any">
-                                        Any language
+                                        {{ t('table.language_any') }}
                                     </SelectItem>
                                     <SelectItem
                                         v-for="lang in languages"
@@ -472,7 +480,7 @@ function applyBulkAction(action: string): void {
                                         }})
                                     </SelectItem>
                                     <SelectItem value="both">
-                                        Has both translations
+                                        {{ t('table.language_both') }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -489,14 +497,14 @@ function applyBulkAction(action: string): void {
                     <p class="text-sm text-muted-foreground">
                         {{
                             isFiltered
-                                ? 'No pages match your filters.'
-                                : 'No pages yet.'
+                                ? t('table.no_results_filtered')
+                                : t('table.no_pages_yet')
                         }}
                     </p>
                     <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/pages/create">
                             <Plus class="size-4" />
-                            Create your first page
+                            {{ t('table.create_first_page') }}
                         </Link>
                     </Button>
                 </div>
@@ -520,42 +528,42 @@ function applyBulkAction(action: string): void {
                                                       ? 'indeterminate'
                                                       : false
                                             "
-                                            aria-label="Select all on this page"
+                                            :aria-label="t('table.select_all_on_page')"
                                             @update:model-value="
                                                 selection.toggleAll(visibleIds)
                                             "
                                         />
                                     </div>
                                 </th>
-                                <th class="w-16 px-2 py-3">Image</th>
+                                <th class="w-16 px-2 py-3">{{ t('table.col_image') }}</th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="title"
-                                        label="Title"
+                                        :label="t('table.col_title')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Categories
+                                    {{ t('table.col_categories') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Translations
+                                    {{ t('table.col_translations') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Template
+                                    {{ t('pages.template') }}
                                 </th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="status"
-                                        label="Status"
+                                        :label="t('table.col_status')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -564,16 +572,16 @@ function applyBulkAction(action: string): void {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="created_at"
-                                        label="Created"
+                                        :label="t('table.col_created')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Actions
+                                    {{ t('table.col_actions') }}
                                 </th>
                             </tr>
                         </thead>
@@ -591,7 +599,7 @@ function applyBulkAction(action: string): void {
                                             :model-value="
                                                 selection.isSelected(row.id)
                                             "
-                                            :aria-label="`Select ${row.title}`"
+                                            :aria-label="t('table.select_row', { name: row.title })"
                                             @update:model-value="
                                                 selection.toggle(row.id)
                                             "
@@ -643,7 +651,7 @@ function applyBulkAction(action: string): void {
                                         v-if="row.user_name"
                                         class="mt-0.5 text-[10px] text-muted-foreground"
                                     >
-                                        by {{ row.user_name }}
+                                        {{ t('dashboard.by_author', { author: row.user_name }) }}
                                     </p>
                                 </td>
                                 <td class="px-4 py-3">
@@ -652,7 +660,9 @@ function applyBulkAction(action: string): void {
                                         class="flex flex-wrap gap-1"
                                     >
                                         <Badge
-                                            v-for="(name, i) in row.category_names"
+                                            v-for="(
+                                                name, i
+                                            ) in row.category_names"
                                             :key="i"
                                             variant="secondary"
                                             class="text-[10px]"
@@ -678,18 +688,18 @@ function applyBulkAction(action: string): void {
                                             "
                                             class="text-[10px]"
                                         >
-                                            <span v-if="lang.flag">{{
-                                                lang.flag
-                                            }}</span>
+                                            <FlagImage
+                                                v-if="lang.flag"
+                                                :code="lang.flag"
+                                                size="xs"
+                                            />
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="
-                                                    !row.translations[
-                                                        lang.code
-                                                    ]
+                                                    !row.translations[lang.code]
                                                 "
                                                 class="opacity-50"
-                                                >·missing</span
+                                                >·{{ t('table.translation_missing') }}</span
                                             >
                                         </Badge>
                                     </div>
@@ -708,14 +718,13 @@ function applyBulkAction(action: string): void {
                                                   ? 'outline'
                                                   : 'destructive'
                                         "
-                                        class="capitalize"
                                     >
-                                        {{ row.status }}
+                                        {{ t(`status.${row.status}`) }}
                                     </Badge>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(row.created_at) }}
                                     </span>
@@ -728,6 +737,21 @@ function applyBulkAction(action: string): void {
                                             as-child
                                             variant="ghost"
                                             size="sm"
+                                            :title="t('table.view_row', { name: row.title })"
+                                        >
+                                            <a
+                                                :href="`/${row.permalink}`"
+                                                target="_blank"
+                                                rel="noopener"
+                                            >
+                                                <Eye class="size-4" />
+                                            </a>
+                                        </Button>
+                                        <Button
+                                            as-child
+                                            variant="ghost"
+                                            size="sm"
+                                            :title="t('table.edit_row', { name: row.title })"
                                         >
                                             <Link
                                                 :href="`/admin/pages/${row.id}/edit`"
@@ -739,7 +763,26 @@ function applyBulkAction(action: string): void {
                                             as-child
                                             variant="ghost"
                                             size="sm"
+                                            :title="t('common.duplicate') + ' — ' + row.title"
+                                        >
+                                            <Link
+                                                :href="`/admin/pages/${row.id}/duplicate`"
+                                                method="post"
+                                                as="button"
+                                                preserve-scroll
+                                                :on-before="
+                                                    () => confirmDuplicate(row)
+                                                "
+                                            >
+                                                <Copy class="size-4" />
+                                            </Link>
+                                        </Button>
+                                        <Button
+                                            as-child
+                                            variant="ghost"
+                                            size="sm"
                                             class="text-destructive hover:text-destructive"
+                                            :title="t('table.delete_row', { name: row.title })"
                                         >
                                             <Link
                                                 :href="`/admin/pages/${row.id}`"

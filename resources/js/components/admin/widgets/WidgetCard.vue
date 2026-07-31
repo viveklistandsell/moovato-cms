@@ -1,9 +1,23 @@
 <script setup lang="ts">
-import { Copy, Eye, EyeOff, GripVertical, Pencil, Trash2 } from 'lucide-vue-next';
+import {
+    ClipboardCopy,
+    Copy,
+    Eye,
+    EyeOff,
+    GripVertical,
+    Monitor,
+    Pencil,
+    Smartphone,
+    Tablet,
+    Trash2,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/composables/useT';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
+
+const t = useT();
 
 const props = defineProps<{
     widget: WidgetInstance;
@@ -14,6 +28,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'edit'): void;
     (e: 'duplicate'): void;
+    (e: 'copy-to-clipboard'): void;
     (e: 'remove'): void;
     (e: 'toggle-active'): void;
 }>();
@@ -30,6 +45,19 @@ const previewText = computed<string>(() => {
         }
     }
     return '';
+});
+
+// Per-breakpoint visibility badge — only rendered when the widget is hidden
+// on at least one breakpoint, so the card stays uncluttered for "show on all".
+const visibilityHidden = computed(() => {
+    const v = props.widget.visibility;
+    if (!v) return null;
+    if (v.desktop && v.tablet && v.mobile) return null;
+    return {
+        mobile: !v.mobile,
+        tablet: !v.tablet,
+        desktop: !v.desktop,
+    };
 });
 </script>
 
@@ -62,9 +90,25 @@ const previewText = computed<string>(() => {
                     </span>
                     <span
                         v-if="!widget.is_active"
-                        class="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                        class="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Hidden
+                    </span>
+                    <span
+                        v-if="visibilityHidden"
+                        class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                        :title="`Hidden on: ${[visibilityHidden.mobile ? 'mobile' : null, visibilityHidden.tablet ? 'tablet' : null, visibilityHidden.desktop ? 'desktop' : null].filter(Boolean).join(', ')}`"
+                    >
+                        <Smartphone
+                            v-if="visibilityHidden.mobile"
+                            class="size-3"
+                        />
+                        <Tablet v-if="visibilityHidden.tablet" class="size-3" />
+                        <Monitor
+                            v-if="visibilityHidden.desktop"
+                            class="size-3"
+                        />
+                        hidden
                     </span>
                 </div>
                 <div
@@ -91,6 +135,7 @@ const previewText = computed<string>(() => {
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="t('widgets.duplicate')"
                     @click="emit('duplicate')"
                 >
                     <Copy class="size-4" />
@@ -99,6 +144,16 @@ const previewText = computed<string>(() => {
                     type="button"
                     variant="ghost"
                     size="icon"
+                    :title="t('widgets.copy_to_clipboard')"
+                    @click="emit('copy-to-clipboard')"
+                >
+                    <ClipboardCopy class="size-4" />
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    :title="t('widgets.edit_widget')"
                     @click="emit('edit')"
                 >
                     <Pencil class="size-4" />

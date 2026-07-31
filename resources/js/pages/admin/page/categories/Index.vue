@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { GripVertical, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
@@ -18,9 +19,20 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useDragReorder } from '@/composables/common/useDragReorder';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
+import { useFormatDate } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const formatDate = useFormatDate();
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.page_categories'), href: '/admin/pages/categories' },
+]);
 
 type Translation = { title: string; permalink: string };
 
@@ -57,24 +69,9 @@ const props = defineProps<{
     filters: Filters;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Pages', href: '/admin/pages/categories' },
-            { title: 'Categories', href: '/admin/pages/categories' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
-function formatDate(iso: string | null): string {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
 
 type Row = Category & { depth: number };
 
@@ -129,9 +126,7 @@ const {
 });
 
 function confirmDelete(c: Category): boolean {
-    return confirm(
-        `Delete category "${c.title}"? Its children will be re-parented.`,
-    );
+    return confirm(t('table.confirm_delete_named', { name: c.title }));
 }
 
 const selection = useRowSelection();
@@ -143,17 +138,17 @@ const someOnPageSelected = computed(
     () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
-const bulkActions: BulkAction[] = [
-    { value: 'publish', label: 'Publish' },
-    { value: 'draft', label: 'Set to draft' },
-    { value: 'inactive', label: 'Mark inactive' },
+const bulkActions = computed<BulkAction[]>(() => [
+    { value: 'publish', label: t('table.bulk_publish') },
+    { value: 'draft', label: t('table.bulk_draft') },
+    { value: 'inactive', label: t('table.bulk_inactive') },
     {
         value: 'delete',
-        label: 'Delete',
+        label: t('table.bulk_delete'),
         destructive: true,
-        confirm: 'Delete {count} selected categor(y/ies)?',
+        confirm: t('table.bulk_confirm_delete'),
     },
-];
+]);
 
 function applyBulkAction(action: string): void {
     if (selection.isEmpty.value) return;
@@ -170,22 +165,18 @@ function applyBulkAction(action: string): void {
 </script>
 
 <template>
-    <Head title="Page categories" />
+    <Head :title="t('pages.categories_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="Page categories"
-                :description="
-                    canDrag
-                        ? 'Drag a row by the handle to reorder.'
-                        : 'Reorder is disabled while filtered or custom-sorted. Clear filters to drag.'
-                "
+                :title="t('pages.categories_title')"
+                :description="t('pages.categories_description')"
             />
             <Button as-child>
                 <Link href="/admin/pages/categories/create">
                     <Plus class="size-4" />
-                    New category
+                    {{ t('pages.category_create') }}
                 </Link>
             </Button>
         </div>
@@ -196,10 +187,14 @@ function applyBulkAction(action: string): void {
                     class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
                 >
                     <div>
-                        <CardTitle>All categories</CardTitle>
+                        <CardTitle>{{ t('table.all_categories') }}</CardTitle>
                         <CardDescription>
-                            {{ categories.length }} total ·
-                            {{ languages.length }} languages active
+                            {{
+                                t('table.total_with_languages', {
+                                    total: categories.length,
+                                    langs: languages.length,
+                                })
+                            }}
                         </CardDescription>
                     </div>
                     <div
@@ -208,13 +203,12 @@ function applyBulkAction(action: string): void {
                         <BulkActions
                             :actions="bulkActions"
                             :count="selection.count.value"
-                            label="Bulk action"
                             @action="applyBulkAction"
                         />
                         <SearchInput
                             :model-value="search"
                             :loading="isLoading"
-                            placeholder="Search title or permalink…"
+                            :placeholder="t('table.search_title_permalink')"
                             @search="setSearch"
                         />
                         <Button
@@ -224,7 +218,7 @@ function applyBulkAction(action: string): void {
                             @click="resetAll"
                         >
                             <X class="size-4" />
-                            Clear
+                            {{ t('table.clear') }}
                         </Button>
                     </div>
                 </div>
@@ -238,14 +232,14 @@ function applyBulkAction(action: string): void {
                     <p class="text-sm text-muted-foreground">
                         {{
                             isFiltered
-                                ? 'No categories match your filters.'
-                                : 'No categories yet.'
+                                ? t('table.no_results_filtered')
+                                : t('pages.category_no_items')
                         }}
                     </p>
                     <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/pages/categories/create">
                             <Plus class="size-4" />
-                            Create your first category
+                            {{ t('pages.category_create') }}
                         </Link>
                     </Button>
                 </div>
@@ -270,7 +264,7 @@ function applyBulkAction(action: string): void {
                                                       ? 'indeterminate'
                                                       : false
                                             "
-                                            aria-label="Select all on this page"
+                                            :aria-label="t('table.select_all_on_page')"
                                             @update:model-value="
                                                 selection.toggleAll(visibleIds)
                                             "
@@ -281,7 +275,7 @@ function applyBulkAction(action: string): void {
                                 <th class="w-20 px-2 py-3">
                                     <SortableColumn
                                         column="sort_order"
-                                        label="Order"
+                                        :label="t('table.col_order')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -290,26 +284,26 @@ function applyBulkAction(action: string): void {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="title"
-                                        label="Title"
+                                        :label="t('table.col_title')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Parent
+                                    {{ t('common.parent') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Translations
+                                    {{ t('table.col_translations') }}
                                 </th>
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="status"
-                                        label="Status"
+                                        :label="t('table.col_status')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -318,7 +312,7 @@ function applyBulkAction(action: string): void {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="is_default"
-                                        label="Default"
+                                        :label="t('table.col_default')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -327,16 +321,16 @@ function applyBulkAction(action: string): void {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="created_at"
-                                        label="Created"
+                                        :label="t('table.col_created')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Actions
+                                    {{ t('table.col_actions') }}
                                 </th>
                             </tr>
                         </thead>
@@ -371,7 +365,7 @@ function applyBulkAction(action: string): void {
                                             :model-value="
                                                 selection.isSelected(node.id)
                                             "
-                                            :aria-label="`Select ${node.title}`"
+                                            :aria-label="t('table.select_row', { name: node.title })"
                                             @update:model-value="
                                                 selection.toggle(node.id)
                                             "
@@ -441,9 +435,11 @@ function applyBulkAction(action: string): void {
                                             "
                                             class="text-[10px]"
                                         >
-                                            <span v-if="lang.flag">{{
-                                                lang.flag
-                                            }}</span>
+                                            <FlagImage
+                                                v-if="lang.flag"
+                                                :code="lang.flag"
+                                                size="xs"
+                                            />
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="
@@ -452,7 +448,7 @@ function applyBulkAction(action: string): void {
                                                     ]
                                                 "
                                                 class="opacity-50"
-                                                >·missing</span
+                                                >·{{ t('table.translation_missing') }}</span
                                             >
                                         </Badge>
                                     </div>
@@ -466,9 +462,8 @@ function applyBulkAction(action: string): void {
                                                   ? 'outline'
                                                   : 'destructive'
                                         "
-                                        class="capitalize"
                                     >
-                                        {{ node.status }}
+                                        {{ t(`status.${node.status}`) }}
                                     </Badge>
                                 </td>
                                 <td class="px-4 py-3">
@@ -477,7 +472,7 @@ function applyBulkAction(action: string): void {
                                         variant="secondary"
                                         class="text-[10px]"
                                     >
-                                        default
+                                        {{ t('dashboard.default') }}
                                     </Badge>
                                     <span
                                         v-else
@@ -487,7 +482,7 @@ function applyBulkAction(action: string): void {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(node.created_at) }}
                                     </span>

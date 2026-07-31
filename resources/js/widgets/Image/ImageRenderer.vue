@@ -39,26 +39,28 @@ const aspectClass = computed(() => {
 </script>
 
 <template>
-    <section v-if="settings.image_url" class="w-full py-10 sm:py-12">
-        <figure class="mx-auto px-4 sm:px-6 lg:px-8" :class="widthClass">
-            <component
-                :is="settings.link_url ? 'a' : 'div'"
-                :href="settings.link_url ?? undefined"
-                class="block overflow-hidden bg-muted"
-                :class="[aspectClass, settings.rounded ? 'rounded-xl' : '']"
-            >
-                <img
-                    :src="settings.image_url"
-                    :alt="data.alt ?? ''"
-                    class="size-full object-cover"
-                />
-            </component>
-            <figcaption
-                v-if="data.caption"
-                class="mt-3 text-center text-sm text-muted-foreground"
-            >
-                {{ data.caption }}
-            </figcaption>
-        </figure>
+    <section v-if="settings.image_url" class="w-full section-py">
+        <div class="container-xl">
+            <figure class="mx-auto" :class="widthClass">
+                <component
+                    :is="settings.link_url ? 'a' : 'div'"
+                    :href="settings.link_url ?? undefined"
+                    class="block overflow-hidden bg-muted"
+                    :class="[aspectClass, settings.rounded ? 'rounded-xl' : '']"
+                >
+                    <img
+                        :src="settings.image_url"
+                        :alt="data.alt ?? ''"
+                        class="size-full object-cover"
+                    />
+                </component>
+                <figcaption
+                    v-if="data.caption"
+                    class="mt-3 text-center text-sm text-muted-foreground"
+                >
+                    {{ data.caption }}
+                </figcaption>
+            </figure>
+        </div>
     </section>
 </template>

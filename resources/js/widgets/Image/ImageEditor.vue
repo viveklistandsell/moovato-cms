@@ -33,14 +33,21 @@ const data = defineModel<Data>('data', { required: true });
                 label="Image"
                 :path="settings.image_path"
                 :url="settings.image_url"
-                @update="(v) => { settings.image_path = v.path; settings.image_url = v.url; }"
+                @update="
+                    (v) => {
+                        settings.image_path = v.path;
+                        settings.image_url = v.url;
+                    }
+                "
             />
             <div class="grid gap-2">
                 <Label>Link URL (optional)</Label>
                 <Input
                     :model-value="settings.link_url ?? ''"
                     placeholder="https://…"
-                    @update:model-value="(v) => (settings.link_url = (v as string) || null)"
+                    @update:model-value="
+                        (v) => (settings.link_url = (v as string) || null)
+                    "
                 />
             </div>
         </div>
@@ -58,7 +65,9 @@ const data = defineModel<Data>('data', { required: true });
                     <Label class="text-xs">Aspect</Label>
                     <Select
                         :model-value="settings.aspect"
-                        @update:model-value="(v) => (settings.aspect = v as Settings['aspect'])"
+                        @update:model-value="
+                            (v) => (settings.aspect = v as Settings['aspect'])
+                        "
                     >
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -73,7 +82,9 @@ const data = defineModel<Data>('data', { required: true });
                     <Label class="text-xs">Width</Label>
                     <Select
                         :model-value="settings.width"
-                        @update:model-value="(v) => (settings.width = v as Settings['width'])"
+                        @update:model-value="
+                            (v) => (settings.width = v as Settings['width'])
+                        "
                     >
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>

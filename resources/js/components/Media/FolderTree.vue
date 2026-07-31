@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { Home } from 'lucide-vue-next';
+import { useT } from '@/composables/useT';
 import FolderTreeNode, { type FolderNode } from './FolderTreeNode.vue';
 
 defineProps<{
     tree: FolderNode[];
     currentFolderId: number | null;
 }>();
+
+const t = useT();
 </script>
 
 <template>
@@ -19,7 +22,7 @@ defineProps<{
             }"
         >
             <Home class="h-4 w-4 shrink-0" />
-            <span>All media</span>
+            <span>{{ t('media.all_media') }}</span>
         </Link>
 
         <FolderTreeNode
@@ -33,7 +36,7 @@ defineProps<{
             v-if="tree.length === 0"
             class="px-2 py-1 text-xs text-muted-foreground"
         >
-            No folders yet.
+            {{ t('media.no_folders_yet') }}
         </p>
     </div>
 </template>

@@ -41,10 +41,16 @@ const iconWrapperClass = computed(() => {
 </script>
 
 <template>
-    <section class="w-full py-16 sm:py-20">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div v-if="data.heading || data.subheading" class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 v-if="data.heading" class="text-3xl font-bold tracking-tight sm:text-4xl">
+    <section class="w-full section-py">
+        <div class="container-xl">
+            <div
+                v-if="data.heading || data.subheading"
+                class="mx-auto mb-12 max-w-2xl text-center"
+            >
+                <h2
+                    v-if="data.heading"
+                    class="text-3xl font-bold tracking-tight sm:text-4xl"
+                >
                     {{ data.heading }}
                 </h2>
                 <p v-if="data.subheading" class="mt-3 text-muted-foreground">
@@ -67,9 +73,11 @@ const iconWrapperClass = computed(() => {
                     <h3 v-if="item.title" class="mt-4 text-lg font-semibold">
                         {{ item.title }}
                     </h3>
-                    <p v-if="item.description" class="mt-2 text-sm text-muted-foreground">
-                        {{ item.description }}
-                    </p>
+                    <div
+                        v-if="item.description"
+                        class="mv-rte mt-2 text-sm text-muted-foreground"
+                        v-html="item.description"
+                    />
                 </div>
             </div>
         </div>

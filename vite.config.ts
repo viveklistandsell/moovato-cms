@@ -7,9 +7,15 @@ import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    server: {
+        host: '127.0.0.1',
+        hmr: {
+            host: '127.0.0.1',
+        },
+    },
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.ts'],
+            input: ['resources/css/app.css', 'resources/css/gs.css', 'resources/js/app.ts'],
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {
@@ -31,4 +37,21 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/vue/') || id.includes('node_modules/@vue/')) {
+                        return 'vue';
+                    }
+                    if (id.includes('node_modules/@vueuse/')) {
+                        return 'vueuse';
+                    }
+                    if (id.includes('node_modules/reka-ui/')) {
+                        return 'reka-ui';
+                    }
+                },
+            },
+        },
+    },
 });

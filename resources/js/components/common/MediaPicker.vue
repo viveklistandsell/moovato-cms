@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     ArrowUpDown,
+    Check,
     ChevronLeft,
     Eye,
     Folder,
@@ -40,6 +41,8 @@ type PickerFile = {
     name: string;
     original_name: string;
     path: string;
+    thumb_path: string | null;
+    medium_path: string | null;
     url: string;
     thumb_url: string | null;
     medium_url: string | null;
@@ -78,8 +81,28 @@ const SORT_LABELS: Record<SortKey, string> = {
 
 const open = defineModel<boolean>('open', { required: true });
 
+// `accept` narrows the listing by MIME family. Defaults to 'image' so the
+// many existing image-only callers (page/blog featured image, widget image
+// fields) keep their current behavior.
+const props = withDefaults(
+    defineProps<{
+        accept?: 'image' | 'video' | 'any';
+        multiple?: boolean;
+    }>(),
+    { accept: 'image', multiple: false },
+);
+
+type PickedFile = {
+    path: string;
+    url: string;
+    name: string;
+    thumb_path?: string | null;
+    thumb_url?: string | null;
+};
+
 const emit = defineEmits<{
-    (e: 'pick', file: { path: string; url: string; name: string }): void;
+    (e: 'pick', file: PickedFile): void;
+    (e: 'pickMany', files: PickedFile[]): void;
 }>();
 
 const search = ref('');
@@ -133,7 +156,10 @@ function onDragEnd(): void {
     dropTargetFolderId.value = null;
 }
 
-async function moveFiles(ids: number[], targetFolderId: number | null): Promise<void> {
+async function moveFiles(
+    ids: number[],
+    targetFolderId: number | null,
+): Promise<void> {
     // Optimistic removal — drop the moved files from the current view
     // immediately so the user sees instant feedback. fetchPage() will
     // reconcile (folder thumb_url and file_count for the target folder).
@@ -185,18 +211,15 @@ async function deleteFolderFromCard(folder: PickerFolder): Promise<void> {
         return;
     }
     try {
-        const res = await fetch(
-            `/admin/media/picker/folders/${folder.id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken.value,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
+        const res = await fetch(`/admin/media/picker/folders/${folder.id}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value,
+                'X-Requested-With': 'XMLHttpRequest',
             },
-        );
+            credentials: 'same-origin',
+        });
         if (!res.ok) return;
         folders.value = folders.value.filter((f) => f.id !== folder.id);
         stats.value = {
@@ -255,10 +278,13 @@ function onDetailsDeleted(deleted: DetailFile): void {
 }
 
 function onDetailsUse(file: DetailFile): void {
+    const f = file as PickerFile;
     emit('pick', {
-        path: file.path,
-        url: file.url,
-        name: file.alt_text ?? file.title ?? file.name,
+        path: f.path,
+        url: f.url,
+        name: f.alt_text ?? f.title ?? f.name,
+        thumb_path: f.thumb_path,
+        thumb_url: f.thumb_url,
     });
     open.value = false;
 }
@@ -272,18 +298,15 @@ async function deleteFromCard(file: PickerFile): Promise<void> {
         return;
     }
     try {
-        const res = await fetch(
-            `/admin/media/picker/files/${file.id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken.value,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
+        const res = await fetch(`/admin/media/picker/files/${file.id}`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value,
+                'X-Requested-With': 'XMLHttpRequest',
             },
-        );
+            credentials: 'same-origin',
+        });
         if (!res.ok) return;
         files.value = files.value.filter((f) => f.id !== file.id);
         stats.value = {
@@ -309,8 +332,7 @@ async function handleUploaded(): Promise<void> {
 const csrfToken = computed(() => {
     if (typeof document === 'undefined') return '';
     return (
-        document
-            .querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
             ?.content ?? ''
     );
 });
@@ -325,6 +347,11 @@ async function fetchPage(): Promise<void> {
             params.set('folder', String(folderId.value));
         }
         params.set('sort', sort.value);
+        if (props.accept !== 'image') {
+            // Image is the server default; only send the param when it differs
+            // so URLs stay short for the common case.
+            params.set('accept', props.accept);
+        }
 
         const res = await fetch(`/admin/media/picker?${params.toString()}`, {
             headers: { Accept: 'application/json' },
@@ -395,9 +422,57 @@ function jumpToCrumb(idx: number): void {
 }
 
 function pickFile(f: PickerFile): void {
-    emit('pick', { path: f.path, url: f.url, name: f.name });
+    if (!props.multiple) {
+        emit('pick', {
+            path: f.path,
+            url: f.url,
+            name: f.name,
+            thumb_path: f.thumb_path,
+            thumb_url: f.thumb_url,
+        });
+        open.value = false;
+
+        return;
+    }
+    toggleSelect(f);
+}
+
+const selectedFiles = ref<Map<number, PickedFile>>(new Map());
+
+function isSelected(f: PickerFile): boolean {
+    return selectedFiles.value.has(f.id);
+}
+
+function toggleSelect(f: PickerFile): void {
+    const next = new Map(selectedFiles.value);
+    if (next.has(f.id)) {
+        next.delete(f.id);
+    } else {
+        next.set(f.id, {
+            path: f.path,
+            url: f.url,
+            name: f.name,
+            thumb_path: f.thumb_path,
+            thumb_url: f.thumb_url,
+        });
+    }
+    selectedFiles.value = next;
+}
+
+function confirmMultiSelect(): void {
+    if (selectedFiles.value.size === 0) {
+        return;
+    }
+    emit('pickMany', Array.from(selectedFiles.value.values()));
+    selectedFiles.value = new Map();
     open.value = false;
 }
+
+watch(open, (isOpen) => {
+    if (!isOpen) {
+        selectedFiles.value = new Map();
+    }
+});
 
 function openTrash(): void {
     window.open('/admin/media/trash', '_blank', 'noopener');
@@ -435,15 +510,12 @@ async function submitNewFolder(): Promise<void> {
         });
         if (!res.ok) {
             const body = await res.json().catch(() => null);
-            throw new Error(
-                body?.message ?? `Create failed (${res.status})`,
-            );
+            throw new Error(body?.message ?? `Create failed (${res.status})`);
         }
         newFolderOpen.value = false;
         await fetchPage();
     } catch (e) {
-        newFolderError.value =
-            e instanceof Error ? e.message : 'Create failed';
+        newFolderError.value = e instanceof Error ? e.message : 'Create failed';
     } finally {
         creatingFolder.value = false;
     }
@@ -469,7 +541,7 @@ const folderLabel = computed(() =>
         >
             <!-- Header -->
             <DialogHeader
-                class="flex flex-row items-start justify-between gap-3 border-b px-6 pb-4 pt-6"
+                class="flex flex-row items-start justify-between gap-3 border-b px-6 pt-6 pb-4"
             >
                 <div class="space-y-1">
                     <DialogTitle class="flex items-center gap-2 text-base">
@@ -477,14 +549,14 @@ const folderLabel = computed(() =>
                         Pick image — {{ folderLabel }}
                     </DialogTitle>
                     <DialogDescription class="text-xs">
-                        Browse the media library or upload a new file. Click
-                        any image to use it as the featured image.
+                        Browse the media library or upload a new file. Click any
+                        image to use it as the featured image.
                     </DialogDescription>
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="relative">
                         <Search
-                            class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                            class="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
                         />
                         <Input
                             v-model="search"
@@ -623,7 +695,7 @@ const folderLabel = computed(() =>
                         Up one level
                         <span
                             v-if="dropTargetFolderId === 'up'"
-                            class="ml-1 text-[10px] uppercase tracking-wider text-primary"
+                            class="ml-1 text-[10px] tracking-wider text-primary uppercase"
                             >Drop to move</span
                         >
                     </Button>
@@ -631,7 +703,7 @@ const folderLabel = computed(() =>
 
                 <section v-if="folders.length > 0" class="mb-6">
                     <h3
-                        class="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Folders
                     </h3>
@@ -653,7 +725,7 @@ const folderLabel = computed(() =>
                         >
                             <!-- Hover actions: open + delete -->
                             <div
-                                class="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+                                class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
                             >
                                 <button
                                     type="button"
@@ -718,7 +790,7 @@ const folderLabel = computed(() =>
 
                 <section>
                     <h3
-                        class="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
                         Files ({{ stats.file_count }})
                     </h3>
@@ -744,18 +816,25 @@ const folderLabel = computed(() =>
                             v-for="file in files"
                             :key="file.id"
                             class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
-                            :class="
-                                draggedFileId === file.id
-                                    ? 'opacity-40'
-                                    : ''
-                            "
+                            :class="[
+                                draggedFileId === file.id ? 'opacity-40' : '',
+                                multiple && isSelected(file) ? 'ring-2 ring-primary border-primary' : '',
+                            ]"
                             draggable="true"
                             @dragstart="onFileDragStart($event, file)"
                             @dragend="onDragEnd"
                         >
+                            <div
+                                v-if="multiple && isSelected(file)"
+                                class="absolute top-2 left-2 z-10 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
+                                title="Selected"
+                            >
+                                <Check class="size-3.5" />
+                            </div>
+
                             <!-- Hover actions: preview + delete -->
                             <div
-                                class="absolute right-2 top-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
+                                class="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100"
                             >
                                 <button
                                     type="button"
@@ -795,9 +874,7 @@ const folderLabel = computed(() =>
                                         class="size-8 text-muted-foreground/50"
                                     />
                                 </div>
-                                <div
-                                    class="flex flex-col gap-0.5 px-2.5 py-2"
-                                >
+                                <div class="flex flex-col gap-0.5 px-2.5 py-2">
                                     <p
                                         class="truncate text-xs font-medium"
                                         :title="file.title ?? file.name"
@@ -818,17 +895,43 @@ const folderLabel = computed(() =>
 
             <!-- Footer -->
             <div
-                class="flex items-center justify-end gap-2 border-t bg-muted/40 px-6 py-3"
+                class="flex items-center justify-between gap-2 border-t bg-muted/40 px-6 py-3"
             >
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    @click="open = false"
+                <p
+                    v-if="multiple"
+                    class="text-xs text-muted-foreground"
                 >
-                    <X class="size-4" />
-                    Close
-                </Button>
+                    <span
+                        v-if="selectedFiles.size > 0"
+                        class="font-medium text-foreground"
+                    >
+                        {{ selectedFiles.size }} selected
+                    </span>
+                    <span v-else>Click a file to select it — browse folders freely.</span>
+                </p>
+                <span v-else />
+
+                <div class="flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        @click="open = false"
+                    >
+                        <X class="size-4" />
+                        Close
+                    </Button>
+                    <Button
+                        v-if="multiple"
+                        type="button"
+                        size="sm"
+                        :disabled="selectedFiles.size === 0"
+                        @click="confirmMultiSelect"
+                    >
+                        <Check class="size-4" />
+                        Add {{ selectedFiles.size > 0 ? selectedFiles.size : '' }}
+                    </Button>
+                </div>
             </div>
         </DialogContent>
     </Dialog>
@@ -853,10 +956,7 @@ const folderLabel = computed(() =>
                     autocomplete="off"
                     @keydown.enter.prevent="submitNewFolder"
                 />
-                <p
-                    v-if="newFolderError"
-                    class="text-xs text-destructive"
-                >
+                <p v-if="newFolderError" class="text-xs text-destructive">
                     {{ newFolderError }}
                 </p>
             </div>

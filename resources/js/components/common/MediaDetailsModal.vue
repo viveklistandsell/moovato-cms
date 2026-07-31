@@ -103,9 +103,9 @@ const currentIndex = computed(() => {
 const hasPrev = computed(() => currentIndex.value > 0);
 const hasNext = computed(
     () =>
-        props.siblings !== undefined
-        && currentIndex.value !== -1
-        && currentIndex.value < props.siblings.length - 1,
+        props.siblings !== undefined &&
+        currentIndex.value !== -1 &&
+        currentIndex.value < props.siblings.length - 1,
 );
 
 function navPrev(): void {
@@ -121,8 +121,7 @@ function navNext(): void {
 const csrfToken = computed(() => {
     if (typeof document === 'undefined') return '';
     return (
-        document
-            .querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+        document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
             ?.content ?? ''
     );
 });
@@ -172,19 +171,16 @@ async function save(): Promise<void> {
         fd.append('title', form.value.title);
         fd.append('caption', form.value.caption);
         fd.append('description', form.value.description);
-        const res = await fetch(
-            `/admin/media/picker/files/${props.file.id}`,
-            {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken.value,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
-                body: fd,
+        const res = await fetch(`/admin/media/picker/files/${props.file.id}`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value,
+                'X-Requested-With': 'XMLHttpRequest',
             },
-        );
+            credentials: 'same-origin',
+            body: fd,
+        });
         if (!res.ok) {
             const body = await res.json().catch(() => null);
             throw new Error(body?.message ?? `Save failed (${res.status})`);
@@ -260,7 +256,7 @@ function formatTimestamp(iso: string | null | undefined): string {
             class="flex h-[92vh] w-[95vw] max-w-[1280px] flex-col gap-0 overflow-hidden p-0 sm:max-w-[1280px]"
         >
             <DialogHeader
-                class="flex flex-row items-start justify-between gap-3 border-b px-6 pb-4 pt-6"
+                class="flex flex-row items-start justify-between gap-3 border-b px-6 pt-6 pb-4"
             >
                 <div class="space-y-1">
                     <DialogTitle class="text-base">Media Details</DialogTitle>
@@ -325,7 +321,7 @@ function formatTimestamp(iso: string | null | undefined): string {
 
                 <!-- RIGHT: metadata -->
                 <div
-                    class="flex w-full shrink-0 flex-col gap-4 overflow-y-auto border-t bg-background p-6 md:w-[420px] md:border-l md:border-t-0"
+                    class="flex w-full shrink-0 flex-col gap-4 overflow-y-auto border-t bg-background p-6 md:w-[420px] md:border-t-0 md:border-l"
                 >
                     <!-- Stats -->
                     <dl class="space-y-1.5 text-sm">
@@ -345,7 +341,12 @@ function formatTimestamp(iso: string | null | undefined): string {
                                     :model-value="absoluteUrl"
                                     readonly
                                     class="h-8 font-mono text-xs"
-                                    @focus="(e: FocusEvent) => (e.target as HTMLInputElement).select()"
+                                    @focus="
+                                        (e: FocusEvent) =>
+                                            (
+                                                e.target as HTMLInputElement
+                                            ).select()
+                                    "
                                 />
                             </dd>
                         </div>
@@ -386,11 +387,7 @@ function formatTimestamp(iso: string | null | undefined): string {
                     </dl>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <Button
-                            type="button"
-                            size="sm"
-                            @click="downloadFile"
-                        >
+                        <Button type="button" size="sm" @click="downloadFile">
                             <Download class="size-4" />
                             Download
                         </Button>
@@ -471,11 +468,7 @@ function formatTimestamp(iso: string | null | undefined): string {
                     Delete Permanently
                 </Button>
                 <div class="flex items-center gap-2">
-                    <Button
-                        type="button"
-                        :disabled="saving"
-                        @click="save"
-                    >
+                    <Button type="button" :disabled="saving" @click="save">
                         <Loader2 v-if="saving" class="size-4 animate-spin" />
                         <Save v-else class="size-4" />
                         Save

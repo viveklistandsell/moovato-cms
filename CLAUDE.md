@@ -93,7 +93,6 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
 - Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
 - Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
-- To check environment variables, read the `.env` file directly.
 
 ## Tinker
 
@@ -208,3 +207,36 @@ Vue components must have a single root element.
 - IMPORTANT: Activate `inertia-vue-development` when working with Inertia Vue client-side patterns.
 
 </laravel-boost-guidelines>
+
+# Moovato Project Conventions
+
+These are standing rules for this project. Follow them without being reminded.
+
+## Sections as Widgets
+
+- Every page section MUST be built as a **widget**, not a one-off section. A widget is a backend class under `app/Widgets/<Name>/` implementing `WidgetContract` (registered in `app/Providers/WidgetServiceProvider.php`) plus an Editor + Renderer Vue pair under `resources/js/widgets/<Name>/` (registered in `resources/js/widgets/registry.ts`). Keep the backend and frontend `type` slugs in sync.
+- Reuse the existing widget patterns (see `Features`, `Faq`) for repeatable items, shared `WidgetIcon`/`WidgetImageField`, and validation rules.
+
+## Styling: root CSS + Tailwind for speed
+
+- Style sections with **CSS custom properties (root variables) + Tailwind utilities** for performance. Avoid heavy JavaScript/animation dependencies (e.g. three.js / WebGPU shaders) — prefer lightweight CSS equivalents.
+- **Always use the theme color tokens** defined on `body` in `gs.css` (`--midnight`, `--midnight-soft`, `--orange`, `--orange-soft`, `--linen`, `--slate`, `--slate-light`, `--paper`, `--white`). Never hardcode arbitrary one-off colors — when porting third-party component CSS, recolor it to the nearest theme token (e.g. a snippet's `rgb(20,20,20)` → `var(--midnight)`, a purple accent → `var(--orange)`).
+- **All new custom/global CSS goes in `resources/css/gs.css`** (registered as a Vite input and via `@vite([...])` in `resources/views/app.blade.php`). Do NOT put global look styles in `app.css` (the Tailwind entry) or in per-component `<style>` blocks. Scope rules under a unique root class (e.g. `.mv-heronew`) so they don't leak.
+
+## SEO-friendly markup
+
+- Every section must use semantic HTML: a single `<h1>` per hero/page, proper heading hierarchy, `<ul>`/`<li>` for lists, real `<a>` anchors, and descriptive `alt` text on images.
+
+## Layout: container-xl + Tailwind columns
+
+- Wrap every section's content in the **`container-xl`** utility (defined via `@utility` in `resources/css/app.css`) instead of hand-writing `max-width` + `margin: 0 auto` + horizontal padding. It is centered, caps at 1280px, and has responsive `px-4 / sm:px-6 / lg:px-8` padding.
+- Use the **`section-py`** utility (also in `resources/css/app.css`) for a section's common vertical padding (`4rem`, `5rem` at `sm`) instead of per-widget `py-*`. Apply it to every section EXCEPT the hero widgets (`Hero`, `Heronew`) and the thin bars (`Banner`, `Marquee`), which keep their own spacing.
+- Build **all column/row layouts with Tailwind utilities** (`grid grid-cols-1 lg:grid-cols-2 gap-*`, `flex`, arbitrary tracks like `lg:grid-cols-[1.2fr_1.4fr_1fr]`) — do NOT write custom `.row`/`.col` or `grid-template-columns` CSS. Prefer Tailwind utilities for all spacing/layout (margin, padding, gap) to keep the CSS bundle lean and the site fast. Reserve `gs.css` for bespoke visual styling only (gradients, animations, pseudo-elements).
+
+## Brand & content (Moovato)
+
+- The site/brand is **Moovato**, a modern moving company (**Umzugsunternehmen**) based in **Berlin**, serving Berlin and all its districts/surrounding cities.
+- Moovato's booking forms offer exactly these four service categories: **Privat**, **Gewerbe**, **Fernumzug**, **Spezialtransport**. Use this as the canonical service list whenever a widget presents Moovato's services.
+- The **primary locale is German (`de`)**. All default/placeholder/demo content for widgets MUST be written in natural German (never lorem ipsum or generic English), themed around Moovato's moving services: Privatumzug, Firmen-/Büroumzug, Fernumzug, Entrümpelung, Möbelmontage, Einlagerung, Verpackungsservice, etc., referencing Berlin.
+- When asked to **create a widget**, auto-fill its default content with realistic German Moovato copy (and matching `en` copy where the widget is bilingual, following the existing `locale === 'de' ? … : …` pattern in `SiteHeader`/`SiteFooter`).
+

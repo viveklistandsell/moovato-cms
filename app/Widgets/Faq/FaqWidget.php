@@ -42,9 +42,13 @@ final class FaqWidget implements WidgetContract
     public static function defaultData(): array
     {
         return [
-            'heading' => '',
+            'heading' => 'Häufig gestellte Fragen',
             'items' => [
-                ['question' => '', 'answer' => ''],
+                ['question' => 'Welche Umzüge führt Moovato durch?', 'answer' => 'Wir bieten vier Hauptleistungen an: Privatumzug für Wohnungen und Häuser, Gewerbeumzug für Büros und Firmen, Fernumzug innerhalb Deutschlands sowie Spezialtransport für empfindliche und sperrige Güter – alles ab Berlin.'],
+                ['question' => 'Wie schnell erhalte ich ein Angebot?', 'answer' => 'Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein kostenloses und unverbindliches Festpreis-Angebot.'],
+                ['question' => 'Sind meine Möbel während des Umzugs versichert?', 'answer' => 'Ja, alle Transporte sind versichert – von Privatumzug bis Spezialtransport. Auf Wunsch bieten wir zusätzlichen Schutz für besonders wertvolle Gegenstände an.'],
+                ['question' => 'In welchen Gebieten ist Moovato tätig?', 'answer' => 'Wir sind in ganz Berlin und Umgebung für Sie da – und übernehmen mit unserem Fernumzug auf Anfrage auch deutschlandweite Umzüge.'],
+                ['question' => 'Was kostet ein Umzug bei Moovato?', 'answer' => 'Der Preis richtet sich nach Leistung, Umfang und Entfernung. Ob Privatumzug, Gewerbeumzug, Fernumzug oder Spezialtransport – dank Festpreisgarantie gibt es keine versteckten Kosten.'],
             ],
         ];
     }

@@ -65,7 +65,9 @@ export const iconMap: Record<string, LucideIcon> = {
     'ti ti-device-laptop': Laptop,
 };
 
-export function getIcon(className: string | null | undefined): LucideIcon | null {
+export function getIcon(
+    className: string | null | undefined,
+): LucideIcon | null {
     if (!className) {
         return null;
     }

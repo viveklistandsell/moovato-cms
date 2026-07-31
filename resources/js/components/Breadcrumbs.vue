@@ -19,9 +19,7 @@ defineProps<Props>();
 
 <template>
     <Breadcrumb>
-        <BreadcrumbList
-            class="text-xs font-medium uppercase tracking-wide"
-        >
+        <BreadcrumbList class="text-xs font-medium tracking-wide uppercase">
             <template v-for="(item, index) in breadcrumbs" :key="index">
                 <BreadcrumbItem>
                     <template v-if="index === breadcrumbs.length - 1">

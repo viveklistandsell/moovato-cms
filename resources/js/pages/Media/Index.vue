@@ -24,9 +24,7 @@ import type { FolderNode } from '@/components/Media/FolderTreeNode.vue';
 import FolderCard, {
     type MediaFolderItem,
 } from '@/components/Media/FolderCard.vue';
-import FileCard, {
-    type MediaFileItem,
-} from '@/components/Media/FileCard.vue';
+import FileCard, { type MediaFileItem } from '@/components/Media/FileCard.vue';
 import MediaBreadcrumbs from '@/components/Media/MediaBreadcrumbs.vue';
 import Uploader from '@/components/Media/Uploader.vue';
 import NewFolderDialog from '@/components/Media/NewFolderDialog.vue';
@@ -34,6 +32,10 @@ import RenameDialog from '@/components/Media/RenameDialog.vue';
 import DeleteConfirmDialog from '@/components/Media/DeleteConfirmDialog.vue';
 import MoveDialog from '@/components/Media/MoveDialog.vue';
 import FilePreviewModal from '@/components/Media/FilePreviewModal.vue';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
+import { useT } from '@/composables/useT';
+
+const t = useT();
 
 type CurrentFolder = {
     id: number;
@@ -61,11 +63,8 @@ const props = defineProps<{
     totalSize: number;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'Media', href: '/admin/media' }],
-    },
-});
+setBreadcrumbs(() => [{ title: t('media.title'), href: '/admin/media' }]);
+defineOptions({});
 
 const newFolderOpen = ref(false);
 
@@ -82,7 +81,12 @@ const bulkDeleteCount = ref(0);
 
 type MoveTarget =
     | { type: 'file'; id: number; name: string; currentFolderId: number | null }
-    | { type: 'folder'; id: number; name: string; currentFolderId: number | null }
+    | {
+          type: 'folder';
+          id: number;
+          name: string;
+          currentFolderId: number | null;
+      }
     | {
           type: 'bulk-files';
           ids: number[];
@@ -106,14 +110,16 @@ const totalSelected = computed(
 );
 const allOnPageSelected = computed(() => {
     const allFilesSelected =
-        props.files.data.length === 0
-        || props.files.data.every((f) => selectedIds.value.includes(f.id));
+        props.files.data.length === 0 ||
+        props.files.data.every((f) => selectedIds.value.includes(f.id));
     const allFoldersSelected =
-        props.folders.length === 0
-        || props.folders.every((f) => selectedFolderIds.value.includes(f.id));
-    return allFilesSelected
-        && allFoldersSelected
-        && (props.files.data.length > 0 || props.folders.length > 0);
+        props.folders.length === 0 ||
+        props.folders.every((f) => selectedFolderIds.value.includes(f.id));
+    return (
+        allFilesSelected &&
+        allFoldersSelected &&
+        (props.files.data.length > 0 || props.folders.length > 0)
+    );
 });
 
 function toggleSelect(file: MediaFileItem): void {
@@ -151,6 +157,85 @@ function toggleSelectAll(): void {
 function clearSelection(): void {
     selectedIds.value = [];
     selectedFolderIds.value = [];
+}
+
+// =====================================================================
+// Drag & drop — move files between folders and to/from root
+// =====================================================================
+
+const draggingFileIds = ref<number[]>([]);
+
+const dropTargetFolderId = ref<number | null | undefined>(undefined);
+
+const isDragging = computed<boolean>(() => draggingFileIds.value.length > 0);
+
+function onFileDragStart(file: MediaFileItem): void {
+    if (selectedIds.value.includes(file.id)) {
+        draggingFileIds.value = [...selectedIds.value];
+    } else {
+        draggingFileIds.value = [file.id];
+    }
+}
+
+function onFileDragEnd(): void {
+    draggingFileIds.value = [];
+    dropTargetFolderId.value = undefined;
+}
+
+function onFolderDragOver(folder: MediaFolderItem, event: DragEvent): void {
+    if (!isDragging.value) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTargetFolderId.value = folder.id;
+}
+
+function onFolderDragLeave(folder: MediaFolderItem): void {
+    if (dropTargetFolderId.value === folder.id) {
+        dropTargetFolderId.value = undefined;
+    }
+}
+
+function onFolderDrop(folder: MediaFolderItem): void {
+    moveDraggedFilesTo(folder.id);
+}
+
+function onBreadcrumbDragOver(
+    folderId: number | null,
+    event: DragEvent,
+): void {
+    if (!isDragging.value) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTargetFolderId.value = folderId;
+}
+
+function onBreadcrumbDragLeave(folderId: number | null): void {
+    if (dropTargetFolderId.value === folderId) {
+        dropTargetFolderId.value = undefined;
+    }
+}
+
+function onBreadcrumbDrop(folderId: number | null): void {
+    moveDraggedFilesTo(folderId);
+}
+
+function moveDraggedFilesTo(folderId: number | null): void {
+    const ids = [...draggingFileIds.value];
+    draggingFileIds.value = [];
+    dropTargetFolderId.value = undefined;
+    if (ids.length === 0) return;
+    if ((props.currentFolder?.id ?? null) === folderId) {
+        return;
+    }
+    router.post(
+        '/admin/media/files/bulk-move',
+        { ids, folder_id: folderId },
+        {
+            preserveScroll: true,
+            preserveState: false,
+            only: ['folders', 'files', 'tree', 'currentFolder', 'breadcrumbs'],
+        },
+    );
 }
 
 watch(
@@ -230,7 +315,8 @@ function changeSort(sort: string): void {
 function readableSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    if (bytes < 1024 * 1024 * 1024)
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
@@ -357,32 +443,44 @@ function deleteFromPreview(file: MediaFileItem): void {
     deleteOpen.value = true;
     previewOpen.value = false;
 }
+
+function onPreviewUpdated(file: MediaFileItem): void {
+    previewFile.value = file;
+    router.reload({ only: ['files'] });
+}
 </script>
 
 <template>
-    <Head title="Media" />
+    <Head :title="t('media.title')" />
 
     <MediaLayout>
         <div class="flex h-full flex-1 flex-col gap-4 p-4">
             <header class="flex flex-wrap items-center justify-between gap-3">
-                <MediaBreadcrumbs :items="breadcrumbs" />
+                <MediaBreadcrumbs
+                    :items="breadcrumbs"
+                    :is-dragging="isDragging"
+                    :drop-target-folder-id="dropTargetFolderId"
+                    @dragover="onBreadcrumbDragOver"
+                    @dragleave="onBreadcrumbDragLeave"
+                    @drop="onBreadcrumbDrop"
+                />
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="relative">
                         <Search
-                            class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                            class="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                         />
                         <Input
                             v-model="searchInput"
                             type="search"
-                            placeholder="Search files…"
-                            class="h-9 w-56 pl-8 pr-8"
+                            :placeholder="t('media.search_placeholder')"
+                            class="h-9 w-56 pr-8 pl-8"
                             @input="onSearchInput"
                             @keydown.enter.prevent="applySearch"
                         />
                         <button
                             v-if="searchInput"
                             type="button"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-accent"
+                            class="absolute top-1/2 right-2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:bg-accent"
                             @click="clearSearch"
                         >
                             <X class="h-3.5 w-3.5" />
@@ -395,7 +493,7 @@ function deleteFromPreview(file: MediaFileItem): void {
                         @click="newFolderOpen = true"
                     >
                         <FolderPlus class="h-4 w-4" />
-                        New folder
+                        {{ t('media.new_folder') }}
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger
@@ -404,40 +502,40 @@ function deleteFromPreview(file: MediaFileItem): void {
                             <ArrowUpDown class="h-4 w-4" />
                             {{
                                 {
-                                    newest: 'Newest',
-                                    oldest: 'Oldest',
-                                    name: 'Name (A→Z)',
-                                    name_desc: 'Name (Z→A)',
-                                    largest: 'Largest',
-                                    smallest: 'Smallest',
+                                    newest: t('media.sort_newest'),
+                                    oldest: t('media.sort_oldest'),
+                                    name: t('media.sort_name_asc'),
+                                    name_desc: t('media.sort_name_desc'),
+                                    largest: t('media.sort_largest'),
+                                    smallest: t('media.sort_smallest'),
                                 }[currentSort]
                             }}
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem @click="changeSort('newest')">
-                                Newest first
+                                {{ t('media.sort_newest_first') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('oldest')">
-                                Oldest first
+                                {{ t('media.sort_oldest_first') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('name')">
-                                Name (A → Z)
+                                {{ t('media.sort_name_asc_long') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('name_desc')">
-                                Name (Z → A)
+                                {{ t('media.sort_name_desc_long') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('largest')">
-                                Largest first
+                                {{ t('media.sort_largest_first') }}
                             </DropdownMenuItem>
                             <DropdownMenuItem @click="changeSort('smallest')">
-                                Smallest first
+                                {{ t('media.sort_smallest_first') }}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <Button as-child variant="outline" size="sm">
                         <Link href="/admin/media/trash">
                             <Trash2 class="h-4 w-4" />
-                            Trash
+                            {{ t('media.trash') }}
                         </Link>
                     </Button>
                 </div>
@@ -448,19 +546,22 @@ function deleteFromPreview(file: MediaFileItem): void {
             >
                 <span class="inline-flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    {{ files.total }} file(s)
+                    {{ t('media.files_count', { count: files.total }) }}
                 </span>
                 <span class="inline-flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                    {{ folders.length }} folder(s)
+                    {{ t('media.folders_count', { count: folders.length }) }}
                 </span>
-                <span v-if="totalSize > 0" class="inline-flex items-center gap-1.5">
+                <span
+                    v-if="totalSize > 0"
+                    class="inline-flex items-center gap-1.5"
+                >
                     <span class="h-2 w-2 rounded-full bg-blue-500"></span>
-                    {{ readableSize(totalSize) }} total
+                    {{ t('media.total_size', { size: readableSize(totalSize) }) }}
                 </span>
                 <span v-if="search" class="inline-flex items-center gap-1.5">
                     <span class="h-2 w-2 rounded-full bg-violet-500"></span>
-                    Search: "{{ search }}"
+                    {{ t('media.search_label', { term: search }) }}
                 </span>
             </div>
 
@@ -470,7 +571,7 @@ function deleteFromPreview(file: MediaFileItem): void {
             >
                 <div class="flex items-center gap-3">
                     <span class="font-medium">
-                        {{ totalSelected }} selected
+                        {{ t('media.selected_count', { count: totalSelected }) }}
                     </span>
                     <button
                         type="button"
@@ -479,8 +580,8 @@ function deleteFromPreview(file: MediaFileItem): void {
                     >
                         {{
                             allOnPageSelected
-                                ? 'Deselect this page'
-                                : 'Select all on this page'
+                                ? t('media.deselect_this_page')
+                                : t('media.select_all_on_page')
                         }}
                     </button>
                 </div>
@@ -492,7 +593,7 @@ function deleteFromPreview(file: MediaFileItem): void {
                         variant="outline"
                         @click="openBulkMove"
                     >
-                        Move {{ selectedIds.length }} file(s)…
+                        {{ t('media.move_files', { count: selectedIds.length }) }}
                     </Button>
                     <Button
                         type="button"
@@ -501,7 +602,7 @@ function deleteFromPreview(file: MediaFileItem): void {
                         @click="openBulkDelete"
                     >
                         <Trash2 class="h-4 w-4" />
-                        Delete
+                        {{ t('media.delete') }}
                     </Button>
                     <Button
                         type="button"
@@ -509,7 +610,7 @@ function deleteFromPreview(file: MediaFileItem): void {
                         variant="ghost"
                         @click="clearSelection"
                     >
-                        Clear
+                        {{ t('media.clear') }}
                     </Button>
                 </div>
             </div>
@@ -517,9 +618,9 @@ function deleteFromPreview(file: MediaFileItem): void {
             <div class="flex flex-1 flex-col gap-4 md:flex-row md:gap-6">
                 <aside class="shrink-0 md:w-64">
                     <p
-                        class="mb-2 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                        class="mb-2 px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
                     >
-                        Folders
+                        {{ t('media.folders') }}
                     </p>
                     <FolderTree
                         :tree="tree"
@@ -529,109 +630,120 @@ function deleteFromPreview(file: MediaFileItem): void {
 
                 <main class="flex min-w-0 flex-1 flex-col gap-4">
                     <div
-                    v-if="!currentFolder && folders.length === 0 && files.total === 0"
-                    class="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center"
-                >
-                    <FolderPlus class="h-8 w-8 text-muted-foreground" />
-                    <div class="flex flex-col gap-1">
-                        <p class="text-sm font-medium">
-                            Create your first album
+                        v-if="
+                            !currentFolder &&
+                            folders.length === 0 &&
+                            files.total === 0
+                        "
+                        class="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center"
+                    >
+                        <FolderPlus class="h-8 w-8 text-muted-foreground" />
+                        <div class="flex flex-col gap-1">
+                            <p class="text-sm font-medium">
+                                {{ t('media.create_first_album') }}
+                            </p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ t('media.create_first_hint') }}
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            size="sm"
+                            @click="newFolderOpen = true"
+                        >
+                            <FolderPlus class="h-4 w-4" />
+                            {{ t('media.new_folder') }}
+                        </Button>
+                    </div>
+
+                    <Uploader v-else :folder-id="currentFolder?.id ?? null" />
+
+                    <section
+                        v-if="folders.length > 0"
+                        class="flex flex-col gap-2"
+                    >
+                        <h3
+                            class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                        >
+                            {{ t('media.folders') }}
+                        </h3>
+                        <div
+                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7"
+                        >
+                            <FolderCard
+                                v-for="folder in folders"
+                                :key="folder.id"
+                                :folder="folder"
+                                :selected="isFolderSelected(folder.id)"
+                                :droppable="isDragging"
+                                :is-drop-target="
+                                    isDragging &&
+                                    dropTargetFolderId === folder.id
+                                "
+                                @rename="openRenameFolder"
+                                @move="openMoveFolder"
+                                @delete="openDeleteFolder"
+                                @toggle-select="toggleSelectFolder"
+                                @dragover="onFolderDragOver"
+                                @dragleave="onFolderDragLeave"
+                                @drop="onFolderDrop"
+                            />
+                        </div>
+                    </section>
+
+                    <section class="flex flex-col gap-2">
+                        <h3
+                            class="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                        >
+                            {{ t('media.files_section', { count: files.total }) }}
+                        </h3>
+                        <div
+                            v-if="files.data.length > 0"
+                            class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7"
+                        >
+                            <FileCard
+                                v-for="file in files.data"
+                                :key="file.id"
+                                :file="file"
+                                :selected="isSelected(file.id)"
+                                :dragging="draggingFileIds.includes(file.id)"
+                                @open="openFile"
+                                @toggle-select="toggleSelect"
+                                @rename="openRenameFile"
+                                @move="openMoveFile"
+                                @delete="openDeleteFile"
+                                @dragstart="onFileDragStart"
+                                @dragend="onFileDragEnd"
+                            />
+                        </div>
+                        <p
+                            v-else
+                            class="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground"
+                        >
+                            {{ t('media.no_files_yet') }}
                         </p>
-                        <p class="text-xs text-muted-foreground">
-                            Start by creating a folder, then upload images,
-                            PDFs, video, or any other file type into it.
-                        </p>
-                    </div>
-                    <Button
-                        type="button"
-                        size="sm"
-                        @click="newFolderOpen = true"
-                    >
-                        <FolderPlus class="h-4 w-4" />
-                        New folder
-                    </Button>
-                </div>
 
-                <Uploader
-                    v-else
-                    :folder-id="currentFolder?.id ?? null"
-                />
-
-                <section
-                    v-if="folders.length > 0"
-                    class="flex flex-col gap-2"
-                >
-                    <h3
-                        class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                    >
-                        Folders
-                    </h3>
-                    <div
-                        class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                    >
-                        <FolderCard
-                            v-for="folder in folders"
-                            :key="folder.id"
-                            :folder="folder"
-                            :selected="isFolderSelected(folder.id)"
-                            @rename="openRenameFolder"
-                            @move="openMoveFolder"
-                            @delete="openDeleteFolder"
-                            @toggle-select="toggleSelectFolder"
-                        />
-                    </div>
-                </section>
-
-                <section class="flex flex-col gap-2">
-                    <h3
-                        class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                    >
-                        Files ({{ files.total }})
-                    </h3>
-                    <div
-                        v-if="files.data.length > 0"
-                        class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                    >
-                        <FileCard
-                            v-for="file in files.data"
-                            :key="file.id"
-                            :file="file"
-                            :selected="isSelected(file.id)"
-                            @open="openFile"
-                            @toggle-select="toggleSelect"
-                            @rename="openRenameFile"
-                            @move="openMoveFile"
-                            @delete="openDeleteFile"
-                        />
-                    </div>
-                    <p
-                        v-else
-                        class="rounded-lg border border-dashed border-border p-12 text-center text-sm text-muted-foreground"
-                    >
-                        No files in this folder yet. Drop files above to upload.
-                    </p>
-
-                    <nav
-                        v-if="files.last_page > 1"
-                        class="flex flex-wrap items-center justify-center gap-1 pt-2 text-sm"
-                    >
-                        <Link
-                            v-for="link in files.links"
-                            :key="link.label"
-                            :href="link.url ?? ''"
-                            :class="[
-                                'rounded px-3 py-1',
-                                link.active
-                                    ? 'bg-primary text-primary-foreground'
-                                    : link.url
-                                      ? 'hover:bg-accent'
-                                      : 'cursor-default text-muted-foreground',
-                            ]"
-                            v-html="link.label"
-                            preserve-scroll
-                        />
-                    </nav>
-                </section>
+                        <nav
+                            v-if="files.last_page > 1"
+                            class="flex flex-wrap items-center justify-center gap-1 pt-2 text-sm"
+                        >
+                            <Link
+                                v-for="link in files.links"
+                                :key="link.label"
+                                :href="link.url ?? ''"
+                                :class="[
+                                    'rounded px-3 py-1',
+                                    link.active
+                                        ? 'bg-primary text-primary-foreground'
+                                        : link.url
+                                          ? 'hover:bg-accent'
+                                          : 'cursor-default text-muted-foreground',
+                                ]"
+                                v-html="link.label"
+                                preserve-scroll
+                            />
+                        </nav>
+                    </section>
                 </main>
             </div>
         </div>
@@ -658,11 +770,10 @@ function deleteFromPreview(file: MediaFileItem): void {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>
-                        Delete {{ bulkDeleteCount }} item(s)?
+                        {{ t('media.bulk_delete_title', { count: bulkDeleteCount }) }}
                     </DialogTitle>
                     <DialogDescription>
-                        Selected folders and files will be moved to trash and
-                        can be restored later.
+                        {{ t('media.bulk_delete_description') }}
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -671,14 +782,14 @@ function deleteFromPreview(file: MediaFileItem): void {
                         variant="outline"
                         @click="deleteOpen = false"
                     >
-                        Cancel
+                        {{ t('media.cancel') }}
                     </Button>
                     <Button
                         type="button"
                         variant="destructive"
                         @click="performBulkDelete"
                     >
-                        Move to trash
+                        {{ t('media.move_to_trash') }}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -695,6 +806,7 @@ function deleteFromPreview(file: MediaFileItem): void {
             v-model:open="previewOpen"
             :file="previewFile"
             @delete="deleteFromPreview"
+            @updated="onPreviewUpdated"
         />
     </MediaLayout>
 </template>

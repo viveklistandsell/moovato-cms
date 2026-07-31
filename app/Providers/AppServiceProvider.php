@@ -1,35 +1,96 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Models\EmailSetting;
+use App\Models\SiteSetting;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Throwable;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->overrideSessionLifetime();
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureAuthorization();
+        $this->configureMailFromDatabase();
+    }
+
+    private function configureMailFromDatabase(): void
+    {
+        try {
+            $s = EmailSetting::current();
+        } catch (Throwable) {
+            return;
+        }
+
+        if (! $s->exists) {
+            return;
+        }
+        if ($s->mail_transport) {
+            config(['mail.default' => $s->mail_transport]);
+        }
+
+        if ($s->mail_host) {
+            config(['mail.mailers.smtp.host' => $s->mail_host]);
+        }
+        if ($s->mail_port) {
+            config(['mail.mailers.smtp.port' => $s->mail_port]);
+        }
+        if ($s->mail_username !== null && $s->mail_username !== '') {
+            config(['mail.mailers.smtp.username' => $s->mail_username]);
+        }
+        if ($s->mail_password !== null && $s->mail_password !== '') {
+            config(['mail.mailers.smtp.password' => $s->mail_password]);
+        }
+        // Encryption explicitly settable to null = no encryption.
+        config(['mail.mailers.smtp.encryption' => $s->mail_encryption ?: null]);
+
+        if ($s->mail_from_address) {
+            config(['mail.from.address' => $s->mail_from_address]);
+        }
+        if ($s->mail_from_name) {
+            config(['mail.from.name' => $s->mail_from_name]);
+        }
+    }
+
+    private function overrideSessionLifetime(): void
+    {
+        try {
+            $configured = SiteSetting::current()->session_lifetime_minutes ?? null;
+        } catch (Throwable) {
+            return;
+        }
+
+        $value = (int) $configured;
+
+        // 5 minutes minimum (anything shorter logs admins out mid-task);
+        // 1 week ceiling (going beyond invites security audit findings on
+        // "session lifetime exceeds policy"). Out-of-range → ignore.
+        if ($value < 5 || $value > 10_080) {
+            return;
+        }
+
+        config(['session.lifetime' => $value]);
     }
 
     /**
      * Configure default behaviors for production-ready applications.
      */
-    protected function configureDefaults(): void
+    private function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
 
@@ -46,5 +107,17 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Grant Super Admin role a free pass on every Gate / can() check. This
+     * keeps fine-grained permission checks in controllers and policies clean
+     * — we never have to special-case the super admin downstream.
+     */
+    private function configureAuthorization(): void
+    {
+        Gate::before(static function (User $user, string $ability): ?bool {
+            return $user->isSuperAdmin() ? true : null;
+        });
     }
 }

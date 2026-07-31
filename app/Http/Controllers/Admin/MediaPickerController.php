@@ -18,8 +18,10 @@ use Illuminate\Support\Str;
 final class MediaPickerController
 {
     /**
-     * Image-only paginated listing for the in-form picker modal.
-     * Filters by ?q=search, ?folder=id, ?sort=newest|oldest|name|name_desc.
+     * Paginated listing for the in-form picker modal.
+     * Filters by ?q=search, ?folder=id, ?sort=newest|oldest|name|name_desc,
+     * ?accept=image|video|any (default: image, for backwards compat with the
+     * many image-only callers).
      */
     public function index(Request $request): JsonResponse
     {
@@ -31,8 +33,16 @@ final class MediaPickerController
             $sort = 'newest';
         }
 
-        $query = MediaFile::query()
-            ->where('mime_type', 'like', 'image/%');
+        $accept = (string) $request->query('accept', 'image');
+        if (! in_array($accept, ['image', 'video', 'any'], true)) {
+            $accept = 'image';
+        }
+        $mimePrefix = $this->mimePrefixFor($accept);
+
+        $query = MediaFile::query();
+        if ($mimePrefix !== null) {
+            $query->where('mime_type', 'like', $mimePrefix);
+        }
 
         match ($sort) {
             'oldest' => $query->orderBy('id'),
@@ -76,7 +86,10 @@ final class MediaPickerController
             ? collect()
             : MediaFile::query()
                 ->whereIn('folder_id', $folderIds)
-                ->where('mime_type', 'like', 'image/%')
+                ->when(
+                    $mimePrefix !== null,
+                    fn ($q) => $q->where('mime_type', 'like', $mimePrefix),
+                )
                 ->whereNotNull('thumb_path')
                 ->orderByDesc('id')
                 ->get(['id', 'folder_id', 'disk', 'thumb_path'])
@@ -327,6 +340,8 @@ final class MediaPickerController
             'name' => $file->name,
             'original_name' => $file->original_name,
             'path' => $file->path,
+            'thumb_path' => $file->thumb_path,
+            'medium_path' => $file->medium_path,
             'url' => $this->relativeUrl($file->path),
             'thumb_url' => $file->thumb_path
                 ? $this->relativeUrl($file->thumb_path)
@@ -373,5 +388,18 @@ final class MediaPickerController
         }
 
         return $trail;
+    }
+
+    /**
+     * Map an `accept` filter (image | video | any) to a SQL LIKE pattern.
+     * Returns null when no filter should be applied (accept=any).
+     */
+    private function mimePrefixFor(string $accept): ?string
+    {
+        return match ($accept) {
+            'image' => 'image/%',
+            'video' => 'video/%',
+            default => null,
+        };
     }
 }

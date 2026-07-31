@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admin\Page;
 
 use App\Actions\Admin\Page\Page\CreatePage;
 use App\Actions\Admin\Page\Page\DeletePage;
+use App\Actions\Admin\Page\Page\DuplicatePage;
 use App\Actions\Admin\Page\Page\UpdatePage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Page\Page\BulkActionPagesRequest;
@@ -204,6 +205,20 @@ final class PageController extends Controller
             ->with('toast', ['type' => 'success', 'message' => 'Page deleted.']);
     }
 
+    /**
+     * Clone a page (translations + categories + widget stack). The copy is
+     * always created as a draft so it never goes live before the admin has
+     * had a chance to review it.
+     */
+    public function duplicate(Page $page, DuplicatePage $action): RedirectResponse
+    {
+        $copy = $action->handle($page);
+
+        return redirect()
+            ->route('admin.pages.edit', $copy)
+            ->with('toast', ['type' => 'success', 'message' => 'Page duplicated.']);
+    }
+
     public function bulkAction(BulkActionPagesRequest $request): RedirectResponse
     {
         /** @var array{action: string, ids: array<int, int>} $data */
@@ -351,6 +366,14 @@ final class PageController extends Controller
                 'position' => $w->position,
                 'is_active' => $w->is_active,
                 'settings' => $w->settings ?? [],
+                // Default missing visibility rows to "show on all" so widgets
+                // created before this column existed don't suddenly disappear.
+                'visibility' => $w->visibility ?? [
+                    'desktop' => true,
+                    'tablet' => true,
+                    'mobile' => true,
+                ],
+                'css_class' => $w->css_class ?? '',
                 'translations' => $w->translations
                     ->mapWithKeys(fn (PageWidgetTranslation $t): array => [
                         $t->lang => $t->data ?? [],

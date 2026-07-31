@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 
 final class DatabaseSeeder extends Seeder
@@ -13,11 +12,18 @@ final class DatabaseSeeder extends Seeder
     {
         $this->call([
             LanguageSeeder::class,
-
-            User::factory()->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]),
+            PermissionSeeder::class,
+            RoleSeeder::class,
+            MenuSeeder::class,
+            SiteSettingSeeder::class,
+            EmailSettingSeeder::class,
+            CountrySeeder::class,
+            StateSeeder::class,
+            CitySeeder::class,
+            DistrictSeeder::class,
+            ServiceParentCategorySeeder::class,
+            ServiceCategorySeeder::class,
+            CompanySeeder::class,
         ]);
     }
 }

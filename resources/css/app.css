@@ -5,7 +5,30 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+@source inline("{p,px,py,pt,pr,pb,pl}-{0,1,2,3,4,5,6,8,10,12,16,20,24}");
+@source inline("{mt,mb,my}-{0,1,2,3,4,5,6,8,10,12,16,20,24}");
+
 @custom-variant dark (&:is(.dark *));
+
+@utility container-xl {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 80rem;
+    padding-inline: 1rem;
+    @media (width >= 40rem) {
+        padding-inline: 1.5rem;
+    }
+    @media (width >= 64rem) {
+        padding-inline: 2rem;
+    }
+}
+
+@utility section-py {
+    padding-block: 4rem;
+    @media (width >= 40rem) {
+        padding-block: 5rem;
+    }
+}
 
 @theme inline {
     --font-sans:
@@ -61,14 +84,6 @@
     --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
     *,
     ::after,
@@ -164,9 +179,57 @@
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
+        @apply outline-ring/50;
     }
     body {
         @apply bg-background text-foreground;
+    }
+    html {
+        @apply scroll-smooth;
+        scroll-padding-top: 4rem;
+    }
+    /* Cookie consent — brand vanilla-cookieconsent v3 via the CSS
+       custom properties it reads internally. Every colour points at
+       a Moovato design token defined in gs.css :root, so the banner
+       reuses the same palette as the rest of the site with zero
+       hard-coded hex values. */
+    #cc-main {
+        --cc-font-family: inherit;
+        --cc-bg: var(--linen);
+        --cc-primary-color: var(--midnight);
+        --cc-secondary-color: var(--slate);
+        --cc-btn-primary-bg: var(--orange);
+        --cc-btn-primary-color: var(--midnight);
+        --cc-btn-primary-hover-bg: var(--midnight);
+        --cc-btn-primary-hover-color: var(--orange);
+        --cc-btn-secondary-bg: transparent;
+        --cc-btn-secondary-color: var(--midnight);
+        --cc-btn-secondary-border-color: var(--midnight);
+        --cc-btn-secondary-hover-bg: var(--midnight);
+        --cc-btn-secondary-hover-color: var(--linen);
+        --cc-btn-secondary-hover-border-color: var(--midnight);
+        --cc-toggle-on-bg: var(--orange);
+        --cc-toggle-off-bg: var(--slate-light);
+        --cc-toggle-on-knob-bg: var(--midnight);
+        --cc-toggle-off-knob-bg: var(--linen);
+        --cc-toggle-readonly-bg: var(--slate-light);
+        --cc-toggle-readonly-knob-bg: var(--linen);
+        --cc-cookie-category-block-bg: var(--white);
+        --cc-cookie-category-block-border: var(--slate-light);
+        --cc-cookie-category-block-hover-bg: var(--paper);
+        --cc-cookie-category-expanded-block-bg: var(--paper);
+        --cc-overlay-bg: color-mix(in srgb, var(--midnight) 60%, transparent);
+        --cc-section-border: var(--slate-light);
+        --cc-separator-border-color: var(--slate-light);
+        --cc-modal-border-radius: calc(var(--radius) * 2);
+        --cc-btn-border-radius: 9999px;
+    }
+    #cc-main .cm__title,
+    #cc-main .pm__title {
+        @apply font-bold;
+    }
+    #cc-main .cm__btn,
+    #cc-main .pm__btn {
+        @apply font-semibold;
     }
 }

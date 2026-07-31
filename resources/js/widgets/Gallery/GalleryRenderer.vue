@@ -47,8 +47,8 @@ function caption(i: number): string | undefined {
 </script>
 
 <template>
-    <section v-if="images.length > 0" class="w-full py-16 sm:py-20">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <section v-if="images.length > 0" class="w-full section-py">
+        <div class="container-xl">
             <h2
                 v-if="data.heading"
                 class="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl"
@@ -85,7 +85,11 @@ function caption(i: number): string | undefined {
                 class="columns-2 lg:columns-3"
                 :class="gapClass"
             >
-                <figure v-for="(img, i) in images" :key="i" class="mb-4 break-inside-avoid">
+                <figure
+                    v-for="(img, i) in images"
+                    :key="i"
+                    class="mb-4 break-inside-avoid"
+                >
                     <img
                         :src="img.url"
                         :alt="caption(i) ?? ''"

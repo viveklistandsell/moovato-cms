@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { GripVertical, Pencil, Plus, Trash2, X } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import BulkActions, {
     type BulkAction,
 } from '@/components/common/BulkActions.vue';
@@ -22,9 +23,20 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useDragReorder } from '@/composables/common/useDragReorder';
 import { useRowSelection } from '@/composables/common/useRowSelection';
 import { useTableQuery } from '@/composables/common/useTableQuery';
+import { useFormatDate } from '@/composables/useAdminLocale';
+import { useT } from '@/composables/useT';
+
+const formatDate = useFormatDate();
+
+const t = useT();
+setBreadcrumbs(() => [
+    { title: t('sidebar.dashboard'), href: '/dashboard' },
+    { title: t('sidebar.blog_tags'), href: '/admin/blog/tags' },
+]);
 
 type Translation = {
     name: string;
@@ -65,21 +77,14 @@ const props = defineProps<{
     pagination: PaginationMeta;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/dashboard' },
-            { title: 'Blog', href: '/admin/blog/tags' },
-            { title: 'Tags', href: '/admin/blog/tags' },
-        ],
-    },
-});
+// Breadcrumbs set dynamically above via setBreadcrumbs().
+defineOptions({});
 
 // `parent_id` field needed by useDragReorder shape; tags are flat so it's null.
 type Row = Tag & { parent_id: null };
 
 const visibleRows = computed<Row[]>(() =>
-    props.tags.map((t) => ({ ...t, parent_id: null })),
+    props.tags.map((tag) => ({ ...tag, parent_id: null })),
 );
 
 const {
@@ -135,8 +140,8 @@ const {
         }),
 });
 
-function confirmDelete(t: Tag): boolean {
-    return confirm(`Delete tag "${t.name}"?`);
+function confirmDelete(tag: Tag): boolean {
+    return confirm(t('table.confirm_delete_named', { name: tag.name }));
 }
 
 const selection = useRowSelection();
@@ -145,21 +150,20 @@ const allOnPageSelected = computed(() =>
     selection.areAllSelected(visibleIds.value),
 );
 const someOnPageSelected = computed(
-    () =>
-        !allOnPageSelected.value && selection.someSelected(visibleIds.value),
+    () => !allOnPageSelected.value && selection.someSelected(visibleIds.value),
 );
 
-const bulkActions: BulkAction[] = [
-    { value: 'publish', label: 'Publish' },
-    { value: 'draft', label: 'Set to draft' },
-    { value: 'inactive', label: 'Mark inactive' },
+const bulkActions = computed<BulkAction[]>(() => [
+    { value: 'publish', label: t('table.bulk_publish') },
+    { value: 'draft', label: t('table.bulk_draft') },
+    { value: 'inactive', label: t('table.bulk_inactive') },
     {
         value: 'delete',
-        label: 'Delete',
+        label: t('table.bulk_delete'),
         destructive: true,
-        confirm: 'Delete {count} selected tag(s)?',
+        confirm: t('table.bulk_confirm_delete'),
     },
-];
+]);
 
 function applyBulkAction(action: string): void {
     if (selection.isEmpty.value) {
@@ -176,35 +180,21 @@ function applyBulkAction(action: string): void {
     );
 }
 
-function formatDate(iso: string | null): string {
-    if (!iso) {
-        return '—';
-    }
-    return new Date(iso).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
 </script>
 
 <template>
-    <Head title="Blog tags" />
+    <Head :title="t('blog.tags_title')" />
 
     <div class="flex flex-col gap-6 p-4">
         <div class="flex items-start justify-between gap-4">
             <Heading
-                title="Blog tags"
-                :description="
-                    canDrag
-                        ? 'Drag a row by the handle to reorder. Sort order is rebuilt automatically.'
-                        : 'Reorder is disabled while filtered or custom-sorted. Clear filters to drag.'
-                "
+                :title="t('blog.tags_title')"
+                :description="t('blog.tags_description')"
             />
             <Button as-child>
                 <Link href="/admin/blog/tags/create">
                     <Plus class="size-4" />
-                    New tag
+                    {{ t('blog.tag_create') }}
                 </Link>
             </Button>
         </div>
@@ -215,10 +205,14 @@ function formatDate(iso: string | null): string {
                     class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
                 >
                     <div>
-                        <CardTitle>All tags</CardTitle>
+                        <CardTitle>{{ t('table.all_tags') }}</CardTitle>
                         <CardDescription>
-                            {{ pagination.total }} total ·
-                            {{ languages.length }} languages active
+                            {{
+                                t('table.total_with_languages', {
+                                    total: pagination.total,
+                                    langs: languages.length,
+                                })
+                            }}
                         </CardDescription>
                     </div>
                     <div
@@ -227,19 +221,17 @@ function formatDate(iso: string | null): string {
                         <PerPageSelect
                             :model-value="perPage"
                             :options="[10, 25, 50, 100]"
-                            label="Per page"
                             @update:model-value="setPerPage"
                         />
                         <BulkActions
                             :actions="bulkActions"
                             :count="selection.count.value"
-                            label="Bulk action"
                             @action="applyBulkAction"
                         />
                         <SearchInput
                             :model-value="search"
                             :loading="isLoading"
-                            placeholder="Search name or permalink…"
+                            :placeholder="t('table.search_name_permalink')"
                             @search="setSearch"
                         />
                         <Button
@@ -249,7 +241,7 @@ function formatDate(iso: string | null): string {
                             @click="resetAll"
                         >
                             <X class="size-4" />
-                            Clear
+                            {{ t('table.clear') }}
                         </Button>
                     </div>
                 </div>
@@ -263,18 +255,14 @@ function formatDate(iso: string | null): string {
                     <p class="text-sm text-muted-foreground">
                         {{
                             isFiltered
-                                ? 'No tags match your filters.'
-                                : 'No tags yet.'
+                                ? t('table.no_results_filtered')
+                                : t('blog.tag_no_items')
                         }}
                     </p>
-                    <Button
-                        v-if="!isFiltered"
-                        as-child
-                        variant="outline"
-                    >
+                    <Button v-if="!isFiltered" as-child variant="outline">
                         <Link href="/admin/blog/tags/create">
                             <Plus class="size-4" />
-                            Create your first tag
+                            {{ t('blog.tag_create') }}
                         </Link>
                     </Button>
                 </div>
@@ -299,11 +287,9 @@ function formatDate(iso: string | null): string {
                                                       ? 'indeterminate'
                                                       : false
                                             "
-                                            aria-label="Select all on this page"
+                                            :aria-label="t('table.select_all_on_page')"
                                             @update:model-value="
-                                                selection.toggleAll(
-                                                    visibleIds,
-                                                )
+                                                selection.toggleAll(visibleIds)
                                             "
                                         />
                                     </div>
@@ -312,7 +298,7 @@ function formatDate(iso: string | null): string {
                                 <th class="w-20 px-2 py-3">
                                     <SortableColumn
                                         column="sort_order"
-                                        label="Order"
+                                        :label="t('table.col_order')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -321,7 +307,7 @@ function formatDate(iso: string | null): string {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="name"
-                                        label="Name"
+                                        :label="t('table.col_name')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -330,7 +316,7 @@ function formatDate(iso: string | null): string {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="translations"
-                                        label="Translations"
+                                        :label="t('table.col_translations')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -339,7 +325,7 @@ function formatDate(iso: string | null): string {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="status"
-                                        label="Status"
+                                        :label="t('table.col_status')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
@@ -348,16 +334,16 @@ function formatDate(iso: string | null): string {
                                 <th class="px-4 py-3">
                                     <SortableColumn
                                         column="created_at"
-                                        label="Created"
+                                        :label="t('table.col_created')"
                                         :active-column="sortBy"
                                         :direction="sortDir"
                                         @sort="toggleSort"
                                     />
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right font-medium uppercase tracking-wide text-muted-foreground"
+                                    class="px-4 py-3 text-right font-medium tracking-wide text-muted-foreground uppercase"
                                 >
-                                    Actions
+                                    {{ t('table.col_actions') }}
                                 </th>
                             </tr>
                         </thead>
@@ -372,8 +358,7 @@ function formatDate(iso: string | null): string {
                                     '!border-t-2 !border-primary':
                                         isDropTarget(row),
                                     'hover:bg-muted/30':
-                                        !isDragging(row) &&
-                                        !isDropTarget(row),
+                                        !isDragging(row) && !isDropTarget(row),
                                 }"
                                 @dragstart="canDrag && onDragStart($event, row)"
                                 @dragover="canDrag && onDragOver($event, row)"
@@ -389,7 +374,7 @@ function formatDate(iso: string | null): string {
                                             :model-value="
                                                 selection.isSelected(row.id)
                                             "
-                                            :aria-label="`Select ${row.name}`"
+                                            :aria-label="t('table.select_row', { name: row.name })"
                                             @update:model-value="
                                                 selection.toggle(row.id)
                                             "
@@ -406,8 +391,8 @@ function formatDate(iso: string | null): string {
                                         "
                                         :title="
                                             canDrag
-                                                ? 'Drag to reorder'
-                                                : 'Reorder disabled while filtered/sorted'
+                                                ? t('table.reorder_drag_hint')
+                                                : t('table.reorder_disabled_hint')
                                         "
                                     >
                                         <GripVertical class="size-4" />
@@ -415,7 +400,7 @@ function formatDate(iso: string | null): string {
                                 </td>
                                 <td class="px-2 py-3 text-center">
                                     <span
-                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 text-xs font-mono font-medium"
+                                        class="inline-flex h-6 min-w-6 items-center justify-center rounded-md bg-muted px-1.5 font-mono text-xs font-medium"
                                     >
                                         {{ row.sort_order }}
                                     </span>
@@ -445,18 +430,18 @@ function formatDate(iso: string | null): string {
                                             "
                                             class="text-[10px]"
                                         >
-                                            <span v-if="lang.flag">{{
-                                                lang.flag
-                                            }}</span>
+                                            <FlagImage
+                                                v-if="lang.flag"
+                                                :code="lang.flag"
+                                                size="xs"
+                                            />
                                             {{ lang.code.toUpperCase() }}
                                             <span
                                                 v-if="
-                                                    !row.translations[
-                                                        lang.code
-                                                    ]
+                                                    !row.translations[lang.code]
                                                 "
                                                 class="opacity-50"
-                                                >·missing</span
+                                                >·{{ t('table.translation_missing') }}</span
                                             >
                                         </Badge>
                                     </div>
@@ -470,14 +455,13 @@ function formatDate(iso: string | null): string {
                                                   ? 'outline'
                                                   : 'destructive'
                                         "
-                                        class="capitalize"
                                     >
-                                        {{ row.status }}
+                                        {{ t(`status.${row.status}`) }}
                                     </Badge>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span
-                                        class="whitespace-nowrap text-xs text-muted-foreground"
+                                        class="text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ formatDate(row.created_at) }}
                                     </span>
