@@ -315,8 +315,8 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
             <div
                 class="topbar-inner relative z-[1] container-xl flex flex-wrap items-center justify-between gap-6"
             >
-                <div class="topbar-welcome inline-flex items-center gap-2">
-                    <span class="ico"><Clock :size="12" /></span>
+                <div class="topbar-welcome inline-flex items-center gap-1">
+                    <span class="ico"><Clock :size="15" /></span>
                     <strong>{{ t.openingHours }}:</strong> {{ t.hours }}
                     <div class="topbar-socials">
                         <a
@@ -325,18 +325,18 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                             :href="s.href"
                             :aria-label="s.label"
                         >
-                            <component :is="s.icon" :size="12" />
+                            <component :is="s.icon" :size="15" />
                         </a>
                     </div>
                 </div>
                 <div class="topbar-contacts">
                     <div v-for="email in emails" :key="email" class="item">
-                        <span class="ico"><Mail :size="12" /></span>
+                        <span class="ico"><Mail :size="15" /></span>
                         {{ t.emailLabel }}:
                         <a :href="`mailto:${email}`">{{ email }}</a>
                     </div>
                     <div v-for="phone in phones" :key="phone.tel" class="item">
-                        <span class="ico"><Phone :size="12" /></span>
+                        <span class="ico"><Phone :size="15" /></span>
                         {{ t.callLabel }}:
                         <a :href="`tel:${phone.tel}`">{{ phone.display }}</a>
                     </div>

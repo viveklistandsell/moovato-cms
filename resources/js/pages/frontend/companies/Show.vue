@@ -217,7 +217,7 @@ const ratingBreakdown = computed(() => {
                 </nav>
 
                 <div v-if="company.is_top_rated" class="mb-2">
-                    <span class="inline-flex items-center gap-1 rounded bg-[var(--midnight)] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white uppercase">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-[var(--midnight)] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white uppercase">
                         <Star class="size-3 fill-amber-400 text-amber-400" />
                         {{ t.top_rated }}
                     </span>
@@ -270,14 +270,14 @@ const ratingBreakdown = computed(() => {
                             <a
                                 v-if="contactsByType.phone[0]"
                                 :href="contactHref(contactsByType.phone[0])"
-                                class="inline-flex items-center gap-1.5 rounded-md bg-[var(--orange)] px-4 py-2 text-sm font-medium text-white hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--orange)] px-4 py-2 text-sm font-medium text-white hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
                             >
                                 <Phone class="size-3.5" />
                                 {{ t.request_quote }}
                             </a>
                             <button
                                 type="button"
-                                class="inline-flex items-center gap-1.5 rounded-md border border-[var(--orange)] px-4 py-2 text-sm font-medium text-[var(--orange)] hover:bg-[var(--orange-soft)]"
+                                class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--orange)] px-4 py-2 text-sm font-medium text-[var(--orange)] hover:bg-[var(--orange-soft)]"
                                 disabled
                                 :title="t.reviews_coming_soon"
                             >

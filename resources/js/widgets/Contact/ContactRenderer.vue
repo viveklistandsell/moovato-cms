@@ -80,7 +80,7 @@ function submit(): void {
     <section id="kontakt" class="mv-contact section-py">
         <div class="container-xl">
             <div
-                class="grid grid-cols-1 items-center gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-8"
+                class="grid grid-cols-1 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-8"
             >
                 <!-- LEFT: info panel + map -->
                 <div class="mv-contact__info">

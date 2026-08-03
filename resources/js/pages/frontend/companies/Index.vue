@@ -294,11 +294,11 @@ onBeforeUnmount(() => {
                         <span aria-hidden="true" class="mv-ci-eyebrow-dot"></span>
                         {{ t.eyebrow }}
                     </span>
-                    <h1 class="mv-ci-title mt-5">
+                    <h1 class="mv-ci-title mt-2">
                         {{ t.heading_lead }}
                         <em>{{ t.heading_accent }}</em>
                     </h1>
-                    <p class="mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)] md:text-lg">
+                    <p class="mt-3 max-w-xl text-base leading-relaxed text-[var(--slate)] md:text-lg">
                         {{ t.subheading }}
                     </p>
                 </div>
@@ -324,7 +324,7 @@ onBeforeUnmount(() => {
                     </li>
                 </ul>
             </header>
-            <div class="mt-12 grid gap-6 md:mt-16 lg:grid-cols-[300px_1fr] lg:gap-6">
+            <div class="mt-10 grid gap-6 md:mt-16 lg:grid-cols-[300px_1fr] lg:gap-6">
                 <aside class="mv-ci-rail self-start lg:sticky lg:top-24" data-mv-reveal>
                     <button
                         type="button"
