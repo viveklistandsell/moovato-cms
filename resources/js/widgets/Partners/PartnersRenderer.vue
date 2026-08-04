@@ -27,7 +27,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-partners section-py">
+    <section v-reveal class="mv-partners section-py">
         <div class="container-xl">
             <div
                 v-if="data.eyebrow || data.heading || data.subheading"

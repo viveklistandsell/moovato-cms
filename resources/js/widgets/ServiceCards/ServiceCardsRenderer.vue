@@ -29,7 +29,7 @@ const colsClass = computed(() => {
 </script>
 
 <template>
-    <section class="mv-services section-py">
+    <section v-reveal class="mv-services section-py">
         <div class="mv-services__wrap">
             <div class="mv-services__lines" aria-hidden="true">
                 <svg

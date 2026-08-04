@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
+import { reveal } from '@/directives/reveal';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import FrontendLayout from '@/layouts/frontend/FrontendLayout.vue';
@@ -30,6 +31,9 @@ createInertiaApp({
     },
     progress: {
         color: '#4B5563',
+    },
+    withApp(app) {
+        app.directive('reveal', reveal);
     },
 });
 

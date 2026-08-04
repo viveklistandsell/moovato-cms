@@ -31,7 +31,7 @@ function toggle(i: number): void {
 </script>
 
 <template>
-    <section class="mv-faqmedia section-py">
+    <section v-reveal class="mv-faqmedia section-py">
         <div
             class="container-xl grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-x-10"
         >

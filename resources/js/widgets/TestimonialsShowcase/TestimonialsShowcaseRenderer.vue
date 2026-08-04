@@ -68,7 +68,7 @@ function thumbStyle(i: number): Record<string, string> {
 </script>
 
 <template>
-    <section class="mv-testimonials section-py" :style="bgStyle">
+    <section v-reveal class="mv-testimonials section-py" :style="bgStyle">
         <div class="mv-testimonials__bg" aria-hidden="true"></div>
 
         <div class="relative z-[2] container-xl">

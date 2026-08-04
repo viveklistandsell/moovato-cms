@@ -77,7 +77,7 @@ function submit(): void {
 </script>
 
 <template>
-    <section id="kontakt" class="mv-contact section-py">
+    <section id="kontakt" v-reveal class="mv-contact section-py">
         <div class="container-xl">
             <div
                 class="grid grid-cols-1 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-8"

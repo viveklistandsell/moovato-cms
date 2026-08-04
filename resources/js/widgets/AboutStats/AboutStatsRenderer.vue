@@ -29,7 +29,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-aboutstats section-py">
+    <section v-reveal class="mv-aboutstats section-py">
         <div class="container-xl">
             <div class="flex flex-col items-start gap-5">
                 <span v-if="data.eyebrow" class="mv-aboutstats-eyebrow">

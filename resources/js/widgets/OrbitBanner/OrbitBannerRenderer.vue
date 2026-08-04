@@ -54,6 +54,7 @@ const crumbs = computed<Crumb[]>(() => {
 
 <template>
     <section
+        v-reveal
         class="mv-orbitbanner section-py"
         :class="{ 'is-dark': settings.theme === 'dark' }"
     >

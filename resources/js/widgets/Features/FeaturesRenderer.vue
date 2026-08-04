@@ -41,7 +41,7 @@ const iconWrapperClass = computed(() => {
 </script>
 
 <template>
-    <section class="w-full section-py">
+    <section v-reveal class="w-full section-py">
         <div class="container-xl">
             <div
                 v-if="data.heading || data.subheading"

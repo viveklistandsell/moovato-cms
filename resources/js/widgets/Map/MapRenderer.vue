@@ -69,7 +69,7 @@ function isMatched(pin: Pin) {
 </script>
 
 <template>
-    <section class="mv-map section-py">
+    <section v-reveal class="mv-map section-py">
         <div class="container-xl">
             <div
                 v-if="data.eyebrow || data.heading || data.subheading"

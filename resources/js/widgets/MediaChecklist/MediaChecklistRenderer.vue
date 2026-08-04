@@ -27,6 +27,7 @@ defineProps<{ settings: Settings; data: Data }>();
 
 <template>
     <section
+        v-reveal
         class="mv-mediachecklist section-py"
         :class="{
             'is-dark': settings.bg === 'dark',

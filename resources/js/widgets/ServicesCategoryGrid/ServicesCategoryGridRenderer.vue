@@ -56,7 +56,7 @@ const gridColsClass = computed<string>(() => {
 </script>
 
 <template>
-    <section class="mv-services-grid section-py">
+    <section v-reveal class="mv-services-grid section-py">
         <div class="container-xl">
             <header
                 v-if="data.eyebrow || data.heading || data.subheading"

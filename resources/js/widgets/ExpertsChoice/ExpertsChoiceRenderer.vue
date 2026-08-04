@@ -20,7 +20,7 @@ defineProps<{ data: Data }>();
 </script>
 
 <template>
-    <section class="mv-experts section-py">
+    <section v-reveal class="mv-experts section-py">
         <div
             class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >

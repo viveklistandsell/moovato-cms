@@ -22,7 +22,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-darkfeature">
+    <section v-reveal class="mv-darkfeature">
         <div
             class="container-xl grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2 lg:gap-x-10"
         >

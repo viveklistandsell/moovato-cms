@@ -86,7 +86,7 @@ function reviewsLabel(count?: number): string {
 </script>
 
 <template>
-    <section class="mv-directory section-py">
+    <section v-reveal class="mv-directory section-py">
         <div class="container-xl">
             <header class="mv-directory__head">
                 <h2 v-if="data.heading" class="mv-directory__title">

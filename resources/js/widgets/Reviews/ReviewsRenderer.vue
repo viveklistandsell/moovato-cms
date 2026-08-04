@@ -52,7 +52,7 @@ function initials(name?: string): string {
 </script>
 
 <template>
-    <section class="mv-reviews section-py">
+    <section v-reveal class="mv-reviews section-py">
         <div class="container-xl">
             <div class="mv-reviews__intro">
                  <span v-if="data.badge" class="mv-reviews__badge">

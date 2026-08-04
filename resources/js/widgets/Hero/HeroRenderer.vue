@@ -48,6 +48,7 @@ const alignClass = computed(() => {
 
 <template>
     <section
+        v-reveal
         class="relative w-full overflow-hidden bg-muted text-foreground"
         :class="heightClass"
     >

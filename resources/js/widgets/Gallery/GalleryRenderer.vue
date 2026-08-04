@@ -47,7 +47,7 @@ function caption(i: number): string | undefined {
 </script>
 
 <template>
-    <section v-if="images.length > 0" class="w-full section-py">
+    <section v-if="images.length > 0" v-reveal class="w-full section-py">
         <div class="container-xl">
             <h2
                 v-if="data.heading"

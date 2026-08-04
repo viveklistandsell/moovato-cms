@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <section ref="root" class="mv-assistant section-py">
+    <section ref="root" v-reveal class="mv-assistant section-py">
         <div class="container-xl">
             <div class="mv-assistant-card">
                 <div class="mv-assistant-top">

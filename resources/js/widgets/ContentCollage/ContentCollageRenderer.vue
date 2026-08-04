@@ -26,7 +26,7 @@ function img(i: number): string | null {
 </script>
 
 <template>
-    <section class="mv-collage section-py">
+    <section v-reveal class="mv-collage section-py">
         <div
             class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >

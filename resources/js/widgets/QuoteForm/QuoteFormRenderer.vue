@@ -104,7 +104,12 @@ function submit(): void {
 </script>
 
 <template>
-    <section ref="sectionRef" class="mv-quote section-py" id="angebot">
+    <section
+        ref="sectionRef"
+        v-reveal
+        class="mv-quote section-py"
+        id="angebot"
+    >
         <div
             class="container-xl grid grid-cols-1 items-start gap-y-9 lg:grid-cols-2 lg:gap-x-10"
         >

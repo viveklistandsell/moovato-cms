@@ -23,7 +23,7 @@ const active = ref(0);
 </script>
 
 <template>
-    <section class="mv-comparison section-py">
+    <section v-reveal class="mv-comparison section-py">
         <div class="container-xl">
             <div
                 v-if="data.eyebrow || data.heading"

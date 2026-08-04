@@ -25,6 +25,7 @@ defineProps<{ settings: Settings; data: Data }>();
 
 <template>
     <section
+        v-reveal
         class="mv-splitmedia"
         :class="settings.image_side === 'left' ? 'image-left' : 'image-right'"
     >

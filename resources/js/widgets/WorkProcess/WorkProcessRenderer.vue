@@ -49,7 +49,7 @@ function connectorStyle(i: number): Record<string, string> {
 </script>
 
 <template>
-    <section class="mv-workproc section-py" :style="bgStyle">
+    <section v-reveal class="mv-workproc section-py" :style="bgStyle">
         <div class="container-xl">
             <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
                 <div>

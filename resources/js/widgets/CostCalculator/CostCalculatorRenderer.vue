@@ -368,7 +368,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <section ref="root" class="mv-calc section-py">
+    <section ref="root" v-reveal class="mv-calc section-py">
         <div class="container-xl">
             <h2 v-if="data.title" class="mv-calc-title">{{ data.title }}</h2>
 

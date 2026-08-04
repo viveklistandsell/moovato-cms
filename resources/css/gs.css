@@ -352,10 +352,10 @@
 
 .mv-heronew .trust-strip {
     position: absolute;
-    bottom: -10px;
-    left: 32px;
+    bottom: 22px;
+    left: 22%;
     background: var(--white);
-    padding: 14px 20px;
+    padding: 10px 10px 10px 75px;
     border-radius: 14px;
     box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1);
     display: flex;
@@ -364,34 +364,12 @@
     z-index: 4;
 }
 
-.mv-heronew .trust-strip .avatars {
-    display: flex;
-}
-
-.mv-heronew .trust-strip .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 2px solid var(--white);
-    margin-left: -8px;
-    background: var(--linen);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--midnight);
-}
-
-.mv-heronew .trust-strip .avatar:first-child {
-    margin-left: 0;
-    background: var(--orange);
-    color: var(--white);
-}
-
-.mv-heronew .trust-strip .avatar:nth-child(2) {
-    background: var(--midnight);
-    color: var(--white);
+.mv-heronew .trust-strip-badge {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    position: absolute;
+    left: -25px;
 }
 
 .mv-heronew .trust-strip-text {
@@ -410,6 +388,10 @@
     font-size: 12px;
 }
 
+.mv-badge-quality {
+    opacity: 0;
+ }
+
 @keyframes mv-float {
 
     0%,
@@ -421,6 +403,8 @@
         transform: translateY(-12px);
     }
 }
+
+
 
 @media (max-width: 1024px) {
     .mv-heronew .hero-title {
@@ -795,38 +779,101 @@
 }
 
 .mv-dashpromo-hero {
+    padding: 10px;
+    border-radius: 34px;
+    background: color-mix(in srgb, var(--linen) 55%, var(--white));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--midnight) 6%, transparent);
+}
+
+.mv-dashpromo-hero-inner {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr;
     align-items: center;
     gap: 24px;
-    border-radius: 20px;
     overflow: hidden;
+    border-radius: 26px;
     background: var(--midnight);
 }
 
-.mv-dashpromo-hero .mv-dashpromo-title {
+.mv-dashpromo-hero-glow {
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 60%;
+    height: 160%;
+    pointer-events: none;
+    background: radial-gradient(circle, color-mix(in srgb, var(--orange) 55%, transparent), transparent 70%);
+    filter: blur(60px);
+    opacity: 0.55;
+}
+
+.mv-dashpromo-hero-inner .mv-dashpromo-title {
     color: var(--white);
 }
 
-.mv-dashpromo-hero .mv-dashpromo-text {
+.mv-dashpromo-hero-inner .mv-dashpromo-text {
     color: color-mix(in srgb, var(--white) 75%, var(--midnight));
 }
 
 @media (width >=64rem) {
-    .mv-dashpromo-hero {
+    .mv-dashpromo-hero-inner {
         grid-template-columns: 1fr 1fr;
         gap: 0;
     }
 }
 
 .mv-dashpromo-hero-content {
-    padding: 40px;
+    position: relative;
+    z-index: 1;
+    padding: 48px;
+}
+
+.mv-dashpromo-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 7px 14px 7px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--white) 12%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--white) 16%, transparent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.mv-dashpromo-eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--orange);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--orange) 30%, transparent);
+    animation: mv-dashpromo-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes mv-dashpromo-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.75);
+    }
 }
 
 .mv-dashpromo-title {
     margin: 0 0 12px;
-    font-size: 26px;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.15;
     font-weight: 800;
+    letter-spacing: -0.01em;
     color: var(--midnight);
 }
 
@@ -837,18 +884,18 @@
     color: var(--midnight-soft);
 }
 
-.mv-dashpromo-cta {
+.mv-dashpromo-cta,
+.mv-dashpromo-link {
     --sweep: var(--black);
     position: relative;
     z-index: 1;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    gap: 12px;
     margin-top: 24px;
-    padding: 12px 22px;
-    border-radius: 10px;
+    padding: 6px 6px 6px 22px;
+    border-radius: 999px;
     background: var(--orange);
     color: var(--white);
     font-size: 14px;
@@ -856,14 +903,40 @@
     text-decoration: none;
     transition:
         color 0.4s ease-in-out,
-        border-color 0.4s ease-in-out;
+        border-color 0.4s ease-in-out,
+        transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.mv-dashpromo-cta:hover {
+.mv-dashpromo-cta:hover,
+.mv-dashpromo-link:hover {
     color: var(--white);
 }
 
+.mv-dashpromo-cta:active,
+.mv-dashpromo-link:active {
+    transform: scale(0.98);
+}
+
+.mv-dashpromo-btn-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--white) 20%, transparent);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mv-dashpromo-cta:hover .mv-dashpromo-btn-ico,
+.mv-dashpromo-link:hover .mv-dashpromo-btn-ico {
+    transform: translate(2px, -1px) scale(1.06);
+}
+
 .mv-dashpromo-hero-media {
+    position: relative;
+    z-index: 1;
     align-self: stretch;
     display: flex;
     align-items: center;
@@ -877,26 +950,30 @@
 }
 
 .mv-dashpromo-card {
+    padding: 8px;
+    border-radius: 30px;
+    background: color-mix(in srgb, var(--linen) 55%, var(--white));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--midnight) 6%, transparent);
+}
+
+.mv-dashpromo-card-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 32px;
-    border-radius: 20px;
-    background: var(--midnight);
+    height: 100%;
+    padding: 28px;
+    border-radius: 22px;
+    background: var(--white);
+    box-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.18);
+    transition:
+        transform 0.5s cubic-bezier(0.32, 0.72, 0, 1),
+        box-shadow 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.mv-dashpromo-card .mv-dashpromo-card-title,
-.mv-dashpromo-card .mv-dashpromo-link {
-    color: var(--white);
-}
-
-.mv-dashpromo-card .mv-dashpromo-text {
-    color: color-mix(in srgb, var(--white) 75%, var(--midnight));
-}
-
-.mv-dashpromo-card .mv-dashpromo-services li {
-    color: var(--white);
+.mv-dashpromo-card:hover .mv-dashpromo-card-inner {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 54px -26px rgba(15, 23, 42, 0.22);
 }
 
 .mv-dashpromo-card-body {
@@ -909,32 +986,6 @@
     font-size: 22px;
     font-weight: 800;
     color: var(--midnight);
-}
-
-.mv-dashpromo-link {
-    --sweep: var(--black);
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 12px 22px;
-    border-radius: 10px;
-    background: var(--orange);
-    color: var(--white);
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-    transition:
-        color 0.4s ease-in-out,
-        border-color 0.4s ease-in-out;
-}
-
-.mv-dashpromo-link:hover {
-    color: var(--white);
 }
 
 .mv-dashpromo-card-media {
@@ -954,7 +1005,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 4px;
     flex-shrink: 0;
 }
 
@@ -962,18 +1013,17 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
     color: var(--midnight);
     white-space: nowrap;
+    transition: background-color 0.3s ease;
 }
 
-.mv-dashpromo-services li:nth-child(1) {
-    margin-left: 10px;
-}
-
-.mv-dashpromo-services li:nth-child(2) {
-    margin-left: 40px;
+.mv-dashpromo-services li:hover {
+    background: var(--linen);
 }
 
 .mv-dashpromo-service-ico {
@@ -984,23 +1034,52 @@
     height: 34px;
     flex-shrink: 0;
     border-radius: 10px;
-    background: var(--white);
+    background: var(--orange-soft);
     color: var(--orange);
 }
 
 @media (max-width: 640px) {
+    .mv-dashpromo-hero {
+        padding: 6px;
+        border-radius: 26px;
+    }
+
+    .mv-dashpromo-hero-inner {
+        border-radius: 20px;
+    }
+
     .mv-dashpromo-hero-content {
         padding: 28px;
     }
 
     .mv-dashpromo-card {
+        padding: 6px;
+        border-radius: 22px;
+    }
+
+    .mv-dashpromo-card-inner {
         flex-direction: column;
         align-items: flex-start;
+        border-radius: 16px;
     }
 
     .mv-dashpromo-card-media {
         width: 100%;
         max-width: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .mv-dashpromo-cta,
+    .mv-dashpromo-link,
+    .mv-dashpromo-btn-ico,
+    .mv-dashpromo-card-inner {
+        transition: none;
+    }
+
+    .mv-dashpromo-eyebrow-dot {
+        animation: none;
     }
 }
 
@@ -2510,7 +2589,7 @@
 .mv-footer__heading {
     position: relative;
     padding-bottom: 14px;
-    margin-bottom: 26px;
+    margin-bottom: 15px;
     font-size: 26px;
     font-weight: 800;
 }
@@ -8795,6 +8874,31 @@
     font-size: 15px;
     font-weight: 500;
     color: var(--midnight-soft);
+}
+
+[data-mv-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 1.75rem, 0);
+    filter: blur(6px);
+    transition:
+        opacity 0.9s var(--mv-reveal-ease, cubic-bezier(0.32, 0.72, 0, 1)) var(--mv-reveal-delay, 0ms),
+        transform 0.9s var(--mv-reveal-ease, cubic-bezier(0.32, 0.72, 0, 1)) var(--mv-reveal-delay, 0ms),
+        filter 0.9s var(--mv-reveal-ease, cubic-bezier(0.32, 0.72, 0, 1)) var(--mv-reveal-delay, 0ms);
+}
+
+[data-mv-reveal].is-revealed {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-mv-reveal] {
+        opacity: 1;
+        transform: none;
+        filter: none;
+        transition: none;
+    }
 }
 
 .mv-companies-index {

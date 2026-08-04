@@ -29,7 +29,7 @@ const telHref = computed(
 </script>
 
 <template>
-    <section class="mv-promocta section-py">
+    <section v-reveal class="mv-promocta section-py">
         <div class="container-xl">
             <div class="mv-promocta-card">
                 <div

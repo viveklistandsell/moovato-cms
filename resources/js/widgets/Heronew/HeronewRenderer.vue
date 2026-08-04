@@ -1,6 +1,7 @@
 ﻿<script setup lang="ts">
 import { ArrowRight, Check } from 'lucide-vue-next';
 import { computed } from 'vue';
+import BestQualityBadge from '@/widgets/shared/BestQualityBadge.vue';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 import NextButton from '@/widgets/shared/NextButton.vue';
 import HeroBackground from './HeroBackground.vue';
@@ -52,8 +53,7 @@ const visiblePills = computed(() =>
 </script>
 
 <template>
-    <section class="mv-heronew">
-        <!-- Animated, dependency-free background (CSS look-alike of the shader) -->
+    <section v-reveal class="mv-heronew">
         <HeroBackground />
 
         <div class="hero">
@@ -106,12 +106,8 @@ const visiblePills = computed(() =>
                     </div>
 
                     <!-- Trust strip -->
-                    <div v-if="data.trust_title || data.avatars?.length" class="trust-strip">
-                        <div v-if="data.avatars?.length" class="avatars">
-                            <div v-for="(avatar, i) in data.avatars" :key="i" class="avatar">
-                                {{ avatar }}
-                            </div>
-                        </div>
+                    <div v-if="data.trust_title" class="trust-strip">
+                        <BestQualityBadge class="trust-strip-badge" />
                         <div class="trust-strip-text">
                             <strong>{{ data.trust_title }}</strong>
                             <span>{{ data.trust_subtitle }}</span>

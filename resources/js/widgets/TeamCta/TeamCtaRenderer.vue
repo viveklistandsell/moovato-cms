@@ -24,7 +24,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-teamcta section-py">
+    <section v-reveal class="mv-teamcta section-py">
         <div
             class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >

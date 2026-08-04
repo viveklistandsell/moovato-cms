@@ -93,7 +93,7 @@ function formattedDate(value?: string | null): string {
 </script>
 
 <template>
-    <section class="mv-blog section-py">
+    <section v-reveal class="mv-blog section-py">
         <div class="container-xl">
             <div class="mx-auto max-w-2xl text-center">
                 <span v-if="data.eyebrow" class="mv-blog-eyebrow">

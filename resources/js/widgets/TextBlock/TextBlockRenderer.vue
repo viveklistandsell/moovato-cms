@@ -46,7 +46,7 @@ const bgClass = computed(() => {
 </script>
 
 <template>
-    <section class="w-full section-py" :class="bgClass">
+    <section v-reveal class="w-full section-py" :class="bgClass">
         <div class="container-xl">
             <div class="mx-auto" :class="[widthClass, alignClass]">
                 <h2

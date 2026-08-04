@@ -24,7 +24,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-about section-py">
+    <section v-reveal class="mv-about section-py">
         <div
             class="container-xl grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >

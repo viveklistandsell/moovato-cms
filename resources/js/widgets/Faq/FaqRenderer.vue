@@ -25,7 +25,7 @@ function toggle(i: number): void {
 </script>
 
 <template>
-    <section class="w-full section-py">
+    <section v-reveal class="w-full section-py">
         <div class="container-xl">
             <div class="mx-auto max-w-4xl">
                 <h2

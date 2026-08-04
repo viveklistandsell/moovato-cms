@@ -19,7 +19,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-ctabanner">
+    <section v-reveal class="mv-ctabanner">
         <img
             v-if="settings.image_url"
             :src="settings.image_url"

@@ -14,7 +14,7 @@ defineProps<{ data: Data }>();
 </script>
 
 <template>
-    <section class="mv-textcols section-py">
+    <section v-reveal class="mv-textcols section-py">
         <div class="container-xl grid gap-10 lg:grid-cols-2 lg:gap-x-10">
             <div>
                 <h2

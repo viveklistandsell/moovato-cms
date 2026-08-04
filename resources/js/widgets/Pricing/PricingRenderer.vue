@@ -22,7 +22,7 @@ defineProps<{ settings: Record<string, unknown>; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-pricing section-py">
+    <section v-reveal class="mv-pricing section-py">
         <div class="container-xl">
             <div class="mv-pricing__intro">
                 <span v-if="data.eyebrow" class="mv-pricing__eyebrow">
