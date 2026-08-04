@@ -133,9 +133,9 @@ const crumbs = computed<Crumb[]>(() => {
 
                 <div
                     v-if="data.description"
-                    class="mv-orbitbanner-desc mt-8 flex items-start gap-4"
+                    class="mv-orbitbanner-desc mt-8 flex items-start gap-2"
                 >
-                    <ArrowDown class="mt-1 size-4 shrink-0" />
+                    <ArrowDown class="mt-1 size-5 shrink-0" />
                     <div class="mv-rte" v-html="data.description" />
                 </div>
 

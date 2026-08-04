@@ -1,6 +1,4 @@
 :root {
-    /* --midnight: #090d18;
-    --midnight-soft: #1e293b; */
     --midnight: #202020;
     --midnight-soft: #1e293b;
     --black: #0c0c0c;
@@ -2110,7 +2108,7 @@
     z-index: 40;
 }
 
-.mv-header.is-stuck {
+.mv-header-nav.is-stuck {
     position: fixed;
     top: 0;
     left: 0;
@@ -2133,7 +2131,7 @@
 .mv-header .topbar {
     position: relative;
     overflow: hidden;
-    padding: 12px 0;
+    padding: 10px 0;
     font-size: 13px;
     color: var(--white);
     background: linear-gradient(90deg, var(--white) 2%, var(--orange) 60%);
@@ -2198,8 +2196,9 @@
 
 .mv-header .topbar-socials {
     display: flex;
-    gap: 10px;
-    padding-left: 16px;
+    gap: 6px;
+    padding-left: 10px;
+    margin-left: 5px;
     border-left: 1px solid rgba(255, 255, 255, 0.25);
 }
 
@@ -2217,7 +2216,6 @@
 
 .mv-header .topbar-socials a:hover {
     background: var(--orange);
-    color: var(--midnight);
 }
 
 .mv-header .logo-mark {
@@ -2477,17 +2475,17 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    margin-top: 32px;
+    margin-top: 25px;
 }
 
 .mv-footer__follow-label {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .mv-footer__socials {
     display: flex;
-    gap: 10px;
+    gap: 5px;
 }
 
 .mv-footer__social {
@@ -8233,7 +8231,13 @@
 }
 
 .mv-workproc__step {
-    text-align: right;
+    text-align: left;
+}
+
+.mv-workproc__item {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
 }
 
 @media (max-width: 639px) {
@@ -8289,7 +8293,7 @@
     position: relative;
     width: 1px;
     height: var(--wp-connector, 90px);
-    margin: 0 30px 30px auto;
+    margin: 0 auto 30px 30px;
     border-left: 1px dashed rgba(255, 255, 255, 0.14);
     transition: border-color 0.4s ease;
 }
@@ -8311,8 +8315,8 @@
 
 .mv-workproc__border-icon {
     position: absolute;
-    left: 50%;
-    bottom: -12px;
+    left: 0;
+    bottom: -13px;
     transform: translateX(-50%);
     color: rgba(255, 255, 255, 0.2);
     transition: color 0.4s ease;
@@ -8327,7 +8331,7 @@
 }
 
 .mv-workproc__title {
-    margin: 0 0 .75rem;
+    margin: 0 0 1.5rem;
     font-size: 1.4rem;
     font-weight: 700;
     line-height: 1.25;
@@ -8335,7 +8339,6 @@
 }
 
 .mv-workproc__image {
-    border-radius: 32px;
     overflow: hidden;
 }
 
@@ -8344,6 +8347,8 @@
     width: 100px;
     height: 100px;
     transition: transform 0.5s ease;
+    border-radius: 32px;
+    object-fit: cover;
 }
 
 .mv-workproc__item:hover .mv-workproc__image img {
@@ -8371,7 +8376,8 @@
 
 .mv-workproc__shape {
     text-align: right;
-    margin: -30px 0;
+    margin-top: -10px;
+    margin-left: 50px;
 }
 
 @media (max-width: 1279px) {

@@ -124,7 +124,7 @@ function cleanLabel(label: string): string {
 <template>
     <Head title="Blog" />
 
-    <div class="mx-auto max-w-6xl px-4 py-8">
+    <div class="container-xl section-py">
         <!-- Breadcrumb -->
         <nav class="mb-6 flex items-center gap-2 text-lg text-muted-foreground">
             <Link
@@ -210,7 +210,7 @@ function cleanLabel(label: string): string {
         />
 
         <!-- Section title -->
-        <h2 class="mb-6 text-2xl font-bold tracking-tight">
+        <h2 class="mb-4 text-2xl font-bold tracking-tight">
             {{ t.overview }}
         </h2>
 
@@ -223,7 +223,7 @@ function cleanLabel(label: string): string {
         </div>
 
         <!-- Grid -->
-        <div v-else class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-else class="grid gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <PostCard
                 v-for="post in posts"
                 :key="post.id"

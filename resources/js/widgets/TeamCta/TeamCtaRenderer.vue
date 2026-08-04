@@ -62,7 +62,7 @@ defineProps<{ settings: Settings; data: Data }>();
                     </li>
                 </ul>
 
-                <div v-if="data.cta_title" class="mv-teamcta-card mt-9">
+                <div v-if="data.cta_title" class="mv-teamcta-card mt-5">
                     <h3 class="text-lg font-semibold text-white">
                         {{ data.cta_title }}
                     </h3>

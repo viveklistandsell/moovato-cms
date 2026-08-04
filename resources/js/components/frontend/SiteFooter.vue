@@ -182,33 +182,28 @@ const socials = computed<Array<{ label: string; icon: typeof Facebook; href: str
                     <span class="mv-footer__socials">
                         <a v-for="s in socials" :key="s.label" :href="s.href" :aria-label="s.label"
                             class="mv-footer__social">
-                            <component :is="s.icon" :size="16" />
+                            <component :is="s.icon" :size="15" />
                         </a>
                     </span>
                 </div>
             </div>
 
-            <!-- Footer columns (driven by the admin's Navigation Management
-                 → Footer Menu — top-level items become column headings, their
-                 children are the links). New-tab items get a plain <a>; SPA
-                 paths use <Link>; anything else (mailto:, tel:, #anchor,
-                 absolute URLs) also falls back to <a>. -->
             <div v-for="column in footerColumns" :key="column.heading" class="mv-footer__col">
                 <h2 class="mv-footer__heading">{{ column.heading }}</h2>
                 <ul class="mv-footer__links">
                     <li v-for="link in column.links" :key="link.label">
                         <a v-if="link.newTab" :href="link.href" target="_blank" rel="noopener noreferrer"
                             class="mv-footer__link">
-                            <ChevronsRight class="ico" :size="16" />
+                            <ChevronsRight class="ico" :size="15" />
                             {{ link.label }}
                         </a>
                         <Link v-else-if="link.href.startsWith('/') && !link.href.startsWith('//')" :href="link.href"
                             class="mv-footer__link">
-                            <ChevronsRight class="ico" :size="16" />
+                            <ChevronsRight class="ico" :size="15" />
                             {{ link.label }}
                         </Link>
                         <a v-else :href="link.href" class="mv-footer__link">
-                            <ChevronsRight class="ico" :size="16" />
+                            <ChevronsRight class="ico" :size="15" />
                             {{ link.label }}
                         </a>
                     </li>
@@ -221,7 +216,7 @@ const socials = computed<Array<{ label: string; icon: typeof Facebook; href: str
                 <ul class="mv-footer__contact">
                     <li v-if="phone">
                         <span class="mv-footer__contact-ico">
-                            <Phone :size="18" />
+                            <Phone :size="15" />
                         </span>
                         <span>
                             <span class="mv-footer__contact-label">{{

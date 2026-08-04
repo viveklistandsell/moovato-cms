@@ -269,10 +269,14 @@ function isMatched(pin: Pin) {
 .mv-map-pin--active {
     z-index: 20;
 }
-
+.mv-map-pin--active  .mv-map-card{
+opacity: 1;
+visibility: visible;
+}
 .mv-map-pin--active .mv-map-dot {
-    transform: scale(1.45);
+    background: var(--black);
     animation: pulse 1.6s infinite;
+    transform: scale(1.4);
 }
 
 @keyframes pulse {

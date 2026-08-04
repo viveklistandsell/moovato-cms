@@ -270,7 +270,9 @@ function onKeydown(e: KeyboardEvent): void {
 // only pins itself once the user has scrolled past its own height, sliding
 // back into view. A spacer keeps the layout from jumping when it detaches.
 const headerEl = ref<HTMLElement | null>(null);
+const navEl = ref<HTMLElement | null>(null);
 const headerHeight = ref(0);
+const navHeight = ref(0);
 const isStuck = ref(false);
 
 function onScroll(): void {
@@ -285,6 +287,7 @@ function onScroll(): void {
 onMounted(() => {
     window.addEventListener('keydown', onKeydown);
     headerHeight.value = headerEl.value?.offsetHeight ?? 0;
+    navHeight.value = navEl.value?.offsetHeight ?? 0;
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 });
@@ -308,7 +311,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     <header
         ref="headerEl"
         class="mv-header"
-        :class="{ 'is-stuck': isStuck }"
+        
     >
         <!-- ===== TOP BAR ===== -->
         <div class="topbar">
@@ -345,7 +348,11 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
         </div>
 
         <!-- ===== NAVIGATION (sticky) ===== -->
-        <nav class="border-b border-[rgba(15,23,42,0.06)] bg-white py-[12px]">
+        <nav
+            ref="navEl"
+            class="mv-header-nav border-b border-[rgba(15,23,42,0.06)] bg-white py-[10px]"
+            :class="{ 'is-stuck': isStuck }"
+        >
             <div class="container-xl flex items-center justify-between gap-8">
                 <Link :href="home" class="flex items-center no-underline">
                     <img
@@ -356,7 +363,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 </Link>
 
                 <ul
-                    class="hidden list-none gap-9 lg:flex lg:flex-1 lg:justify-center"
+                    class="hidden list-none gap-8 lg:flex lg:flex-1 lg:justify-center"
                 >
                     <li
                         v-for="item in navItems"
@@ -617,7 +624,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     <div
         v-if="isStuck"
         class="mv-header-spacer"
-        :style="{ height: headerHeight + 'px' }"
+        :style="{ height: navHeight + 'px' }"
         aria-hidden="true"
     ></div>
     </div>
