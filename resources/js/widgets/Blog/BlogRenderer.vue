@@ -95,10 +95,8 @@ function formattedDate(value?: string | null): string {
 <template>
     <section v-reveal class="mv-blog section-py">
         <div class="container-xl">
-            <div class="mx-auto max-w-2xl text-center">
-                <span v-if="data.eyebrow" class="mv-blog-eyebrow">
-                    {{ data.eyebrow }}
-                </span>
+            <div class="max-w-2xl">
+                <span v-if="data.eyebrow" class="mv-map-eyebrow">{{ data.eyebrow }}</span>
                 <h2
                     v-if="data.heading"
                     class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl"
@@ -114,20 +112,26 @@ function formattedDate(value?: string | null): string {
             </div>
 
             <ul
-                class="mt-16 grid grid-cols-1 gap-x-8 gap-y-14"
+                class="mt-20 grid grid-cols-1 gap-x-10 gap-y-20"
                 :class="colsClass"
             >
-                <li v-for="(post, i) in posts" :key="i" class="mv-blogcard">
+                <li
+                    v-for="(post, i) in posts"
+                    :key="i"
+                    class="mv-blogcard"
+                >
                     <a :href="post.href || '#'" class="mv-blogcard-media">
-                        <span class="mv-blogcard-img">
-                            <img
-                                v-if="post.image_url"
-                                :src="post.image_url"
-                                :alt="post.title || ''"
-                                loading="lazy"
-                                decoding="async"
-                            />
-                            <ImageIcon v-else class="size-10" />
+                        <span class="mv-blogcard-frame">
+                            <span class="mv-blogcard-img">
+                                <img
+                                    v-if="post.image_url"
+                                    :src="post.image_url"
+                                    :alt="post.title || ''"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
+                                <ImageIcon v-else class="size-10" />
+                            </span>
                         </span>
                         <span class="mv-blogcard-meta">
                             <span
@@ -152,13 +156,15 @@ function formattedDate(value?: string | null): string {
                     <div class="mv-blogcard-foot">
                         <a :href="post.href || '#'" class="mv-blogcard-more">
                             {{ data.read_more_label || 'Mehr lesen' }}
-                            <ArrowRight class="size-4" />
+                            <span class="mv-blogcard-more-ico">
+                                <ArrowRight class="size-4" />
+                            </span>
                         </a>
                     </div>
                 </li>
             </ul>
 
-            <div v-if="data.cta_label" class="mt-12 text-center">
+            <div v-if="data.cta_label" class="mt-16 text-center">
                 <NextButton :label="data.cta_label" :href="ctaHref" />
             </div>
         </div>

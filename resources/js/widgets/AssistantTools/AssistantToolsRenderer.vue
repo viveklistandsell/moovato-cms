@@ -61,17 +61,23 @@ onBeforeUnmount(() => {
     <section ref="root" v-reveal class="mv-assistant section-py">
         <div class="container-xl">
             <div class="mv-assistant-card">
+                <div class="mv-assistant-glow mv-assistant-glow-a" aria-hidden="true"></div>
+                <div class="mv-assistant-glow mv-assistant-glow-b" aria-hidden="true"></div>
+
                 <div class="mv-assistant-top">
                     <div
                         v-if="settings.avatar_url"
-                        class="mv-assistant-avatar"
+                        class="mv-assistant-avatar-wrap"
                     >
-                        <img
-                            :src="settings.avatar_url"
-                            :alt="data.avatar_alt || ''"
-                            loading="lazy"
-                            decoding="async"
-                        />
+                        <span class="mv-assistant-avatar-ring" aria-hidden="true"></span>
+                        <div class="mv-assistant-avatar">
+                            <img
+                                :src="settings.avatar_url"
+                                :alt="data.avatar_alt || ''"
+                                loading="lazy"
+                                decoding="async"
+                            />
+                        </div>
                     </div>
                     <div>
                         <h2
@@ -130,46 +136,54 @@ onBeforeUnmount(() => {
                         :href="data.button_url || '#'"
                     >
                         {{ data.button_label }}
-                        <ArrowRight :size="16" />
+                        <span class="mv-assistant-btn-ico">
+                            <ArrowRight :size="15" />
+                        </span>
                     </a>
                 </form>
             </div>
 
-            <h3 v-if="data.tools_title" class="mv-assistant-tools-title">
-                {{ data.tools_title }}
-            </h3>
+            <div v-if="data.tools_title" class="mv-assistant-tools-head">
+                <span class="mv-map-eyebrow mb-3">Tool-Center</span>
+                <h3 class="mv-assistant-tools-title">
+                    {{ data.tools_title }}
+                </h3>
+            </div>
 
-            <div
-                class="grid grid-cols-1 gap-6 lg:grid-cols-2"
-            >
-                <div
-                    v-for="(column, i) in data.columns ?? []"
-                    :key="i"
-                    class="mv-assistant-col"
-                >
-                    <div class="mv-assistant-col-head">
-                        <span class="mv-assistant-col-ico">
-                            <WidgetIcon
-                                :name="column.icon"
-                                fallback="FileText"
-                                class="size-5"
-                            />
-                        </span>
-                        <h4 class="mv-assistant-col-title">
-                            {{ column.title }}
-                        </h4>
+            <div class="mv-assistant-tools-shell">
+                <div class="mv-assistant-tools-grid grid grid-cols-1 lg:grid-cols-2">
+                    <div
+                        v-for="(column, i) in data.columns ?? []"
+                        :key="i"
+                        class="mv-assistant-col"
+                    >
+                        <div class="mv-assistant-col-head">
+                            <span class="mv-assistant-col-ico">
+                                <WidgetIcon
+                                    :name="column.icon"
+                                    fallback="FileText"
+                                    class="size-5"
+                                />
+                            </span>
+                            <h4 class="mv-assistant-col-title">
+                                {{ column.title }}
+                            </h4>
+                        </div>
+                        <ul class="mv-assistant-links">
+                            <li
+                                v-for="(link, j) in column.links ?? []"
+                                :key="j"
+                            >
+                                <a :href="link.url || '#'">
+                                    <span class="mv-assistant-link-index">{{
+                                        String(j + 1).padStart(2, '0')
+                                    }}</span>
+                                    <span class="mv-assistant-link-label">{{ link.label }}</span>
+                                    <ArrowRight :size="15" class="mv-assistant-link-arrow" />
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <ul class="mv-assistant-links">
-                        <li
-                            v-for="(link, j) in column.links ?? []"
-                            :key="j"
-                        >
-                            <a :href="link.url || '#'">
-                                {{ link.label }}
-                                <ArrowRight :size="15" />
-                            </a>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>

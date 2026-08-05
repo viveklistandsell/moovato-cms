@@ -37,10 +37,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 <div class="mv-dashpromo-hero-inner">
                     <div class="mv-dashpromo-hero-glow" aria-hidden="true"></div>
                     <div class="mv-dashpromo-hero-content">
-                        <span class="mv-dashpromo-eyebrow">
-                            <span class="mv-dashpromo-eyebrow-dot" aria-hidden="true"></span>
-                            Kundenportal
-                        </span>
+                        <span class="mv-map-eyebrow mb-4">Kundenportal</span>
                         <h2 v-if="data.promo_title" class="mv-dashpromo-title">
                             {{ data.promo_title }}
                         </h2>
