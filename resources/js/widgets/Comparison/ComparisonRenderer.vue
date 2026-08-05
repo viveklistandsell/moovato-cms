@@ -29,8 +29,8 @@ const active = ref(0);
                 v-if="data.eyebrow || data.heading"
                 class="mb-10 flex flex-col items-center text-center"
             >
-                <span v-if="data.eyebrow" class="mv-map-eyebrow mb-4">{{ data.eyebrow }}</span>
-                <h2 v-if="data.heading" class="mv-comparison-heading">
+                <span v-if="data.eyebrow" class="mv-comparison-eyebrow mb-4">{{ data.eyebrow }}</span>
+                <h2 v-if="data.heading" class="mv-comparison-heading mv-section-heading">
                     {{ data.heading }}
                 </h2>
             </div>

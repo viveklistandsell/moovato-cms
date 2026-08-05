@@ -13,9 +13,23 @@
     --accent-gradient: linear-gradient(95deg, var(--orange), var(--yellow-dark));
     --glow: rgba(255, 98, 29, 0.38);
 }
-h2, h2{
-    font-family: "Instrument Serif", ui-serif, Georgia !important; 
+
+h2 {
+    font-family: "Instrument Serif", ui-serif, Georgia !important;
+    font-size: 44px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
+
+.mv-section-heading {
+    font-family: "Instrument Serif", ui-serif, Georgia;
+    font-size: 44px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
 .mv-prose p {
     margin-bottom: 0.75em;
 }
@@ -392,7 +406,7 @@ h2, h2{
 
 .mv-badge-quality {
     opacity: 0;
- }
+}
 
 @keyframes mv-float {
 
@@ -672,9 +686,9 @@ h2, h2{
 
 .mv-citysearch-title {
     margin: 0;
-    font-size: 30px;
-    line-height: 1.2;
-    font-weight: 800;
+    font-size: 44px;
+    line-height: 1.15;
+    font-weight: 700;
     color: var(--midnight);
 }
 
@@ -833,10 +847,10 @@ h2, h2{
 
 .mv-dashpromo-title {
     margin: 0 0 12px;
-    font-size: clamp(26px, 3vw, 34px);
+    font-size: clamp(26px, 4vw, 44px);
     line-height: 1.15;
-    font-weight: 800;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     color: var(--midnight);
 }
 
@@ -1365,12 +1379,12 @@ h2, h2{
     padding: 32px;
 }
 
-.mv-assistant-col + .mv-assistant-col {
+.mv-assistant-col+.mv-assistant-col {
     border-top: 1px solid color-mix(in srgb, var(--midnight) 8%, transparent);
 }
 
 @media (width >=64rem) {
-    .mv-assistant-col + .mv-assistant-col {
+    .mv-assistant-col+.mv-assistant-col {
         border-top: 0;
         border-left: 1px solid color-mix(in srgb, var(--midnight) 8%, transparent);
     }
@@ -1998,7 +2012,7 @@ h2, h2{
 .trust-bar {
     position: relative;
     overflow: hidden;
-    background: url(\public\images\shapes\section-bg.png);
+    background: url(/public/images/shapes/section-bg.png);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -2731,6 +2745,7 @@ h2, h2{
     margin-bottom: 15px;
     font-size: 26px;
     font-weight: 800;
+    color: var(--white);
 }
 
 .mv-footer__links {
@@ -3377,9 +3392,9 @@ h2, h2{
 
 .mv-quote__h1 {
     margin: 16px 0 0;
-    font-size: 40px;
-    line-height: 1.1;
-    font-weight: 800;
+    font-size: 44px;
+    line-height: 1.15;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--midnight);
 }
@@ -4285,8 +4300,8 @@ h2, h2{
 .mv-pricing__title {
     margin: 0;
     font-size: 36px;
-    line-height: 1.1;
-    font-weight: 800;
+    line-height: 1.15;
+    font-weight: 700;
     letter-spacing: -0.02em;
     text-transform: uppercase;
     color: var(--white);
@@ -4294,7 +4309,7 @@ h2, h2{
 
 @media (min-width: 768px) {
     .mv-pricing__title {
-        font-size: 52px;
+        font-size: 44px;
     }
 }
 
@@ -4412,15 +4427,15 @@ h2, h2{
 .mv-reviews__heading {
     margin: 0 0 22px;
     font-size: 36px;
-    line-height: 1.1;
-    font-weight: 800;
+    line-height: 1.15;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--midnight);
 }
 
 @media (min-width: 768px) {
     .mv-reviews__heading {
-        font-size: 52px;
+        font-size: 44px;
     }
 }
 
@@ -4562,6 +4577,12 @@ h2, h2{
     transform: rotate(-0.5deg) translateY(-4px);
 }
 
+.mv-reviews__card.is-pulsing {
+    transform: rotate(3.2deg) translate(3%, 3%);
+}
+.mv-reviews__card.is-pulsing::before{
+    transform:rotate(0deg) translate(0) !important;
+}
 .mv-reviews__card::before,
 .mv-reviews__card::after {
     content: '';
@@ -4766,7 +4787,8 @@ h2, h2{
 @media (prefers-reduced-motion: reduce) {
 
     .mv-reviews__card,
-    .mv-reviews__card:hover {
+    .mv-reviews__card:hover,
+    .mv-reviews__card.is-pulsing {
         transform: none;
         transition: none;
     }
@@ -4813,10 +4835,10 @@ h2, h2{
 
 .mv-comparison-heading {
     margin: 0;
-    font-size: clamp(28px, 3.4vw, 38px);
+    font-size: clamp(28px, 4vw, 44px);
     line-height: 1.15;
-    font-weight: 800;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     color: var(--midnight);
 }
 
@@ -4913,7 +4935,7 @@ h2, h2{
     transition: background-color 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.mv-comparison-row + .mv-comparison-row {
+.mv-comparison-row+.mv-comparison-row {
     border-top: 1px solid color-mix(in srgb, var(--midnight) 8%, transparent);
 }
 
@@ -5703,14 +5725,14 @@ h2, h2{
 
 .mv-promocta .mv-promocta-heading {
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 700;
     font-style: italic;
     color: var(--midnight);
 }
 
 @media (min-width: 640px) {
     .mv-promocta .mv-promocta-heading {
-        font-size: 2.5rem;
+        font-size: 2.75rem;
     }
 }
 
@@ -5895,8 +5917,8 @@ h2, h2{
 .mv-faqmedia .mv-faqmedia-heading {
     margin-top: 0.75rem;
     font-size: 2rem;
-    font-weight: 800;
-    line-height: 1.1;
+    font-weight: 700;
+    line-height: 1.15;
     color: var(--midnight);
 }
 
@@ -5932,7 +5954,7 @@ h2, h2{
     border-top-color: transparent;
 }
 
-.mv-faqmedia .mv-faqmedia-item.is-open + .mv-faqmedia-item {
+.mv-faqmedia .mv-faqmedia-item.is-open+.mv-faqmedia-item {
     border-top-color: transparent;
 }
 
@@ -6193,6 +6215,10 @@ h2, h2{
 .mv-whychoose .wc-eyebrow,
 .mv-partners-eyebrow,
 .mv-blog-eyebrow,
+.mv-directory__eyebrow,
+.mv-comparison-eyebrow,
+.mv-assistant-eyebrow,
+.mv-dashpromo-eyebrow,
 .mv-map-eyebrow,
 .mv-faqmedia .mv-faqmedia-eyebrow,
 .mv-aboutstats .mv-aboutstats-eyebrow,
@@ -6236,6 +6262,14 @@ h2, h2{
 .mv-partners-eyebrow::after,
 .mv-blog-eyebrow::before,
 .mv-blog-eyebrow::after,
+.mv-directory__eyebrow::before,
+.mv-directory__eyebrow::after,
+.mv-comparison-eyebrow::before,
+.mv-comparison-eyebrow::after,
+.mv-assistant-eyebrow::before,
+.mv-assistant-eyebrow::after,
+.mv-dashpromo-eyebrow::before,
+.mv-dashpromo-eyebrow::after,
 .mv-map-eyebrow::before,
 .mv-map-eyebrow::after,
 .mv-faqmedia .mv-faqmedia-eyebrow::before,
@@ -6275,6 +6309,10 @@ h2, h2{
 .mv-whychoose .wc-eyebrow::before,
 .mv-partners-eyebrow::before,
 .mv-blog-eyebrow::before,
+.mv-directory__eyebrow::before,
+.mv-comparison-eyebrow::before,
+.mv-assistant-eyebrow::before,
+.mv-dashpromo-eyebrow::before,
 .mv-map-eyebrow::before,
 .mv-faqmedia .mv-faqmedia-eyebrow::before,
 .mv-aboutstats .mv-aboutstats-eyebrow::before,
@@ -6297,6 +6335,10 @@ h2, h2{
 .mv-whychoose .wc-eyebrow::after,
 .mv-partners-eyebrow::after,
 .mv-blog-eyebrow::after,
+.mv-directory__eyebrow::after,
+.mv-comparison-eyebrow::after,
+.mv-assistant-eyebrow::after,
+.mv-dashpromo-eyebrow::after,
 .mv-map-eyebrow::after,
 .mv-faqmedia .mv-faqmedia-eyebrow::after,
 .mv-aboutstats .mv-aboutstats-eyebrow::after,
@@ -6367,15 +6409,15 @@ h2, h2{
 .mv-directory__title {
     margin: 0 0 12px;
     font-size: 30px;
-    line-height: 1.1;
-    font-weight: 800;
+    line-height: 1.15;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--midnight);
 }
 
 @media (min-width: 768px) {
     .mv-directory__title {
-        font-size: 40px;
+        font-size: 44px;
     }
 }
 
@@ -6944,10 +6986,10 @@ h2, h2{
 
 .mv-experts .ec-title {
     margin-top: 0.75rem;
-    font-size: 2.25rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
 }
 
 .mv-experts .ec-body {
@@ -8019,9 +8061,10 @@ h2, h2{
 
 .mv-contact__title {
     margin: 0;
-    font-size: 40px;
+    font-size: 44px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     color: var(--midnight);
 }
 
@@ -8533,9 +8576,9 @@ h2, h2{
 
 .mv-testimonials__heading {
     margin: 1rem 0 0;
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(2rem, 4vw, 2.75rem);
     font-weight: 700;
-    line-height: 1.12;
+    line-height: 1.15;
     letter-spacing: -0.02em;
     color: var(--white);
 }
@@ -8827,15 +8870,15 @@ h2, h2{
 
 .mv-services-grid__heading {
     font-size: 1.875rem;
-    line-height: 1.2;
+    line-height: 1.15;
     font-weight: 700;
     color: var(--midnight);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
 }
 
 @media (min-width: 768px) {
     .mv-services-grid__heading {
-        font-size: 2.25rem;
+        font-size: 2.75rem;
     }
 }
 
@@ -9340,9 +9383,10 @@ h2, h2{
 .mv-calc-title {
     margin: 0 0 28px;
     text-align: center;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 800;
+    font-size: clamp(24px, 3.5vw, 44px);
+    font-weight: 700;
     letter-spacing: -0.02em;
+    line-height: 1.15;
     color: var(--midnight);
 }
 

@@ -84,7 +84,7 @@ function isMatched(pin: Pin) {
 
                 <h2
                     v-if="data.heading"
-                    class="mt- text-3xl font-bold tracking-tight text-[var(--white)] sm:text-4xl"
+                    class="mt- text-[var(--white)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>
@@ -354,7 +354,7 @@ function edgeClass(value: number | undefined): string {
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight text-[var(--white)] sm:text-4xl"
+                    class="mt-5 text-[var(--white)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

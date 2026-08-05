@@ -162,7 +162,7 @@ function submit(): void {
                                 {{ data.eyebrow }}
                             </span>
                         </div>
-                        <h2 class="mv-contact__title">
+                        <h2 class="mv-contact__title mv-section-heading">
                             {{ data.heading_lead }}
                             <span class="mv-contact__title-accent">{{
                                 data.heading_highlight

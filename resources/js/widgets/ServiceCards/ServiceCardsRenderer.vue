@@ -86,7 +86,7 @@ const colsClass = computed(() => {
                         <span v-if="data.eyebrow" class="mv-services__eyebrow">
                             {{ data.eyebrow }}
                         </span>
-                        <h2 v-if="data.heading" class="mv-services__heading">
+                        <h2 v-if="data.heading" class="mv-services__heading mv-section-heading">
                             {{ data.heading }}
                         </h2>
                     </div>

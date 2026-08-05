@@ -48,7 +48,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="text-3xl font-bold tracking-tight text-white sm:text-4xl"
+                    class="text-white mv-section-heading"
                     :class="data.eyebrow ? 'mt-4' : ''"
                 >
                     {{ data.heading }}

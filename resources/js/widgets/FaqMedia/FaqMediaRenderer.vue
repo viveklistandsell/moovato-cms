@@ -33,7 +33,7 @@ function toggle(i: number): void {
 <template>
     <section v-reveal class="mv-faqmedia section-py">
         <div
-            class="container-xl grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:gap-x-16"
+            class="container-xl grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-x-10"
         >
             <div class="mv-faqmedia-media">
                 <div v-if="data.vertical_label" class="mv-faqmedia-vlabel">
@@ -62,8 +62,8 @@ function toggle(i: number): void {
             </div>
 
             <div>
-                <span v-if="data.eyebrow" class="mv-map-eyebrow mb-3">{{ data.eyebrow }}</span>
-                <h2 class="mv-faqmedia-heading">
+                <span v-if="data.eyebrow" class="mv-faqmedia-eyebrow mb-3">{{ data.eyebrow }}</span>
+                <h2 class="mv-faqmedia-heading mv-section-heading">
                     {{ data.heading_lead }}
                     <span v-if="data.heading_highlight" class="hl">{{
                         data.heading_highlight

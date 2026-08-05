@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight, Star } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 type Testimonial = {
     quote?: string;
@@ -29,6 +29,17 @@ const active = computed<Testimonial | null>(
     () => items.value[current.value] ?? null,
 );
 
+const isPulsing = ref(false);
+let pulseTimeout: ReturnType<typeof setTimeout> | undefined;
+
+watch(current, () => {
+    if (pulseTimeout) clearTimeout(pulseTimeout);
+    isPulsing.value = true;
+    pulseTimeout = setTimeout(() => {
+        isPulsing.value = false;
+    }, 500);
+});
+
 function prev(): void {
     const n = items.value.length;
     if (n) current.value = (current.value - 1 + n) % n;
@@ -55,8 +66,8 @@ function initials(name?: string): string {
     <section v-reveal class="mv-reviews section-py">
         <div class="container-xl">
             <div class="mv-reviews__intro">
-                <span v-if="data.badge" class="mv-map-eyebrow mb-4">{{ data.badge }}</span>
-                <h2 v-if="data.heading" class="mv-reviews__heading">
+                <span v-if="data.badge" class="mv-reviews__badge mb-4">{{ data.badge }}</span>
+                <h2 v-if="data.heading" class="mv-reviews__heading mv-section-heading">
                     {{ data.heading }}
                 </h2>
 
@@ -86,7 +97,11 @@ function initials(name?: string): string {
                     </a>
                 </div>
 
-                <div v-if="active" class="mv-reviews__card">
+                <div
+                    v-if="active"
+                    class="mv-reviews__card"
+                    :class="{ 'is-pulsing': isPulsing }"
+                >
                     <Transition name="mv-reviews-fade" mode="out-in">
                         <div :key="current" class="mv-reviews__content">
                             <div class="mv-reviews__stars">

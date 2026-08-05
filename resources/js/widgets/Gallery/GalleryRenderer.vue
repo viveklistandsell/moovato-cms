@@ -51,7 +51,7 @@ function caption(i: number): string | undefined {
         <div class="container-xl">
             <h2
                 v-if="data.heading"
-                class="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl"
+                class="mb-10 text-center mv-section-heading"
             >
                 {{ data.heading }}
             </h2>

@@ -70,7 +70,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl lg:text-5xl"
+                    class="mt-5 text-[var(--midnight)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

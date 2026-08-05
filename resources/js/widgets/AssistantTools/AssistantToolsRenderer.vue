@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-if="data.tools_title" class="mv-assistant-tools-head">
-                <span class="mv-map-eyebrow mb-3">Tool-Center</span>
+                <span class="mv-assistant-eyebrow mb-3">Tool-Center</span>
                 <h3 class="mv-assistant-tools-title">
                     {{ data.tools_title }}
                 </h3>

@@ -30,7 +30,7 @@ function toggle(i: number): void {
             <div class="mx-auto max-w-4xl">
                 <h2
                     v-if="data.heading"
-                    class="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mb-10 text-center mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

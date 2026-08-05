@@ -36,7 +36,7 @@ const telHref = computed(
                     class="mv-promocta-inner grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-x-10"
                 >
                     <div>
-                        <h2 v-if="data.heading" class="mv-promocta-heading">
+                        <h2 v-if="data.heading" class="mv-promocta-heading mv-section-heading">
                             {{ data.heading }}
                         </h2>
 

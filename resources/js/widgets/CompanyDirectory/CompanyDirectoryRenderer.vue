@@ -89,8 +89,8 @@ function reviewsLabel(count?: number): string {
     <section v-reveal class="mv-directory section-py">
         <div class="container-xl">
             <header class="mv-directory__head">
-                <span v-if="data.heading" class="mv-map-eyebrow mb-4">Geprüfte Anbieter</span>
-                <h2 v-if="data.heading" class="mv-directory__title">
+                <span v-if="data.heading" class="mv-directory__eyebrow mb-4">Geprüfte Anbieter</span>
+                <h2 v-if="data.heading" class="mv-directory__title mv-section-heading">
                     {{ data.heading }}
                 </h2>
                 <p v-if="data.subheading" class="mv-directory__subtitle">

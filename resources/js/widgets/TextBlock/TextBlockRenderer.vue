@@ -51,7 +51,7 @@ const bgClass = computed(() => {
             <div class="mx-auto" :class="[widthClass, alignClass]">
                 <h2
                     v-if="data.heading"
-                    class="mb-6 text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mb-6 mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

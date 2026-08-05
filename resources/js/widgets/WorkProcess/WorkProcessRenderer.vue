@@ -56,7 +56,7 @@ function connectorStyle(i: number): Record<string, string> {
                     <span v-if="data.eyebrow" class="mv-howitworks__eyebrow">{{
                         data.eyebrow
                     }}</span>
-                    <h2 v-if="data.heading" class="mv-workproc__heading">
+                    <h2 v-if="data.heading" class="mv-workproc__heading mv-section-heading">
                         {{ data.heading }}
                     </h2>
                 </div>

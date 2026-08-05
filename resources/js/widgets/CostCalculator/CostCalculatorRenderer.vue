@@ -370,7 +370,7 @@ onBeforeUnmount(() => {
 <template>
     <section ref="root" v-reveal class="mv-calc section-py">
         <div class="container-xl">
-            <h2 v-if="data.title" class="mv-calc-title">{{ data.title }}</h2>
+            <h2 v-if="data.title" class="mv-calc-title mv-section-heading">{{ data.title }}</h2>
 
             <form class="mv-calc-form" @submit.prevent="calculate">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3">

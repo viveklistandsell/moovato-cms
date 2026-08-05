@@ -37,7 +37,7 @@ defineProps<{ data: Data }>();
                     <span v-if="data.eyebrow" class="ec-eyebrow">
                         {{ data.eyebrow }}
                     </span>
-                    <h2 v-if="data.heading" class="ec-title">
+                    <h2 v-if="data.heading" class="ec-title mv-section-heading">
                         {{ data.heading }}
                     </h2>
                     <p v-if="data.body" class="ec-body">{{ data.body }}</p>

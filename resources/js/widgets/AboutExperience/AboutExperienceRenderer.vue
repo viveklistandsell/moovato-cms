@@ -77,7 +77,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading || data.heading_accent"
-                    class="mt-5 text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="mt-5 text-[var(--midnight)] mv-section-heading"
                 >
                     {{ data.heading }}
                     <span v-if="data.heading_accent" class="text-[var(--orange)]">

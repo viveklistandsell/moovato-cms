@@ -28,7 +28,7 @@ defineProps<{ settings: Record<string, unknown>; data: Data }>();
                 <span v-if="data.eyebrow" class="mv-pricing__eyebrow">
                     {{ data.eyebrow }}
                 </span>
-                <h2 v-if="data.heading" class="mv-pricing__title">
+                <h2 v-if="data.heading" class="mv-pricing__title mv-section-heading">
                     {{ data.heading }}
                 </h2>
             </div>

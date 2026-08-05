@@ -70,7 +70,7 @@ const gridColsClass = computed<string>(() => {
                 </p>
                 <h2
                     v-if="data.heading"
-                    class="mv-services-grid__heading"
+                    class="mv-services-grid__heading mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

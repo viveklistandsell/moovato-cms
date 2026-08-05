@@ -33,10 +33,10 @@ defineProps<{ settings: Settings; data: Data }>();
                 v-if="data.eyebrow || data.heading || data.subheading"
                 class="mx-auto max-w-2xl text-center"
             >
-                <span v-if="data.eyebrow" class="mv-map-eyebrow">{{ data.eyebrow }}</span>
+                <span v-if="data.eyebrow" class="mv-partners-eyebrow">{{ data.eyebrow }}</span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mt-5 mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

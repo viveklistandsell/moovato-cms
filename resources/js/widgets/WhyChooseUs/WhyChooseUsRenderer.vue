@@ -31,7 +31,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mt-5 mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>
