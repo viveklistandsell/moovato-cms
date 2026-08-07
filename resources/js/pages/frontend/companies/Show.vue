@@ -578,6 +578,33 @@ function markHelpful(review: PublicReview): void {
                         </div>
                     </section>
 
+                    <!-- Service areas -->
+                    <section v-if="company.service_areas.length > 0" class="rounded-lg border border-[var(--linen)] bg-white p-6 shadow-sm">
+                        <h2 class="mb-4 text-xl font-bold text-[var(--midnight)]">
+                            {{ t.section_areas }}
+                        </h2>
+                        <div class="space-y-4">
+                            <div v-for="area in company.service_areas" :key="area.city_id">
+                                <div class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-[var(--midnight)]">
+                                    <Building2 class="size-4 text-[var(--slate)]" />
+                                    {{ area.city_name }}
+                                    <span class="text-xs font-normal text-[var(--slate-light)]">
+                                        ({{ area.districts.length }})
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span
+                                        v-for="d in area.districts"
+                                        :key="d.id"
+                                        class="rounded-full border border-[var(--linen)] bg-[var(--linen)]/40 px-2.5 py-0.5 text-xs text-[var(--slate)]"
+                                    >
+                                        {{ d.name }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- FAQ -->
                     <section v-if="company.faqs.length > 0" class="rounded-lg border border-[var(--linen)] bg-white p-6 shadow-sm">
                         <h2 class="mb-4 text-xl font-bold text-[var(--midnight)]">
@@ -606,33 +633,6 @@ function markHelpful(review: PublicReview): void {
                                 </div>
                             </li>
                         </ul>
-                    </section>
-
-                    <!-- Service areas -->
-                    <section v-if="company.service_areas.length > 0" class="rounded-lg border border-[var(--linen)] bg-white p-6 shadow-sm">
-                        <h2 class="mb-4 text-xl font-bold text-[var(--midnight)]">
-                            {{ t.section_areas }}
-                        </h2>
-                        <div class="space-y-4">
-                            <div v-for="area in company.service_areas" :key="area.city_id">
-                                <div class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-[var(--midnight)]">
-                                    <Building2 class="size-4 text-[var(--slate)]" />
-                                    {{ area.city_name }}
-                                    <span class="text-xs font-normal text-[var(--slate-light)]">
-                                        ({{ area.districts.length }})
-                                    </span>
-                                </div>
-                                <div class="flex flex-wrap gap-1.5">
-                                    <span
-                                        v-for="d in area.districts"
-                                        :key="d.id"
-                                        class="rounded-full border border-[var(--linen)] bg-[var(--linen)]/40 px-2.5 py-0.5 text-xs text-[var(--slate)]"
-                                    >
-                                        {{ d.name }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
                     </section>
 
                     <!-- Reviews section (placeholder — reviews module ships later) -->
