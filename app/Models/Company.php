@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable([
     'primary_city_id', 'primary_district_id', 'street', 'postal_code',
@@ -47,6 +48,55 @@ final class Company extends Model
                 self::query()->where('id', $sibling->id)->update(['sort_order' => $newOrder]);
             }
         }
+    }
+
+    /**
+     * Recompute the four denormalized review cache columns for one
+     * company in a single aggregate query. Called by
+     * CompanyReviewObserver on create/update/delete and by the
+     * `reviews:recompute-stats` backfill command.
+     *
+     * A review with rating >= 4 counts as a "recommend".
+     *
+     * When a company has no published reviews left, all four fields
+     * reset to 0 / null so the frontend doesn't render stale numbers.
+     */
+    public static function recomputeReviewStats(int $companyId): void
+    {
+        $row = DB::table('company_reviews')
+            ->selectRaw('
+                COUNT(*)                                              AS review_count,
+                AVG(rating)                                           AS rating_avg,
+                SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END)          AS recommends,
+                SUM(CASE WHEN rating = 5 THEN 1 ELSE 0 END)           AS r5,
+                SUM(CASE WHEN rating = 4 THEN 1 ELSE 0 END)           AS r4,
+                SUM(CASE WHEN rating = 3 THEN 1 ELSE 0 END)           AS r3,
+                SUM(CASE WHEN rating = 2 THEN 1 ELSE 0 END)           AS r2,
+                SUM(CASE WHEN rating = 1 THEN 1 ELSE 0 END)           AS r1
+            ')
+            ->where('company_id', $companyId)
+            ->where('status', 'published')
+            ->first();
+
+        $count = (int) ($row->review_count ?? 0);
+        $avg = $count > 0 ? round((float) $row->rating_avg, 1) : 0;
+        $pct = $count > 0
+            ? (int) round(100 * ((int) $row->recommends) / $count)
+            : 0;
+        $breakdown = [
+            '5' => (int) ($row->r5 ?? 0),
+            '4' => (int) ($row->r4 ?? 0),
+            '3' => (int) ($row->r3 ?? 0),
+            '2' => (int) ($row->r2 ?? 0),
+            '1' => (int) ($row->r1 ?? 0),
+        ];
+
+        self::query()->where('id', $companyId)->update([
+            'review_count' => $count,
+            'rating_avg' => $avg,
+            'recommend_pct' => $pct,
+            'rating_breakdown' => json_encode($breakdown, JSON_THROW_ON_ERROR),
+        ]);
     }
 
     public function reorderToCurrentPosition(): void
@@ -125,5 +175,10 @@ final class Company extends Model
     public function faqs(): HasMany
     {
         return $this->hasMany(CompanyFaq::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(CompanyReview::class);
     }
 }

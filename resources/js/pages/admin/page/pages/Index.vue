@@ -1,16 +1,27 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
+    Building2,
+    CheckCircle2,
     Copy,
     ExternalLink,
     Eye,
     Home,
     Image as ImageIcon,
+    List,
     Pencil,
     Plus,
+    Star,
     Trash2,
     X,
 } from 'lucide-vue-next';
+
+const SYSTEM_ICONS = {
+    list: List,
+    building: Building2,
+    star: Star,
+    check: CheckCircle2,
+} as const;
 import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import FlagImage from '@/components/common/FlagImage.vue';
@@ -105,11 +116,21 @@ type Filters = {
     lang: string; // 'any' | <lang code> | 'both'
 };
 
+type SystemPage = {
+    id: string;
+    title: string;
+    description: string;
+    url: string | null;
+    icon: 'list' | 'building' | 'star' | 'check';
+    requires_sample: boolean;
+};
+
 const props = defineProps<{
     pages: Page[];
     languages: Language[];
     categoryOptions: CategoryOption[];
     statusCounts: StatusCounts;
+    systemPages: SystemPage[];
     filters: Filters;
     pagination: PaginationMeta;
 }>();
@@ -209,14 +230,10 @@ function resetAllFilters(): void {
     );
 }
 
-// Active state for the "All" pill: no status filter AND not the Mine view.
 const allActive = computed(
     () => statusFilter.value === 'all' && !mineOnly.value,
 );
 
-// Each pill: idle classes + active classes. We use Tailwind color families so
-// the inactive state stays soft/tinted and the active state pops in saturated
-// color (matches the user's design reference).
 type Pill = {
     key: 'all' | 'mine' | 'published' | 'draft' | 'inactive';
     label: string;
@@ -353,6 +370,59 @@ function applyBulkAction(action: string): void {
                 </Link>
             </Button>
         </div>
+
+        <!-- System Pages: dynamic frontend routes (companies list, detail,
+             review, thanks). Read-only entries so admins can jump to and
+             QA the live frontend without hunting for URLs. -->
+        <Card>
+            <CardHeader class="pb-3">
+                <CardTitle class="text-base">
+                    {{ t('system_pages.section_title') }}
+                </CardTitle>
+                <CardDescription>
+                    {{ t('system_pages.section_description') }}
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div
+                        v-for="sp in systemPages"
+                        :key="sp.id"
+                        class="flex flex-col gap-2 rounded-lg border border-border p-3 transition-colors hover:border-[var(--orange)]"
+                    >
+                        <div class="flex items-start gap-2">
+                            <div class="flex size-8 shrink-0 items-center justify-center rounded-md bg-[var(--orange-soft)] text-[var(--orange)]">
+                                <component :is="SYSTEM_ICONS[sp.icon]" class="size-4" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-[var(--midnight)] dark:text-white">
+                                    {{ sp.title }}
+                                </p>
+                                <p class="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                                    {{ sp.description }}
+                                </p>
+                            </div>
+                        </div>
+                        <p v-if="sp.url" class="truncate font-mono text-[10px] text-muted-foreground">
+                            {{ sp.url }}
+                        </p>
+                        <a
+                            v-if="sp.url"
+                            :href="sp.url"
+                            target="_blank"
+                            rel="noopener"
+                            class="mt-auto inline-flex items-center gap-1.5 self-start rounded-md border border-[var(--orange)] px-2.5 py-1 text-xs font-medium text-[var(--orange)] hover:bg-[var(--orange-soft)]"
+                        >
+                            <ExternalLink class="size-3.5" />
+                            {{ t('system_pages.view') }}
+                        </a>
+                        <p v-else class="text-xs italic text-muted-foreground">
+                            {{ t('system_pages.no_sample') }}
+                        </p>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
 
         <Card>
             <CardHeader>

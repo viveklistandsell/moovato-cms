@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSett
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\Reviews\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\Service\CategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Admin\Service\ParentCategoryController as AdminServiceParentCategoryController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\CompanyController as FrontendCompanyController;
+use App\Http\Controllers\Frontend\CompanyReviewController as FrontendCompanyReviewController;
 use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\PlaceSearchController;
@@ -82,6 +84,20 @@ Route::middleware('locale')->group(function (): void {
     Route::get('company/{permalink}', [FrontendCompanyController::class, 'show'])
         ->where('permalink', '[a-z0-9-]+')
         ->name('companies.show');
+    Route::get('company/{slug}/review', [FrontendCompanyReviewController::class, 'create'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('companies.review.create');
+    Route::post('company/{slug}/review', [FrontendCompanyReviewController::class, 'store'])
+        ->where('slug', '[a-z0-9-]+')
+        ->middleware('throttle:5,60')
+        ->name('companies.review.store');
+    Route::get('company/{slug}/review/thanks', [FrontendCompanyReviewController::class, 'thanks'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('companies.review.thanks');
+    Route::post('reviews/{review}/helpful', [FrontendCompanyReviewController::class, 'helpful'])
+        ->whereNumber('review')
+        ->middleware('throttle:60,1')
+        ->name('reviews.helpful');
 });
 
 // Non-default locales (EN, ...) keep the /{locale}/ prefix.
@@ -104,6 +120,20 @@ Route::prefix('{locale}')
         Route::get('company/{permalink}', [FrontendCompanyController::class, 'show'])
             ->where('permalink', '[a-z0-9-]+')
             ->name('companies.show');
+        Route::get('company/{slug}/review', [FrontendCompanyReviewController::class, 'create'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('companies.review.create');
+        Route::post('company/{slug}/review', [FrontendCompanyReviewController::class, 'store'])
+            ->where('slug', '[a-z0-9-]+')
+            ->middleware('throttle:5,60')
+            ->name('companies.review.store');
+        Route::get('company/{slug}/review/thanks', [FrontendCompanyReviewController::class, 'thanks'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('companies.review.thanks');
+        Route::post('reviews/{review}/helpful', [FrontendCompanyReviewController::class, 'helpful'])
+            ->whereNumber('review')
+            ->middleware('throttle:60,1')
+            ->name('reviews.helpful');
     });
 
 // Canonical: old /de/* URLs 301-redirect to the unprefixed root.
@@ -114,9 +144,6 @@ Route::get('/de/{rest?}', function (?string $rest = null) {
     return redirect($query !== null ? "{$target}?{$query}" : $target, 301);
 })->where('rest', '.*');
 
-// Public page show — must be registered AFTER all other named routes so it
-// doesn't shadow /blog, /admin, /login, etc. The slug regex blocks reserved
-// segments at the URL boundary.
 Route::middleware('locale')
     ->get('/{permalink}', [FrontendPageController::class, 'show'])
     ->where('permalink', '(?!admin|blog|companies|company|de|en|login|register|dashboard|forgot-password|reset-password|email|user|two-factor-challenge|logout|settings|_boost|storage|build)[a-z0-9-]+')
@@ -265,6 +292,21 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             Route::resource('companies', AdminCompanyController::class)
                 ->parameters(['companies' => 'company'])
                 ->except('show');
+            Route::get('reviews/{review}/proof', [AdminReviewController::class, 'downloadProof'])
+                ->whereNumber('review')
+                ->name('reviews.proof');
+            Route::post('reviews/{review}/reply', [AdminReviewController::class, 'reply'])
+                ->whereNumber('review')
+                ->name('reviews.reply');
+            Route::delete('reviews/{review}/reply', [AdminReviewController::class, 'destroyReply'])
+                ->whereNumber('review')
+                ->name('reviews.reply.destroy');
+            Route::post('reviews/{review}/status', [AdminReviewController::class, 'setStatus'])
+                ->whereNumber('review')
+                ->name('reviews.status');
+            Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])
+                ->whereNumber('review')
+                ->name('reviews.destroy');
         });
 
         Route::prefix('pages')->name('pages.')->group(function (): void {

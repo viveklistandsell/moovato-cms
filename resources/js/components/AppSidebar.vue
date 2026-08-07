@@ -149,9 +149,6 @@ const navigationItems = computed<NavItem[]>(() => [
     { title: t('sidebar.footer_menu'), href: '/admin/menus/footer', icon: MenuIcon },
 ]);
 
-// User management sub-menu shown under the collapsible "User Management"
-// item. "Add User" jumps to the index page with `?new=1` so Index.vue
-// auto-opens the create drawer — no separate route required.
 const userItems = computed<NavItem[]>(() => [
     { title: t('sidebar.all_users'), href: '/admin/users', icon: Users },
     { title: t('sidebar.add_user'), href: '/admin/users/create', icon: UserPlus },

@@ -40,8 +40,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'locale' => SetLocale::class,
             'admin' => EnsureUserIsAdmin::class,
             'admin.locale' => SetAdminLocale::class,
-            // Spatie permission middleware aliases. Used in routes/web.php as
-            // ->middleware('permission:users.create') etc.
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,

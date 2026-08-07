@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import {
     BadgeCheck,
     Briefcase,
@@ -7,16 +7,20 @@ import {
     ChevronLeft,
     ChevronRight,
     Globe,
+    Loader2,
     Mail,
     MapPin,
     MessageCircle,
     MessageSquareQuote,
+    MessageSquareReply,
     Phone,
     Star,
+    ThumbsDown,
+    ThumbsUp,
     Truck,
     X,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { localizedUrl } from '@/lib/localizedUrl';
 
 type Contact = {
@@ -73,9 +77,36 @@ type Company = {
     faqs: Faq[];
 };
 
+type PublicReview = {
+    id: number;
+    public_name: string;
+    is_anonymous: boolean;
+    rating: number;
+    body: string;
+    advantages: string[];
+    disadvantages: string[];
+    source: string | null;
+    helpful_count: number;
+    published_at: string | null;
+    reply_body: string | null;
+    replied_at: string | null;
+    reply_author_name: string | null;
+};
+
+type ReviewsPage = {
+    sort: string;
+    data: PublicReview[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    has_more: boolean;
+};
+
 const props = defineProps<{
     locale: string;
     company: Company;
+    reviews: ReviewsPage;
 }>();
 
 const t = computed(() => ({
@@ -107,14 +138,71 @@ const t = computed(() => ({
     recommend: (p: number) => props.locale === 'de'
         ? `${p}% empfehlen dieses Unternehmen weiter.`
         : `${p}% recommend this company.`,
-    reviews_coming_soon: props.locale === 'de'
-        ? 'Öffentliche Bewertungen erscheinen hier, sobald das Bewertungsmodul aktiviert ist.'
-        : 'Public reviews will appear here once the reviews module is live.',
     founded: props.locale === 'de' ? 'Gegründet' : 'Founded',
     employees: props.locale === 'de' ? 'Mitarbeiter' : 'Employees',
     empty_faqs: props.locale === 'de' ? 'Keine FAQs hinterlegt.' : 'No FAQs yet.',
     empty_gallery: props.locale === 'de' ? 'Keine Galerie-Bilder.' : 'No gallery photos yet.',
     empty_services: props.locale === 'de' ? 'Keine Leistungen hinterlegt.' : 'No services listed.',
+    reviews_sort_label: props.locale === 'de' ? 'Sortieren' : 'Sort',
+    reviews_sort_newest: props.locale === 'de' ? 'Neueste zuerst' : 'Newest first',
+    reviews_sort_oldest: props.locale === 'de' ? 'Älteste zuerst' : 'Oldest first',
+    reviews_sort_high: props.locale === 'de' ? 'Beste Bewertung' : 'Highest rating',
+    reviews_sort_low: props.locale === 'de' ? 'Schlechteste Bewertung' : 'Lowest rating',
+    reviews_show_more: props.locale === 'de' ? 'Mehr Bewertungen laden' : 'Show more reviews',
+    reviews_showing: (shown: number, total: number) => props.locale === 'de'
+        ? `${shown} von ${total} Bewertungen`
+        : `${shown} of ${total} reviews`,
+    reviews_empty: props.locale === 'de'
+        ? 'Noch keine Bewertungen. Seien Sie die erste Person, die eine schreibt.'
+        : 'No reviews yet. Be the first to write one.',
+    reply_by_company: props.locale === 'de' ? 'Antwort vom Unternehmen' : 'Reply from the company',
+    helpful_ask: props.locale === 'de' ? 'War diese Bewertung hilfreich?' : 'Was this review helpful?',
+    helpful_button: props.locale === 'de' ? 'Hilfreich' : 'Helpful',
+    helpful_marked: props.locale === 'de' ? 'Danke!' : 'Thanks!',
+    helpful_count_label: (n: number) => props.locale === 'de'
+        ? (n === 1 ? '1 Person fand das hilfreich' : `${n} Personen fanden das hilfreich`)
+        : (n === 1 ? '1 person found this helpful' : `${n} people found this helpful`),
+    source_label: (s: string) => {
+        const de: Record<string, string> = {
+            google: 'Google-Suche', referred: 'Empfehlung', website: 'Direkt auf Moovato',
+            social: 'Soziale Medien', other: 'Andere',
+        };
+        const en: Record<string, string> = {
+            google: 'Google search', referred: 'Recommendation', website: 'Directly on Moovato',
+            social: 'Social media', other: 'Other',
+        };
+        return (props.locale === 'de' ? de : en)[s] ?? s;
+    },
+    tag_label: (tag: string) => {
+        const de: Record<string, string> = {
+            friendly: 'Freundlich', professional: 'Professionell', fast: 'Schnell',
+            'on-time': 'Pünktlich', reliable: 'Zuverlässig', careful: 'Sorgfältig',
+            'fair-pricing': 'Faire Preise', communicative: 'Kommunikativ',
+            'value-for-money': 'Preis-Leistung',
+        };
+        const en: Record<string, string> = {
+            friendly: 'Friendly', professional: 'Professional', fast: 'Fast',
+            'on-time': 'On-time', reliable: 'Reliable', careful: 'Careful',
+            'fair-pricing': 'Fair pricing', communicative: 'Communicative',
+            'value-for-money': 'Value for money',
+        };
+        return (props.locale === 'de' ? de : en)[tag] ?? tag;
+    },
+    tag_label_negative: (tag: string) => {
+        const de: Record<string, string> = {
+            friendly: 'Unfreundlich', professional: 'Unprofessionell', fast: 'Langsam',
+            'on-time': 'Verspätet', reliable: 'Unzuverlässig', careful: 'Unachtsam',
+            'fair-pricing': 'Zu teuer', communicative: 'Schlechte Kommunikation',
+            'value-for-money': 'Schlechtes Preis-Leistungs-Verhältnis',
+        };
+        const en: Record<string, string> = {
+            friendly: 'Unfriendly', professional: 'Unprofessional', fast: 'Slow',
+            'on-time': 'Late arrival', reliable: 'Unreliable', careful: 'Careless',
+            'fair-pricing': 'Overpriced', communicative: 'Poor communication',
+            'value-for-money': 'Poor value for money',
+        };
+        return (props.locale === 'de' ? de : en)[tag] ?? tag;
+    },
     write_review_cta: props.locale === 'de'
         ? 'Sind Sie mit diesem Unternehmen umgezogen? Teilen Sie Ihre Erfahrungen.'
         : 'Did you move with this company? Tell us about your experience.',
@@ -187,14 +275,130 @@ const ratingBreakdown = computed(() => {
         pct: (Number(breakdown[String(n)] ?? 0) / total) * 100,
     }));
 });
+
+const reviewFormUrl = computed(() =>
+    localizedUrl(props.locale, `/company/${props.company.permalink}/review`),
+);
+
+/* ---------------------------------------- reviews list state */
+
+const loadedReviews = ref<PublicReview[]>([...props.reviews.data]);
+const loadingMore = ref(false);
+const currentSort = ref(props.reviews.sort);
+const currentPage = ref(props.reviews.current_page);
+const totalReviews = ref(props.reviews.total);
+const hasMore = ref(props.reviews.has_more);
+
+watch(
+    () => props.reviews,
+    (fresh) => {
+        if (fresh.current_page === 1) {
+            loadedReviews.value = [...fresh.data];
+        } else {
+            loadedReviews.value = [...loadedReviews.value, ...fresh.data];
+        }
+        currentSort.value = fresh.sort;
+        currentPage.value = fresh.current_page;
+        totalReviews.value = fresh.total;
+        hasMore.value = fresh.has_more;
+        loadingMore.value = false;
+    },
+);
+
+function reloadReviews(params: Record<string, string | number>): void {
+    router.get(
+        localizedUrl(props.locale, `/company/${props.company.permalink}`),
+        params,
+        {
+            only: ['reviews'],
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            onFinish: () => { loadingMore.value = false; },
+        },
+    );
+}
+
+function changeSort(next: string): void {
+    if (next === currentSort.value) return;
+    reloadReviews({ reviews_sort: next });
+}
+
+function loadMore(): void {
+    if (loadingMore.value || !hasMore.value) return;
+    loadingMore.value = true;
+    reloadReviews({
+        reviews_sort: currentSort.value,
+        reviews_page: currentPage.value + 1,
+    });
+}
+
+function formatDate(iso: string | null): string {
+    if (!iso) return '';
+    try {
+        return new Date(iso).toLocaleDateString(props.locale === 'de' ? 'de-DE' : 'en-US', {
+            year: 'numeric', month: 'short', day: 'numeric',
+        });
+    } catch {
+        return '';
+    }
+}
+
+/* ---------------------------------------- helpful button state */
+
+const helpfulMarked = ref<Set<number>>(new Set());
+const helpfulPending = ref<Set<number>>(new Set());
+
+function isHelpfulMarked(reviewId: number): boolean {
+    return helpfulMarked.value.has(reviewId);
+}
+
+function markHelpful(review: PublicReview): void {
+    if (isHelpfulMarked(review.id) || helpfulPending.value.has(review.id)) return;
+
+    review.helpful_count += 1;
+    helpfulPending.value.add(review.id);
+
+    router.post(
+        `/reviews/${review.id}/helpful`,
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['reviews'],
+            onSuccess: () => {
+                helpfulMarked.value = new Set([...helpfulMarked.value, review.id]);
+            },
+            onError: () => {
+                review.helpful_count = Math.max(0, review.helpful_count - 1);
+            },
+            onFinish: () => {
+                helpfulPending.value.delete(review.id);
+            },
+        },
+    );
+}
 </script>
 
 <template>
     <Head :title="company.name" />
 
     <div class="mv-company-show bg-[var(--paper)]">
-        <!-- Header band with breadcrumb + name -->
-        <div class="border-b border-[var(--linen)] bg-[color-mix(in_srgb,var(--orange-soft)_60%,white)] py-6">
+        <div class="relative overflow-hidden border-b border-[var(--linen)] py-6">
+            <img
+                v-if="company.cover"
+                :src="assetUrl(company.cover)!"
+                alt="cover-image"
+                aria-hidden="true"
+                class="pointer-events-none absolute inset-0 size-full scale-90 object-cover"
+            />
+            <div
+                class="absolute inset-0"
+                :class="company.cover
+                    ? 'bg-[color-mix(in_srgb,var(--orange-soft)_60%,white)]/85'
+                    : 'bg-[color-mix(in_srgb,var(--orange-soft)_60%,white)]'"
+            />
+            <div class="relative">
             <div class="container-xl">
                 <nav class="mb-3 flex flex-wrap items-center gap-1.5 text-xs text-[var(--slate)]">
                     <Link :href="localizedUrl(locale, '/')" class="hover:text-[var(--midnight)] hover:underline">
@@ -244,8 +448,8 @@ const ratingBreakdown = computed(() => {
                                     :key="n"
                                     class="size-4"
                                     :class="(company.review_count > 0
-                                        ? company.rating_avg / 2
-                                        : Number(company.google_rating ?? 0) / 2) >= n ? 'fill-current' : ''"
+                                        ? Number(company.rating_avg)
+                                        : Number(company.google_rating ?? 0)) >= n ? 'fill-current' : ''"
                                 />
                             </div>
                             <span class="text-[var(--slate)]">
@@ -275,17 +479,16 @@ const ratingBreakdown = computed(() => {
                                 <Phone class="size-3.5" />
                                 {{ t.request_quote }}
                             </a>
-                            <button
-                                type="button"
+                            <Link
+                                :href="reviewFormUrl"
                                 class="inline-flex items-center gap-1.5 rounded-xl border border-[var(--orange)] px-4 py-2 text-sm font-medium text-[var(--orange)] hover:bg-[var(--orange-soft)]"
-                                disabled
-                                :title="t.reviews_coming_soon"
                             >
                                 {{ t.write_review }}
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -451,7 +654,7 @@ const ratingBreakdown = computed(() => {
                                         v-for="n in 5"
                                         :key="n"
                                         class="size-5"
-                                        :class="company.rating_avg / 2 >= n ? 'fill-current' : ''"
+                                        :class="Number(company.rating_avg) >= n ? 'fill-current' : ''"
                                     />
                                 </div>
                             </div>
@@ -481,16 +684,166 @@ const ratingBreakdown = computed(() => {
                         </div>
 
                         <div
-                            class="mt-4 flex items-start gap-3 rounded-md border border-[var(--linen)] bg-[var(--paper)] p-4"
+                            class="mt-4 flex flex-wrap items-start gap-3 rounded-md border border-[var(--linen)] bg-[var(--paper)] p-4"
                         >
                             <MessageSquareQuote class="mt-0.5 size-5 shrink-0 text-[var(--orange)]" />
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0">
                                 <p class="text-sm text-[var(--midnight)]">
                                     {{ t.write_review_cta }}
                                 </p>
-                                <p class="mt-1 text-xs text-[var(--slate)]">
-                                    {{ t.reviews_coming_soon }}
+                            </div>
+                            <Link
+                                :href="reviewFormUrl"
+                                class="inline-flex items-center gap-1.5 rounded-md bg-[var(--orange)] px-4 py-2 text-sm font-semibold text-white hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                            >
+                                {{ t.write_review }}
+                            </Link>
+                        </div>
+
+                        <!-- Individual reviews list -->
+                        <div v-if="totalReviews === 0" class="mt-6 rounded-md border border-dashed border-[var(--linen)] p-8 text-center text-sm text-[var(--slate)]">
+                            {{ t.reviews_empty }}
+                        </div>
+
+                        <div v-else class="mt-6">
+                            <!-- Sort control -->
+                            <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--linen)] pb-3">
+                                <p class="text-sm text-[var(--slate)]">
+                                    {{ t.reviews_showing(loadedReviews.length, totalReviews) }}
                                 </p>
+                                <label class="flex items-center gap-2 text-sm">
+                                    <span class="text-[var(--slate)]">{{ t.reviews_sort_label }}:</span>
+                                    <select
+                                        :value="currentSort"
+                                        class="rounded-md border border-[var(--linen)] bg-white px-2 py-1 text-sm focus:border-[var(--orange)] focus:outline-none"
+                                        @change="(e) => changeSort((e.target as HTMLSelectElement).value)"
+                                    >
+                                        <option value="newest">{{ t.reviews_sort_newest }}</option>
+                                        <option value="oldest">{{ t.reviews_sort_oldest }}</option>
+                                        <option value="rating_high">{{ t.reviews_sort_high }}</option>
+                                        <option value="rating_low">{{ t.reviews_sort_low }}</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <ul class="divide-y divide-[var(--linen)]">
+                                <li
+                                    v-for="review in loadedReviews"
+                                    :key="review.id"
+                                    class="py-5 first:pt-0"
+                                >
+                                    <!-- Header row: initials avatar + name + date + stars -->
+                                    <div class="mb-2 flex items-start justify-between gap-3">
+                                        <div class="flex items-start gap-3 min-w-0">
+                                            <div
+                                                class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--orange-soft)] text-sm font-semibold text-[var(--orange)]"
+                                                aria-hidden="true"
+                                            >
+                                                {{ review.public_name.slice(0, 2).replace('.', '').toUpperCase() || '?' }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-semibold text-[var(--midnight)]">
+                                                    {{ review.public_name }}
+                                                </p>
+                                                <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-[var(--slate)]">
+                                                    <span>{{ formatDate(review.published_at) }}</span>
+                                                    <span v-if="review.source">·</span>
+                                                    <span v-if="review.source">{{ t.source_label(review.source) }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-0.5 shrink-0">
+                                            <Star
+                                                v-for="n in 5"
+                                                :key="n"
+                                                class="size-4"
+                                                :class="n <= review.rating
+                                                    ? 'fill-amber-400 text-amber-400'
+                                                    : 'text-[var(--linen)]'"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Body -->
+                                    <p class="mb-3 whitespace-pre-line text-sm leading-relaxed text-[var(--midnight)]">
+                                        {{ review.body }}
+                                    </p>
+
+                                    <!-- Tags -->
+                                    <div
+                                        v-if="review.advantages.length || review.disadvantages.length"
+                                        class="mb-3 flex flex-wrap gap-1.5"
+                                    >
+                                        <span
+                                            v-for="tag in review.advantages"
+                                            :key="`adv-${review.id}-${tag}`"
+                                            class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-700"
+                                        >
+                                            <ThumbsUp class="size-3" />
+                                            {{ t.tag_label(tag) }}
+                                        </span>
+                                        <span
+                                            v-for="tag in review.disadvantages"
+                                            :key="`dis-${review.id}-${tag}`"
+                                            class="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] text-red-700"
+                                        >
+                                            <ThumbsDown class="size-3" />
+                                            {{ t.tag_label_negative(tag) }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Company reply (nested, Google-style) -->
+                                    <div
+                                        v-if="review.reply_body"
+                                        class="mt-3 rounded-md border border-[var(--linen)] bg-[var(--paper)] p-3"
+                                    >
+                                        <div class="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold text-[var(--midnight)]">
+                                            <MessageSquareReply class="size-3.5 text-[var(--orange)]" />
+                                            {{ t.reply_by_company }}
+                                            <span v-if="review.replied_at" class="font-normal text-[var(--slate)]">
+                                                · {{ formatDate(review.replied_at) }}
+                                            </span>
+                                        </div>
+                                        <p class="whitespace-pre-line text-sm text-[var(--midnight)]">
+                                            {{ review.reply_body }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Helpful vote row -->
+                                    <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--linen)] pt-3">
+                                        <button
+                                            type="button"
+                                            :disabled="isHelpfulMarked(review.id) || helpfulPending.has(review.id)"
+                                            class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors"
+                                            :class="isHelpfulMarked(review.id)
+                                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                                : 'border-[var(--linen)] text-[var(--slate)] hover:border-[var(--orange)] hover:text-[var(--orange)]'"
+                                            @click="markHelpful(review)"
+                                        >
+                                            <ThumbsUp class="size-3.5" />
+                                            {{ isHelpfulMarked(review.id) ? t.helpful_marked : t.helpful_button }}
+                                        </button>
+                                        <span
+                                            v-if="review.helpful_count > 0"
+                                            class="text-xs text-[var(--slate)]"
+                                        >
+                                            {{ t.helpful_count_label(review.helpful_count) }}
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <!-- Show-more button -->
+                            <div v-if="hasMore" class="mt-4 flex justify-center">
+                                <button
+                                    type="button"
+                                    :disabled="loadingMore"
+                                    class="inline-flex items-center gap-2 rounded-md border border-[var(--orange)] px-5 py-2 text-sm font-medium text-[var(--orange)] hover:bg-[var(--orange-soft)] disabled:opacity-60"
+                                    @click="loadMore"
+                                >
+                                    <Loader2 v-if="loadingMore" class="size-4 animate-spin" />
+                                    {{ t.reviews_show_more }}
+                                </button>
                             </div>
                         </div>
                     </section>
