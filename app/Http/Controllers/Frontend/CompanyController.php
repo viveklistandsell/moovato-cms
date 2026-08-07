@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Company;
+use App\Models\CompanyReview;
 use App\Models\CompanyTranslation;
 use App\Models\District;
 use App\Models\Language;
@@ -191,6 +192,7 @@ final class CompanyController extends Controller
             'company' => $this->presentDetail($company, $locale),
             // Shared with SiteHeader — see `switchHref` computed there.
             'localeAlternates' => $localeAlternates,
+            'reviews' => fn (): array => $this->presentReviews($request, (int) $company->id),
         ]);
     }
 
@@ -230,6 +232,69 @@ final class CompanyController extends Controller
             ->unique()
             ->values()
             ->all();
+    }
+
+    /**
+     * Load one page of public reviews for the profile page.
+     *
+     * Query params:
+     *   reviews_sort → newest (default) | oldest | rating_high | rating_low
+     *   reviews_page → 1..N (default 1)
+     *
+     * Namespaced under `reviews_` so future filters on the profile URL
+     * don't collide.
+     *
+     * @return array<string, mixed>
+     */
+    private function presentReviews(Request $request, int $companyId): array
+    {
+        $sort = (string) $request->query('reviews_sort', 'newest');
+        $sort = in_array($sort, ['newest', 'oldest', 'rating_high', 'rating_low'], true)
+            ? $sort
+            : 'newest';
+
+        $query = CompanyReview::query()
+            ->published()
+            ->where('company_id', $companyId)
+            ->with(['replyAuthor:id,name']);
+
+        match ($sort) {
+            'oldest' => $query->orderBy('published_at')->orderBy('id'),
+            'rating_high' => $query->orderByDesc('rating')->orderByDesc('id'),
+            'rating_low' => $query->orderBy('rating')->orderByDesc('id'),
+            default => $query->latest('published_at')->orderByDesc('id'),
+        };
+
+        $perPage = max(1, min(50, (int) $request->query('reviews_per_page', '6')));
+        $paginated = $query->paginate($perPage, ['*'], 'reviews_page')
+            ->withQueryString();
+
+        return [
+            'sort' => $sort,
+            'data' => $paginated->getCollection()
+                ->map(fn (CompanyReview $r): array => [
+                    'id' => (int) $r->id,
+                    'public_name' => $r->publicName(),
+                    'is_anonymous' => (bool) $r->is_anonymous,
+                    'rating' => (int) $r->rating,
+                    'body' => $r->body,
+                    'advantages' => $r->advantages ?? [],
+                    'disadvantages' => $r->disadvantages ?? [],
+                    'source' => $r->source,
+                    'helpful_count' => (int) $r->helpful_count,
+                    'published_at' => $r->published_at?->toIso8601String(),
+                    'reply_body' => $r->reply_body,
+                    'replied_at' => $r->replied_at?->toIso8601String(),
+                    'reply_author_name' => $r->replyAuthor?->name,
+                ])
+                ->values()
+                ->all(),
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+            'per_page' => $paginated->perPage(),
+            'total' => $paginated->total(),
+            'has_more' => $paginated->currentPage() < $paginated->lastPage(),
+        ];
     }
 
     /* ---------------------------------------------------------- presenters */

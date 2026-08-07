@@ -24,6 +24,7 @@ final class DatabaseSeeder extends Seeder
             ServiceParentCategorySeeder::class,
             ServiceCategorySeeder::class,
             CompanySeeder::class,
+            CompanyReviewSeeder::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Companies;
 
+use App\Http\Controllers\Admin\Reviews\ReviewController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Companies\Company\BulkActionCompaniesRequest;
 use App\Http\Requests\Admin\Companies\Company\ReorderCompaniesRequest;
@@ -159,11 +160,6 @@ final class CompanyController extends Controller
         ]);
     }
 
-    /**
-     * Slim JSON list of companies for the `company_top_list` widget picker.
-     * Pass `q` to search by name, or `ids[]` to re-hydrate an existing pick
-     * (order is restored by the caller, not here).
-     */
     public function lookup(Request $request): JsonResponse
     {
         $search = mb_trim((string) $request->query('q', ''));
@@ -252,7 +248,7 @@ final class CompanyController extends Controller
             ->with('toast', ['type' => 'success', 'message' => __('admin.companies.company_created_toast')]);
     }
 
-    public function edit(Company $company): Response
+    public function edit(Request $request, Company $company): Response
     {
         $company->load([
             'primaryCity:id,state_id,name,permalink',
@@ -276,6 +272,7 @@ final class CompanyController extends Controller
             'parentCategories' => $this->presentParentCategories(),
             'serviceCategories' => $this->presentServiceCategories(),
             'nextSortOrder' => $company->sort_order,
+            'reviews' => fn (): array => ReviewController::paginateForCompany($request, (int) $company->id),
         ]);
     }
 
@@ -391,13 +388,21 @@ final class CompanyController extends Controller
      */
     private function companyAttributes(array $data): array
     {
-        return collect($data)->only([
+        $attrs = collect($data)->only([
             'primary_city_id', 'primary_district_id', 'street', 'postal_code',
             'logo', 'cover', 'verified', 'is_top_rated', 'plan_tier',
             'rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown',
             'google_rating', 'google_review_count',
             'founded_year', 'employee_count', 'status', 'sort_order',
         ])->all();
+
+        foreach (['rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown'] as $observed) {
+            if (array_key_exists($observed, $attrs) && $attrs[$observed] === null) {
+                unset($attrs[$observed]);
+            }
+        }
+
+        return $attrs;
     }
 
     /**

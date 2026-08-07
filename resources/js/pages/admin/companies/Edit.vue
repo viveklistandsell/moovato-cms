@@ -23,6 +23,9 @@ import {
 import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import Heading from '@/components/Heading.vue';
+import CompanyReviewsSection, {
+    type ReviewsPayload,
+} from '@/components/admin/CompanyReviewsSection.vue';
 import FlagImage from '@/components/common/FlagImage.vue';
 import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
@@ -151,15 +154,11 @@ const props = defineProps<{
     parentCategories: ParentCat[];
     serviceCategories: ServiceCat[];
     nextSortOrder: number;
+    reviews?: ReviewsPayload;
 }>();
 
 const isEditing = computed(() => props.company !== null);
 
-/**
- * Preview URL — only meaningful once a company has been saved (has an
- * ID and a default-language permalink). Points to the public detail
- * page in the default locale (unprefixed for DE, /en/... for others).
- */
 const previewUrl = computed<string | null>(() => {
     if (!props.company) return null;
     const defaultLocale = props.languages.find((l) => l.is_default)?.code ?? 'de';
@@ -182,8 +181,7 @@ setBreadcrumbs(() => [
         href: '#',
     },
 ]);
-        
-// One translation row per active language — seeded from server or blank.
+
 function seedTranslations(): Translation[] {
     return props.languages.map((lang) => {
         const existing = props.company?.translations.find((t) => t.lang === lang.code);
@@ -254,12 +252,6 @@ const currentLang = ref(
     props.languages.find((l) => l.is_default)?.code ?? props.languages[0]?.code ?? 'de',
 );
 
-/**
- * URL prefix shown fused to the left of the permalink input, so admins
- * can see at a glance what the final public URL will look like. Default
- * locale (usually `de`) sits at the site root, other locales get the
- * `/{locale}/` prefix — mirrors the actual route registration.
- */
 const urlPrefixes = computed<Record<string, string>>(() => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const map: Record<string, string> = {};
@@ -1292,6 +1284,13 @@ function submit(): void {
                 </LocaleTabs>
             </CardContent>
         </Card>
+        <!-- 9. Reviews — inline moderation for this company's reviews. -->
+        <CompanyReviewsSection
+            v-if="isEditing && props.reviews && props.company"
+            :company-id="props.company.id"
+            :reviews="props.reviews"
+            :reload-url="`/admin/companies/${props.company.id}/edit`"
+        />
 
         </div>
         <aside class="flex flex-col gap-6 lg:sticky lg:top-4 lg:self-start">
@@ -1545,8 +1544,8 @@ function submit(): void {
                                 type="number"
                                 step="0.1"
                                 min="0"
-                                max="10"
-                                placeholder="9.5"
+                                max="5"
+                                placeholder="4.5"
                             />
                         </div>
                         <div class="grid gap-2">
@@ -1615,8 +1614,8 @@ function submit(): void {
                             type="number"
                             step="0.1"
                             min="0"
-                            max="10"
-                            placeholder="9.8"
+                            max="5"
+                            placeholder="4.8"
                         />
                     </div>
                     <div class="grid gap-2">
