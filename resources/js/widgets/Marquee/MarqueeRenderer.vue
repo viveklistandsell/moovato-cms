@@ -23,7 +23,7 @@ const duration = computed(
 </script>
 
 <template>
-    <section v-if="items.length" class="mv-ticker">
+    <section v-if="items.length" v-reveal class="mv-ticker">
         <div class="mv-ticker__bar">
             <div
                 class="mv-ticker__track"

@@ -54,16 +54,16 @@ final class PromoCtaWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:160'],
-            'features' => ['nullable', 'array', 'max:8'],
-            'features.*' => ['nullable', 'string', 'max:120'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
-            'badge_number' => ['nullable', 'string', 'max:8'],
-            'badge_unit' => ['nullable', 'string', 'max:40'],
-            'badge_label' => ['nullable', 'string', 'max:40'],
-            'call_label' => ['nullable', 'string', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:60'],
+            'heading' => ['nullable', 'string'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'badge_number' => ['nullable', 'string'],
+            'badge_unit' => ['nullable', 'string'],
+            'badge_label' => ['nullable', 'string'],
+            'call_label' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string'],
         ];
     }
 }

@@ -92,8 +92,8 @@ final class AssistantToolsWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'avatar_path' => ['nullable', 'string', 'max:1000'],
-            'avatar_url' => ['nullable', 'string', 'max:2000'],
+            'avatar_path' => ['nullable', 'string'],
+            'avatar_url' => ['nullable', 'string'],
         ];
     }
 
@@ -103,22 +103,22 @@ final class AssistantToolsWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'assistant_title' => ['nullable', 'string', 'max:160'],
-            'assistant_subtitle' => ['nullable', 'string', 'max:255'],
-            'avatar_alt' => ['nullable', 'string', 'max:160'],
-            'selects' => ['nullable', 'array', 'max:4'],
-            'selects.*.label' => ['nullable', 'string', 'max:80'],
-            'selects.*.options' => ['nullable', 'array', 'max:20'],
-            'selects.*.options.*' => ['nullable', 'string', 'max:120'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
-            'tools_title' => ['nullable', 'string', 'max:160'],
-            'columns' => ['nullable', 'array', 'max:4'],
-            'columns.*.icon' => ['nullable', 'string', 'max:64'],
-            'columns.*.title' => ['nullable', 'string', 'max:120'],
-            'columns.*.links' => ['nullable', 'array', 'max:12'],
-            'columns.*.links.*.label' => ['nullable', 'string', 'max:160'],
-            'columns.*.links.*.url' => ['nullable', 'string', 'max:2000'],
+            'assistant_title' => ['nullable', 'string'],
+            'assistant_subtitle' => ['nullable', 'string'],
+            'avatar_alt' => ['nullable', 'string'],
+            'selects' => ['nullable', 'array'],
+            'selects.*.label' => ['nullable', 'string'],
+            'selects.*.options' => ['nullable', 'array'],
+            'selects.*.options.*' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'tools_title' => ['nullable', 'string'],
+            'columns' => ['nullable', 'array'],
+            'columns.*.icon' => ['nullable', 'string'],
+            'columns.*.title' => ['nullable', 'string'],
+            'columns.*.links' => ['nullable', 'array'],
+            'columns.*.links.*.label' => ['nullable', 'string'],
+            'columns.*.links.*.url' => ['nullable', 'string'],
         ];
     }
 }

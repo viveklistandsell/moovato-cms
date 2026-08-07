@@ -31,28 +31,18 @@ function hrefFor(categorySlug: string | null): string {
 
 <template>
     <div v-if="categories.length > 0" class="flex flex-wrap items-center gap-2">
-        <Link
-            :href="hrefFor(null)"
-            class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors"
-            :class="
-                activeSlug === null
+        <Link :href="hrefFor(null)" class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors"
+            :class="activeSlug === null
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-            "
-        >
+                ">
             {{ allLabel ?? (locale === 'de' ? 'Alle' : 'All') }}
         </Link>
-        <Link
-            v-for="cat in categories"
-            :key="cat.id"
-            :href="hrefFor(cat.permalink)"
-            class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors"
-            :class="
-                activeSlug === cat.permalink
+        <Link v-for="cat in categories" :key="cat.id" :href="hrefFor(cat.permalink)"
+            class="rounded-full border px-4 py-1.5 text-sm font-medium transition-colors" :class="activeSlug === cat.permalink
                     ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-            "
-        >
+                ">
             {{ cat.name }}
         </Link>
     </div>

@@ -54,20 +54,20 @@ final class ImageWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'aspect' => ['required', 'in:16/9,4/3,1/1,auto'],
             'width' => ['required', 'in:narrow,wide,full'],
             'rounded' => ['boolean'],
-            'link_url' => ['nullable', 'string', 'max:2000'],
+            'link_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'alt' => ['nullable', 'string', 'max:255'],
-            'caption' => ['nullable', 'string', 'max:500'],
+            'alt' => ['nullable', 'string'],
+            'caption' => ['nullable', 'string'],
         ];
     }
 }

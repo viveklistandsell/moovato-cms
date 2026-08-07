@@ -26,7 +26,7 @@ function img(i: number): string | null {
 </script>
 
 <template>
-    <section class="mv-collage section-py">
+    <section v-reveal class="mv-collage section-py">
         <div
             class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
@@ -72,7 +72,7 @@ function img(i: number): string | null {
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="text-[var(--midnight)] mv-section-heading"
                     :class="data.eyebrow ? 'mt-5' : ''"
                 >
                     {{ data.heading }}

@@ -2,7 +2,7 @@
 import { Image as ImageIcon } from 'lucide-vue-next';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
-type Stat = { value?: string; title?: string; description?: string };
+type Stat = { description?: string };
 
 type Settings = {
     image_path: string | null;
@@ -29,7 +29,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-aboutstats section-py">
+    <section v-reveal class="mv-aboutstats section-py">
         <div class="container-xl">
             <div class="flex flex-col items-start gap-5">
                 <span v-if="data.eyebrow" class="mv-aboutstats-eyebrow">
@@ -37,7 +37,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading || data.heading_accent"
-                    class="text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="text-[var(--midnight)] mv-section-heading"
                 >
                     {{ data.heading }}
                     <span
@@ -50,17 +50,17 @@ defineProps<{ settings: Settings; data: Data }>();
             </div>
 
             <div
-                class="mt-8 grid gap-6 border-b border-black/10 pb-10 lg:grid-cols-2 lg:items-end"
+                class="mt-8 grid gap-6 border-b border-black/10 pb-5 lg:grid-cols-2 lg:items-end"
             >
                 <p
                     v-if="data.body"
-                    class="max-w-2xl text-base leading-relaxed text-[var(--slate)]"
+                    class="text-base leading-relaxed text-[var(--slate)]"
                 >
                     {{ data.body }}
                 </p>
             </div>
 
-            <div class="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-x-10">
+            <div class="mt-5 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-x-10">
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div class="mv-aboutstats-photo">
                         <img
@@ -88,29 +88,16 @@ defineProps<{ settings: Settings; data: Data }>();
                     </div>
                 </div>
 
-                <div class="flex flex-col justify-center gap-8">
-                    <dl class="space-y-8">
+                <div class="flex flex-col gap-8">
+                   
                         <div
                             v-for="(stat, i) in data.stats ?? []"
                             :key="i"
-                            class="mv-aboutstats-stat"
+                            v-show="stat.description"
                         >
-                            <dt class="mv-aboutstats-stat-label">
-                                {{ stat.title }}
-                            </dt>
-                            <dd
-                                class="mt-4 flex items-baseline justify-between gap-4"
-                            >
-                                <span class="mv-aboutstats-stat-value">
-                                    {{ stat.value }}
-                                </span>
-                                <div
-                                    class="mv-rte mv-aboutstats-stat-desc"
-                                    v-html="stat.description"
-                                />
-                            </dd>
+                            <div v-html="stat.description" />
                         </div>
-                    </dl>
+                    
 
                     <NextButton
                         v-if="data.button_label"

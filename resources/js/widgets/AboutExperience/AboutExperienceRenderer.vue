@@ -32,7 +32,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-aboutexp section-py">
+    <section v-reveal class="mv-aboutexp section-py">
         <div
             class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
@@ -77,7 +77,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading || data.heading_accent"
-                    class="mt-5 text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="mt-5 text-[var(--midnight)] mv-section-heading"
                 >
                     {{ data.heading }}
                     <span v-if="data.heading_accent" class="text-[var(--orange)]">

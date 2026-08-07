@@ -30,6 +30,7 @@ function ordinal(i: number): string {
 
 <template>
     <section
+        v-reveal
         class="trust-bar section-py"
         :class="`trust-bar--${settings.theme}`"
         :style="bgStyle"

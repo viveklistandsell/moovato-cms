@@ -39,7 +39,7 @@ const aspectClass = computed(() => {
 </script>
 
 <template>
-    <section v-if="settings.image_url" class="w-full section-py">
+    <section v-if="settings.image_url" v-reveal class="w-full section-py">
         <div class="container-xl">
             <figure class="mx-auto" :class="widthClass">
                 <component

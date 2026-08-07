@@ -34,7 +34,7 @@ test('about stats ships two image slots, avatars and stat blocks', function (): 
             'button_url',
         ])
         ->and($data['stats'])->toHaveCount(2)
-        ->and($data['stats'][0])->toHaveKeys(['value', 'title', 'description'])
+        ->and($data['stats'][0])->toHaveKeys(['description'])
         ->and($data['eyebrow'])->toBe('Über uns');
 });
 

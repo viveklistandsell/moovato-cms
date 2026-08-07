@@ -46,12 +46,12 @@ const bgClass = computed(() => {
 </script>
 
 <template>
-    <section class="w-full section-py" :class="bgClass">
+    <section v-reveal class="w-full section-py" :class="bgClass">
         <div class="container-xl">
             <div class="mx-auto" :class="[widthClass, alignClass]">
                 <h2
                     v-if="data.heading"
-                    class="mb-6 text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mb-6 mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

@@ -104,26 +104,26 @@ final class TestimonialsShowcaseWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'bg_image_path' => ['nullable', 'string', 'max:1000'],
-            'bg_image_url' => ['nullable', 'string', 'max:2000'],
+            'bg_image_path' => ['nullable', 'string'],
+            'bg_image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'button_label' => ['nullable', 'string', 'max:120'],
-            'button_url' => ['nullable', 'string', 'max:2048'],
-            'items' => ['nullable', 'array', 'max:12'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'items' => ['nullable', 'array'],
             'items.*.rating' => ['nullable', 'integer', 'min:1', 'max:5'],
-            'items.*.rating_text' => ['nullable', 'string', 'max:60'],
-            'items.*.quote' => ['nullable', 'string', 'max:1000'],
-            'items.*.name' => ['nullable', 'string', 'max:120'],
-            'items.*.role' => ['nullable', 'string', 'max:160'],
-            'items.*.image_path' => ['nullable', 'string', 'max:1000'],
-            'items.*.image_url' => ['nullable', 'string', 'max:2000'],
+            'items.*.rating_text' => ['nullable', 'string'],
+            'items.*.quote' => ['nullable', 'string'],
+            'items.*.name' => ['nullable', 'string'],
+            'items.*.role' => ['nullable', 'string'],
+            'items.*.image_path' => ['nullable', 'string'],
+            'items.*.image_url' => ['nullable', 'string'],
         ];
     }
 }

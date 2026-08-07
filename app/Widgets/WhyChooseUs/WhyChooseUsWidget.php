@@ -59,22 +59,22 @@ final class WhyChooseUsWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:500'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'cards' => ['nullable', 'array', 'max:6'],
-            'cards.*.icon' => ['nullable', 'string', 'max:64'],
-            'cards.*.title' => ['nullable', 'string', 'max:120'],
-            'cards.*.description' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'cards' => ['nullable', 'array'],
+            'cards.*.icon' => ['nullable', 'string'],
+            'cards.*.title' => ['nullable', 'string'],
+            'cards.*.description' => ['nullable', 'string'],
         ];
     }
 }

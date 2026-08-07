@@ -95,14 +95,14 @@ final class FaqPageWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:1000'],
-            'search_placeholder' => ['nullable', 'string', 'max:120'],
-            'categories' => ['nullable', 'array', 'max:12'],
-            'categories.*.name' => ['nullable', 'string', 'max:120'],
-            'categories.*.items' => ['nullable', 'array', 'max:40'],
-            'categories.*.items.*.question' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
+            'search_placeholder' => ['nullable', 'string'],
+            'categories' => ['nullable', 'array'],
+            'categories.*.name' => ['nullable', 'string'],
+            'categories.*.items' => ['nullable', 'array'],
+            'categories.*.items.*.question' => ['nullable', 'string'],
             'categories.*.items.*.answer' => ['nullable', 'string'],
         ];
     }

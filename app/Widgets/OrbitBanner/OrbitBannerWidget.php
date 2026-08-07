@@ -63,26 +63,26 @@ final class OrbitBannerWidget implements WidgetContract
     {
         return [
             'theme' => ['required', 'in:light,dark'],
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
-            'inline_image_path' => ['nullable', 'string', 'max:1000'],
-            'inline_image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
+            'inline_image_path' => ['nullable', 'string'],
+            'inline_image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'crumbs' => ['nullable', 'array', 'max:5'],
-            'crumbs.*.label' => ['nullable', 'string', 'max:80'],
-            'crumbs.*.url' => ['nullable', 'string', 'max:2000'],
-            'highlight' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:600'],
-            'primary_label' => ['nullable', 'string', 'max:80'],
-            'primary_url' => ['nullable', 'string', 'max:2000'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'inline_image_alt' => ['nullable', 'string', 'max:160'],
+            'crumbs' => ['nullable', 'array'],
+            'crumbs.*.label' => ['nullable', 'string'],
+            'crumbs.*.url' => ['nullable', 'string'],
+            'highlight' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'primary_label' => ['nullable', 'string'],
+            'primary_url' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'inline_image_alt' => ['nullable', 'string'],
         ];
     }
 }

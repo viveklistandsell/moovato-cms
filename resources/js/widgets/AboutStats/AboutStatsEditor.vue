@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
-type Stat = { value: string; title: string; description: string };
+type Stat = { description: string };
 
 type Settings = {
     image_path: string | null;
@@ -44,10 +44,7 @@ function removeAvatar(index: number): void {
 }
 
 function addStat(): void {
-    data.value.stats = [
-        ...(data.value.stats ?? []),
-        { value: '', title: '', description: '' },
-    ];
+    data.value.stats = [...(data.value.stats ?? []), { description: '' }];
 }
 
 function removeStat(index: number): void {
@@ -193,15 +190,11 @@ function removeStat(index: number): void {
                     :key="i"
                     class="grid gap-2 rounded-md border bg-muted/30 p-3"
                 >
-                    <div class="flex gap-2">
-                        <Input
-                            v-model="stat.value"
-                            class="w-24"
-                            placeholder="98%"
-                        />
-                        <Input
-                            v-model="stat.title"
-                            placeholder="Zufriedenheit"
+                    <div class="flex items-start gap-2">
+                        <RichTextEditor
+                            v-model="stat.description"
+                            class="flex-1"
+                            placeholder="Garantierte Zufriedenheit"
                         />
                         <Button
                             type="button"
@@ -212,10 +205,6 @@ function removeStat(index: number): void {
                             <Trash2 class="size-4 text-destructive" />
                         </Button>
                     </div>
-                    <RichTextEditor
-                        v-model="stat.description"
-                        placeholder="Garantierte Zufriedenheit"
-                    />
                 </div>
             </div>
         </div>

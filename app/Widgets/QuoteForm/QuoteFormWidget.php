@@ -66,15 +66,15 @@ final class QuoteFormWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:80'],
-            'heading' => ['nullable', 'string', 'max:160'],
-            'lead' => ['nullable', 'string', 'max:500'],
-            'benefits' => ['nullable', 'array', 'max:8'],
-            'benefits.*' => ['nullable', 'string', 'max:120'],
-            'form_title' => ['nullable', 'string', 'max:120'],
-            'form_subtitle' => ['nullable', 'string', 'max:160'],
-            'success_title' => ['nullable', 'string', 'max:120'],
-            'success_text' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'lead' => ['nullable', 'string'],
+            'benefits' => ['nullable', 'array'],
+            'benefits.*' => ['nullable', 'string'],
+            'form_title' => ['nullable', 'string'],
+            'form_subtitle' => ['nullable', 'string'],
+            'success_title' => ['nullable', 'string'],
+            'success_text' => ['nullable', 'string'],
         ];
     }
 }

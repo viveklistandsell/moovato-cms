@@ -25,12 +25,12 @@ function toggle(i: number): void {
 </script>
 
 <template>
-    <section class="w-full section-py">
+    <section v-reveal class="w-full section-py">
         <div class="container-xl">
             <div class="mx-auto max-w-4xl">
                 <h2
                     v-if="data.heading"
-                    class="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mb-10 text-center mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

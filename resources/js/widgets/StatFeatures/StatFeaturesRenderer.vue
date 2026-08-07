@@ -22,7 +22,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-statfeatures section-py">
+    <section v-reveal class="mv-statfeatures section-py">
         <div
             class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
@@ -32,7 +32,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="text-[var(--midnight)] mv-section-heading"
                     :class="data.eyebrow ? 'mt-4' : ''"
                 >
                     {{ data.heading }}

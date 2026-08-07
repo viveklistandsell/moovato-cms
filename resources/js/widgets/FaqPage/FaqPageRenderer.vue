@@ -67,7 +67,7 @@ const hasResults = computed(() =>
 </script>
 
 <template>
-    <section class="mv-faqpage w-full section-py">
+    <section v-reveal class="mv-faqpage w-full section-py">
         <div class="container-xl">
             <header class="mx-auto max-w-3xl text-center">
                 <span v-if="data.eyebrow" class="mv-howitworks__eyebrow">

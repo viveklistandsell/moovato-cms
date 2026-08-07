@@ -14,12 +14,12 @@ defineProps<{ data: Data }>();
 </script>
 
 <template>
-    <section class="mv-textcols section-py">
+    <section v-reveal class="mv-textcols section-py">
         <div class="container-xl grid gap-10 lg:grid-cols-2 lg:gap-x-10">
             <div>
                 <h2
                     v-if="data.heading"
-                    class="text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="text-[var(--midnight)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

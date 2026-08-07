@@ -68,18 +68,18 @@ final class ExpertsChoiceWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:500'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
-            'since_label' => ['nullable', 'string', 'max:40'],
-            'cards' => ['nullable', 'array', 'max:6'],
-            'cards.*.icon' => ['nullable', 'string', 'max:64'],
-            'cards.*.title' => ['nullable', 'string', 'max:120'],
-            'cards.*.description' => ['nullable', 'string', 'max:300'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'since_label' => ['nullable', 'string'],
+            'cards' => ['nullable', 'array'],
+            'cards.*.icon' => ['nullable', 'string'],
+            'cards.*.title' => ['nullable', 'string'],
+            'cards.*.description' => ['nullable', 'string'],
         ];
     }
 }

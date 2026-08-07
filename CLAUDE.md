@@ -216,6 +216,7 @@ These are standing rules for this project. Follow them without being reminded.
 
 - Every page section MUST be built as a **widget**, not a one-off section. A widget is a backend class under `app/Widgets/<Name>/` implementing `WidgetContract` (registered in `app/Providers/WidgetServiceProvider.php`) plus an Editor + Renderer Vue pair under `resources/js/widgets/<Name>/` (registered in `resources/js/widgets/registry.ts`). Keep the backend and frontend `type` slugs in sync.
 - Reuse the existing widget patterns (see `Features`, `Faq`) for repeatable items, shared `WidgetIcon`/`WidgetImageField`, and validation rules.
+- Every new widget's Renderer.vue MUST add the `v-reveal` directive to its root `<section>` (or main wrapping `<div>` if the widget has no `<section>` root) — this triggers the site-wide blur/fade-up reveal-on-scroll effect (directive at `resources/js/directives/reveal.ts`, registered globally in `resources/js/app.ts`; CSS in `gs.css` via `[data-mv-reveal]`/`.is-revealed`). One plain `v-reveal` per widget root is enough — don't scatter it across inner elements.
 
 ## Styling: root CSS + Tailwind for speed
 

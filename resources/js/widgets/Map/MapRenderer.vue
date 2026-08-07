@@ -69,7 +69,7 @@ function isMatched(pin: Pin) {
 </script>
 
 <template>
-    <section class="mv-map section-py">
+    <section v-reveal class="mv-map section-py">
         <div class="container-xl">
             <div
                 v-if="data.eyebrow || data.heading || data.subheading"
@@ -84,7 +84,7 @@ function isMatched(pin: Pin) {
 
                 <h2
                     v-if="data.heading"
-                    class="mt- text-3xl font-bold tracking-tight text-[var(--white)] sm:text-4xl"
+                    class="mt- text-[var(--white)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>
@@ -269,10 +269,14 @@ function isMatched(pin: Pin) {
 .mv-map-pin--active {
     z-index: 20;
 }
-
+.mv-map-pin--active  .mv-map-card{
+opacity: 1;
+visibility: visible;
+}
 .mv-map-pin--active .mv-map-dot {
-    transform: scale(1.45);
+    background: var(--black);
     animation: pulse 1.6s infinite;
+    transform: scale(1.4);
 }
 
 @keyframes pulse {
@@ -350,7 +354,7 @@ function edgeClass(value: number | undefined): string {
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight text-[var(--white)] sm:text-4xl"
+                    class="mt-5 text-[var(--white)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

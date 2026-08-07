@@ -25,6 +25,7 @@ defineProps<{ settings: Settings; data: Data }>();
 
 <template>
     <section
+        v-reveal
         class="mv-splitmedia"
         :class="settings.image_side === 'left' ? 'image-left' : 'image-right'"
     >
@@ -35,7 +36,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl"
+                    class="text-[var(--midnight)] mv-section-heading"
                     :class="[
                         data.eyebrow ? 'mt-5' : '',
                         settings.heading_style === 'italic' ? 'italic' : '',

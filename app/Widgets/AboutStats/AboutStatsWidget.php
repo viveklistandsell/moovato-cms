@@ -53,8 +53,8 @@ final class AboutStatsWidget implements WidgetContract
             'image_alt' => 'Moovato Team verpackt Umzugskartons in einer Berliner Wohnung',
             'image_2_alt' => 'Lächelnder Moovato Umzugshelfer mit Paket',
             'stats' => [
-                ['value' => '98%', 'title' => 'Zufriedenheit', 'description' => 'Garantierte Zufriedenheit'],
-                ['value' => '150+', 'title' => 'Einsatzgebiete', 'description' => 'Aktiv in 25 Städten'],
+                ['description' => 'Garantierte Zufriedenheit'],
+                ['description' => 'Aktiv in 25 Städten'],
             ],
             'button_label' => 'Mehr über uns',
             'button_url' => '#leistungen',
@@ -64,31 +64,29 @@ final class AboutStatsWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
-            'image_2_path' => ['nullable', 'string', 'max:1000'],
-            'image_2_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
+            'image_2_path' => ['nullable', 'string'],
+            'image_2_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'heading_accent' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:600'],
-            'reviews_label' => ['nullable', 'string', 'max:120'],
-            'avatars' => ['nullable', 'array', 'max:8'],
-            'avatars.*' => ['nullable', 'string', 'max:3'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'image_2_alt' => ['nullable', 'string', 'max:160'],
-            'stats' => ['nullable', 'array', 'max:4'],
-            'stats.*.value' => ['nullable', 'string', 'max:24'],
-            'stats.*.title' => ['nullable', 'string', 'max:80'],
-            'stats.*.description' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'heading_accent' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'reviews_label' => ['nullable', 'string'],
+            'avatars' => ['nullable', 'array'],
+            'avatars.*' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'image_2_alt' => ['nullable', 'string'],
+            'stats' => ['nullable', 'array'],
+            'stats.*.description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

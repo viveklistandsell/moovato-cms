@@ -84,25 +84,25 @@ final class PartnersWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'partners' => ['nullable', 'array', 'max:24'],
-            'partners.*.path' => ['nullable', 'string', 'max:1000'],
-            'partners.*.url' => ['nullable', 'string', 'max:2000'],
-            'partners.*.name' => ['nullable', 'string', 'max:120'],
-            'partners.*.link' => ['nullable', 'string', 'max:2000'],
-            'certificates' => ['nullable', 'array', 'max:12'],
-            'certificates.*.icon' => ['nullable', 'string', 'max:64'],
-            'certificates.*.title' => ['nullable', 'string', 'max:120'],
+            'partners' => ['nullable', 'array'],
+            'partners.*.path' => ['nullable', 'string'],
+            'partners.*.url' => ['nullable', 'string'],
+            'partners.*.name' => ['nullable', 'string'],
+            'partners.*.link' => ['nullable', 'string'],
+            'certificates' => ['nullable', 'array'],
+            'certificates.*.icon' => ['nullable', 'string'],
+            'certificates.*.title' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:500'],
-            'partners_title' => ['nullable', 'string', 'max:120'],
-            'certificates_title' => ['nullable', 'string', 'max:120'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
+            'partners_title' => ['nullable', 'string'],
+            'certificates_title' => ['nullable', 'string'],
         ];
     }
 }

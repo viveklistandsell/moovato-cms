@@ -42,64 +42,41 @@ const primaryCategory = computed(() => props.post.categories[0] ?? null);
 </script>
 
 <template>
-    <section class="rounded-2xl border border-border/40 bg-muted/40 p-6 sm:p-8">
+    <section class="rounded-2xl border border-border/40 bg-muted/40 p-6 bg-white dark:bg-muted">
         <div class="grid gap-8 md:grid-cols-2 md:items-center">
             <div class="space-y-4">
-                <p
-                    class="text-xs font-bold tracking-[0.2em] text-rose-600 uppercase dark:text-rose-400"
-                >
+                <p class="text-xs font-extrabold tracking-[0.2em] text-[var(--orange)] uppercase dark:var(--orange)">
                     {{
                         label ??
                         (locale === 'de' ? 'Neueste Beiträge' : 'Latest Posts')
                     }}
                 </p>
-                <Link
-                    :href="detailHref"
-                    class="block text-2xl leading-tight font-extrabold tracking-tight hover:underline sm:text-3xl"
-                >
+                <Link :href="detailHref"
+                    class="block text-2xl leading-tight font-extrabold tracking-tight hover:underline sm:text-3xl">
                     {{ post.title }}
                 </Link>
-                <p
-                    v-if="post.excerpt"
-                    class="line-clamp-4 text-sm leading-relaxed text-muted-foreground sm:text-base"
-                >
+                <p v-if="post.excerpt" class="line-clamp-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
                     {{ post.excerpt }}
                 </p>
-                <div
-                    class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground"
-                >
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
                     <span v-if="formattedDate" class="font-medium">{{
                         formattedDate
-                    }}</span>
-                    <Link
-                        v-if="primaryCategory"
-                        :href="
-                            localizedUrl(
-                                locale,
-                                `/blog?category=${primaryCategory.permalink}`,
-                            )
-                        "
-                        class="text-rose-600 hover:underline dark:text-rose-400"
-                    >
+                        }}</span>
+                    <Link v-if="primaryCategory" :href="localizedUrl(
+                        locale,
+                        `/blog?category=${primaryCategory.permalink}`,
+                    )
+                        " class="text-[var(--orange)] hover:underline text-bold">
                         {{ primaryCategory.name }}
                     </Link>
                     <span v-if="post.author">· {{ post.author }}</span>
-                    <span v-if="post.reading_time"
-                        >· {{ post.reading_time }} min</span
-                    >
+                    <span v-if="post.reading_time">· {{ post.reading_time }} min</span>
                 </div>
             </div>
 
-            <Link
-                :href="detailHref"
-                class="block aspect-[4/3] overflow-hidden rounded-xl bg-muted"
-            >
-                <img
-                    v-if="post.image_url"
-                    :src="post.image_url"
-                    :alt="post.title"
-                    class="size-full object-cover transition-transform duration-500 hover:scale-[1.03]"
-                />
+            <Link :href="detailHref" class="block aspect-[4/2] overflow-hidden rounded-xl bg-muted">
+                <img v-if="post.image_url" :src="post.image_url" :alt="post.title"
+                    class="size-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
                 <div v-else class="flex size-full items-center justify-center">
                     <ImageIcon class="size-12 text-muted-foreground/40" />
                 </div>

@@ -41,16 +41,13 @@ const iconWrapperClass = computed(() => {
 </script>
 
 <template>
-    <section class="w-full section-py">
+    <section v-reveal class="w-full section-py">
         <div class="container-xl">
             <div
                 v-if="data.heading || data.subheading"
                 class="mx-auto mb-12 max-w-2xl text-center"
             >
-                <h2
-                    v-if="data.heading"
-                    class="text-3xl font-bold tracking-tight sm:text-4xl"
-                >
+                <h2 v-if="data.heading" class="mv-section-heading">
                     {{ data.heading }}
                 </h2>
                 <p v-if="data.subheading" class="mt-3 text-muted-foreground">

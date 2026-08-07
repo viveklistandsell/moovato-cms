@@ -21,7 +21,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-whychoose section-py">
+    <section v-reveal class="mv-whychoose section-py">
         <div
             class="container-xl grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
@@ -31,7 +31,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl"
+                    class="mt-5 mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>

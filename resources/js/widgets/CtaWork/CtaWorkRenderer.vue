@@ -27,7 +27,7 @@ const bgStyle = computed(() =>
 </script>
 
 <template>
-    <section class="mv-workcta section-py">
+    <section v-reveal class="mv-workcta section-py">
         <div class="mv-workcta__bg" :style="bgStyle" aria-hidden="true"></div>
         <div class="mv-workcta__inner container-xl">
             <h2 class="mv-workcta__title">

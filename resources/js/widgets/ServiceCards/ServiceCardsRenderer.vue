@@ -29,7 +29,7 @@ const colsClass = computed(() => {
 </script>
 
 <template>
-    <section class="mv-services section-py">
+    <section v-reveal class="mv-services section-py">
         <div class="mv-services__wrap">
             <div class="mv-services__lines" aria-hidden="true">
                 <svg
@@ -86,7 +86,7 @@ const colsClass = computed(() => {
                         <span v-if="data.eyebrow" class="mv-services__eyebrow">
                             {{ data.eyebrow }}
                         </span>
-                        <h2 v-if="data.heading" class="mv-services__heading">
+                        <h2 v-if="data.heading" class="mv-services__heading mv-section-heading">
                             {{ data.heading }}
                         </h2>
                     </div>

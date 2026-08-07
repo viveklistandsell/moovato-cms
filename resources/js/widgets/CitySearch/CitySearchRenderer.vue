@@ -25,10 +25,10 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-citysearch">
+    <section v-reveal class="mv-citysearch">
         <div class="mv-citysearch-head">
             <div class="container-xl mx-auto max-w-3xl text-center">
-                <h2 v-if="data.title" class="mv-citysearch-title">
+                <h2 v-if="data.title" class="mv-citysearch-title mv-section-heading">
                     {{ data.title }}
                 </h2>
                 <p v-if="data.subtitle" class="mv-citysearch-subtitle">
