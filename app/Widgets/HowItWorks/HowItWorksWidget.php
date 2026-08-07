@@ -70,12 +70,12 @@ final class HowItWorksWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:60'],
-            'heading' => ['nullable', 'string', 'max:160'],
-            'steps' => ['nullable', 'array', 'max:8'],
-            'steps.*.icon' => ['nullable', 'string', 'max:64'],
-            'steps.*.title' => ['nullable', 'string', 'max:120'],
-            'steps.*.description' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'steps' => ['nullable', 'array'],
+            'steps.*.icon' => ['nullable', 'string'],
+            'steps.*.title' => ['nullable', 'string'],
+            'steps.*.description' => ['nullable', 'string'],
         ];
     }
 }

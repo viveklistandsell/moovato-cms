@@ -95,7 +95,7 @@ function formattedDate(value?: string | null): string {
 <template>
     <section v-reveal class="mv-blog section-py">
         <div class="container-xl">
-            <div class="max-w-2xl">
+            <div>
                 <span v-if="data.eyebrow" class="mv-blog-eyebrow">{{ data.eyebrow }}</span>
                 <h2
                     v-if="data.heading"
@@ -112,7 +112,7 @@ function formattedDate(value?: string | null): string {
             </div>
 
             <ul
-                class="mt-20 grid grid-cols-1 gap-x-10 gap-y-20"
+                class="mt-10 grid grid-cols-1 gap-x-10 gap-y-20"
                 :class="colsClass"
             >
                 <li

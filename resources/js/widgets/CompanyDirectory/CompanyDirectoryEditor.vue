@@ -2,7 +2,6 @@
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-vue-next';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,16 +11,15 @@ type Company = {
     logo_path: string | null;
     logo_url: string | null;
     name: string;
-    verified: boolean;
-    top_pro: boolean;
+    ribbon_label: string | null;
     score: string;
     reviews_count: number;
-    badges: string;
+    pro_reviews_count: number;
     description: string;
     address: string;
-    founded: string;
     services: string;
-    request_url: string;
+    pros: string;
+    cons: string;
     quote_url: string;
 };
 
@@ -34,7 +32,10 @@ type Data = {
     subheading: string;
     all_label: string;
     score_label: string;
-    request_label: string;
+    pro_reviews_label: string;
+    rating_prefix: string;
+    pros_heading: string;
+    cons_heading: string;
     quote_label: string;
 };
 
@@ -48,16 +49,15 @@ function addCompany(): void {
             logo_path: null,
             logo_url: null,
             name: '',
-            verified: false,
-            top_pro: false,
+            ribbon_label: null,
             score: '',
             reviews_count: 0,
-            badges: '',
+            pro_reviews_count: 0,
             description: '',
             address: '',
-            founded: '',
             services: '',
-            request_url: '#',
+            pros: '',
+            cons: '',
             quote_url: '#',
         },
     ];
@@ -100,12 +100,30 @@ function move(index: number, delta: number): void {
                 <Input v-model="data.score_label" placeholder="Bewertungen" />
             </div>
             <div class="grid gap-2">
-                <Label>Request button label</Label>
-                <Input v-model="data.request_label" />
+                <Label>Professional reviews label</Label>
+                <Input
+                    v-model="data.pro_reviews_label"
+                    placeholder="Bewertungen als Profi"
+                />
             </div>
             <div class="grid gap-2">
-                <Label>Quote button label</Label>
-                <Input v-model="data.quote_label" />
+                <Label>Rating section prefix</Label>
+                <Input
+                    v-model="data.rating_prefix"
+                    placeholder="So bewerten Kunden"
+                />
+            </div>
+            <div class="grid gap-2">
+                <Label>Pros heading</Label>
+                <Input v-model="data.pros_heading" placeholder="Vorteile" />
+            </div>
+            <div class="grid gap-2">
+                <Label>Cons heading</Label>
+                <Input v-model="data.cons_heading" placeholder="Nachteile" />
+            </div>
+            <div class="grid gap-2">
+                <Label>Button label</Label>
+                <Input v-model="data.quote_label" placeholder="Angebot anfordern" />
             </div>
         </div>
 
@@ -182,7 +200,7 @@ function move(index: number, delta: number): void {
                             v-model="company.name"
                             placeholder="Company name"
                         />
-                        <div class="grid gap-2 md:grid-cols-2">
+                        <div class="grid gap-2 md:grid-cols-3">
                             <Input
                                 v-model="company.score"
                                 placeholder="Score (e.g. 9,8)"
@@ -193,17 +211,17 @@ function move(index: number, delta: number): void {
                                 min="0"
                                 placeholder="Reviews count"
                             />
+                            <Input
+                                v-model.number="company.pro_reviews_count"
+                                type="number"
+                                min="0"
+                                placeholder="Pro reviews count"
+                            />
                         </div>
-                        <div class="flex items-center gap-6 pt-1">
-                            <label class="flex items-center gap-2 text-sm">
-                                <Checkbox v-model="company.verified" />
-                                Verified
-                            </label>
-                            <label class="flex items-center gap-2 text-sm">
-                                <Checkbox v-model="company.top_pro" />
-                                TOP PRO
-                            </label>
-                        </div>
+                        <Input
+                            v-model="company.ribbon_label"
+                            placeholder="Ribbon badge (e.g. Bestbewertetes Umzugsunternehmen)"
+                        />
                     </div>
                 </div>
 
@@ -212,33 +230,37 @@ function move(index: number, delta: number): void {
                     placeholder="Short description"
                 />
 
-                <div class="grid gap-2 md:grid-cols-2">
-                    <Input v-model="company.address" placeholder="Address" />
-                    <Input
-                        v-model="company.founded"
-                        placeholder="Founded (e.g. Gegründet 2018)"
-                    />
-                </div>
+                <Input v-model="company.address" placeholder="Location" />
 
-                <Input
-                    v-model="company.badges"
-                    placeholder="Badges, comma separated (e.g. Sofort verfügbar, Reagiert schnell)"
-                />
                 <Input
                     v-model="company.services"
                     placeholder="Services, comma separated (used as filter tags)"
                 />
 
                 <div class="grid gap-2 md:grid-cols-2">
-                    <Input
-                        v-model="company.request_url"
-                        placeholder="Request link"
-                    />
-                    <Input
-                        v-model="company.quote_url"
-                        placeholder="Quote link"
-                    />
+                    <div class="grid gap-1">
+                        <Label class="text-xs">Advantages</Label>
+                        <Input
+                            v-model="company.pros"
+                            placeholder="Professionell, Freundlich, Fairer Preis"
+                        />
+                    </div>
+                    <div class="grid gap-1">
+                        <Label class="text-xs">Disadvantages</Label>
+                        <Input
+                            v-model="company.cons"
+                            placeholder="Terminplanung"
+                        />
+                    </div>
                 </div>
+                <p class="text-xs text-muted-foreground">
+                    Advantages and disadvantages are comma separated lists.
+                </p>
+
+                <Input
+                    v-model="company.quote_url"
+                    placeholder="Button link"
+                />
             </div>
         </div>
     </div>

@@ -59,23 +59,23 @@ final class StatFeaturesWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:600'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'stat_value' => ['nullable', 'string', 'max:16'],
-            'stat_label' => ['nullable', 'string', 'max:40'],
-            'features' => ['nullable', 'array', 'max:6'],
-            'features.*.title' => ['nullable', 'string', 'max:120'],
-            'features.*.description' => ['nullable', 'string', 'max:300'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'stat_value' => ['nullable', 'string'],
+            'stat_label' => ['nullable', 'string'],
+            'features' => ['nullable', 'array'],
+            'features.*.title' => ['nullable', 'string'],
+            'features.*.description' => ['nullable', 'string'],
         ];
     }
 }

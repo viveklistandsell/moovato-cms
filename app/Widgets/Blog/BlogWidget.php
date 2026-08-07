@@ -57,19 +57,19 @@ final class BlogWidget implements WidgetContract
         return [
             'count' => ['required', 'integer', 'min:1', 'max:12'],
             'columns' => ['required', 'integer', 'in:2,3,4'],
-            'category' => ['nullable', 'string', 'max:191'],
+            'category' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:500'],
-            'read_more_label' => ['nullable', 'string', 'max:80'],
-            'cta_label' => ['nullable', 'string', 'max:80'],
-            'cta_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
+            'read_more_label' => ['nullable', 'string'],
+            'cta_label' => ['nullable', 'string'],
+            'cta_url' => ['nullable', 'string'],
         ];
     }
 }

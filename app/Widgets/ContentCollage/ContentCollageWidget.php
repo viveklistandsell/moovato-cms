@@ -65,9 +65,9 @@ final class ContentCollageWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'images' => ['nullable', 'array', 'max:3'],
-            'images.*.path' => ['nullable', 'string', 'max:1000'],
-            'images.*.url' => ['nullable', 'string', 'max:2000'],
+            'images' => ['nullable', 'array'],
+            'images.*.path' => ['nullable', 'string'],
+            'images.*.url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
             'marker_style' => ['required', 'in:check,chevron'],
         ];
@@ -76,15 +76,15 @@ final class ContentCollageWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:1200'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'alts' => ['nullable', 'array', 'max:3'],
-            'alts.*' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*' => ['nullable', 'string'],
+            'alts' => ['nullable', 'array'],
+            'alts.*' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

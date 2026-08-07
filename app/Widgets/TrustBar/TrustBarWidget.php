@@ -70,8 +70,8 @@ final class TrustBarWidget implements WidgetContract
     {
         return [
             'theme' => ['required', 'in:dark,light'],
-            'bg_image_path' => ['nullable', 'string', 'max:1000'],
-            'bg_image_url' => ['nullable', 'string', 'max:2000'],
+            'bg_image_path' => ['nullable', 'string'],
+            'bg_image_url' => ['nullable', 'string'],
         ];
     }
 
@@ -81,10 +81,10 @@ final class TrustBarWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'stats' => ['nullable', 'array', 'max:4'],
-            'stats.*.value' => ['nullable', 'string', 'max:24'],
-            'stats.*.line1' => ['nullable', 'string', 'max:80'],
-            'stats.*.line2' => ['nullable', 'string', 'max:80'],
+            'stats' => ['nullable', 'array'],
+            'stats.*.value' => ['nullable', 'string'],
+            'stats.*.line1' => ['nullable', 'string'],
+            'stats.*.line2' => ['nullable', 'string'],
         ];
     }
 }

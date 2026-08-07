@@ -58,20 +58,20 @@ final class CtaBannerWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
-            'primary_label' => ['nullable', 'string', 'max:80'],
-            'primary_url' => ['nullable', 'string', 'max:2000'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:200'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
+            'heading' => ['nullable', 'string'],
+            'primary_label' => ['nullable', 'string'],
+            'primary_url' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
         ];
     }
 }

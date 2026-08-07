@@ -63,8 +63,8 @@ final class TeamCtaWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
         ];
     }
@@ -72,16 +72,16 @@ final class TeamCtaWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:800'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'cta_title' => ['nullable', 'string', 'max:160'],
-            'cta_body' => ['nullable', 'string', 'max:400'],
-            'cta_button_label' => ['nullable', 'string', 'max:80'],
-            'cta_button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'cta_title' => ['nullable', 'string'],
+            'cta_body' => ['nullable', 'string'],
+            'cta_button_label' => ['nullable', 'string'],
+            'cta_button_url' => ['nullable', 'string'],
         ];
     }
 }

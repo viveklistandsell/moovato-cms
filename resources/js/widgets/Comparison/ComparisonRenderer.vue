@@ -86,7 +86,7 @@ const active = ref(0);
                             <div
                                 v-for="(row, ri) in tab.rows ?? []"
                                 :key="ri"
-                                class="mv-comparison-row grid grid-cols-[1fr_6rem_7rem] items-center gap-x-4 px-6 py-6 sm:px-8"
+                                class="mv-comparison-row grid grid-cols-[1fr_6rem_7rem] items-center gap-x-4 px-5 py-5 sm:px-5"
                             >
                                 <span class="mv-comparison-row-label">
                                     {{ row.label }}

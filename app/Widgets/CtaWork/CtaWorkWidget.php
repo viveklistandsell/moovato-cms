@@ -59,21 +59,21 @@ final class CtaWorkWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'bg_image_path' => ['nullable', 'string', 'max:1000'],
-            'bg_image_url' => ['nullable', 'string', 'max:2000'],
-            'inline_image_path' => ['nullable', 'string', 'max:1000'],
-            'inline_image_url' => ['nullable', 'string', 'max:2000'],
+            'bg_image_path' => ['nullable', 'string'],
+            'bg_image_url' => ['nullable', 'string'],
+            'inline_image_path' => ['nullable', 'string'],
+            'inline_image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'title_before' => ['nullable', 'string', 'max:120'],
-            'title_after' => ['nullable', 'string', 'max:120'],
-            'inline_image_alt' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2048'],
+            'title_before' => ['nullable', 'string'],
+            'title_after' => ['nullable', 'string'],
+            'inline_image_alt' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

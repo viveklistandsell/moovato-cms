@@ -74,12 +74,12 @@ final class ServiceCardsWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:60'],
-            'heading' => ['nullable', 'string', 'max:160'],
-            'items' => ['nullable', 'array', 'max:12'],
-            'items.*.icon' => ['nullable', 'string', 'max:64'],
-            'items.*.title' => ['nullable', 'string', 'max:120'],
-            'items.*.description' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'items' => ['nullable', 'array'],
+            'items.*.icon' => ['nullable', 'string'],
+            'items.*.title' => ['nullable', 'string'],
+            'items.*.description' => ['nullable', 'string'],
         ];
     }
 }

@@ -57,18 +57,18 @@ final class GalleryWidget implements WidgetContract
             'layout' => ['required', 'in:grid,masonry,carousel'],
             'columns' => ['required', 'integer', 'in:2,3,4'],
             'gap' => ['required', 'in:sm,md,lg'],
-            'images' => ['nullable', 'array', 'max:50'],
-            'images.*.path' => ['nullable', 'string', 'max:1000'],
-            'images.*.url' => ['nullable', 'string', 'max:2000'],
+            'images' => ['nullable', 'array'],
+            'images.*.path' => ['nullable', 'string'],
+            'images.*.url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
+            'heading' => ['nullable', 'string'],
             'captions' => ['nullable', 'array'],
-            'captions.*' => ['nullable', 'string', 'max:500'],
+            'captions.*' => ['nullable', 'string'],
         ];
     }
 }

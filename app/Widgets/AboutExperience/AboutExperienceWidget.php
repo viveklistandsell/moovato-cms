@@ -71,33 +71,33 @@ final class AboutExperienceWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
-            'image_2_path' => ['nullable', 'string', 'max:1000'],
-            'image_2_url' => ['nullable', 'string', 'max:2000'],
-            'founder_path' => ['nullable', 'string', 'max:1000'],
-            'founder_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
+            'image_2_path' => ['nullable', 'string'],
+            'image_2_url' => ['nullable', 'string'],
+            'founder_path' => ['nullable', 'string'],
+            'founder_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'heading_accent' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:600'],
-            'experience_value' => ['nullable', 'string', 'max:16'],
-            'experience_label' => ['nullable', 'string', 'max:60'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'image_2_alt' => ['nullable', 'string', 'max:160'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
-            'founder_name' => ['nullable', 'string', 'max:120'],
-            'founder_role' => ['nullable', 'string', 'max:80'],
-            'founder_alt' => ['nullable', 'string', 'max:160'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'heading_accent' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'experience_value' => ['nullable', 'string'],
+            'experience_label' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'image_2_alt' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'founder_name' => ['nullable', 'string'],
+            'founder_role' => ['nullable', 'string'],
+            'founder_alt' => ['nullable', 'string'],
         ];
     }
 }

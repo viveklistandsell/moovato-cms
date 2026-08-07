@@ -89,8 +89,8 @@ final class MarqueeWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'items' => ['nullable', 'array', 'max:24'],
-            'items.*' => ['nullable', 'string', 'max:60'],
+            'items' => ['nullable', 'array'],
+            'items.*' => ['nullable', 'string'],
         ];
     }
 }

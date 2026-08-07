@@ -65,24 +65,24 @@ final class MapWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
-            'pins' => ['nullable', 'array', 'max:30'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
+            'pins' => ['nullable', 'array'],
             'pins.*.x' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'pins.*.y' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'pins.*.city' => ['nullable', 'string', 'max:80'],
-            'pins.*.label' => ['nullable', 'string', 'max:160'],
-            'pins.*.flag_path' => ['nullable', 'string', 'max:1000'],
-            'pins.*.flag_url' => ['nullable', 'string', 'max:2000'],
+            'pins.*.city' => ['nullable', 'string'],
+            'pins.*.label' => ['nullable', 'string'],
+            'pins.*.flag_path' => ['nullable', 'string'],
+            'pins.*.flag_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
         ];
     }
 }

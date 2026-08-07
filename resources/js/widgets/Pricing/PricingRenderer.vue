@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowUpRight, Check } from 'lucide-vue-next';
+import { ArrowUpRight, Check, X } from 'lucide-vue-next';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 
 type Feature = { label?: string; included?: boolean };
@@ -33,44 +33,52 @@ defineProps<{ settings: Record<string, unknown>; data: Data }>();
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 <article
                     v-for="(plan, i) in data.plans ?? []"
                     :key="i"
                     class="mv-pricing__card"
                 >
-                    <div class="mv-pricing__head">
-                        <div class="mv-pricing__head-text">
+                    <div class="mv-pricing__card-shape" aria-hidden="true" />
+                    <div class="mv-pricing__card-content">
+                        <div class="mv-pricing__card-inner">
+                            <span class="mv-pricing__number">{{
+                                String(i + 1).padStart(2, '0')
+                            }}</span>
+                            <div class="mv-pricing__icon">
+                                <WidgetIcon
+                                    :name="plan.icon"
+                                    fallback="Package"
+                                    class="size-7"
+                                />
+                            </div>
+
                             <h3 class="mv-pricing__name">{{ plan.name }}</h3>
                             <div class="mv-pricing__price">
                                 {{ plan.price }}
                             </div>
-                        </div>
-                        <div class="mv-pricing__icon">
-                            <WidgetIcon
-                                :name="plan.icon"
-                                fallback="Package"
-                                class="size-8"
-                            />
-                        </div>
-                    </div>
 
-                    <ul class="mv-pricing__features">
-                        <li
-                            v-for="(feature, fi) in plan.features ?? []"
-                            :key="fi"
-                            :class="{ 'is-muted': !feature.included }"
-                        >
-                            <Check :size="18" />
-                            <span>{{ feature.label }}</span>
-                        </li>
-                    </ul>
+                            <ul class="mv-pricing__features">
+                                <li
+                                    v-for="(feature, fi) in plan.features ??
+                                    []"
+                                    :key="fi"
+                                    :class="{ 'is-muted': !feature.included }"
+                                >
+                                    <Check v-if="feature.included" :size="18" />
+                                    <X v-else :size="18" />
+                                    <span>{{ feature.label }}</span>
+                                </li>
+                            </ul>
 
-                    <div class="mv-pricing__foot">
-                        <a :href="plan.cta_url || '#'" class="mv-pricing__btn">
-                            {{ plan.cta_label }}
-                            <ArrowUpRight :size="16" />
-                        </a>
+                            <a
+                                :href="plan.cta_url || '#'"
+                                class="mv-pricing__btn"
+                            >
+                                <span>{{ plan.cta_label }}</span>
+                                <ArrowUpRight :size="16" />
+                            </a>
+                        </div>
                     </div>
                 </article>
             </div>

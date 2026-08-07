@@ -1,29 +1,19 @@
 <script setup lang="ts">
-import {
-    ArrowRight,
-    BadgeCheck,
-    Building2,
-    CalendarDays,
-    MapPin,
-    ShieldCheck,
-    Star,
-    Zap,
-} from 'lucide-vue-next';
+import { Building2, Star, ThumbsDown, ThumbsUp } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 type Company = {
     logo_url?: string | null;
     name?: string;
-    verified?: boolean;
-    top_pro?: boolean;
+    ribbon_label?: string | null;
     score?: string;
     reviews_count?: number;
-    badges?: string;
+    pro_reviews_count?: number;
     description?: string;
     address?: string;
-    founded?: string;
     services?: string;
-    request_url?: string;
+    pros?: string;
+    cons?: string;
     quote_url?: string;
 };
 
@@ -36,7 +26,10 @@ type Data = {
     subheading?: string;
     all_label?: string;
     score_label?: string;
-    request_label?: string;
+    pro_reviews_label?: string;
+    rating_prefix?: string;
+    pros_heading?: string;
+    cons_heading?: string;
     quote_label?: string;
 };
 
@@ -127,144 +120,120 @@ function reviewsLabel(count?: number): string {
                 <li
                     v-for="(company, i) in visibleCompanies"
                     :key="i"
-                    class="mv-directory__card"
+                    class="mv-directory__entry"
                 >
-                    <div class="mv-directory__card-inner">
-                        <div
-                            class="grid gap-5 sm:grid-cols-[120px_1fr] lg:grid-cols-[150px_1fr]"
-                        >
-                            <div class="mv-directory__logo">
-                                <img
-                                    v-if="company.logo_url"
-                                    :src="company.logo_url"
-                                    :alt="company.name || 'Unternehmen'"
-                                />
-                                <Building2 v-else :size="40" />
-                            </div>
+                    <h3 class="mv-directory__name">
+                        <span class="mv-directory__rank">{{ i + 1 }}</span>
+                        {{ company.name }}
+                    </h3>
 
-                            <div class="min-w-0">
-                                <div
-                                    class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-                                >
-                                    <div class="min-w-0">
-                                        <h3 class="mv-directory__name">
-                                            <span class="mv-directory__rank">
-                                                {{ i + 1 }}
-                                            </span>
-                                            {{ company.name }}
-                                            <BadgeCheck
-                                                v-if="company.verified"
-                                                class="mv-directory__verified"
-                                                :size="18"
-                                            />
-                                        </h3>
+                    <div
+                        v-if="company.description"
+                        class="mv-rte mv-directory__desc"
+                        v-html="company.description"
+                    />
 
-                                        <div
-                                            v-if="
-                                                company.top_pro ||
-                                                splitTags(company.badges).length
-                                            "
-                                            class="mv-directory__badges"
-                                        >
-                                            <span
-                                                v-if="company.top_pro"
-                                                class="mv-directory__toppro"
-                                            >
-                                                <ShieldCheck :size="13" />
-                                                TOP PRO
-                                            </span>
-                                            <span
-                                                v-for="badge in splitTags(
-                                                    company.badges,
-                                                )"
-                                                :key="badge"
-                                                class="mv-directory__chip"
-                                            >
-                                                <Zap :size="12" />
-                                                {{ badge }}
-                                            </span>
-                                        </div>
-                                    </div>
+                    <div class="mv-directory__card">
+                        <div class="mv-directory__card-inner">
+                            <span
+                                v-if="company.ribbon_label"
+                                class="mv-directory__ribbon"
+                            >
+                                {{ company.ribbon_label }}
+                            </span>
 
+                            <div class="mv-directory__card-grid">
+                                <div class="mv-directory__logo">
+                                    <img
+                                        v-if="company.logo_url"
+                                        :src="company.logo_url"
+                                        :alt="company.name || 'Unternehmen'"
+                                    />
+                                    <Building2 v-else :size="36" />
+                                </div>
+
+                                <div class="mv-directory__info">
                                     <div class="mv-directory__score">
-                                        <div class="mv-directory__score-badge">
-                                            <span
-                                                class="mv-directory__score-value"
-                                            >
-                                                {{ company.score }}
-                                            </span>
-                                            <span class="mv-directory__stars">
-                                                <Star
-                                                    v-for="s in 5"
-                                                    :key="s"
-                                                    :size="14"
-                                                    :class="
-                                                        s <=
-                                                        scoreToStars(
-                                                            company.score,
-                                                        )
-                                                            ? 'is-on'
-                                                            : ''
-                                                    "
-                                                />
-                                            </span>
-                                        </div>
+                                        <span class="mv-directory__score-value">
+                                            {{ company.score }}
+                                        </span>
+                                        <span class="mv-directory__stars">
+                                            <Star
+                                                v-for="s in 5"
+                                                :key="s"
+                                                :size="14"
+                                                :class="
+                                                    s <=
+                                                    scoreToStars(company.score)
+                                                        ? 'is-on'
+                                                        : ''
+                                                "
+                                            />
+                                        </span>
                                         <span class="mv-directory__count">
-                                            {{
-                                                reviewsLabel(
-                                                    company.reviews_count,
-                                                )
-                                            }}
-                                            {{
-                                                data.score_label ||
-                                                'Bewertungen'
-                                            }}
+                                            {{ reviewsLabel(company.reviews_count) }}
                                         </span>
                                     </div>
+
+                                    <p class="mv-directory__companyname">
+                                        {{ company.name }}
+                                    </p>
+                                    <p v-if="company.address" class="mv-directory__location">
+                                        {{ company.address }}
+                                    </p>
+
+                                    <p
+                                        v-if="company.pro_reviews_count"
+                                        class="mv-directory__proreviews"
+                                    >
+                                        {{ reviewsLabel(company.pro_reviews_count) }}
+                                        {{ data.pro_reviews_label || 'Bewertungen als Profi' }}
+                                    </p>
                                 </div>
 
-                                <div
-                                    v-if="company.description"
-                                    class="mv-rte mv-directory__desc"
-                                    v-html="company.description"
-                                />
-
-                                <div class="mv-directory__foot">
-                                    <ul class="mv-directory__meta">
-                                        <li v-if="company.address">
-                                            <MapPin :size="15" />
-                                            {{ company.address }}
-                                        </li>
-                                        <li v-if="company.founded">
-                                            <CalendarDays :size="15" />
-                                            {{ company.founded }}
-                                        </li>
-                                    </ul>
-
-                                    <div class="mv-directory__actions">
-                                        <a
-                                            :href="company.request_url || '#'"
-                                            class="mv-directory__btn mv-directory__btn--ghost"
-                                        >
-                                            {{
-                                                data.request_label ||
-                                                'Verfügbarkeit anfragen'
-                                            }}
-                                        </a>
-                                        <a
-                                            :href="company.quote_url || '#'"
-                                            class="mv-directory__btn mv-directory__btn--solid"
-                                        >
-                                            {{
-                                                data.quote_label ||
-                                                'Angebot einholen'
-                                            }}
-                                            <span class="mv-directory__btn-ico">
-                                                <ArrowRight :size="15" />
-                                            </span>
-                                        </a>
-                                    </div>
+                                <div class="mv-directory__actions">
+                                    <a
+                                        :href="company.quote_url || '#'"
+                                        class="mv-directory__btn mv-directory__btn--solid"
+                                    >
+                                        {{ data.quote_label || 'Angebot anfordern' }}
+                                    </a>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        v-if="splitTags(company.pros).length || splitTags(company.cons).length"
+                        class="mv-directory__rating"
+                    >
+                        <h4 class="mv-directory__rating-title">
+                            {{ data.rating_prefix || 'So bewerten Kunden' }}
+                            {{ company.name }}
+                        </h4>
+
+                        <div class="mv-directory__rating-grid">
+                            <div class="mv-directory__rating-col mv-directory__rating-col--pros">
+                                <span class="mv-directory__rating-head">
+                                    {{ data.pros_heading || 'Vorteile' }}
+                                </span>
+                                <ul>
+                                    <li v-for="pro in splitTags(company.pros)" :key="pro">
+                                        <ThumbsUp :size="14" />
+                                        <span>{{ pro }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mv-directory__rating-col mv-directory__rating-col--cons">
+                                <span class="mv-directory__rating-head">
+                                    {{ data.cons_heading || 'Nachteile' }}
+                                </span>
+                                <ul>
+                                    <li v-for="con in splitTags(company.cons)" :key="con">
+                                        <ThumbsDown :size="14" />
+                                        <span>{{ con }}</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>

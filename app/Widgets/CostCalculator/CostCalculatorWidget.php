@@ -87,13 +87,13 @@ final class CostCalculatorWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'currency' => ['nullable', 'string', 'max:8'],
+            'currency' => ['nullable', 'string'],
             'base_price' => ['nullable', 'numeric', 'min:0'],
             'price_per_sqm' => ['nullable', 'numeric', 'min:0'],
             'price_per_km' => ['nullable', 'numeric', 'min:0'],
             'spread_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'locations' => ['nullable', 'array', 'max:200'],
-            'locations.*.name' => ['nullable', 'string', 'max:160'],
+            'locations' => ['nullable', 'array'],
+            'locations.*.name' => ['nullable', 'string'],
             'locations.*.lat' => ['nullable', 'numeric', 'between:-90,90'],
             'locations.*.lng' => ['nullable', 'numeric', 'between:-180,180'],
         ];
@@ -105,24 +105,24 @@ final class CostCalculatorWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'title' => ['nullable', 'string', 'max:160'],
-            'from_label' => ['nullable', 'string', 'max:120'],
-            'from_placeholder' => ['nullable', 'string', 'max:160'],
-            'to_label' => ['nullable', 'string', 'max:120'],
-            'to_placeholder' => ['nullable', 'string', 'max:160'],
-            'area_label' => ['nullable', 'string', 'max:120'],
-            'area_placeholder' => ['nullable', 'string', 'max:60'],
-            'area_unit' => ['nullable', 'string', 'max:16'],
-            'calculate_label' => ['nullable', 'string', 'max:80'],
-            'recalculate_label' => ['nullable', 'string', 'max:80'],
-            'result_title' => ['nullable', 'string', 'max:120'],
-            'volume_label' => ['nullable', 'string', 'max:80'],
-            'distance_label' => ['nullable', 'string', 'max:80'],
-            'empty_text' => ['nullable', 'string', 'max:400'],
-            'error_text' => ['nullable', 'string', 'max:400'],
-            'cta_text' => ['nullable', 'string', 'max:2000'],
-            'cta_label' => ['nullable', 'string', 'max:120'],
-            'cta_url' => ['nullable', 'string', 'max:2000'],
+            'title' => ['nullable', 'string'],
+            'from_label' => ['nullable', 'string'],
+            'from_placeholder' => ['nullable', 'string'],
+            'to_label' => ['nullable', 'string'],
+            'to_placeholder' => ['nullable', 'string'],
+            'area_label' => ['nullable', 'string'],
+            'area_placeholder' => ['nullable', 'string'],
+            'area_unit' => ['nullable', 'string'],
+            'calculate_label' => ['nullable', 'string'],
+            'recalculate_label' => ['nullable', 'string'],
+            'result_title' => ['nullable', 'string'],
+            'volume_label' => ['nullable', 'string'],
+            'distance_label' => ['nullable', 'string'],
+            'empty_text' => ['nullable', 'string'],
+            'error_text' => ['nullable', 'string'],
+            'cta_text' => ['nullable', 'string'],
+            'cta_label' => ['nullable', 'string'],
+            'cta_url' => ['nullable', 'string'],
         ];
     }
 

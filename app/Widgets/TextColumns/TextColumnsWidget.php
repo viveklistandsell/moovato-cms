@@ -62,13 +62,13 @@ final class TextColumnsWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:1500'],
-            'intro' => ['nullable', 'string', 'max:400'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'outro' => ['nullable', 'string', 'max:400'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'intro' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*' => ['nullable', 'string'],
+            'outro' => ['nullable', 'string'],
         ];
     }
 }

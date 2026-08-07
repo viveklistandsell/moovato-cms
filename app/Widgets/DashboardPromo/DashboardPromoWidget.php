@@ -81,10 +81,10 @@ final class DashboardPromoWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'dashboard_image_path' => ['nullable', 'string', 'max:1000'],
-            'dashboard_image_url' => ['nullable', 'string', 'max:2000'],
-            'reviews_image_path' => ['nullable', 'string', 'max:1000'],
-            'reviews_image_url' => ['nullable', 'string', 'max:2000'],
+            'dashboard_image_path' => ['nullable', 'string'],
+            'dashboard_image_url' => ['nullable', 'string'],
+            'reviews_image_path' => ['nullable', 'string'],
+            'reviews_image_url' => ['nullable', 'string'],
         ];
     }
 
@@ -94,21 +94,21 @@ final class DashboardPromoWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'promo_title' => ['nullable', 'string', 'max:160'],
-            'promo_text' => ['nullable', 'string', 'max:400'],
-            'promo_cta_label' => ['nullable', 'string', 'max:80'],
-            'promo_cta_url' => ['nullable', 'string', 'max:2000'],
-            'dashboard_image_alt' => ['nullable', 'string', 'max:160'],
-            'reviews_title' => ['nullable', 'string', 'max:160'],
-            'reviews_text' => ['nullable', 'string', 'max:500'],
-            'reviews_image_alt' => ['nullable', 'string', 'max:160'],
-            'services_title' => ['nullable', 'string', 'max:160'],
-            'services_text' => ['nullable', 'string', 'max:500'],
-            'services_link_label' => ['nullable', 'string', 'max:80'],
-            'services_link_url' => ['nullable', 'string', 'max:2000'],
-            'services' => ['nullable', 'array', 'max:8'],
-            'services.*.icon' => ['nullable', 'string', 'max:64'],
-            'services.*.label' => ['nullable', 'string', 'max:120'],
+            'promo_title' => ['nullable', 'string'],
+            'promo_text' => ['nullable', 'string'],
+            'promo_cta_label' => ['nullable', 'string'],
+            'promo_cta_url' => ['nullable', 'string'],
+            'dashboard_image_alt' => ['nullable', 'string'],
+            'reviews_title' => ['nullable', 'string'],
+            'reviews_text' => ['nullable', 'string'],
+            'reviews_image_alt' => ['nullable', 'string'],
+            'services_title' => ['nullable', 'string'],
+            'services_text' => ['nullable', 'string'],
+            'services_link_label' => ['nullable', 'string'],
+            'services_link_url' => ['nullable', 'string'],
+            'services' => ['nullable', 'array'],
+            'services.*.icon' => ['nullable', 'string'],
+            'services.*.label' => ['nullable', 'string'],
         ];
     }
 }

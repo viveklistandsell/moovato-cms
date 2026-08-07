@@ -97,16 +97,16 @@ final class ComparisonWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:60'],
-            'heading' => ['nullable', 'string', 'max:160'],
-            'tabs' => ['nullable', 'array', 'max:4'],
-            'tabs.*.label' => ['nullable', 'string', 'max:80'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'tabs' => ['nullable', 'array'],
+            'tabs.*.label' => ['nullable', 'string'],
             'tabs.*.mode' => ['nullable', 'in:value,check'],
-            'tabs.*.col_left' => ['nullable', 'string', 'max:80'],
-            'tabs.*.col_right' => ['nullable', 'string', 'max:80'],
+            'tabs.*.col_left' => ['nullable', 'string'],
+            'tabs.*.col_right' => ['nullable', 'string'],
             'tabs.*.use_logo' => ['boolean'],
-            'tabs.*.rows' => ['nullable', 'array', 'max:20'],
-            'tabs.*.rows.*.label' => ['nullable', 'string', 'max:160'],
+            'tabs.*.rows' => ['nullable', 'array'],
+            'tabs.*.rows.*.label' => ['nullable', 'string'],
             'tabs.*.rows.*.left' => ['nullable'],
             'tabs.*.rows.*.right' => ['nullable'],
         ];
