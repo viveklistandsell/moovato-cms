@@ -83,9 +83,6 @@ jobs:
         #   - vendor          : never deployed (kept locally so the Composer
         #                       cache can save it); the post-deploy step
         #                       reinstalls it server-side with the konsoleH PHP
-        #   - composer.phar   : downloaded once server-side by the post-deploy
-        #                       step; absent from the source, so --delete would
-        #                       prune it on every deploy
         #   - storage / .env  : runtime state (logs, sessions, cache, uploads, secrets)
         #   - public/storage  : the storage:link symlink. It is gitignored, so it
         #                       is absent from the source and --delete would prune
@@ -106,7 +103,6 @@ jobs:
             --exclude '.github' \
             --exclude 'node_modules' \
             --exclude 'vendor' \
-            --exclude 'composer.phar' \
             --exclude 'storage' \
             --exclude 'public/storage' \
             --exclude 'bin' \
@@ -126,12 +122,21 @@ jobs:
             # Hetzner managed server: `php` on PATH is the version configured in
             # konsoleH (currently 8.5), fine for this app.
             PHP=php
-            # composer may not be preinstalled on the managed server; install
-            # composer.phar next to the app once and reuse it on later deploys.
-            if [ ! -f composer.phar ]; then
-              curl -sS https://getcomposer.org/installer | $PHP
+            # composer is not preinstalled on the managed server, so fetch the
+            # phar once and reuse it on later deploys. Downloaded with curl
+            # rather than getcomposer.org/installer, which refuses to run when
+            # allow_url_fopen is off in the CLI php.ini. Kept in the home
+            # directory, outside the deployed tree, so rsync --delete never
+            # prunes it and it is not web-reachable.
+            COMPOSER="$HOME/composer.phar"
+            if [ ! -f "$COMPOSER" ]; then
+              curl -sS -o "$COMPOSER" https://getcomposer.org/composer-stable.phar
             fi
-            COMPOSER=composer.phar
+            # Overridden per-invocation rather than relying on the konsoleH PHP
+            # settings: composer needs allow_url_fopen for remote metadata, and
+            # resolving the dependency graph regularly exceeds the account's
+            # 128M memory_limit.
+            COMPOSER_PHP="$PHP -d allow_url_fopen=1 -d memory_limit=-1"
             # storage/ is rsync-excluded to protect runtime state, so on a fresh
             # server the framework scaffolding does not exist and view:cache fails
             # with "View path not found". Recreating it is idempotent.
@@ -142,7 +147,7 @@ jobs:
                      storage/logs \
                      bootstrap/cache
             # vendor is never rsynced, so it is rebuilt here from composer.lock.
-            $PHP "$COMPOSER" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            $COMPOSER_PHP "$COMPOSER" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
             $PHP artisan migrate --force
             # Idempotent: recreates public/storage on a fresh server without
             # failing when the symlink is already in place.
