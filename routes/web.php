@@ -46,6 +46,7 @@ use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\PlaceSearchController;
 use App\Http\Controllers\Frontend\RobotsController;
 use App\Http\Controllers\Frontend\SitemapController;
+use App\Http\Controllers\Portal\CompanyProfileController as PortalCompanyProfileController;
 use App\Http\Controllers\StorageFallbackController;
 use Illuminate\Support\Facades\Route;
 
@@ -494,6 +495,77 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
         });
     });
 });
+
+Route::get('company-portal/{company}/{slug?}', [PortalCompanyProfileController::class, 'show'])
+    ->whereNumber('company')
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware('locale')
+    ->name('portal.company.profile');
+Route::post('company-portal/{company}/name', [PortalCompanyProfileController::class, 'updateName'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-name');
+Route::post('company-portal/{company}/founded', [PortalCompanyProfileController::class, 'updateFounded'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-founded');
+Route::post('company-portal/{company}/employees', [PortalCompanyProfileController::class, 'updateEmployees'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-employees');
+Route::post('company-portal/{company}/website', [PortalCompanyProfileController::class, 'updateWebsite'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-website');
+Route::post('company-portal/{company}/trust', [PortalCompanyProfileController::class, 'updateTrust'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-trust');
+Route::post('company-portal/{company}/about', [PortalCompanyProfileController::class, 'updateAbout'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-about');
+Route::post('company-portal/{company}/short-description', [PortalCompanyProfileController::class, 'updateShortDescription'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-short-description');
+Route::post('company-portal/{company}/google', [PortalCompanyProfileController::class, 'updateGoogle'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-google');
+Route::post('company-portal/{company}/address', [PortalCompanyProfileController::class, 'updateAddress'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-address');
+Route::post('company-portal/{company}/contacts', [PortalCompanyProfileController::class, 'updateContacts'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-contacts');
+Route::post('company-portal/{company}/services', [PortalCompanyProfileController::class, 'updateServices'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-services');
+Route::post('company-portal/{company}/areas', [PortalCompanyProfileController::class, 'updateAreas'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-areas');
+Route::post('company-portal/{company}/faqs', [PortalCompanyProfileController::class, 'updateFaqs'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-faqs');
+Route::post('company-portal/{company}/branding', [PortalCompanyProfileController::class, 'updateBranding'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:10,1'])
+    ->name('portal.company.update-branding');
+Route::post('company-portal/{company}/gallery', [PortalCompanyProfileController::class, 'addGalleryImage'])
+    ->whereNumber('company')
+    ->middleware(['locale', 'throttle:20,1'])
+    ->name('portal.company.gallery-add');
+Route::delete('company-portal/{company}/gallery/{media}', [PortalCompanyProfileController::class, 'deleteGalleryImage'])
+    ->whereNumber('company')
+    ->whereNumber('media')
+    ->middleware(['locale', 'throttle:20,1'])
+    ->name('portal.company.gallery-delete');
 
 Route::middleware(['auth', 'verified', 'admin', 'admin.locale'])
     ->prefix('admin')

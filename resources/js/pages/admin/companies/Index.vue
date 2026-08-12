@@ -5,6 +5,7 @@ import {
     Briefcase,
     ExternalLink,
     GripVertical,
+    IdCard,
     Pencil,
     Plus,
     Star,
@@ -717,7 +718,15 @@ function performDelete(c: Company): void {
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <Button variant="ghost" size="icon-sm" as-child>
+                                        <Button variant="ghost" size="icon-sm" as-child :title="t('profile.rows.name')">
+                                            <Link :href="displayPermalink(row)
+                                                ? `/company-portal/${row.id}/${displayPermalink(row)}`
+                                                : `/company-portal/${row.id}`"
+                                            >
+                                                <IdCard class="size-4" />
+                                            </Link>
+                                        </Button>
+                                        <Button variant="ghost" size="icon-sm" as-child :title="t('profile.open_full_editor')">
                                             <Link :href="`/admin/companies/${row.id}/edit`">
                                                 <Pencil class="size-4" />
                                             </Link>
