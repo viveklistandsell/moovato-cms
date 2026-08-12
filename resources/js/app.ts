@@ -27,6 +27,10 @@ createInertiaApp({
                 return [AppLayout, SettingsLayout];
             case name.startsWith('portal/'):
                 return null;
+            // Partner (company owner) auth + dashboard pages — bespoke
+            // centered-card layout, no admin chrome, no public site header.
+            case name.startsWith('partner/'):
+                return null;
             default:
                 return AppLayout;
         }

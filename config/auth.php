@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Models\CompanyUser;
 use App\Models\User;
 
 return [
@@ -42,6 +45,15 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Company owners / partners — completely separate auth stack.
+        // Used by /partner/* routes; shares the browser session store
+        // with `web` so both an admin AND a partner can be logged in
+        // in the same session (rare, but doesn't hurt).
+        'company' => [
+            'driver' => 'session',
+            'provider' => 'company_users',
+        ],
     ],
 
     /*
@@ -67,10 +79,13 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        // Feeds the `company` guard above. Different model, different
+        // table (`company_users`), zero overlap with the admin User
+        // provider.
+        'company_users' => [
+            'driver' => 'eloquent',
+            'model' => CompanyUser::class,
+        ],
     ],
 
     /*
@@ -97,6 +112,20 @@ return [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        // Powers BOTH flows for company users:
+        //   1. Admin-triggered "set your initial password" (fires from
+        //      the Accept button — token expires in 7 days so a busy
+        //      applicant has time to click the email).
+        //   2. Self-service /partner/forgot-password (same 7-day TTL
+        //      is fine; short enough to be safe, long enough to
+        //      accommodate weekend / vacation email checking).
+        'company_users' => [
+            'provider' => 'company_users',
+            'table' => 'company_password_reset_tokens',
+            'expire' => 60 * 24 * 7, // 7 days in minutes
             'throttle' => 60,
         ],
     ],

@@ -46,6 +46,7 @@ use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\PlaceSearchController;
 use App\Http\Controllers\Frontend\RobotsController;
 use App\Http\Controllers\Frontend\SitemapController;
+use App\Http\Controllers\Partner\Auth\RegisterController as PartnerRegisterController;
 use App\Http\Controllers\Portal\CompanyProfileController as PortalCompanyProfileController;
 use App\Http\Controllers\StorageFallbackController;
 use Illuminate\Support\Facades\Route;
@@ -501,6 +502,20 @@ Route::get('company-portal/{company}/{slug?}', [PortalCompanyProfileController::
     ->where('slug', '[a-z0-9-]+')
     ->middleware('locale')
     ->name('portal.company.profile');
+
+// Partner (company owner) auth stack — SEPARATE from admin auth.
+// Uses the `company` guard (see config/auth.php). Live surfaces so
+// far: register + thanks (this phase). Login / logout / forgot /
+// reset land in Phase 3.
+Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(function (): void {
+    Route::get('register', [PartnerRegisterController::class, 'create'])
+        ->name('register');
+    Route::post('register', [PartnerRegisterController::class, 'store'])
+        ->middleware('throttle:5,60')
+        ->name('register.store');
+    Route::get('register/thanks', [PartnerRegisterController::class, 'thanks'])
+        ->name('register.thanks');
+});
 Route::post('company-portal/{company}/name', [PortalCompanyProfileController::class, 'updateName'])
     ->whereNumber('company')
     ->middleware(['locale', 'throttle:10,1'])
