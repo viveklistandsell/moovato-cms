@@ -25,6 +25,8 @@ createInertiaApp({
                 return FrontendLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
+            case name.startsWith('portal/'):
+                return null;
             default:
                 return AppLayout;
         }
