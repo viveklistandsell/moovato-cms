@@ -1,0 +1,161 @@
+name: Deploy to dev server via SSH
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v6
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install NPM dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Generate Wayfinder routes
+        run: php artisan wayfinder:generate
+
+      - name: Build frontend assets
+        run: npm run build
+
+      # vendor is NOT removed here: rsync already excludes it, and the cache
+      # action saves the vendor path in its post-job step — deleting it would
+      # leave the Composer cache permanently empty.
+      - name: Remove generated Wayfinder files before deploy
+        run: rm -rf resources/js/actions resources/js/routes
+
+      - name: Clean up conflicting paths on remote
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          password: ${{ secrets.DEV_SSH_PASSWORD }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          script: |
+            cd ./public_html/
+            find .claude/skills .github/skills -maxdepth 1 -type d ! -name skills 2>/dev/null | xargs rm -rf
+
+      # burnett01/rsync-deployments only supports key auth, so with a password
+      # we run rsync directly through sshpass instead.
+      - name: Deploy files via rsync
+        env:
+          # sshpass -e reads the password from SSHPASS, keeping it out of the
+          # process list (a -p argument would be visible in `ps`).
+          SSHPASS: ${{ secrets.DEV_SSH_PASSWORD }}
+          DEV_SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+          DEV_SSH_USER: ${{ secrets.DEV_SSH_USER }}
+          DEV_SSH_PORT: ${{ secrets.DEV_SSH_PORT }}
+        # -r recurse, -l links, -p perms, -t times, -z compress, -v verbose.
+        # Deliberately NOT -a: we skip owner/group (-o/-g) preservation since the
+        # deploy user can't chown and would error.
+        # --delete prunes files removed from the repo. The excludes below are
+        # protected from --delete (NOT --delete-excluded), so server-only state is
+        # never pruned:
+        #   - .git / .github  : repo metadata, not needed on the server
+        #   - node_modules    : dev-only, never deployed
+        #   - vendor          : never deployed (kept locally so the Composer
+        #                       cache can save it); the post-deploy step
+        #                       reinstalls it server-side with the konsoleH PHP
+        #   - storage / .env  : runtime state (logs, sessions, cache, uploads, secrets)
+        #   - public/storage  : the storage:link symlink. It is gitignored, so it
+        #                       is absent from the source and --delete would prune
+        #                       it on every deploy, 404ing all uploaded media.
+        #   - bin             : server-side ffmpeg/ffprobe copies kept inside
+        #                       open_basedir. Gitignored and absent from the
+        #                       source, so --delete would prune them.
+        # We do NOT honour .gitignore here because public/build is gitignored yet
+        # must be deployed — it's the freshly built frontend.
+        # The Hetzner SSH user lands in its home directory, so the document root
+        # directory (remote target) is one level down at ./public_html/.
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends sshpass
+          sshpass -e rsync -rlptzv --delete \
+            -e "ssh -o StrictHostKeyChecking=no -p $DEV_SSH_PORT" \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude 'vendor' \
+            --exclude 'storage' \
+            --exclude 'public/storage' \
+            --exclude 'bin' \
+            --exclude '.env' \
+            ./ "$DEV_SSH_USER@$DEV_SSH_HOST:./public_html/"
+
+      - name: Post-deploy tasks
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          username: ${{ secrets.DEV_SSH_USER }}
+          password: ${{ secrets.DEV_SSH_PASSWORD }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          script: |
+            set -e
+            cd ./public_html/
+            # Hetzner managed server: `php` on PATH is the version configured in
+            # konsoleH (currently 8.5), fine for this app.
+            PHP=php
+            # composer is not preinstalled on the managed server, so fetch the
+            # phar once and reuse it on later deploys. Downloaded with curl
+            # rather than getcomposer.org/installer, which refuses to run when
+            # allow_url_fopen is off in the CLI php.ini. Kept in the home
+            # directory, outside the deployed tree, so rsync --delete never
+            # prunes it and it is not web-reachable.
+            COMPOSER="$HOME/composer.phar"
+            if [ ! -f "$COMPOSER" ]; then
+              curl -sS -o "$COMPOSER" https://getcomposer.org/composer-stable.phar
+            fi
+            # Overridden per-invocation rather than relying on the konsoleH PHP
+            # settings: composer needs allow_url_fopen for remote metadata, and
+            # resolving the dependency graph regularly exceeds the account's
+            # 128M memory_limit.
+            COMPOSER_PHP="$PHP -d allow_url_fopen=1 -d memory_limit=-1"
+            # storage/ is rsync-excluded to protect runtime state, so on a fresh
+            # server the framework scaffolding does not exist and view:cache fails
+            # with "View path not found". Recreating it is idempotent.
+            mkdir -p storage/framework/cache/data \
+                     storage/framework/sessions \
+                     storage/framework/views \
+                     storage/app/public \
+                     storage/logs \
+                     bootstrap/cache
+            # vendor is never rsynced, so it is rebuilt here from composer.lock.
+            $COMPOSER_PHP "$COMPOSER" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            $PHP artisan migrate --force
+            # Idempotent: recreates public/storage on a fresh server without
+            # failing when the symlink is already in place.
+            $PHP artisan storage:link --force
+            $PHP artisan optimize:clear
+            $PHP artisan optimize
+            # Supervisor workers are long-lived and hold the old code in memory;
+            # this lets in-flight jobs finish, then respawns them with new code.
+            $PHP artisan queue:restart
+
+            
