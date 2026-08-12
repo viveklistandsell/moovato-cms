@@ -276,7 +276,7 @@ const navHeight = ref(0);
 const isStuck = ref(false);
 
 function onScroll(): void {
-    if (!headerSticky.value) {
+    if (!headerSticky.value || window.innerWidth < 768) {
         isStuck.value = false;
         return;
     }

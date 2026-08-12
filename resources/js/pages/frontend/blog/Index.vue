@@ -124,7 +124,7 @@ function cleanLabel(label: string): string {
 <template>
     <Head title="Blog" />
 
-    <div class="container-xl section-py">
+    <div class="container-xl section-py mv-blog-index">
         <!-- Breadcrumb -->
         <nav class="mb-6 flex items-center gap-2 text-lg text-muted-foreground">
             <Link

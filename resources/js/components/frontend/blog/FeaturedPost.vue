@@ -42,17 +42,17 @@ const primaryCategory = computed(() => props.post.categories[0] ?? null);
 </script>
 
 <template>
-    <section class="rounded-2xl border border-border/40 bg-muted/40 p-6 bg-white dark:bg-muted">
-        <div class="grid gap-8 md:grid-cols-2 md:items-center">
+    <section class="mv-blogcard-featured rounded-[32px] p-2">
+        <div class="mv-blogcard-featured-inner grid gap-8 rounded-[26px] bg-white p-6 md:grid-cols-2 md:items-center md:p-10">
             <div class="space-y-4">
-                <p class="text-xs font-extrabold tracking-[0.2em] text-[var(--orange)] uppercase dark:var(--orange)">
+                <p class="inline-flex items-center rounded-full border border-[var(--orange-soft)] bg-white px-3 py-1 text-[11px] font-bold tracking-[0.18em] text-[var(--orange)] uppercase">
                     {{
                         label ??
                         (locale === 'de' ? 'Neueste Beiträge' : 'Latest Posts')
                     }}
                 </p>
                 <Link :href="detailHref"
-                    class="block text-2xl leading-tight font-extrabold tracking-tight hover:underline sm:text-3xl">
+                    class="mv-blogcard-title block text-2xl leading-tight font-extrabold tracking-tight hover:underline underline-offset-4 sm:text-3xl">
                     {{ post.title }}
                 </Link>
                 <p v-if="post.excerpt" class="line-clamp-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -66,7 +66,7 @@ const primaryCategory = computed(() => props.post.categories[0] ?? null);
                         locale,
                         `/blog?category=${primaryCategory.permalink}`,
                     )
-                        " class="text-[var(--orange)] hover:underline text-bold">
+                        " class="inline-flex items-center rounded-full bg-[var(--orange-soft)] px-3 py-1 text-[11px] font-bold tracking-wider text-[var(--orange)] uppercase transition-colors hover:bg-[var(--orange)] hover:text-white">
                         {{ primaryCategory.name }}
                     </Link>
                     <span v-if="post.author">· {{ post.author }}</span>
@@ -74,9 +74,9 @@ const primaryCategory = computed(() => props.post.categories[0] ?? null);
                 </div>
             </div>
 
-            <Link :href="detailHref" class="block aspect-[4/2] overflow-hidden rounded-xl bg-muted">
+            <Link :href="detailHref" class="mv-blogcard-featured-media block aspect-[4/2] overflow-hidden rounded-2xl bg-muted">
                 <img v-if="post.image_url" :src="post.image_url" :alt="post.title"
-                    class="size-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+                    class="size-full object-cover" />
                 <div v-else class="flex size-full items-center justify-center">
                     <ImageIcon class="size-12 text-muted-foreground/40" />
                 </div>
