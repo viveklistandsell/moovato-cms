@@ -46,33 +46,32 @@ const categoryLabel = computed(() => {
 </script>
 
 <template>
-    <Link :href="detailHref" class="mv-blogcard group flex h-full flex-col rounded-[28px] p-2">
-        <div class="mv-blogcard-inner flex h-full flex-col overflow-hidden rounded-[22px] bg-white">
-            <div class="mv-blogcard-media relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-muted">
-                <img v-if="post.image_url" :src="post.image_url" :alt="post.title"
-                    class="size-full object-cover" />
-                <ImageIcon v-else class="size-10 text-muted-foreground/50" />
-            </div>
+    <Link :href="detailHref"
+        class="group flex flex-col overflow-hidden rounded-lg border rounded-lg transition-all hover:border-border bg-white dark:bg-muted hover:shadow-lg">
+        <div class="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-lg bg-muted">
+            <img v-if="post.image_url" :src="post.image_url" :alt="post.title"
+                class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+            <ImageIcon v-else class="size-10 text-muted-foreground/50" />
+        </div>
 
-            <div class="flex flex-1 flex-col gap-3 p-5">
-                <p v-if="categoryLabel"
-                    class="inline-flex w-fit items-center rounded-full bg-[var(--orange-soft)] px-3 py-1 text-[11px] font-bold tracking-wider text-[var(--orange)] uppercase">
-                    {{ categoryLabel }}
-                </p>
-                <h3 class="mv-blogcard-title text-xl leading-tight font-extrabold text-foreground group-hover:underline underline-offset-4">
-                    {{ post.title }}
-                </h3>
-                <p v-if="post.excerpt" class="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                    {{ post.excerpt }}
-                </p>
-                <div class="mt-auto flex items-center gap-2 border-t border-black/[0.06] pt-3 text-xs text-muted-foreground">
-                    <span v-if="post.author">{{ post.author }}</span>
-                    <span v-if="post.author && formattedDate">·</span>
-                    <span v-if="formattedDate">{{ formattedDate }}</span>
-                    <span v-if="post.reading_time">
-                        · {{ post.reading_time }} min
-                    </span>
-                </div>
+        <div class="flex flex-col gap-2 p-4 py-6">
+            <p v-if="categoryLabel"
+                class="text-xs font-bold tracking-wider text-[var(--orange)] uppercase dark:var(--orange)">
+                {{ categoryLabel }}
+            </p>
+            <h3 class="text-xl leading-tight font-extrabold text-foreground group-hover:underline">
+                {{ post.title }}
+            </h3>
+            <p v-if="post.excerpt" class="line-clamp-3 text-sm text-muted-foreground">
+                {{ post.excerpt }}
+            </p>
+            <div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                <span v-if="post.author">{{ post.author }}</span>
+                <span v-if="post.author && formattedDate">·</span>
+                <span v-if="formattedDate">{{ formattedDate }}</span>
+                <span v-if="post.reading_time">
+                    · {{ post.reading_time }} min
+                </span>
             </div>
         </div>
     </Link>

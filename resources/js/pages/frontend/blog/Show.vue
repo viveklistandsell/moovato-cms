@@ -205,7 +205,7 @@ onBeforeUnmount(() => observer?.disconnect());
         />
     </Head>
 
-    <div class="container-xl section-py mv-blog-index">
+    <div class="container-xl section-py">
         <!-- Breadcrumb -->
         <nav class="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
             <Link
@@ -235,12 +235,12 @@ onBeforeUnmount(() => observer?.disconnect());
             <!-- Table of Contents (sticky on lg+) -->
             <aside v-if="toc.length > 0" class="hidden lg:block">
                 <div
-                    class="mv-blogpost-toc sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl p-5"
+                    class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2"
                 >
                     <div
-                        class="mb-3 inline-flex items-center gap-2 text-lg font-extrabold text-foreground"
+                        class="mb-3 inline-flex items-center gap-2 text-2xl font-extrabold text-foreground"
                     >
-                        <List class="size-4 text-[var(--orange)]" />
+                        <List class="size-4 text-primary" />
                         {{ t.toc }}
                     </div>
                     <nav class="flex flex-col text-sm">
@@ -258,7 +258,7 @@ onBeforeUnmount(() => observer?.disconnect());
                                         ? 'pl-9'
                                         : 'pl-12',
                                 activeId === entry.id
-                                    ? 'border-[var(--orange)] font-medium text-foreground'
+                                    ? 'border-primary font-medium text-foreground'
                                     : 'border-transparent text-muted-foreground hover:border-border',
                             ]"
                             @click="scrollToHeading(entry.id, $event)"
@@ -274,7 +274,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Categories -->
                 <div
                     v-if="post.categories.length > 0"
-                    class="mb-3 flex flex-wrap gap-2"
+                    class="flex flex-wrap gap-2 text-sm font-extrabold tracking-wider  text-[var(--orange)] uppercase dark:text-[var(--orange)]"
                 >
                     <Link
                         v-for="cat in post.categories"
@@ -285,7 +285,7 @@ onBeforeUnmount(() => observer?.disconnect());
                                 `/blog?category=${cat.permalink}`,
                             )
                         "
-                        class="inline-flex items-center rounded-full bg-[var(--orange-soft)] px-3 py-1 text-[11px] font-bold tracking-wider text-[var(--orange)] uppercase transition-colors hover:bg-[var(--orange)] hover:text-white"
+                        class="hover:underline"
                     >
                         {{ cat.name }}
                     </Link>
@@ -293,36 +293,32 @@ onBeforeUnmount(() => observer?.disconnect());
 
                 <!-- Title -->
                 <h1
-                    class="mb-4 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl md:text-5xl"
+                    class="mb-2 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl md:text-5xl"
                 >
                     {{ post.title }}
                 </h1>
 
                 <!-- Meta row -->
                 <div
-                    class="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
+                    class="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
                 >
-                    <span v-if="post.author" class="mv-blogpost-chip">{{
-                        t.by
-                    }}
-                        {{ post.author }}</span
-                    >
+                    <span v-if="post.author">{{ t.by }} {{ post.author }}</span>
                     <span
                         v-if="formattedDate"
-                        class="mv-blogpost-chip"
+                        class="inline-flex items-center gap-1.5"
                     >
-                        <Calendar class="size-3.5 text-[var(--orange)]" />
+                        <Calendar class="size-4" />
                         {{ formattedDate }}
                     </span>
                     <span
                         v-if="post.reading_time"
-                        class="mv-blogpost-chip"
+                        class="inline-flex items-center gap-1.5"
                     >
-                        <Clock class="size-3.5 text-[var(--orange)]" />
+                        <Clock class="size-4" />
                         {{ post.reading_time }} {{ t.minRead }}
                     </span>
-                    <span class="mv-blogpost-chip">
-                        <Eye class="size-3.5 text-[var(--orange)]" />
+                    <span class="inline-flex items-center gap-1.5">
+                        <Eye class="size-4" />
                         {{ post.view_count.toLocaleString() }} {{ t.views }}
                     </span>
                 </div>
@@ -330,23 +326,19 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Featured image -->
                 <div
                     v-if="post.image_url"
-                    class="mv-blogpost-media mb-6 rounded-[28px] p-1.5"
+                    class="mb-5 overflow-hidden rounded-xl bg-muted"
                 >
-                    <div
-                        class="mv-blogpost-media-inner overflow-hidden rounded-[22px] bg-muted"
-                    >
-                        <img
-                            :src="post.image_url"
-                            :alt="post.title"
-                            class="aspect-[16/9] w-full object-cover"
-                        />
-                    </div>
+                    <img
+                        :src="post.image_url"
+                        :alt="post.title"
+                        class="aspect-[16/9] w-full object-cover"
+                    />
                 </div>
 
                 <!-- Short Description/Excerpt as lead-in -->
                 <p
                     v-if="post.excerpt"
-                    class="mv-blogpost-lead mb-8 rounded-2xl border-l-4 px-5 py-4 text-base leading-relaxed italic"
+                    class="mb-8 border-l-4 border-primary/40 bg-muted/30 px-4 py-3 text-base leading-relaxed text-muted-foreground italic"
                 >
                     {{ post.excerpt }}
                 </p>
@@ -355,7 +347,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <div
                     v-if="post.content"
                     ref="contentRef"
-                    class="mv-prose prose prose-neutral dark:prose-invert prose-headings:font-bold prose-headings:scroll-mt-24 prose-a:text-[var(--orange)] prose-img:rounded-md max-w-none"
+                    class="prose prose-neutral dark:prose-invert prose-headings:font-bold prose-headings:scroll-mt-24 prose-a:text-primary prose-img:rounded-md max-w-none"
                     v-html="post.content"
                 />
 
@@ -370,7 +362,7 @@ onBeforeUnmount(() => observer?.disconnect());
                         :href="
                             localizedUrl(locale, `/blog?tag=${tag.permalink}`)
                         "
-                        class="rounded-full border border-border px-3 py-1 text-foreground transition-colors hover:border-[var(--orange)] hover:text-[var(--orange)]"
+                        class="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:border-foreground hover:text-foreground"
                     >
                         #{{ tag.name }}
                     </Link>
@@ -380,11 +372,9 @@ onBeforeUnmount(() => observer?.disconnect());
                 <div class="mt-10">
                     <Link
                         :href="localizedUrl(locale, '/blog')"
-                        class="mv-blogpost-back group inline-flex items-center gap-2 text-sm font-medium text-[var(--orange)]"
+                        class="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
                     >
-                        <ArrowLeft
-                            class="size-4 transition-transform duration-300 group-hover:-translate-x-1"
-                        />
+                        <ArrowLeft class="size-4" />
                         {{ t.back }}
                     </Link>
                 </div>
@@ -395,7 +385,7 @@ onBeforeUnmount(() => observer?.disconnect());
     <!-- Related posts -->
     <section
         v-if="related.length > 0"
-        class="mv-blog-index mv-blogpost-related border-t border-border/60"
+        class="border-t border-border/60 bg-muted/20"
     >
         <div class="container-xl section-py">
             <h2 class="mb-6 text-2xl font-extrabold tracking-tight">
