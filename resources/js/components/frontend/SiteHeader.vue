@@ -18,7 +18,7 @@ import {
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import FlagImage from '@/components/common/FlagImage.vue';
-import { getDefaultLocale, localizedUrl } from '@/lib/localizedUrl';
+import { getDefaultLocale, localizedUrl, setDefaultLocale } from '@/lib/localizedUrl';
 
 const props = defineProps<{
     locale: string;
@@ -302,7 +302,7 @@ onBeforeUnmount(() => {
 // Keep the cached default locale in sync with whatever the server shares.
 const sharedDefault = (page.props as Record<string, unknown>).defaultLocale;
 if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
-    import('@/lib/localizedUrl').then((m) => m.setDefaultLocale(sharedDefault));
+    setDefaultLocale(sharedDefault);
 }
 </script>
 
