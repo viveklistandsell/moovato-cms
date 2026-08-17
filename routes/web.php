@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryContr
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
 use App\Http\Controllers\Admin\Companies\CompanyController as AdminCompanyController;
+use App\Http\Controllers\Admin\CompanyApplications\CompanyApplicationController as AdminCompanyApplicationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Directory\CityController as AdminCityController;
 use App\Http\Controllers\Admin\Directory\CountryController as AdminCountryController;
@@ -46,7 +47,12 @@ use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\PlaceSearchController;
 use App\Http\Controllers\Frontend\RobotsController;
 use App\Http\Controllers\Frontend\SitemapController;
+use App\Http\Controllers\Partner\Auth\ForgotPasswordController as PartnerForgotPasswordController;
+use App\Http\Controllers\Partner\Auth\LoginController as PartnerLoginController;
+use App\Http\Controllers\Partner\Auth\LogoutController as PartnerLogoutController;
 use App\Http\Controllers\Partner\Auth\RegisterController as PartnerRegisterController;
+use App\Http\Controllers\Partner\Auth\ResetPasswordController as PartnerResetPasswordController;
+use App\Http\Controllers\Partner\DashboardController as PartnerDashboardController;
 use App\Http\Controllers\Portal\CompanyProfileController as PortalCompanyProfileController;
 use App\Http\Controllers\StorageFallbackController;
 use Illuminate\Support\Facades\Route;
@@ -309,6 +315,21 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])
                 ->whereNumber('review')
                 ->name('reviews.destroy');
+            Route::get('company-applications', [AdminCompanyApplicationController::class, 'index'])
+                ->name('applications.index');
+            Route::post('company-applications/{application}/approve', [AdminCompanyApplicationController::class, 'approve'])
+                ->whereNumber('application')
+                ->name('applications.approve');
+            Route::post('company-applications/{application}/reject', [AdminCompanyApplicationController::class, 'reject'])
+                ->whereNumber('application')
+                ->name('applications.reject');
+            Route::delete('company-applications/{application}', [AdminCompanyApplicationController::class, 'destroy'])
+                ->whereNumber('application')
+                ->name('applications.destroy');
+            Route::get('company-applications/{application}/doc/{index}', [AdminCompanyApplicationController::class, 'downloadDoc'])
+                ->whereNumber('application')
+                ->whereNumber('index')
+                ->name('applications.doc');
         });
 
         Route::prefix('pages')->name('pages.')->group(function (): void {
@@ -503,84 +524,97 @@ Route::get('company-portal/{company}/{slug?}', [PortalCompanyProfileController::
     ->middleware('locale')
     ->name('portal.company.profile');
 
-// Partner (company owner) auth stack — SEPARATE from admin auth.
-// Uses the `company` guard (see config/auth.php). Live surfaces so
-// far: register + thanks (this phase). Login / logout / forgot /
-// reset land in Phase 3.
 Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(function (): void {
     Route::get('register', [PartnerRegisterController::class, 'create'])
         ->name('register');
     Route::post('register', [PartnerRegisterController::class, 'store'])
-        ->middleware('throttle:5,60')
+        ->middleware('throttle:20,10')
         ->name('register.store');
     Route::get('register/thanks', [PartnerRegisterController::class, 'thanks'])
         ->name('register.thanks');
+
+    Route::middleware('guest:company')->group(function (): void {
+        Route::get('login', [PartnerLoginController::class, 'create'])
+            ->name('login');
+        Route::post('login', [PartnerLoginController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('login.store');
+
+        Route::get('forgot-password', [PartnerForgotPasswordController::class, 'create'])
+            ->name('password.request');
+        Route::post('forgot-password', [PartnerForgotPasswordController::class, 'store'])
+            ->middleware('throttle:10,10')
+            ->name('password.email');
+        Route::get('reset-password/{token}', [PartnerResetPasswordController::class, 'create'])
+            ->name('password.reset');
+
+        Route::post('reset-password', [PartnerResetPasswordController::class, 'store'])
+            ->middleware('throttle:20,10')
+            ->name('password.update');
+    });
+
+    Route::middleware('auth:company')->group(function (): void {
+        Route::get('dashboard', [PartnerDashboardController::class, 'index'])
+            ->name('dashboard');
+        Route::post('logout', PartnerLogoutController::class)
+            ->name('logout');
+    });
 });
-Route::post('company-portal/{company}/name', [PortalCompanyProfileController::class, 'updateName'])
+
+Route::middleware(['locale', 'auth:company', 'partner.owns.company'])
     ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-name');
-Route::post('company-portal/{company}/founded', [PortalCompanyProfileController::class, 'updateFounded'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-founded');
-Route::post('company-portal/{company}/employees', [PortalCompanyProfileController::class, 'updateEmployees'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-employees');
-Route::post('company-portal/{company}/website', [PortalCompanyProfileController::class, 'updateWebsite'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-website');
-Route::post('company-portal/{company}/trust', [PortalCompanyProfileController::class, 'updateTrust'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-trust');
-Route::post('company-portal/{company}/about', [PortalCompanyProfileController::class, 'updateAbout'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-about');
-Route::post('company-portal/{company}/short-description', [PortalCompanyProfileController::class, 'updateShortDescription'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-short-description');
-Route::post('company-portal/{company}/google', [PortalCompanyProfileController::class, 'updateGoogle'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-google');
-Route::post('company-portal/{company}/address', [PortalCompanyProfileController::class, 'updateAddress'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-address');
-Route::post('company-portal/{company}/contacts', [PortalCompanyProfileController::class, 'updateContacts'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-contacts');
-Route::post('company-portal/{company}/services', [PortalCompanyProfileController::class, 'updateServices'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-services');
-Route::post('company-portal/{company}/areas', [PortalCompanyProfileController::class, 'updateAreas'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-areas');
-Route::post('company-portal/{company}/faqs', [PortalCompanyProfileController::class, 'updateFaqs'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-faqs');
-Route::post('company-portal/{company}/branding', [PortalCompanyProfileController::class, 'updateBranding'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:10,1'])
-    ->name('portal.company.update-branding');
-Route::post('company-portal/{company}/gallery', [PortalCompanyProfileController::class, 'addGalleryImage'])
-    ->whereNumber('company')
-    ->middleware(['locale', 'throttle:20,1'])
-    ->name('portal.company.gallery-add');
-Route::delete('company-portal/{company}/gallery/{media}', [PortalCompanyProfileController::class, 'deleteGalleryImage'])
-    ->whereNumber('company')
-    ->whereNumber('media')
-    ->middleware(['locale', 'throttle:20,1'])
-    ->name('portal.company.gallery-delete');
+    ->name('portal.company.')
+    ->group(function (): void {
+        Route::post('company-portal/{company}/name', [PortalCompanyProfileController::class, 'updateName'])
+            ->middleware('throttle:10,1')
+            ->name('update-name');
+        Route::post('company-portal/{company}/founded', [PortalCompanyProfileController::class, 'updateFounded'])
+            ->middleware('throttle:10,1')
+            ->name('update-founded');
+        Route::post('company-portal/{company}/employees', [PortalCompanyProfileController::class, 'updateEmployees'])
+            ->middleware('throttle:10,1')
+            ->name('update-employees');
+        Route::post('company-portal/{company}/website', [PortalCompanyProfileController::class, 'updateWebsite'])
+            ->middleware('throttle:10,1')
+            ->name('update-website');
+        Route::post('company-portal/{company}/trust', [PortalCompanyProfileController::class, 'updateTrust'])
+            ->middleware('throttle:10,1')
+            ->name('update-trust');
+        Route::post('company-portal/{company}/about', [PortalCompanyProfileController::class, 'updateAbout'])
+            ->middleware('throttle:10,1')
+            ->name('update-about');
+        Route::post('company-portal/{company}/short-description', [PortalCompanyProfileController::class, 'updateShortDescription'])
+            ->middleware('throttle:10,1')
+            ->name('update-short-description');
+        Route::post('company-portal/{company}/google', [PortalCompanyProfileController::class, 'updateGoogle'])
+            ->middleware('throttle:10,1')
+            ->name('update-google');
+        Route::post('company-portal/{company}/address', [PortalCompanyProfileController::class, 'updateAddress'])
+            ->middleware('throttle:10,1')
+            ->name('update-address');
+        Route::post('company-portal/{company}/contacts', [PortalCompanyProfileController::class, 'updateContacts'])
+            ->middleware('throttle:10,1')
+            ->name('update-contacts');
+        Route::post('company-portal/{company}/services', [PortalCompanyProfileController::class, 'updateServices'])
+            ->middleware('throttle:10,1')
+            ->name('update-services');
+        Route::post('company-portal/{company}/areas', [PortalCompanyProfileController::class, 'updateAreas'])
+            ->middleware('throttle:10,1')
+            ->name('update-areas');
+        Route::post('company-portal/{company}/faqs', [PortalCompanyProfileController::class, 'updateFaqs'])
+            ->middleware('throttle:10,1')
+            ->name('update-faqs');
+        Route::post('company-portal/{company}/branding', [PortalCompanyProfileController::class, 'updateBranding'])
+            ->middleware('throttle:10,1')
+            ->name('update-branding');
+        Route::post('company-portal/{company}/gallery', [PortalCompanyProfileController::class, 'addGalleryImage'])
+            ->middleware('throttle:20,1')
+            ->name('gallery-add');
+        Route::delete('company-portal/{company}/gallery/{media}', [PortalCompanyProfileController::class, 'deleteGalleryImage'])
+            ->whereNumber('media')
+            ->middleware('throttle:20,1')
+            ->name('gallery-delete');
+    });
 
 Route::middleware(['auth', 'verified', 'admin', 'admin.locale'])
     ->prefix('admin')

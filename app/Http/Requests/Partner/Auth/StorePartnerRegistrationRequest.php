@@ -11,8 +11,10 @@ use Illuminate\Validation\Rule;
  * Validates the public /partner/register submission.
  *
  * NO auth required — this IS the entry point for company owners.
- * Anti-spam is layered separately at the route (rate limit) and
- * via reCAPTCHA (added in Phase 3 once the site key is configured).
+ * Anti-spam is layered: route rate limit + hidden honeypot field +
+ * Google reCAPTCHA v2. The reCAPTCHA check is SKIPPED when the
+ * site key isn't configured (fresh install / local dev) so the form
+ * stays usable before the admin pastes the keys into .env.
  *
  * Password is intentionally NOT collected here — the user only
  * gets a password once the admin approves the application and the
@@ -53,6 +55,10 @@ final class StorePartnerRegistrationRequest extends FormRequest
             // Honeypot — bots fill hidden fields; humans don't. The
             // Vue form renders this off-screen with aria-hidden.
             'website_url' => ['nullable', 'string', 'max:0'],
+
+            'g-recaptcha-response' => $this->captchaConfigured()
+                ? ['required', 'string', 'captcha']
+                : ['nullable', 'string'],
         ];
     }
 
@@ -65,6 +71,14 @@ final class StorePartnerRegistrationRequest extends FormRequest
             'accept_terms.accepted' => __('partner.register.errors.accept_terms'),
             'email.unique' => __('partner.register.errors.email_unique'),
             'website_url.max' => __('partner.register.errors.spam_rejected'),
+            'g-recaptcha-response.required' => __('partner.register.errors.captcha_required'),
+            'g-recaptcha-response.captcha' => __('partner.register.errors.captcha_invalid'),
         ];
+    }
+
+    private function captchaConfigured(): bool
+    {
+        return ! empty(config('captcha.sitekey'))
+            && ! empty(config('captcha.secret'));
     }
 }

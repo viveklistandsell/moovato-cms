@@ -13,13 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Auth account for a company owner / partner.
- *
- * Fully separate from the admin `users` table — different guard
- * (`company`), different login URL (`/partner/login`), different
- * password-reset tokens table.
  *
  * A CompanyUser is created in one of two ways:
  *   1. Public POST /partner/register — status=pending, password=null
@@ -63,7 +60,6 @@ final class CompanyUser extends Authenticatable implements CanResetPasswordContr
         return $this->belongsTo(Company::class);
     }
 
-    /** The admin who last processed this application (accept or reject). */
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by_user_id');
@@ -79,17 +75,34 @@ final class CompanyUser extends Authenticatable implements CanResetPasswordContr
         return mb_trim("{$this->first_name} {$this->last_name}");
     }
 
-    /**
-     * The two hard gates for a login attempt. Both must be true.
-     * Called from the custom login controller BEFORE Auth::attempt so
-     * pending / rejected / password-less accounts get a clean error
-     * instead of a silent "wrong credentials" — the applicant would
-     * otherwise keep guessing forever.
-     */
     public function canLogin(): bool
     {
         return $this->status === self::STATUS_APPROVED
             && $this->password !== null;
+    }
+
+    public function portalUrl(?string $locale = null): ?string
+    {
+        if ($this->company_id === null) {
+            return null;
+        }
+
+        $locale ??= app()->getLocale();
+
+        $company = $this->relationLoaded('company')
+            ? $this->company
+            : Company::query()->with('translations:id,company_id,lang,permalink')->find($this->company_id);
+
+        if ($company === null) {
+            return null;
+        }
+
+        $translation = $company->translation($locale);
+        $permalink = $translation?->permalink;
+
+        return $permalink !== null && $permalink !== ''
+            ? "/company-portal/{$company->id}/{$permalink}"
+            : "/company-portal/{$company->id}";
     }
 
     /* --------------------------------------------- scopes */
@@ -109,6 +122,33 @@ final class CompanyUser extends Authenticatable implements CanResetPasswordContr
         return $q->where('status', self::STATUS_REJECTED);
     }
 
+    protected static function booted(): void
+    {
+        self::deleting(function (self $user): void {
+            if ($user->company_id === null) {
+                return;
+            }
+
+            $company = Company::query()->find($user->company_id);
+            if ($company === null) {
+                return;
+            }
+
+            if ($user->isForceDeleting()) {
+                self::cascadeForceDeleteCompany($company);
+
+                return;
+            }
+
+            if ($company->status === 'published') {
+                $company->update(['status' => 'draft']);
+            }
+        });
+
+        self::restoring(function (self $user): void {
+        });
+    }
+
     /**
      * @return array<string, string>
      */
@@ -118,9 +158,21 @@ final class CompanyUser extends Authenticatable implements CanResetPasswordContr
             'email_verified_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'password' => 'hashed',
-            // Array of {name, path} entries for docs uploaded during
-            // the /partner/register form. Stored as JSON.
             'registration_docs' => 'array',
         ];
+    }
+
+    private static function cascadeForceDeleteCompany(Company $company): void
+    {
+        DB::transaction(function () use ($company): void {
+            $company->translations()->delete();
+            $company->contacts()->delete();
+            $company->media()->delete();
+            $company->faqs()->delete();
+            $company->reviews()->delete();
+            $company->services()->detach();
+            $company->serviceAreas()->detach();
+            $company->delete();
+        });
     }
 }

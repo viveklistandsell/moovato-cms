@@ -23,6 +23,7 @@ import {
     ImagePlus,
     Info,
     Layers,
+    LayoutDashboard,
     MapPin,
     Map as MapIcon,
     Pencil,
@@ -64,6 +65,7 @@ type CompanyHeader = {
     id: number;
     name: string;
     permalink: string | null;
+    public_url: string | null;
     logo: string | null;
     cover: string | null;
     city_name: string | null;
@@ -146,6 +148,10 @@ const de: Record<string, string> = {
     edit_coming_soon: 'Bearbeitung folgt in Kürze',
     footer_note: 'Ein Klick auf den Stift öffnet ein Bearbeitungsfenster direkt auf dieser Seite. Weitere Abschnitte folgen.',
     back: 'Zurück',
+    to_dashboard: 'Zum Dashboard',
+    to_dashboard_short: 'Dashboard',
+    view_public: 'Öffentliches Profil ansehen',
+    view_public_short: 'Ansehen',
     founded_title: 'Gründungsjahr bearbeiten',
     founded_label: 'Gründungsjahr',
     founded_placeholder: 'z. B. 2011',
@@ -166,6 +172,10 @@ const en: Record<string, string> = {
     edit_coming_soon: 'Editing coming soon',
     footer_note: 'Clicking the pencil opens an inline edit dialog on this page. More sections coming soon.',
     back: 'Back',
+    to_dashboard: 'Back to dashboard',
+    to_dashboard_short: 'Dashboard',
+    view_public: 'View public page',
+    view_public_short: 'View',
     founded_title: 'Edit year of establishment',
     founded_label: 'Year founded',
     founded_placeholder: 'e.g. 2011',
@@ -255,6 +265,27 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
                             {{ company.city_name }}
                         </p>
                     </div>
+                </div>
+                <div class="flex shrink-0 items-center gap-2">
+                    <Link
+                        href="/partner/dashboard"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--linen)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--slate)] transition-colors hover:border-[var(--orange)] hover:text-[var(--orange)] sm:px-4 sm:py-2 sm:text-sm"
+                    >
+                        <LayoutDashboard class="size-3.5 sm:size-4" />
+                        <span class="hidden sm:inline">{{ t('to_dashboard') }}</span>
+                        <span class="sm:hidden">{{ t('to_dashboard_short') }}</span>
+                    </Link>
+                    <a
+                        v-if="company.public_url"
+                        :href="company.public_url"
+                        target="_blank"
+                        rel="noopener"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--orange)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)] sm:px-4 sm:py-2 sm:text-sm"
+                    >
+                        <ExternalLink class="size-3.5 sm:size-4" />
+                        <span class="hidden sm:inline">{{ t('view_public') }}</span>
+                        <span class="sm:hidden">{{ t('view_public_short') }}</span>
+                    </a>
                 </div>
             </div>
         </header>

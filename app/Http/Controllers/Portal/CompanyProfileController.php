@@ -601,10 +601,18 @@ final class CompanyProfileController extends Controller
         $t = $company->translations->firstWhere('lang', $locale) ?? $company->translations->first();
         $websiteContact = $company->contacts->firstWhere('type', 'website');
 
+        $publicUrl = null;
+        if ($t?->permalink !== null && $t->permalink !== '') {
+            $publicUrl = $locale === 'de'
+                ? "/company/{$t->permalink}"
+                : "/{$locale}/company/{$t->permalink}";
+        }
+
         return [
             'id' => (int) $company->id,
             'name' => $t?->name ?? '—',
             'permalink' => $t?->permalink,
+            'public_url' => $publicUrl,
             'logo' => $company->logo,
             'cover' => $company->cover,
             'city_name' => $company->primaryCity?->name,
@@ -648,15 +656,12 @@ final class CompanyProfileController extends Controller
     private function buildRows(Company $company, string $locale): array
     {
         $t = $company->translations->firstWhere('lang', $locale) ?? $company->translations->first();
-        $translations = $company->translations;
 
         $contactPreview = $company->contacts
             ->map(fn ($c) => (string) $c->value)
             ->filter(fn (string $v) => $v !== '')
             ->take(3)
             ->implode(' · ');
-
-        $websiteContact = $company->contacts->firstWhere('type', 'website');
 
         $servicesList = $company->services
             ->map(function ($s) use ($locale) {
@@ -727,21 +732,7 @@ final class CompanyProfileController extends Controller
         }
         $trustPreview = $trustParts === [] ? null : implode(' · ', $trustParts);
 
-        $namePreview = $translations
-            ->map(fn ($tr) => $tr->name ? "[{$tr->lang}] {$tr->name}" : null)
-            ->filter()
-            ->take(2)
-            ->implode(' · ');
-
         return [
-            [
-                'id' => 'name',
-                'label' => __('admin.profile.rows.name'),
-                'icon' => 'IdCard',
-                'preview' => $namePreview !== '' ? $namePreview : null,
-                'is_missing' => $namePreview === '',
-                'edit_anchor' => 'translations',
-            ],
             [
                 'id' => 'contacts',
                 'label' => __('admin.profile.rows.contacts'),
@@ -789,14 +780,6 @@ final class CompanyProfileController extends Controller
                 'preview' => $company->employee_count !== null ? (string) $company->employee_count : null,
                 'is_missing' => $company->employee_count === null,
                 'edit_anchor' => 'basic',
-            ],
-            [
-                'id' => 'website',
-                'label' => __('admin.profile.rows.website'),
-                'icon' => 'Globe',
-                'preview' => $websiteContact?->value,
-                'is_missing' => $websiteContact === null,
-                'edit_anchor' => 'contacts',
             ],
             [
                 'id' => 'short_description',

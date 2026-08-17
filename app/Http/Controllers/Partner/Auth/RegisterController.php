@@ -20,16 +20,6 @@ use Inertia\Response;
 
 /**
  * Public register flow for partner (company) accounts.
- *
- * Flow:
- *   GET  /partner/register        → form (screenshot 1)
- *   POST /partner/register        → validates + creates
- *   GET  /partner/register/thanks → confirmation ("we'll email you
- *                                    when the admin approves")
- *
- * Nothing here logs the user in — they get access only after admin
- * accepts the application AND they've set their password via the
- * emailed reset-style link (handled in Phase 3 admin actions).
  */
 final class RegisterController extends Controller
 {
@@ -40,28 +30,18 @@ final class RegisterController extends Controller
         return Inertia::render('partner/auth/Register', [
             'locale' => $locale,
             'cities' => $this->cityOptions(),
+            'recaptchaSiteKey' => config('captcha.sitekey') ?: null,
         ]);
     }
 
     public function store(StorePartnerRegistrationRequest $request): RedirectResponse
     {
         $data = $request->validated();
-
-        // Persist docs FIRST (outside the DB transaction) so the
-        // filesystem side is committed before we're locked into
-        // rows referencing it. If the DB transaction later rolls
-        // back the orphan files stay on disk but only one uid-
-        // prefixed subfolder is stale — cheap tradeoff vs. writing
-        // files inside a transaction (which can leave rows
-        // pointing at files that never got flushed to disk).
         $docPaths = $this->storeDocs($request->file('documents') ?? []);
 
         $companyUser = DB::transaction(function () use ($data, $docPaths): CompanyUser {
-            // 1. Look up city → country / state come along the FK chain.
             $city = City::query()->findOrFail((int) $data['city_id']);
 
-            // 2. Create the Company row. status='draft' so it never
-            //    appears on the public directory until admin approves.
             $company = Company::query()->create([
                 'primary_city_id' => $city->id,
                 'primary_district_id' => null,
@@ -70,17 +50,12 @@ final class RegisterController extends Controller
                 'status' => 'draft',
                 'sort_order' => Company::nextSortOrder(),
             ]);
-
-            // 3. One translation row seeded per active language, but
-            //    we only KNOW the DE name from the form. Admin can
-            //    fill the EN name later from the portal edit modal.
             $company->translations()->create([
                 'lang' => 'de',
                 'name' => (string) $data['company_name'],
                 'permalink' => Str::slug((string) $data['company_name']),
             ]);
 
-            // 4. The CompanyUser — pending, no password yet.
             return CompanyUser::query()->create([
                 'company_id' => $company->id,
                 'first_name' => mb_trim((string) $data['first_name']),
@@ -93,8 +68,6 @@ final class RegisterController extends Controller
             ]);
         });
 
-        // Notify admin — for now just a log entry. A real Mailable
-        // + admin-approval-inbox notification lands in Phase 6.
         Log::info('New partner registration pending review', [
             'company_user_id' => $companyUser->id,
             'company_id' => $companyUser->company_id,

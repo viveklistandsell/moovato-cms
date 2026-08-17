@@ -15,6 +15,7 @@ import {
     MessageSquareReply,
     Phone,
     Star,
+    Store,
     ThumbsDown,
     ThumbsUp,
     Truck,
@@ -208,6 +209,15 @@ const t = computed(() => ({
         : 'Did you move with this company? Tell us about your experience.',
     address_line: props.locale === 'de' ? 'Adresse' : 'Address',
     call_cta_prefix: props.locale === 'de' ? 'Tel.' : 'Tel.',
+    partner_cta_kicker: props.locale === 'de' ? 'Für Umzugsunternehmen' : 'For moving companies',
+    partner_cta_title: props.locale === 'de'
+        ? 'Auch Ihr Unternehmen bei Moovato listen'
+        : 'List your company on Moovato',
+    partner_cta_body: props.locale === 'de'
+        ? 'Kostenlose Registrierung, direkte Anfragen von Umzugskunden und volle Kontrolle über Ihr Profil.'
+        : 'Free registration, direct requests from moving customers and full control of your profile.',
+    partner_cta_button: props.locale === 'de' ? 'Jetzt als Partner registrieren' : 'Register as a partner',
+    partner_cta_login: props.locale === 'de' ? 'Bereits registriert? Anmelden' : 'Already registered? Sign in',
 }));
 
 // Contact grouped by type for the sidebar card.
@@ -921,6 +931,39 @@ function markHelpful(review: PublicReview): void {
                     </div>
                 </aside>
             </div>
+            <section
+                v-reveal
+                class="mt-12 overflow-hidden rounded-2xl bg-[var(--midnight)] p-6 sm:p-10"
+            >
+                <div class="grid items-center gap-6 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+                    <div class="min-w-0">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--orange-soft)]/90">
+                            {{ t.partner_cta_kicker }}
+                        </p>
+                        <h2 class="mt-2 text-2xl font-bold leading-tight text-white sm:text-3xl">
+                            {{ t.partner_cta_title }}
+                        </h2>
+                        <p class="mt-3 max-w-xl text-sm text-[var(--linen)]/80 sm:text-base">
+                            {{ t.partner_cta_body }}
+                        </p>
+                    </div>
+                    <div class="flex flex-col items-start gap-3 md:items-end">
+                        <Link
+                            href="/partner/register"
+                            class="inline-flex items-center gap-2 rounded-lg bg-[var(--orange)] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                        >
+                            <Store class="size-4" />
+                            {{ t.partner_cta_button }}
+                        </Link>
+                        <Link
+                            href="/partner/login"
+                            class="text-xs font-medium text-[var(--orange-soft)]/90 hover:text-white hover:underline"
+                        >
+                            {{ t.partner_cta_login }}
+                        </Link>
+                    </div>
+                </div>
+            </section>
         </div>
         <div
             v-if="lightboxIdx !== null && company.gallery[lightboxIdx]?.url"
