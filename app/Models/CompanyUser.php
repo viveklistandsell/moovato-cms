@@ -134,18 +134,7 @@ final class CompanyUser extends Authenticatable implements CanResetPasswordContr
                 return;
             }
 
-            if ($user->isForceDeleting()) {
-                self::cascadeForceDeleteCompany($company);
-
-                return;
-            }
-
-            if ($company->status === 'published') {
-                $company->update(['status' => 'draft']);
-            }
-        });
-
-        self::restoring(function (self $user): void {
+            self::cascadeForceDeleteCompany($company);
         });
     }
 

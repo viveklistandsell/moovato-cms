@@ -15,6 +15,7 @@ use App\Models\ServiceCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -374,30 +375,48 @@ final class CompanyProfileController extends Controller
     public function addGalleryImage(Request $request, Company $company): RedirectResponse
     {
         $request->validate([
-            'image' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'image' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'images' => ['sometimes', 'array', 'max:20'],
+            'images.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        $file = $request->file('image');
-        $path = $file->store('company-portal/gallery', 'public');
+        $files = $request->file('images', []);
+        if (! is_array($files)) {
+            $files = [];
+        }
+        if ($request->file('image') !== null) {
+            $files[] = $request->file('image');
+        }
 
-        $mediaFile = MediaFile::query()->create([
-            'folder_id' => null,
-            'user_id' => null,
-            'name' => $file->getClientOriginalName(),
-            'original_name' => $file->getClientOriginalName(),
-            'mime_type' => (string) $file->getMimeType(),
-            'extension' => (string) ($file->getClientOriginalExtension() ?: 'bin'),
-            'size' => (int) $file->getSize(),
-            'disk' => 'public',
-            'path' => $path,
-        ]);
+        if ($files === []) {
+            return back(303)->withErrors(['images' => __('validation.required', ['attribute' => 'images'])]);
+        }
 
-        $nextOrder = ((int) $company->media()->where('kind', 'gallery')->max('sort_order')) + 1;
-        $company->media()->create([
-            'media_file_id' => $mediaFile->id,
-            'kind' => 'gallery',
-            'sort_order' => $nextOrder,
-        ]);
+        DB::transaction(function () use ($files, $company): void {
+            $nextOrder = ((int) $company->media()->where('kind', 'gallery')->max('sort_order')) + 1;
+
+            foreach ($files as $file) {
+                $path = $file->store('company-portal/gallery', 'public');
+
+                $mediaFile = MediaFile::query()->create([
+                    'folder_id' => null,
+                    'user_id' => null,
+                    'name' => $file->getClientOriginalName(),
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => (string) $file->getMimeType(),
+                    'extension' => (string) ($file->getClientOriginalExtension() ?: 'bin'),
+                    'size' => (int) $file->getSize(),
+                    'disk' => 'public',
+                    'path' => $path,
+                ]);
+
+                $company->media()->create([
+                    'media_file_id' => $mediaFile->id,
+                    'kind' => 'gallery',
+                    'sort_order' => $nextOrder++,
+                ]);
+            }
+        });
 
         return back(303);
     }

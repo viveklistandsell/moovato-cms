@@ -247,7 +247,7 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
 
     <div class="min-h-screen bg-[var(--paper)]">
         <header class="sticky top-0 z-10 border-b border-[var(--linen)] bg-white/95 backdrop-blur">
-            <div class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
+            <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
                 <div class="flex items-center gap-2 min-w-0">
                     <button
                         type="button"
@@ -290,7 +290,7 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
             </div>
         </header>
 
-        <div class="mx-auto max-w-3xl px-4 py-6">
+        <div class="mx-auto max-w-6xl px-4 py-6">
             <!-- Cover + logo band -->
             <div class="relative aspect-[6/1] w-full overflow-hidden rounded-lg border border-[var(--linen)] bg-[var(--linen)]">
                 <img

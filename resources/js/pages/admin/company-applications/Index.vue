@@ -1,20 +1,21 @@
 <script setup lang="ts">
-/**
- * Admin approval queue for pending partner registrations.
- */
+
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
+    AlertCircle,
     Building2,
     Check,
+    CheckCircle2,
+    Clock,
     ExternalLink,
     FileText,
     Loader2,
     Mail,
-    MapPin,
+    Paperclip,
     Pencil,
     Phone,
-    Search,
     Trash2,
+    UserRound,
     X,
     XCircle,
 } from 'lucide-vue-next';
@@ -97,20 +98,29 @@ const { search, perPage, setSearch, setPerPage } = useTableQuery(
     { only: ['applications', 'pagination', 'filters', 'stats'] },
 );
 
-function applyFilter(key: string, value: string | number | null): void {
+function applyStatusFilter(value: string | number): void {
     const params: Record<string, string | number> = {};
     if (search.value) params.q = search.value;
     if (perPage.value !== 15) params.per_page = perPage.value;
-    if (props.filters.status !== 'pending' && key !== 'status') {
-        params.status = props.filters.status;
-    }
-    if (value !== null && value !== '') params[key] = value;
+    if (String(value) !== 'all') params.status = String(value);
     router.get('/admin/company-applications', params, {
         preserveScroll: true,
         preserveState: true,
         only: ['applications', 'pagination', 'filters', 'stats'],
     });
 }
+
+function resetFilters(): void {
+    router.get('/admin/company-applications', {}, {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['applications', 'pagination', 'filters', 'stats'],
+    });
+}
+
+const isFiltered = computed(
+    () => props.filters.status !== 'all' || props.filters.q !== '',
+);
 
 /* ---------------------------------------------- actions */
 
@@ -141,25 +151,55 @@ function submitReject(): void {
     });
 }
 
+/* ---------------------------------------------- presenters */
+
 function formatDate(iso: string | null): string {
     if (!iso) return '—';
     try {
         return new Date(iso).toLocaleDateString(undefined, {
-            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+            year: 'numeric', month: 'short', day: 'numeric',
         });
     } catch {
         return iso;
     }
 }
 
-const statusColor = computed(() => (status: string) => {
-    switch (status) {
-        case 'pending': return 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
-        case 'approved': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
-        case 'rejected': return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300';
-        default: return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+function formatDateTime(iso: string | null): string {
+    if (!iso) return '';
+    try {
+        return new Date(iso).toLocaleString(undefined, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
+        });
+    } catch {
+        return iso;
     }
-});
+}
+
+function initials(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    const a = parts[0]?.charAt(0) ?? '';
+    const b = parts.length > 1 ? (parts[parts.length - 1]?.charAt(0) ?? '') : '';
+    return (a + b).toUpperCase() || '?';
+}
+
+const statusStyle = (s: string): string => {
+    switch (s) {
+        case 'pending': return 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300';
+        case 'approved': return 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+        case 'rejected': return 'border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300';
+        default: return 'border-slate-300 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300';
+    }
+};
+
+const statusIcon = (s: string) => {
+    switch (s) {
+        case 'pending': return Clock;
+        case 'approved': return CheckCircle2;
+        case 'rejected': return XCircle;
+        default: return AlertCircle;
+    }
+};
 </script>
 
 <template>
@@ -173,28 +213,48 @@ const statusColor = computed(() => (status: string) => {
 
         <!-- Stat strip -->
         <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Card class="border-amber-200 bg-amber-50/40 dark:bg-amber-950/20">
-                <CardContent class="p-4">
-                    <p class="text-xs text-muted-foreground">{{ t('applications.stats.pending') }}</p>
-                    <p class="text-2xl font-bold text-amber-700">{{ stats.pending }}</p>
+            <Card class="border-amber-200 dark:border-amber-900">
+                <CardContent class="flex items-center gap-3 p-4">
+                    <div class="flex size-10 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                        <Clock class="size-5" />
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{{ t('applications.stats.pending') }}</p>
+                        <p class="text-2xl font-bold text-amber-700 dark:text-amber-300">{{ stats.pending }}</p>
+                    </div>
                 </CardContent>
             </Card>
             <Card>
-                <CardContent class="p-4">
-                    <p class="text-xs text-muted-foreground">{{ t('applications.stats.approved') }}</p>
-                    <p class="text-2xl font-bold text-emerald-600">{{ stats.approved }}</p>
+                <CardContent class="flex items-center gap-3 p-4">
+                    <div class="flex size-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                        <CheckCircle2 class="size-5" />
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{{ t('applications.stats.approved') }}</p>
+                        <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.approved }}</p>
+                    </div>
                 </CardContent>
             </Card>
             <Card>
-                <CardContent class="p-4">
-                    <p class="text-xs text-muted-foreground">{{ t('applications.stats.rejected') }}</p>
-                    <p class="text-2xl font-bold text-red-600">{{ stats.rejected }}</p>
+                <CardContent class="flex items-center gap-3 p-4">
+                    <div class="flex size-10 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">
+                        <XCircle class="size-5" />
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{{ t('applications.stats.rejected') }}</p>
+                        <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ stats.rejected }}</p>
+                    </div>
                 </CardContent>
             </Card>
             <Card>
-                <CardContent class="p-4">
-                    <p class="text-xs text-muted-foreground">{{ t('applications.stats.total') }}</p>
-                    <p class="text-2xl font-bold">{{ stats.total }}</p>
+                <CardContent class="flex items-center gap-3 p-4">
+                    <div class="flex size-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                        <UserRound class="size-5" />
+                    </div>
+                    <div>
+                        <p class="text-xs text-muted-foreground">{{ t('applications.stats.total') }}</p>
+                        <p class="text-2xl font-bold">{{ stats.total }}</p>
+                    </div>
                 </CardContent>
             </Card>
         </div>
@@ -215,155 +275,211 @@ const statusColor = computed(() => (status: string) => {
                             @update:model-value="setSearch"
                         />
                     </div>
-                    <div class="min-w-[160px]">
-                        <label class="mb-1 block text-xs text-muted-foreground">
-                            {{ t('applications.filter_status') }}
-                        </label>
-                        <Select
-                            :model-value="filters.status"
-                            @update:model-value="(v) => applyFilter('status', String(v))"
-                        >
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem v-for="s in allowed.statuses" :key="s" :value="s">
-                                    {{ t(`applications.status.${s}`) }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <Select
+                        :model-value="filters.status"
+                        @update:model-value="(v) => applyStatusFilter(String(v))"
+                    >
+                        <SelectTrigger class="w-[180px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem v-for="s in allowed.statuses" :key="s" :value="s">
+                                {{ t(`applications.status.${s}`) }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Button
+                        v-if="isFiltered"
+                        variant="outline"
+                        size="sm"
+                        @click="resetFilters"
+                    >
+                        <X class="size-4" />
+                        {{ t('common.clear_filters') }}
+                    </Button>
                 </div>
             </CardContent>
         </Card>
 
-        <!-- Applications list -->
+        <!-- Table -->
         <Card>
             <CardContent class="p-0">
-                <div v-if="applications.length === 0" class="p-8 text-center text-sm text-muted-foreground">
-                    {{ t('applications.no_applications') }}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-muted/40 text-xs uppercase">
+                            <tr>
+                                <th class="w-80 px-4 py-3 text-left">{{ t('applications.col_applicant') }}</th>
+                                <th class="px-4 py-3 text-left">{{ t('applications.col_company') }}</th>
+                                <th class="px-4 py-3 text-left">{{ t('applications.col_contact') }}</th>
+                                <th class="w-20 px-4 py-3 text-center">{{ t('applications.col_docs') }}</th>
+                                <th class="w-32 px-4 py-3 text-left">{{ t('applications.col_status') }}</th>
+                                <th class="w-32 px-4 py-3 text-left">{{ t('applications.col_submitted') }}</th>
+                                <th class="w-72 px-4 py-3 text-right">{{ t('table.col_actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="applications.length === 0" class="border-t">
+                                <td :colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                                    {{ t('applications.no_applications') }}
+                                </td>
+                            </tr>
+                            <tr
+                                v-for="app in applications"
+                                v-else
+                                :key="app.id"
+                                class="border-t transition-colors hover:bg-muted/30"
+                            >
+                                <!-- Applicant: avatar + name + email -->
+                                <td class="px-4 py-3">
+                                    <div class="flex items-start gap-3">
+                                        <div class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                                            {{ initials(app.full_name) }}
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="truncate font-medium">{{ app.full_name }}</p>
+                                            <a :href="`mailto:${app.email}`" class="inline-flex items-center gap-1 truncate text-xs text-muted-foreground hover:text-primary">
+                                                <Mail class="size-3" />
+                                                {{ app.email }}
+                                            </a>
+                                            <div v-if="app.documents.length > 0" class="mt-2 grid max-w-full grid-cols-2 gap-1">
+                                                <a
+                                                    v-for="doc in app.documents"
+                                                    :key="doc.url"
+                                                    :href="doc.url"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    class="min-w-0 truncate rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground hover:border-primary hover:text-primary"
+                                                    :title="doc.name"
+                                                >
+                                                    {{ doc.name }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Company -->
+                                <td class="px-4 py-3">
+                                    <div class="flex items-start gap-2">
+                                        <Building2 class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                        <div class="min-w-0">
+                                            <p class="truncate font-medium">
+                                                {{ app.company_name ?? t('applications.no_name') }}
+                                            </p>
+                                            <p v-if="app.company_city || app.company_postal" class="truncate text-xs text-muted-foreground">
+                                                <span v-if="app.company_postal">{{ app.company_postal }} </span>
+                                                <span v-if="app.company_city">{{ app.company_city }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Phone -->
+                                <td class="px-4 py-3">
+                                    <div v-if="app.phone" class="flex items-center gap-1.5 text-xs">
+                                        <Phone class="size-3.5 text-muted-foreground" />
+                                        {{ app.phone }}
+                                    </div>
+                                    <span v-else class="text-xs text-muted-foreground">—</span>
+                                </td>
+
+                                <!-- Docs count -->
+                                <td class="px-4 py-3 text-center">
+                                    <span
+                                        v-if="app.documents.length > 0"
+                                        class="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-1.5 py-0.5 text-xs"
+                                        :title="app.documents.map((d) => d.name).join(', ')"
+                                    >
+                                        <Paperclip class="size-3" />
+                                        {{ app.documents.length }}
+                                    </span>
+                                    <span v-else class="text-xs text-muted-foreground">—</span>
+                                </td>
+
+                                <!-- Status pill -->
+                                <td class="px-4 py-3">
+                                    <Badge
+                                        variant="outline"
+                                        class="gap-1"
+                                        :class="statusStyle(app.status)"
+                                    >
+                                        <component :is="statusIcon(app.status)" class="size-3" />
+                                        {{ t(`applications.status.${app.status}`) }}
+                                    </Badge>
+                                    <p
+                                        v-if="app.status === 'rejected' && app.rejection_reason"
+                                        class="mt-1 line-clamp-2 text-[10px] text-muted-foreground"
+                                        :title="app.rejection_reason"
+                                    >
+                                        {{ app.rejection_reason }}
+                                    </p>
+                                </td>
+
+                                <!-- Submitted -->
+                                <td class="px-4 py-3">
+                                    <div class="text-xs">
+                                        <p class="font-medium">{{ formatDate(app.created_at) }}</p>
+                                        <p v-if="app.reviewer_name" class="mt-0.5 text-muted-foreground" :title="formatDateTime(app.reviewed_at)">
+                                            {{ t('applications.by_short', { name: app.reviewer_name }) }}
+                                        </p>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex flex-col items-end gap-2">
+                                        <div class="flex flex-nowrap items-center justify-end gap-2 whitespace-nowrap">
+                                            <button
+                                                v-if="app.status === 'pending'"
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
+                                                @click="approve(app)"
+                                            >
+                                                <Check class="size-3.5" />
+                                                {{ t('applications.approve') }}
+                                            </button>
+                                            <button
+                                                v-if="app.status === 'pending'"
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-red-50 px-2 py-1 text-[11px] font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"
+                                                @click="openReject(app)"
+                                            >
+                                                <XCircle class="size-3.5" />
+                                                {{ t('applications.reject') }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-red-50 px-2 py-1 text-[11px] font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"
+                                                @click="destroy(app)"
+                                            >
+                                                <Trash2 class="size-3.5" />
+                                                {{ t('applications.delete') }}
+                                            </button>
+                                        </div>
+
+                                        <!-- Row 2: navigation shortcuts (neutral) -->
+                                        <div class="flex flex-wrap items-center justify-end gap-1">
+                                            <a
+                                                v-if="app.edit_url"
+                                                :href="app.edit_url"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground hover:border-primary hover:text-primary"
+                                            >
+                                                <Pencil class="size-3.5" />
+                                                {{ t('applications.edit_company') }}
+                                            </a>
+                                            <Link
+                                                v-if="app.company_id && app.company_permalink"
+                                                :href="`/company-portal/${app.company_id}/${app.company_permalink}`"
+                                                class="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground hover:border-primary hover:text-primary"
+                                            >
+                                                <ExternalLink class="size-3.5" />
+                                                {{ t('applications.view_portal') }}
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <ul v-else class="divide-y divide-border">
-                    <li v-for="app in applications" :key="app.id" class="p-4 md:p-5">
-                        <!-- Header: applicant + status + submitted at -->
-                        <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-[var(--midnight)] dark:text-white">
-                                    {{ app.full_name }}
-                                </p>
-                                <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                                    <a :href="`mailto:${app.email}`" class="inline-flex items-center gap-1 hover:text-[var(--orange)]">
-                                        <Mail class="size-3" /> {{ app.email }}
-                                    </a>
-                                    <span v-if="app.phone" class="inline-flex items-center gap-1">
-                                        <Phone class="size-3" /> {{ app.phone }}
-                                    </span>
-                                    <span>· {{ formatDate(app.created_at) }}</span>
-                                </div>
-                            </div>
-                            <Badge :class="statusColor(app.status)">
-                                {{ t(`applications.status.${app.status}`) }}
-                            </Badge>
-                        </div>
-
-                        <!-- Company card -->
-                        <div class="mb-3 flex flex-wrap items-start gap-3 rounded-md border border-[var(--linen)] bg-[var(--paper)] p-3 dark:border-slate-800 dark:bg-slate-900/40">
-                            <Building2 class="mt-0.5 size-5 shrink-0 text-[var(--slate)]" />
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium">
-                                    {{ app.company_name ?? t('applications.no_name') }}
-                                </p>
-                                <p v-if="app.company_street || app.company_city" class="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                                    <MapPin class="size-3" />
-                                    <span>
-                                        <span v-if="app.company_street">{{ app.company_street }}, </span>
-                                        <span v-if="app.company_postal">{{ app.company_postal }} </span>
-                                        <span v-if="app.company_city">{{ app.company_city }}</span>
-                                    </span>
-                                </p>
-                                <p v-if="app.company_status" class="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                                    {{ t('applications.company_status') }}: {{ app.company_status }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Documents (if any) -->
-                        <div v-if="app.documents.length > 0" class="mb-3 flex flex-wrap gap-2">
-                            <a
-                                v-for="doc in app.documents"
-                                :key="doc.url"
-                                :href="doc.url"
-                                target="_blank"
-                                rel="noopener"
-                                class="inline-flex items-center gap-1.5 rounded-md border border-[var(--linen)] bg-white px-2.5 py-1 text-xs font-medium text-[var(--slate)] hover:border-[var(--orange)] hover:text-[var(--orange)] dark:bg-slate-900"
-                            >
-                                <FileText class="size-3.5" />
-                                {{ doc.name }}
-                            </a>
-                        </div>
-
-                        <!-- Rejection reason if rejected -->
-                        <div v-if="app.status === 'rejected' && app.rejection_reason" class="mb-3 rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/40">
-                            <p class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-red-700 dark:text-red-300">
-                                {{ t('applications.rejection_reason') }}
-                            </p>
-                            <p class="text-xs text-red-700 dark:text-red-300">
-                                {{ app.rejection_reason }}
-                            </p>
-                        </div>
-
-                        <!-- Reviewer trail -->
-                        <p v-if="app.reviewer_name && app.reviewed_at" class="mb-3 text-[10px] text-muted-foreground">
-                            {{ t('applications.reviewed_by', { name: app.reviewer_name, when: formatDate(app.reviewed_at) }) }}
-                        </p>
-
-                        <!-- Actions -->
-                        <div class="flex flex-wrap items-center gap-2">
-                            <Button
-                                v-if="app.status === 'pending'"
-                                size="sm"
-                                @click="approve(app)"
-                            >
-                                <Check class="size-4" />
-                                {{ t('applications.approve') }}
-                            </Button>
-                            <Button
-                                v-if="app.status === 'pending'"
-                                size="sm"
-                                variant="outline"
-                                class="text-red-600 hover:text-red-700"
-                                @click="openReject(app)"
-                            >
-                                <XCircle class="size-4" />
-                                {{ t('applications.reject') }}
-                            </Button>
-                            <Button v-if="app.edit_url" size="sm" variant="outline" as-child>
-                                <a :href="app.edit_url">
-                                    <Pencil class="size-4" />
-                                    {{ t('applications.edit_company') }}
-                                </a>
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                class="text-red-600 hover:text-red-700"
-                                @click="destroy(app)"
-                            >
-                                <Trash2 class="size-4" />
-                                {{ t('applications.delete') }}
-                            </Button>
-                            <Link
-                                v-if="app.company_id && app.company_permalink"
-                                :href="`/company-portal/${app.company_id}/${app.company_permalink}`"
-                                class="ml-auto inline-flex items-center gap-1 text-xs text-[var(--orange)] hover:underline"
-                            >
-                                <ExternalLink class="size-3" />
-                                {{ t('applications.view_portal') }}
-                            </Link>
-                        </div>
-                    </li>
-                </ul>
             </CardContent>
         </Card>
 
@@ -386,15 +502,15 @@ const statusColor = computed(() => (status: string) => {
                 </DialogHeader>
                 <form class="space-y-3" @submit.prevent="submitReject">
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-[var(--slate)]">
+                        <label class="mb-1 block text-xs font-medium text-muted-foreground">
                             {{ t('applications.reject_reason_label') }}
                         </label>
                         <textarea
                             v-model="rejectForm.reason"
                             rows="4"
                             :placeholder="t('applications.reject_reason_placeholder')"
-                            class="w-full rounded-md border border-[var(--linen)] px-3 py-2 text-sm focus:border-[var(--orange)] focus:outline-none"
-                            :class="{ 'border-red-400': !!rejectForm.errors.reason }"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            :class="{ 'border-red-500': !!rejectForm.errors.reason }"
                         />
                         <p v-if="rejectForm.errors.reason" class="mt-1 text-xs text-red-600">
                             {{ rejectForm.errors.reason }}
@@ -408,7 +524,7 @@ const statusColor = computed(() => (status: string) => {
                         <Button
                             type="submit"
                             :disabled="rejectForm.processing"
-                            class="bg-red-600 text-white hover:bg-red-700"
+                            variant="destructive"
                         >
                             <Loader2 v-if="rejectForm.processing" class="size-4 animate-spin" />
                             <XCircle v-else class="size-4" />

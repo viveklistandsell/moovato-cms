@@ -63,7 +63,7 @@ const de = {
     submit: 'Als Partner registrieren',
     submitting: 'Wird gesendet…',
     already: 'Bereits Partner?',
-    login: 'Anmelden',
+    login: 'Login',
     city_placeholder: 'Bitte wählen',
     max_files: '{n} von 5 Dateien',
     err_too_many: 'Maximal 5 Dateien erlaubt. Weitere Dateien wurden ignoriert.',

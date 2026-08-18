@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/**
- * Thanks page shown after /partner/register submission. Same
- * split-panel shell as the other partner-auth pages, palette
- * limited to project theme tokens (no emerald/blue/etc.).
- */
+
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, CheckCircle2, Clock, Mail, ShieldCheck } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -27,9 +23,9 @@ const de = {
     step_2_title: 'E-Mail zum Passwort-Setup',
     step_2_body: 'Bei Genehmigung erhalten Sie einen sicheren Link an Ihre E-Mail-Adresse.',
     step_3_title: 'Loslegen',
-    step_3_body: 'Nach dem Setzen des Passworts können Sie sich anmelden und Ihr Firmenprofil pflegen.',
+    step_3_body: 'Nach dem Setzen des Passworts können Sie sich einloggen und Ihr Firmenprofil pflegen.',
     home: 'Zur Startseite',
-    login: 'Bereits Partner? Anmelden',
+    login: 'Bereits Partner? Einloggen',
 } as const;
 
 const en = {

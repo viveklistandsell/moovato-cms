@@ -34,13 +34,13 @@ use Throwable;
  */
 final class CompanyApplicationController extends Controller
 {
-    private const ALLOWED_STATUS_FILTERS = ['pending', 'approved', 'rejected', 'all'];
+    private const ALLOWED_STATUS_FILTERS = ['all', 'pending', 'approved', 'rejected'];
 
     public function index(Request $request): Response
     {
-        $status = (string) $request->query('status', 'pending');
+        $status = (string) $request->query('status', 'all');
         if (! in_array($status, self::ALLOWED_STATUS_FILTERS, true)) {
-            $status = 'pending';
+            $status = 'all';
         }
 
         $search = mb_trim((string) $request->query('q', ''));
@@ -192,6 +192,7 @@ final class CompanyApplicationController extends Controller
             'success' => __('admin.applications.flash.deleted', ['name' => $name]),
         ]);
     }
+
     public function downloadDoc(CompanyUser $application, int $index): StreamedResponse
     {
         $docs = (array) ($application->registration_docs ?? []);

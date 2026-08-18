@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/**
- * "Forgot password?" form. The backend always shows the same
- * success flash on submit — for unknown / non-approved accounts it
- * silently succeeds so a stranger can't probe the DB.
- */
+
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, CheckCircle2, Loader2, Mail } from 'lucide-vue-next';
 import { computed } from 'vue';
@@ -25,7 +21,7 @@ const de = {
     email_placeholder: 'name@firma.de',
     submit: 'Reset-Link senden',
     submitting: 'Wird gesendet…',
-    back: 'Zurück zur Anmeldung',
+    back: 'Zurück zum Login',
 } as const;
 
 const en = {

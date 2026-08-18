@@ -1,10 +1,5 @@
 <script setup lang="ts">
-/**
- * Partner login form — matches the split-panel design used across
- * the partner-auth flow. Colors come exclusively from the project
- * theme tokens defined in gs.css (--midnight / --orange / --paper
- * / --linen / --slate).
- */
+
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { AlertCircle, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -19,16 +14,16 @@ const flash = computed<FlashBag>(
 
 const de = {
     brand_title: 'Willkommen zurück',
-    brand_subtitle: 'Melden Sie sich an, um Ihr Firmenprofil, Ihre Bewertungen und Anfragen zu verwalten.',
-    card_title: 'Anmelden',
+    brand_subtitle: 'Loggen Sie sich ein, um Ihr Firmenprofil, Ihre Bewertungen und Anfragen zu verwalten.',
+    card_title: 'Einloggen',
     card_subtitle: 'Geben Sie Ihre Zugangsdaten ein, um auf Ihr Partner-Konto zuzugreifen.',
     label_email: 'E-Mail-Adresse',
     label_password: 'Passwort',
     email_placeholder: 'name@firma.de',
     password_placeholder: 'Ihr Passwort',
-    label_remember: 'Angemeldet bleiben',
-    submit: 'Anmelden',
-    submitting: 'Wird angemeldet…',
+    label_remember: 'Eingeloggt bleiben',
+    submit: 'Einloggen',
+    submitting: 'Wird eingeloggt…',
     forgot: 'Passwort vergessen?',
     no_account: 'Noch kein Partner?',
     register: 'Konto erstellen',

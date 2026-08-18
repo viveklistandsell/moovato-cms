@@ -521,7 +521,7 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
 Route::get('company-portal/{company}/{slug?}', [PortalCompanyProfileController::class, 'show'])
     ->whereNumber('company')
     ->where('slug', '[a-z0-9-]+')
-    ->middleware('locale')
+    ->middleware(['locale', 'auth:company', 'partner.owns.company'])
     ->name('portal.company.profile');
 
 Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(function (): void {

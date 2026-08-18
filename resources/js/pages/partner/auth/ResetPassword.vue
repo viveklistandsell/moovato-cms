@@ -1,11 +1,5 @@
 <script setup lang="ts">
-/**
- * Set / reset password form.
- *
- * `isSetup=true` means this is the first-time password setup after
- * an admin accepted the application (copy switches to "Welcome —
- * set your password"). Otherwise it's a standard reset flow.
- */
+
 import { Head, useForm } from '@inertiajs/vue3';
 import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2, Lock, Mail } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -31,7 +25,7 @@ const de = {
     label_password: 'Neues Passwort',
     label_confirm: 'Passwort bestätigen',
     password_hint: 'Mindestens 8 Zeichen mit Buchstaben und Zahlen.',
-    setup_submit: 'Passwort speichern & anmelden',
+    setup_submit: 'Passwort speichern & einloggen',
     reset_submit: 'Passwort zurücksetzen',
     submitting: 'Wird gespeichert…',
     show_password: 'Passwort anzeigen',

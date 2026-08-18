@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Controllers\Auth\AdminAuthenticatedSessionController;
 use App\Http\Responses\LoginResponse;
 use App\Http\Responses\LogoutResponse;
 use App\Models\SiteSetting;
@@ -19,6 +20,7 @@ use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController as FortifyAuthenticatedSessionController;
 use Throwable;
 
 final class FortifyServiceProvider extends ServiceProvider
@@ -35,6 +37,17 @@ final class FortifyServiceProvider extends ServiceProvider
         // Send users to the login screen after logout (Fortify's default
         // lands on `/`, which is the public site root).
         $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
+
+        // Swap Fortify's default logout controller for our own so
+        // admin logout does NOT wipe the parallel `company` guard
+        // session. See AdminAuthenticatedSessionController for the
+        // full rationale. The container-bind trick works because
+        // Fortify registers its logout route as
+        // `[AuthenticatedSessionController::class, 'destroy']`.
+        $this->app->bind(
+            FortifyAuthenticatedSessionController::class,
+            AdminAuthenticatedSessionController::class,
+        );
     }
 
     /**
