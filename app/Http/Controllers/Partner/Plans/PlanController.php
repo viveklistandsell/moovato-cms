@@ -43,8 +43,9 @@ final class PlanController extends Controller
 {
     public function index(Request $request): Response
     {
-        $user = $this->partner($request);
-        $company = $this->companyOf($user);
+        /** @var CompanyUser|null $user */
+        $user = $request->user('company');
+        $company = $user !== null ? $this->companyOf($user) : null;
 
         $pending = $company === null
             ? null
@@ -56,7 +57,7 @@ final class PlanController extends Controller
 
         return Inertia::render('partner/plans/Index', [
             'locale' => App::getLocale(),
-            'user' => [
+            'user' => $user === null ? null : [
                 'first_name' => (string) $user->first_name,
                 'full_name' => $user->fullName(),
                 'email' => (string) $user->email,
@@ -80,6 +81,8 @@ final class PlanController extends Controller
                 fn (PlanTier $tier): array => $tier->toArray(),
                 PlanTier::ordered(),
             ),
+            'loginUrl' => route('partner.login'),
+            'registerUrl' => route('partner.register'),
         ]);
     }
 
@@ -141,13 +144,6 @@ final class PlanController extends Controller
             ->with('flash', ['success' => __('partner.plans.request_submitted', ['tier' => $newTier->label()])]);
     }
 
-    /**
-     * Partner cancels their own pending request.
-     *
-     * Ownership check is by company_id — a partner from company A
-     * can't cancel a request belonging to company B even if they
-     * somehow know its id.
-     */
     public function cancel(Request $request, PlanChangeRequest $planRequest): RedirectResponse
     {
         $user = $this->partner($request);

@@ -554,6 +554,8 @@ Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(functi
         ->name('register.store');
     Route::get('register/thanks', [PartnerRegisterController::class, 'thanks'])
         ->name('register.thanks');
+    Route::get('plans', [PartnerPlanController::class, 'index'])
+        ->name('plans.index');
 
     Route::middleware('guest:company')->group(function (): void {
         Route::get('login', [PartnerLoginController::class, 'create'])
@@ -580,8 +582,6 @@ Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(functi
             ->name('dashboard');
         Route::post('logout', PartnerLogoutController::class)
             ->name('logout');
-        Route::get('plans', [PartnerPlanController::class, 'index'])
-            ->name('plans.index');
         Route::post('plans/choose', [PartnerPlanController::class, 'choose'])
             ->middleware('throttle:20,10')
             ->name('plans.choose');

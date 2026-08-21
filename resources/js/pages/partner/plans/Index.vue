@@ -3,7 +3,6 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Clock, LayoutDashboard, Loader2, XCircle } from 'lucide-vue-next';
 import { computed } from 'vue';
-import PartnerTopBar from '@/components/partner/PartnerTopBar.vue';
 import PlanPickerCards from '@/components/partner/PlanPickerCards.vue';
 
 type Tier = {
@@ -43,11 +42,13 @@ type PendingRequest = {
 
 const props = defineProps<{
     locale: string;
-    user: UserProp;
+    user: UserProp | null;
     company: CompanyProp;
     currentTier: string;
     pendingRequest: PendingRequest | null;
     plans: Tier[];
+    loginUrl: string;
+    registerUrl: string;
 }>();
 
 type FlashBag = { success?: string; warning?: string; error?: string };
@@ -70,6 +71,9 @@ const de = {
     pending_confirm_cancel: 'Möchten Sie diese Plan-Anfrage wirklich zurückziehen?',
     back_to_dashboard: 'Zurück zum Dashboard',
     open_dashboard: 'Dashboard öffnen',
+    guest_notice: 'Melden Sie sich als Partner an, um einen Plan-Wechsel zu beantragen.',
+    login_cta: 'Als Partner anmelden',
+    register_cta: 'Neu registrieren',
 } as const;
 const en = {
     title: 'Manage your plan',
@@ -86,6 +90,9 @@ const en = {
     pending_confirm_cancel: 'Do you really want to cancel this plan request?',
     back_to_dashboard: 'Back to dashboard',
     open_dashboard: 'Open dashboard',
+    guest_notice: 'Sign in as a partner to request a plan change.',
+    login_cta: 'Sign in as partner',
+    register_cta: 'Sign up',
 } as const;
 const t = computed(() => (props.locale === 'de' ? de : en));
 
@@ -98,13 +105,15 @@ const form = useForm<{ plan_tier: 'basic' | 'premium' | 'gold' }>({
 });
 
 const hasPending = computed(() => props.pendingRequest !== null);
+const isGuest = computed(() => props.user === null);
 
 const canSubmit = computed(
     () =>
         form.plan_tier !== props.currentTier
         && !form.processing
         && props.company !== null
-        && !hasPending.value,
+        && !hasPending.value
+        && !isGuest.value,
 );
 
 const isDowngrade = computed(() => {
@@ -128,16 +137,18 @@ function cancelPending(): void {
     <Head :title="t.title" />
 
     <div class="min-h-svh bg-[var(--paper)]">
-        <PartnerTopBar :locale="props.locale" :user="user" :portal-url="company?.portal_url ?? null" />
-
         <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+            <!-- Back link — only shown when the visitor is a signed-in
+                 partner (guests don't have a dashboard to return to). -->
             <Link
+                v-if="!isGuest"
                 href="/partner/dashboard"
                 class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--slate)] hover:text-[var(--orange)]"
             >
                 <ArrowLeft class="size-4" />
                 {{ t.back_to_dashboard }}
             </Link>
+
 
             <header class="mb-6">
                 <h1 class="text-2xl font-bold text-[var(--midnight)] sm:text-3xl">{{ t.title }}</h1>
@@ -183,19 +194,15 @@ function cancelPending(): void {
                     {{ t.pending_cancel }}
                 </button>
             </div>
-
-            <!-- Standing approval-required notice (shown only when no request is pending). -->
             <div
-                v-if="!pendingRequest"
+                v-if="!pendingRequest && !isGuest"
                 class="mb-6 flex items-start gap-2 rounded-lg border border-[var(--linen)] bg-[var(--white)] p-3 text-xs text-[var(--slate)]"
             >
                 <AlertTriangle class="mt-0.5 size-4 shrink-0 text-[var(--orange)]" />
                 <span>{{ t.approval_notice }}</span>
             </div>
-
-            <!-- No linked company edge case -->
             <div
-                v-if="!company"
+                v-if="!company && !isGuest"
                 class="mb-6 rounded-lg border border-[var(--linen)] bg-[var(--white)] p-4 text-sm text-[var(--slate)]"
             >
                 {{ t.no_company }}
@@ -207,7 +214,7 @@ function cancelPending(): void {
                 :tiers="props.plans"
                 :locale="props.locale"
                 :current-tier="props.currentTier"
-                :disabled="form.processing || !company || hasPending"
+                :disabled="!isGuest && (form.processing || !company || hasPending)"
             />
 
             <!-- Downgrade warning -->
@@ -217,9 +224,10 @@ function cancelPending(): void {
             >
                 {{ t.downgrade_note }}
             </div>
-
-            <!-- Sticky apply button -->
-            <div class="mt-6 flex flex-wrap items-center justify-end gap-2">
+            <div
+                v-if="!isGuest"
+                class="mt-6 flex flex-wrap items-center justify-end gap-2"
+            >
                 <p v-if="form.plan_tier === props.currentTier" class="mr-auto text-xs text-[var(--slate)]">
                     {{ t.already_on }}
                 </p>
