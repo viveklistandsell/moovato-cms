@@ -10,6 +10,9 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import {
     Building2,
+    CheckCircle2,
+    ChevronRight,
+    Crown,
     FileText,
     Loader2,
     Mail,
@@ -21,14 +24,28 @@ import {
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import PartnerAuthShell from '@/components/partner/PartnerAuthShell.vue';
+import PlanPickerCards from '@/components/partner/PlanPickerCards.vue';
 import Recaptcha from '@/components/partner/Recaptcha.vue';
 
 type CityOption = { id: number; name: string };
+type PlanTier = {
+    slug: 'basic' | 'premium' | 'gold';
+    label: string;
+    price: number;
+    currency: string;
+    period: string;
+    positioning: string;
+    placement: string;
+    features: Record<string, boolean>;
+    caps: Record<string, number | null>;
+    is_free: boolean;
+};
 
 const props = defineProps<{
     locale: string;
     cities: CityOption[];
     recaptchaSiteKey: string | null;
+    plans: PlanTier[];
 }>();
 
 const de = {
@@ -45,6 +62,15 @@ const de = {
     section_company: 'Unternehmensdaten',
     section_docs: 'Dokumente (optional)',
     section_docs_hint: 'PDF, JPG oder PNG · max. 5 Dateien',
+    section_plan: 'Wählen Sie Ihren Plan',
+    section_plan_hint: 'Sie können jederzeit später upgraden oder downgraden. Basic ist kostenlos.',
+    plan_button_choose: 'Plan auswählen',
+    plan_button_change: 'Plan ändern',
+    plan_button_free: 'Kostenlos',
+    plan_modal_title: 'Wählen Sie Ihren Plan',
+    plan_modal_subtitle: 'Vergleichen Sie die Pläne und wählen Sie den, der am besten zu Ihrem Unternehmen passt.',
+    plan_modal_close: 'Schließen',
+    plan_modal_confirm: 'Auswahl übernehmen',
     section_legal: 'Rechtliches',
     label_first: 'Vorname',
     label_last: 'Nachname',
@@ -88,6 +114,15 @@ const en = {
     section_company: 'Company details',
     section_docs: 'Documents (optional)',
     section_docs_hint: 'PDF, JPG or PNG · max 5 files',
+    section_plan: 'Choose your plan',
+    section_plan_hint: 'You can upgrade or downgrade any time later. Basic is free forever.',
+    plan_button_choose: 'Select plan',
+    plan_button_change: 'Change plan',
+    plan_button_free: 'Free',
+    plan_modal_title: 'Choose your plan',
+    plan_modal_subtitle: 'Compare the plans and pick the one that fits your business best.',
+    plan_modal_close: 'Close',
+    plan_modal_confirm: 'Confirm selection',
     section_legal: 'Legal',
     label_first: 'First name',
     label_last: 'Last name',
@@ -129,8 +164,9 @@ const form = useForm<{
     city_id: number | null;
     documents: File[];
     accept_terms: boolean;
-    website_url: string; // honeypot
+    website_url: string;
     'g-recaptcha-response': string;
+    plan_tier: 'basic' | 'premium' | 'gold';
 }>({
     first_name: '',
     last_name: '',
@@ -144,11 +180,25 @@ const form = useForm<{
     accept_terms: false,
     website_url: '',
     'g-recaptcha-response': '',
+    plan_tier: 'basic',
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false);
 const recaptchaRef = ref<InstanceType<typeof Recaptcha> | null>(null);
+
+/* Plan picker modal state. The form still binds `plan_tier` — the
+   modal is just a chrome layer around PlanPickerCards. */
+const showPlanModal = ref(false);
+const selectedPlan = computed<PlanTier | undefined>(
+    () => props.plans.find((p) => p.slug === form.plan_tier),
+);
+function openPlanModal(): void {
+    showPlanModal.value = true;
+}
+function closePlanModal(): void {
+    showPlanModal.value = false;
+}
 
 const MAX_FILES = 5;
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -541,6 +591,55 @@ function submit(): void {
                     </p>
                 </section>
 
+                <!-- === Plan picker (button opens modal with the tier cards) === -->
+                <section>
+                    <header class="mb-3 border-b border-[var(--linen)] pb-2">
+                        <h2 class="text-sm font-semibold text-[var(--midnight)]">{{ t.section_plan }}</h2>
+                        <p class="mt-0.5 text-[11px] text-[var(--slate-light)]">
+                            {{ t.section_plan_hint }}
+                        </p>
+                    </header>
+
+                    <button
+                        type="button"
+                        class="group flex w-full items-center justify-between gap-3 rounded-xl border-2 border-[var(--linen)] bg-[var(--white)] p-4 text-left transition-colors hover:border-[var(--orange)]/40 focus:border-[var(--orange)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                        :disabled="form.processing"
+                        @click="openPlanModal"
+                    >
+                        <span class="flex items-center gap-3">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--orange-soft)] text-[var(--orange)]">
+                                <Crown class="size-5" />
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block text-[10px] font-semibold uppercase tracking-wider text-[var(--slate-light)]">
+                                    {{ selectedPlan ? selectedPlan.label : t.plan_button_choose }}
+                                </span>
+                                <span class="mt-0.5 flex items-baseline gap-1">
+                                    <span class="text-base font-bold text-[var(--midnight)]">
+                                        {{ selectedPlan?.is_free
+                                            ? t.plan_button_free
+                                            : `${selectedPlan?.currency ?? ''}${selectedPlan?.price ?? ''}` }}
+                                    </span>
+                                    <span v-if="selectedPlan && !selectedPlan.is_free" class="text-[11px] text-[var(--slate)]">
+                                        / {{ selectedPlan.period }}
+                                    </span>
+                                </span>
+                                <span v-if="selectedPlan" class="mt-0.5 block text-[11px] text-[var(--slate)]">
+                                    {{ selectedPlan.positioning }}
+                                </span>
+                            </span>
+                        </span>
+                        <span class="flex shrink-0 items-center gap-1.5 text-xs font-medium text-[var(--orange)]">
+                            {{ selectedPlan ? t.plan_button_change : t.plan_button_choose }}
+                            <ChevronRight class="size-4 transition-transform group-hover:translate-x-0.5" />
+                        </span>
+                    </button>
+
+                    <p v-if="form.errors.plan_tier" class="mt-2 text-xs text-[var(--orange)]">
+                        {{ form.errors.plan_tier }}
+                    </p>
+                </section>
+
                 <!-- === Legal === -->
                 <section>
                     <label class="-m-2 flex cursor-pointer items-start gap-2.5 rounded-md p-2 hover:bg-[var(--paper)]">
@@ -620,4 +719,59 @@ function submit(): void {
             </div>
         </div>
     </PartnerAuthShell>
+    <div
+        v-if="showPlanModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--midnight)]/60 px-4 py-6 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        @click.self="closePlanModal"
+    >
+        <div class="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[var(--paper)] shadow-2xl">
+            <header class="flex items-start justify-between gap-3 border-b border-[var(--linen)] bg-[var(--white)] px-6 py-4">
+                <div>
+                    <h3 class="text-lg font-bold text-[var(--midnight)]">
+                        {{ t.plan_modal_title }}
+                    </h3>
+                    <p class="mt-0.5 text-xs text-[var(--slate)]">
+                        {{ t.plan_modal_subtitle }}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    class="shrink-0 rounded-md p-1.5 text-[var(--slate)] hover:bg-[var(--paper)] hover:text-[var(--midnight)]"
+                    :aria-label="t.plan_modal_close"
+                    @click="closePlanModal"
+                >
+                    <X class="size-5" />
+                </button>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <PlanPickerCards
+                    v-model="form.plan_tier"
+                    :tiers="props.plans"
+                    :locale="props.locale"
+                    :disabled="form.processing"
+                />
+            </div>
+
+            <footer class="flex items-center justify-end gap-2 border-t border-[var(--linen)] bg-[var(--white)] px-6 py-3">
+                <button
+                    type="button"
+                    class="rounded-lg border border-[var(--linen)] px-4 py-2 text-sm font-medium text-[var(--slate)] hover:border-[var(--slate-light)]"
+                    @click="closePlanModal"
+                >
+                    {{ t.plan_modal_close }}
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-lg bg-[var(--orange)] px-5 py-2 text-sm font-semibold text-[var(--white)] hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                    @click="closePlanModal"
+                >
+                    <CheckCircle2 class="size-4" />
+                    {{ t.plan_modal_confirm }}
+                </button>
+            </footer>
+        </div>
+    </div>
 </template>

@@ -24,6 +24,8 @@ use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSett
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\PlanChangeRequests\PlanChangeRequestController as AdminPlanChangeRequestController;
+use App\Http\Controllers\Admin\Plans\PlanController as AdminPlanController;
 use App\Http\Controllers\Admin\Reviews\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\Service\CategoryController as AdminServiceCategoryController;
@@ -53,6 +55,9 @@ use App\Http\Controllers\Partner\Auth\LogoutController as PartnerLogoutControlle
 use App\Http\Controllers\Partner\Auth\RegisterController as PartnerRegisterController;
 use App\Http\Controllers\Partner\Auth\ResetPasswordController as PartnerResetPasswordController;
 use App\Http\Controllers\Partner\DashboardController as PartnerDashboardController;
+use App\Http\Controllers\Partner\NotificationController as PartnerNotificationController;
+use App\Http\Controllers\Partner\Plans\PlanController as PartnerPlanController;
+use App\Http\Controllers\Partner\ReviewController as PartnerReviewController;
 use App\Http\Controllers\Portal\CompanyProfileController as PortalCompanyProfileController;
 use App\Http\Controllers\StorageFallbackController;
 use Illuminate\Support\Facades\Route;
@@ -330,6 +335,23 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
                 ->whereNumber('application')
                 ->whereNumber('index')
                 ->name('applications.doc');
+            Route::post('plan-change-requests/{planRequest}/approve', [AdminPlanChangeRequestController::class, 'approve'])
+                ->whereNumber('planRequest')
+                ->name('plan-change-requests.approve');
+            Route::post('plan-change-requests/{planRequest}/reject', [AdminPlanChangeRequestController::class, 'reject'])
+                ->whereNumber('planRequest')
+                ->name('plan-change-requests.reject');
+            Route::get('plans', [AdminPlanController::class, 'index'])
+                ->middleware('permission:settings.site')
+                ->name('plans.index');
+            Route::get('plans/{plan}/edit', [AdminPlanController::class, 'edit'])
+                ->middleware('permission:settings.site')
+                ->where('plan', 'basic|premium|gold')
+                ->name('plans.edit');
+            Route::match(['put', 'patch'], 'plans/{plan}', [AdminPlanController::class, 'update'])
+                ->middleware('permission:settings.site')
+                ->where('plan', 'basic|premium|gold')
+                ->name('plans.update');
         });
 
         Route::prefix('pages')->name('pages.')->group(function (): void {
@@ -558,6 +580,50 @@ Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(functi
             ->name('dashboard');
         Route::post('logout', PartnerLogoutController::class)
             ->name('logout');
+        Route::get('plans', [PartnerPlanController::class, 'index'])
+            ->name('plans.index');
+        Route::post('plans/choose', [PartnerPlanController::class, 'choose'])
+            ->middleware('throttle:20,10')
+            ->name('plans.choose');
+        Route::delete('plans/request/{planRequest}', [PartnerPlanController::class, 'cancel'])
+            ->whereNumber('planRequest')
+            ->middleware('throttle:20,10')
+            ->name('plans.request.cancel');
+        Route::post('notifications/{notification}/read', [PartnerNotificationController::class, 'markRead'])
+            ->whereNumber('notification')
+            ->middleware('throttle:60,1')
+            ->name('notifications.read');
+        Route::post('notifications/read-all', [PartnerNotificationController::class, 'markAllRead'])
+            ->middleware('throttle:10,1')
+            ->name('notifications.read-all');
+        Route::post('reviews/{review}/reply', [PartnerReviewController::class, 'reply'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.reply');
+        Route::delete('reviews/{review}/reply', [PartnerReviewController::class, 'destroyReply'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.reply.destroy');
+        Route::post('reviews/{review}/hide', [PartnerReviewController::class, 'hide'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.hide');
+        Route::post('reviews/{review}/unhide', [PartnerReviewController::class, 'unhide'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.unhide');
+        Route::post('reviews/{review}/mark-spam', [PartnerReviewController::class, 'markSpam'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.mark-spam');
+        Route::post('reviews/{review}/unmark-spam', [PartnerReviewController::class, 'unmarkSpam'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.unmark-spam');
+        Route::delete('reviews/{review}', [PartnerReviewController::class, 'destroy'])
+            ->whereNumber('review')
+            ->middleware('throttle:10,1')
+            ->name('reviews.destroy');
     });
 });
 

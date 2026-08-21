@@ -24,6 +24,7 @@ import {
     Info,
     Layers,
     LayoutDashboard,
+    Lock,
     MapPin,
     Map as MapIcon,
     Pencil,
@@ -40,6 +41,7 @@ import EditBrandingModal from '@/components/portal/EditBrandingModal.vue';
 import EditContactsModal from '@/components/portal/EditContactsModal.vue';
 import EditFaqsModal from '@/components/portal/EditFaqsModal.vue';
 import EditGalleryModal from '@/components/portal/EditGalleryModal.vue';
+import PortalReviewsSection from '@/components/portal/PortalReviewsSection.vue';
 import EditGoogleModal from '@/components/portal/EditGoogleModal.vue';
 import EditNameModal from '@/components/portal/EditNameModal.vue';
 import EditServicesModal from '@/components/portal/EditServicesModal.vue';
@@ -80,6 +82,10 @@ type CompanyHeader = {
     contacts: Contact[];
     google_rating: number | string | null;
     google_review_count: number;
+    plan_tier: 'basic' | 'premium' | 'gold';
+    plan_label: string;
+    plan_caps: Record<string, number | null>;
+    plans_url: string;
 };
 
 type Row = {
@@ -90,6 +96,9 @@ type Row = {
         | 'ImagePlus' | 'BadgeCheck' | 'AlignLeft' | 'Star';
     preview: string | null;
     is_missing: boolean;
+    is_locked?: boolean;
+    locked_by_feature?: string | null;
+    cap?: number | null;
     edit_anchor: string;
 };
 
@@ -114,6 +123,35 @@ const props = defineProps<{
     selectedDistrictIds?: number[];
     faqs?: Faq[];
     gallery?: GalleryItem[];
+    reviews?: {
+        data: Array<{
+            id: number;
+            author_name: string | null;
+            author_initials: string | null;
+            is_anonymous: boolean;
+            public_name: string;
+            rating: number;
+            body: string;
+            advantages: string[];
+            disadvantages: string[];
+            status: 'published' | 'hidden' | 'spam';
+            reply_body: string | null;
+            replied_at: string | null;
+            helpful_count: number;
+            created_at: string | null;
+            published_at: string | null;
+        }>;
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        has_more: boolean;
+        reply_cap: number | null;
+        reply_used: number;
+        reply_remaining: number | null;
+        can_reply_new: boolean;
+        plans_url: string;
+    };
 }>();
 
 const ICONS = {
@@ -148,6 +186,10 @@ const de: Record<string, string> = {
     edit_coming_soon: 'Bearbeitung folgt in Kürze',
     footer_note: 'Ein Klick auf den Stift öffnet ein Bearbeitungsfenster direkt auf dieser Seite. Weitere Abschnitte folgen.',
     back: 'Zurück',
+    your_plan: 'Ihr Plan',
+    manage_plan: 'Plan verwalten',
+    upgrade: 'Upgrade',
+    upgrade_to_unlock: 'Upgraden, um diese Funktion freizuschalten',
     to_dashboard: 'Zum Dashboard',
     to_dashboard_short: 'Dashboard',
     view_public: 'Öffentliches Profil ansehen',
@@ -172,6 +214,10 @@ const en: Record<string, string> = {
     edit_coming_soon: 'Editing coming soon',
     footer_note: 'Clicking the pencil opens an inline edit dialog on this page. More sections coming soon.',
     back: 'Back',
+    your_plan: 'Your plan',
+    manage_plan: 'Manage plan',
+    upgrade: 'Upgrade',
+    upgrade_to_unlock: 'Upgrade to unlock this feature',
     to_dashboard: 'Back to dashboard',
     to_dashboard_short: 'Dashboard',
     view_public: 'View public page',
@@ -233,6 +279,10 @@ function ensureLazyProps(keys: string[]): void {
             needed.forEach((k) => lazyLoaded.value.add(k));
         },
     });
+}
+
+function invalidateLazyProps(keys: string[]): void {
+    keys.forEach((k) => lazyLoaded.value.delete(k));
 }
 
 const availableLanguages = props.company.translations.map((t) => t.lang);
@@ -325,24 +375,54 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
                     </span>
                 </div>
             </div>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--linen)] bg-[var(--white)] px-4 py-2.5 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs uppercase tracking-wider text-[var(--slate-light)]">
+                        {{ t('your_plan') }}
+                    </span>
+                    <span
+                        class="inline-flex items-center gap-1 rounded-full border border-[var(--orange)]/30 bg-[var(--orange-soft)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--orange)]"
+                    >
+                        {{ company.plan_label }}
+                    </span>
+                </div>
+                <Link
+                    :href="company.plans_url"
+                    class="inline-flex items-center gap-1 rounded-md border border-[var(--linen)] px-2.5 py-1 text-xs font-medium text-[var(--slate)] hover:border-[var(--orange)] hover:text-[var(--orange)]"
+                >
+                    {{ t('manage_plan') }}
+                </Link>
+            </div>
 
             <!-- Row list. Each row is one field group. -->
             <div class="mt-4 flex flex-col divide-y divide-[var(--linen)] overflow-hidden rounded-lg border border-[var(--linen)] bg-white">
                 <div
                     v-for="row in rows"
                     :key="row.id"
-                    class="flex items-start gap-3 p-4 transition-colors hover:bg-[var(--paper)] md:items-center"
+                    class="flex items-start gap-3 p-4 transition-colors md:items-center"
+                    :class="row.is_locked ? 'bg-[var(--paper)]/60' : 'hover:bg-[var(--paper)]'"
                 >
                     <!-- Icon -->
-                    <div class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-[var(--orange-soft)]/60 text-[var(--orange)] md:mt-0">
+                    <div
+                        class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md md:mt-0"
+                        :class="row.is_locked
+                            ? 'bg-[var(--linen)] text-[var(--slate-light)]'
+                            : 'bg-[var(--orange-soft)]/60 text-[var(--orange)]'"
+                    >
                         <component :is="ICONS[row.icon]" class="size-4" />
                     </div>
 
                     <!-- Label + preview -->
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-semibold text-[var(--midnight)]">
-                            {{ row.label }}
-                        </p>
+                        <div class="flex items-center gap-1.5">
+                            <p
+                                class="text-sm font-semibold"
+                                :class="row.is_locked ? 'text-[var(--slate)]' : 'text-[var(--midnight)]'"
+                            >
+                                {{ row.label }}
+                            </p>
+                            <Lock v-if="row.is_locked" class="size-3.5 text-[var(--slate-light)]" />
+                        </div>
                         <p
                             v-if="row.preview"
                             class="mt-0.5 truncate text-xs text-[var(--slate)]"
@@ -359,14 +439,25 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
                     </div>
 
                     <!-- Missing-info pill -->
-                    <div v-if="row.is_missing" class="shrink-0">
+                    <div v-if="row.is_missing && !row.is_locked" class="shrink-0">
                         <span class="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">
                             <Info class="size-3" />
                             {{ t('missing_info') }}
                         </span>
                     </div>
+
+                    <!-- Locked → jumps to /partner/plans instead of the edit modal -->
+                    <Link
+                        v-if="row.is_locked"
+                        :href="company.plans_url"
+                        class="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--linen)] bg-[var(--white)] px-2.5 py-1 text-[11px] font-semibold text-[var(--slate)] hover:border-[var(--orange)] hover:text-[var(--orange)]"
+                        :title="t('upgrade_to_unlock')"
+                    >
+                        <Lock class="size-3" />
+                        {{ t('upgrade') }}
+                    </Link>
                     <button
-                        v-if="isInlineEditable(row.id)"
+                        v-else-if="isInlineEditable(row.id)"
                         type="button"
                         class="ml-2 flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--linen)] text-[var(--slate)] transition-colors hover:border-[var(--orange)] hover:text-[var(--orange)]"
                         :title="t('edit_row')"
@@ -383,7 +474,13 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
                     </span>
                 </div>
             </div>
-
+            <PortalReviewsSection
+                :reviews="reviews"
+                :lazy-loaded="lazyLoaded.has('reviews')"
+                :locale="locale"
+                @lazy-load="ensureLazyProps(['reviews'])"
+                @refresh="invalidateLazyProps(['reviews']); ensureLazyProps(['reviews'])"
+            />
             <!-- Footer note -->
             <p class="mt-4 flex items-center gap-1.5 text-xs text-[var(--slate)]">
                 <ExternalLink class="size-3.5" />
@@ -508,6 +605,7 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
             :lazy-loaded="lazyLoaded.has('districtsByCity') && lazyLoaded.has('selectedDistrictIds')"
             @update:open="(v: boolean) => (openSection = v ? 'areas' : null)"
             @lazy-load="ensureLazyProps(['districtsByCity', 'selectedDistrictIds'])"
+            @saved="invalidateLazyProps"
         />
 
         <EditFaqsModal
@@ -539,6 +637,9 @@ function isInlineEditable(rowId: string): rowId is EditableSection {
             :gallery="gallery ?? []"
             :locale="locale"
             :lazy-loaded="lazyLoaded.has('gallery')"
+            :photo-cap="company.plan_caps.gallery"
+            :tier-label="company.plan_label"
+            :plans-url="company.plans_url"
             @update:open="(v: boolean) => (openSection = v ? 'gallery' : null)"
             @lazy-load="ensureLazyProps(['gallery'])"
         />

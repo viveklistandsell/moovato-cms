@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Partner\Auth;
 
+use App\Enums\PlanTier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Partner\Auth\StorePartnerRegistrationRequest;
 use App\Models\City;
@@ -31,6 +32,10 @@ final class RegisterController extends Controller
             'locale' => $locale,
             'cities' => $this->cityOptions(),
             'recaptchaSiteKey' => config('captcha.sitekey') ?: null,
+            'plans' => array_map(
+                fn (PlanTier $tier): array => $tier->toArray(),
+                PlanTier::ordered(),
+            ),
         ]);
     }
 
@@ -41,6 +46,7 @@ final class RegisterController extends Controller
 
         $companyUser = DB::transaction(function () use ($data, $docPaths): CompanyUser {
             $city = City::query()->findOrFail((int) $data['city_id']);
+            $chosenTier = PlanTier::tryFrom((string) ($data['plan_tier'] ?? '')) ?? PlanTier::Basic;
 
             $company = Company::query()->create([
                 'primary_city_id' => $city->id,
@@ -49,6 +55,7 @@ final class RegisterController extends Controller
                 'postal_code' => $data['postal_code'] ?? null,
                 'status' => 'draft',
                 'sort_order' => Company::nextSortOrder(),
+                'plan_tier' => $chosenTier->value,
             ]);
             $company->translations()->create([
                 'lang' => 'de',

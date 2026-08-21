@@ -9,13 +9,16 @@ use App\Models\City;
 use App\Models\Company;
 use App\Models\CompanyFaq;
 use App\Models\CompanyFaqTranslation;
+use App\Models\CompanyReview;
 use App\Models\District;
 use App\Models\MediaFile;
 use App\Models\ServiceCategory;
+use App\Policies\CompanyPlanPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -67,6 +70,7 @@ final class CompanyProfileController extends Controller
                 ->pluck('service_categories.id')->all()),
             'selectedDistrictIds' => Inertia::optional(fn (): array => $company->serviceAreas()
                 ->pluck('districts.id')->all()),
+            'reviews' => Inertia::optional(fn (): array => $this->presentReviewsFeed($company)),
         ]);
     }
 
@@ -107,6 +111,8 @@ final class CompanyProfileController extends Controller
      */
     public function updateFounded(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('founded', $company);
+
         $data = $request->validate([
             'founded_year' => ['nullable', 'integer', 'between:1800,'.date('Y')],
         ]);
@@ -121,6 +127,8 @@ final class CompanyProfileController extends Controller
      */
     public function updateEmployees(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('employees', $company);
+
         $data = $request->validate([
             'employee_count' => ['nullable', 'integer', 'between:0,100000'],
         ]);
@@ -147,6 +155,20 @@ final class CompanyProfileController extends Controller
             return back(303);
         }
 
+        $cap = $company->tier()->contactLimit();
+        $existingWebsite = $company->contacts()->where('type', 'website')->exists();
+        if ($cap !== null && ! $existingWebsite) {
+            $otherContacts = $company->contacts()->where('type', '!=', 'website')->count();
+            if ($otherContacts + 1 > $cap) {
+                return back(303)->withErrors([
+                    'website' => __('portal.contacts.cap_exceeded', [
+                        'cap' => $cap,
+                        'tier' => $company->tier()->label(),
+                    ]),
+                ]);
+            }
+        }
+
         $company->contacts()->updateOrCreate(
             ['type' => 'website'],
             ['value' => $url, 'is_primary' => true],
@@ -160,6 +182,8 @@ final class CompanyProfileController extends Controller
      */
     public function updateTrust(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('trust', $company);
+
         $data = $request->validate([
             'verified' => ['required', 'boolean'],
             'is_top_rated' => ['required', 'boolean'],
@@ -178,6 +202,8 @@ final class CompanyProfileController extends Controller
      */
     public function updateAbout(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('about', $company);
+
         $data = $request->validate([
             'translations' => ['required', 'array', 'min:1'],
             'translations.*.lang' => ['required', 'string', 'max:10'],
@@ -209,6 +235,8 @@ final class CompanyProfileController extends Controller
      */
     public function updateShortDescription(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('shortDescription', $company);
+
         $data = $request->validate([
             'translations' => ['required', 'array', 'min:1'],
             'translations.*.lang' => ['required', 'string', 'max:10'],
@@ -239,6 +267,8 @@ final class CompanyProfileController extends Controller
      */
     public function updateGoogle(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('google', $company);
+
         $data = $request->validate([
             'google_rating' => ['nullable', 'numeric', 'between:0,5'],
             'google_review_count' => ['nullable', 'integer', 'between:0,1000000'],
@@ -272,8 +302,9 @@ final class CompanyProfileController extends Controller
      */
     public function updateServices(Request $request, Company $company): RedirectResponse
     {
+        $cap = $company->tier()->serviceLimit();
         $data = $request->validate([
-            'service_ids' => ['nullable', 'array'],
+            'service_ids' => ['nullable', 'array', $cap !== null ? 'max:'.$cap : 'max:1000'],
             'service_ids.*' => ['integer', 'exists:service_categories,id'],
         ]);
 
@@ -287,8 +318,9 @@ final class CompanyProfileController extends Controller
      */
     public function updateAreas(Request $request, Company $company): RedirectResponse
     {
+        $cap = $company->tier()->areaLimit();
         $data = $request->validate([
-            'district_ids' => ['nullable', 'array'],
+            'district_ids' => ['nullable', 'array', $cap !== null ? 'max:'.$cap : 'max:1000'],
             'district_ids.*' => ['integer', 'exists:districts,id'],
         ]);
 
@@ -302,8 +334,11 @@ final class CompanyProfileController extends Controller
      */
     public function updateFaqs(Request $request, Company $company): RedirectResponse
     {
+        Gate::authorize('faqs', $company);
+
+        $cap = $company->tier()->faqLimit();
         $data = $request->validate([
-            'faqs' => ['nullable', 'array'],
+            'faqs' => ['nullable', 'array', $cap !== null ? 'max:'.$cap : 'max:1000'],
             'faqs.*.translations' => ['required', 'array', 'min:1'],
             'faqs.*.translations.*.lang' => ['required', 'string', 'max:10'],
             'faqs.*.translations.*.question' => ['required', 'string', 'max:500'],
@@ -335,6 +370,11 @@ final class CompanyProfileController extends Controller
      */
     public function updateBranding(Request $request, Company $company): RedirectResponse
     {
+        $touchesCover = $request->boolean('remove_cover') || $request->hasFile('cover');
+        if ($touchesCover) {
+            Gate::authorize('cover', $company);
+        }
+
         $request->validate([
             'logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
             'cover' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
@@ -390,6 +430,22 @@ final class CompanyProfileController extends Controller
 
         if ($files === []) {
             return back(303)->withErrors(['images' => __('validation.required', ['attribute' => 'images'])]);
+        }
+
+        $cap = $company->tier()->photoLimit();
+        if ($cap !== null) {
+            $current = (int) $company->media()->where('kind', 'gallery')->count();
+            if ($current + count($files) > $cap) {
+                $remaining = max(0, $cap - $current);
+
+                return back(303)->withErrors([
+                    'images' => __('portal.gallery.cap_exceeded', [
+                        'cap' => $cap,
+                        'remaining' => $remaining,
+                        'tier' => $company->tier()->label(),
+                    ]),
+                ]);
+            }
         }
 
         DB::transaction(function () use ($files, $company): void {
@@ -448,12 +504,20 @@ final class CompanyProfileController extends Controller
      */
     public function updateContacts(Request $request, Company $company): RedirectResponse
     {
-        $data = $request->validate([
+        $cap = $company->tier()->contactLimit();
+        $rules = [
             'contacts' => ['nullable', 'array'],
             'contacts.*.type' => ['required', 'string', 'in:phone,email,whatsapp'],
             'contacts.*.value' => ['required', 'string', 'max:255'],
             'contacts.*.label' => ['nullable', 'string', 'max:100'],
-        ]);
+        ];
+        if ($cap !== null) {
+            $reservedForWebsite = $company->contacts()->where('type', 'website')->count();
+            $allowed = max(0, $cap - $reservedForWebsite);
+            $rules['contacts'][] = 'max:'.$allowed;
+        }
+
+        $data = $request->validate($rules);
 
         $company->contacts()->whereIn('type', ['phone', 'email', 'whatsapp'])->delete();
 
@@ -467,6 +531,67 @@ final class CompanyProfileController extends Controller
         }
 
         return back(303);
+    }
+
+    /**
+     * Reviews feed shown on the portal profile — paginated 15 per
+     * page, always sorted newest-first for the partner experience.
+     * The cap counters (`reply_cap`, `reply_used`, `reply_remaining`,
+     * `can_reply_new`) travel with every page so the UI can render
+     * the "X of Y replies used" strip without a second lookup.
+     *
+     * @return array<string, mixed>
+     */
+    private function presentReviewsFeed(Company $company): array
+    {
+        $request = request();
+        $perPage = max(1, min(50, (int) $request->query('reviews_per_page', '15')));
+
+        $paginated = CompanyReview::query()
+            ->where('company_id', $company->id)
+            ->latest('created_at')
+            ->orderByDesc('id')
+            ->paginate($perPage, ['*'], 'reviews_page')
+            ->withQueryString();
+
+        $tier = $company->tier();
+        $cap = $tier->cap('reply_reviews');
+        $used = CompanyPlanPolicy::countReplies($company);
+        $remaining = $cap === null ? null : max(0, $cap - $used);
+        $canReplyNew = $cap === null ? true : $used < $cap;
+
+        return [
+            'data' => $paginated->getCollection()
+                ->map(fn (CompanyReview $r): array => [
+                    'id' => (int) $r->id,
+                    'author_name' => $r->author_name,
+                    'author_initials' => $r->author_initials,
+                    'is_anonymous' => (bool) $r->is_anonymous,
+                    'public_name' => $r->publicName(),
+                    'rating' => (int) $r->rating,
+                    'body' => (string) $r->body,
+                    'advantages' => (array) ($r->advantages ?? []),
+                    'disadvantages' => (array) ($r->disadvantages ?? []),
+                    'status' => (string) $r->status,
+                    'reply_body' => $r->reply_body,
+                    'replied_at' => $r->replied_at?->toIso8601String(),
+                    'helpful_count' => (int) $r->helpful_count,
+                    'created_at' => $r->created_at?->toIso8601String(),
+                    'published_at' => $r->published_at?->toIso8601String(),
+                ])
+                ->values()
+                ->all(),
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+            'per_page' => $paginated->perPage(),
+            'total' => $paginated->total(),
+            'has_more' => $paginated->currentPage() < $paginated->lastPage(),
+            'reply_cap' => $cap,           // int | null (null = unlimited)
+            'reply_used' => $used,
+            'reply_remaining' => $remaining,
+            'can_reply_new' => $canReplyNew,
+            'plans_url' => route('partner.plans.index'),
+        ];
     }
 
     /* ---------------------------------------------- new presenters */
@@ -627,6 +752,8 @@ final class CompanyProfileController extends Controller
                 : "/{$locale}/company/{$t->permalink}";
         }
 
+        $tier = $company->tier();
+
         return [
             'id' => (int) $company->id,
             'name' => $t?->name ?? '—',
@@ -663,6 +790,19 @@ final class CompanyProfileController extends Controller
                 ])
                 ->values()
                 ->all(),
+            // Plan bundle — read by the Vue side to badge locked rows,
+            // set gallery-cap client-side hint, and render the "Your plan"
+            // strip in the header.
+            'plan_tier' => $tier->value,
+            'plan_label' => $tier->label(),
+            'plan_caps' => [
+                'gallery' => $tier->photoLimit(),
+                'contacts' => $tier->contactLimit(),
+                'services' => $tier->serviceLimit(),
+                'areas' => $tier->areaLimit(),
+                'faqs' => $tier->faqLimit(),
+            ],
+            'plans_url' => route('partner.plans.index'),
         ];
     }
 
@@ -736,8 +876,7 @@ final class CompanyProfileController extends Controller
         }
 
         $faqCount = $company->faqs->count();
-
-        $galleryCount = $company->media->where('collection', 'gallery')->count();
+        $galleryCount = $company->media->where('kind', 'gallery')->count();
         $galleryPreview = $galleryCount > 0
             ? trans_choice('admin.profile.gallery_preview', $galleryCount, ['n' => $galleryCount])
             : null;
@@ -751,7 +890,7 @@ final class CompanyProfileController extends Controller
         }
         $trustPreview = $trustParts === [] ? null : implode(' · ', $trustParts);
 
-        return [
+        $rows = [
             [
                 'id' => 'contacts',
                 'label' => __('admin.profile.rows.contacts'),
@@ -864,5 +1003,47 @@ final class CompanyProfileController extends Controller
                 'edit_anchor' => 'basic',
             ],
         ];
+
+        return $this->decorateRowsWithPlanLocks($rows, $company);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function decorateRowsWithPlanLocks(array $rows, Company $company): array
+    {
+        $tier = $company->tier();
+
+        $featureMap = [
+            'founded' => 'founded',
+            'employees' => 'employees',
+            'short_description' => 'short_description',
+            'about' => 'about',
+            'faqs' => 'faqs',
+            'branding' => 'cover',
+            'trust' => 'trust',
+            'google' => 'google',
+        ];
+
+        $capMap = [
+            'contacts' => 'contacts',
+            'services' => 'services',
+            'areas' => 'areas',
+            'faqs' => 'faqs',
+            'gallery' => 'gallery',
+        ];
+
+        foreach ($rows as $i => $row) {
+            $featureSlug = $featureMap[$row['id']] ?? null;
+            $isLocked = $featureSlug !== null ? ! $tier->hasFeature($featureSlug) : false;
+            $capSlug = $capMap[$row['id']] ?? null;
+
+            $rows[$i]['is_locked'] = $isLocked;
+            $rows[$i]['locked_by_feature'] = $isLocked ? $featureSlug : null;
+            $rows[$i]['cap'] = $capSlug !== null ? $tier->cap($capSlug) : null;
+        }
+
+        return $rows;
     }
 }

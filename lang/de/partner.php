@@ -13,6 +13,37 @@ return [
         ],
     ],
 
+    'notifications' => [
+        'plan_updated_title' => 'Ihr :plan-Plan wurde aktualisiert',
+        'plan_updated_body' => 'Unser Team hat Ihren Plan angepasst. Die neuen Werte sind unten aufgelistet.',
+    ],
+
+    'reviews' => [
+        'errors' => [
+            'reply_cap_reached' => 'Sie haben das Antwort-Limit Ihres Plans erreicht. Upgraden Sie Ihren Plan, um weitere Antworten zu verfassen.',
+        ],
+        'flash' => [
+            'reply_saved' => 'Antwort gespeichert.',
+            'reply_deleted' => 'Antwort entfernt.',
+            'hidden' => 'Bewertung ausgeblendet.',
+            'unhidden' => 'Bewertung wird wieder angezeigt.',
+            'spam_marked' => 'Bewertung als Spam markiert.',
+            'spam_unmarked' => 'Spam-Markierung entfernt.',
+            'review_deleted' => 'Bewertung gelöscht.',
+        ],
+    ],
+
+    'plans' => [
+        'already_on' => 'Sie sind bereits auf dem :tier-Plan.',
+        'upgraded' => 'Sie sind jetzt auf dem :tier-Plan — die neuen Funktionen sind bereits aktiv.',
+        'downgraded' => 'Ihr Plan wurde auf :tier geändert. Inhalte über den neuen Limits wurden angepasst.',
+        'no_company' => 'Kein Unternehmen mit Ihrem Konto verknüpft — bitte kontaktieren Sie den Support.',
+        'request_submitted' => 'Anfrage für den :tier-Plan wurde gesendet. Unser Team prüft sie zeitnah.',
+        'request_already_pending' => 'Sie haben bereits eine offene Plan-Anfrage. Bitte ziehen Sie diese zuerst zurück, bevor Sie eine neue senden.',
+        'request_not_pending' => 'Diese Anfrage wurde bereits bearbeitet.',
+        'request_cancelled' => 'Ihre Plan-Anfrage wurde zurückgezogen.',
+    ],
+
     'auth' => [
         'invalid_credentials' => 'Die eingegebene E-Mail-Adresse oder das Passwort ist falsch.',
         'status_pending' => 'Ihre Anmeldung wird noch geprüft. Sie erhalten eine E-Mail, sobald sie freigegeben wurde.',

@@ -32,7 +32,7 @@ final class UpdateCompanyRequest extends FormRequest
 
             'verified' => ['boolean'],
             'is_top_rated' => ['boolean'],
-            'plan_tier' => ['required', Rule::in(['free', 'silver', 'gold'])],
+            'plan_tier' => ['required', Rule::in(['basic', 'premium', 'gold'])],
             'rating_avg' => ['nullable', 'numeric', 'between:0,10'],
             'review_count' => ['nullable', 'integer', 'min:0'],
             'recommend_pct' => ['nullable', 'integer', 'between:0,100'],

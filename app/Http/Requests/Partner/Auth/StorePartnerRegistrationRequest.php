@@ -59,6 +59,8 @@ final class StorePartnerRegistrationRequest extends FormRequest
             'g-recaptcha-response' => $this->captchaConfigured()
                 ? ['required', 'string', 'captcha']
                 : ['nullable', 'string'],
+
+            'plan_tier' => ['required', 'string', 'in:basic,premium,gold'],
         ];
     }
 
@@ -74,6 +76,13 @@ final class StorePartnerRegistrationRequest extends FormRequest
             'g-recaptcha-response.required' => __('partner.register.errors.captcha_required'),
             'g-recaptcha-response.captcha' => __('partner.register.errors.captcha_invalid'),
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('plan_tier') || $this->input('plan_tier') === '') {
+            $this->merge(['plan_tier' => 'basic']);
+        }
     }
 
     private function captchaConfigured(): bool

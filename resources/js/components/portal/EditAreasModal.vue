@@ -1,10 +1,6 @@
 <script setup lang="ts">
-/**
- * Service Areas picker. Districts grouped by city. Per-city
- * "Select all / Clear" shortcut so admins covering an entire city
- * don't have to click 12 checkboxes.
- */
-import { useForm } from '@inertiajs/vue3';
+
+import { router, useForm } from '@inertiajs/vue3';
 import { Check, ChevronDown, ChevronRight, Loader2, X } from 'lucide-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -36,6 +32,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'update:open', value: boolean): void;
     (e: 'lazyLoad'): void;
+    (e: 'saved', invalidatedProps: string[]): void;
 }>();
 
 const de = {
@@ -127,9 +124,17 @@ function close(): void {
 }
 
 function submit(): void {
-    form.post(`/company-portal/${props.companyId}/areas`, {
+    const payload = { district_ids: [...form.district_ids] };
+    
+    close();
+
+    emit('saved', ['selectedDistrictIds', 'districtsByCity']);
+
+    router.post(`/company-portal/${props.companyId}/areas`, payload, {
         preserveScroll: true,
-        onSuccess: () => close(),
+        onSuccess: () => {
+            router.reload({ only: ['company', 'rows'] });
+        },
     });
 }
 </script>

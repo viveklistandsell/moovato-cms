@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PlanTier;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'primary_city_id', 'primary_district_id', 'street', 'postal_code',
@@ -28,6 +30,7 @@ final class Company extends Model
         'rating_avg' => 'decimal:1',
         'google_rating' => 'decimal:1',
         'rating_breakdown' => 'array',
+        'plan_tier' => PlanTier::class,
     ];
 
     public static function nextSortOrder(): int
@@ -180,5 +183,164 @@ final class Company extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(CompanyReview::class);
+    }
+
+    /* ---------------------------------------------- plan helpers */
+    public function tier(): PlanTier
+    {
+        $raw = $this->plan_tier;
+        if ($raw instanceof PlanTier) {
+            return $raw;
+        }
+
+        return PlanTier::tryFrom((string) $raw) ?? PlanTier::Basic;
+    }
+    public function enforceLimits(): void
+    {
+        $tier = $this->tier();
+
+        DB::transaction(function () use ($tier): void {
+            $this->pruneCollection('media', $tier->photoLimit(), 'kind', 'gallery');
+            $this->pruneContacts($tier->contactLimit());
+            $this->pruneServices($tier->serviceLimit());
+            $this->pruneAreas($tier->areaLimit());
+            $this->pruneFaqs($tier->faqLimit());
+            $this->stripLockedFeatures($tier);
+        });
+    }
+
+    private function pruneCollection(
+        string $relation,
+        ?int $cap,
+        ?string $filterCol = null,
+        mixed $filterVal = null,
+    ): void {
+        if ($cap === null) {
+            return;
+        }
+
+        $query = $this->{$relation}();
+        if ($filterCol !== null) {
+            $query = $query->where($filterCol, $filterVal);
+        }
+        $count = $query->count();
+        if ($count <= $cap) {
+            return;
+        }
+
+        $excess = $count - $cap;
+        $victims = (clone $query)->orderBy('sort_order')->orderBy('id')->limit($excess)->get();
+        foreach ($victims as $victim) {
+            $victim->delete();
+        }
+    }
+
+    private function pruneContacts(?int $cap): void
+    {
+        if ($cap === null) {
+            return;
+        }
+        $count = $this->contacts()->count();
+        if ($count <= $cap) {
+            return;
+        }
+        $victims = $this->contacts()
+            ->orderBy('is_primary')
+            ->orderByDesc('id')
+            ->limit($count - $cap)
+            ->get();
+        foreach ($victims as $victim) {
+            $victim->delete();
+        }
+    }
+
+    private function pruneServices(?int $cap): void
+    {
+        if ($cap === null) {
+            return;
+        }
+        $ids = $this->services()
+            ->orderByDesc('company_services.created_at')
+            ->pluck('service_categories.id')
+            ->all();
+        $keep = array_slice($ids, -1 * $cap);
+        $drop = array_diff($ids, $keep);
+        if ($drop !== []) {
+            $this->services()->detach($drop);
+        }
+    }
+
+    private function pruneAreas(?int $cap): void
+    {
+        if ($cap === null) {
+            return;
+        }
+        $ids = $this->serviceAreas()
+            ->orderByDesc('company_service_areas.created_at')
+            ->pluck('districts.id')
+            ->all();
+        $keep = array_slice($ids, -1 * $cap);
+        $drop = array_diff($ids, $keep);
+        if ($drop !== []) {
+            $this->serviceAreas()->detach($drop);
+        }
+    }
+
+    private function pruneFaqs(?int $cap): void
+    {
+        if ($cap === null) {
+            return;
+        }
+        $count = $this->faqs()->count();
+        if ($count <= $cap) {
+            return;
+        }
+        $victims = $this->faqs()
+            ->orderByDesc('sort_order')
+            ->orderByDesc('id')
+            ->limit($count - $cap)
+            ->get();
+        foreach ($victims as $victim) {
+            $victim->delete();
+        }
+    }
+    private function stripLockedFeatures(PlanTier $tier): void
+    {
+        $updates = [];
+
+        if (! $tier->hasFeature('founded')) {
+            $updates['founded_year'] = null;
+        }
+        if (! $tier->hasFeature('employees')) {
+            $updates['employee_count'] = null;
+        }
+        if (! $tier->hasFeature('google')) {
+            $updates['google_rating'] = null;
+            $updates['google_review_count'] = 0;
+        }
+        if (! $tier->hasFeature('trust')) {
+            $updates['verified'] = false;
+            $updates['is_top_rated'] = false;
+        }
+        if (! $tier->hasFeature('cover') && $this->cover !== null) {
+            if (! str_starts_with((string) $this->cover, 'http')) {
+                Storage::disk('public')->delete((string) $this->cover);
+            }
+            $updates['cover'] = null;
+        }
+
+        if ($updates !== []) {
+            $this->forceFill($updates)->save();
+        }
+        $translationUpdates = [];
+        if (! $tier->hasFeature('short_description')) {
+            $translationUpdates['short_description'] = null;
+        }
+        if (! $tier->hasFeature('about')) {
+            $translationUpdates['about'] = null;
+        }
+        if ($translationUpdates !== []) {
+            $this->translations()->update($translationUpdates);
+        }
     }
 }

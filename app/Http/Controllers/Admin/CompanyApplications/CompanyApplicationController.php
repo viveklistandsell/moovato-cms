@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\CompanyApplications\RejectApplicationRequest;
 use App\Mail\PartnerAccepted;
 use App\Mail\PartnerRejected;
 use App\Models\CompanyUser;
+use App\Models\PlanChangeRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,7 +49,7 @@ final class CompanyApplicationController extends Controller
 
         $query = CompanyUser::query()
             ->with([
-                'company:id,primary_city_id,street,postal_code,status',
+                'company:id,primary_city_id,street,postal_code,status,plan_tier',
                 'company.primaryCity:id,name',
                 'company.translations:id,company_id,lang,name,permalink',
                 'reviewer:id,name',
@@ -72,9 +73,19 @@ final class CompanyApplicationController extends Controller
 
         $paginated = $query->paginate($perPage)->withQueryString();
         $locale = App::getLocale();
+        $companyIds = $paginated->getCollection()
+            ->pluck('company_id')
+            ->filter()
+            ->all();
+        $pendingByCompany = PlanChangeRequest::query()
+            ->pending()
+            ->whereIn('company_id', $companyIds)
+            ->latest('created_at')
+            ->get()
+            ->keyBy('company_id');
 
         $applications = $paginated->getCollection()
-            ->map(fn (CompanyUser $u): array => $this->present($u, $locale))
+            ->map(fn (CompanyUser $u): array => $this->present($u, $locale, $pendingByCompany->get($u->company_id)))
             ->values()
             ->all();
 
@@ -213,7 +224,7 @@ final class CompanyApplicationController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function present(CompanyUser $u, string $locale): array
+    private function present(CompanyUser $u, string $locale, ?PlanChangeRequest $pending = null): array
     {
         $translation = $u->company?->translations->firstWhere('lang', $locale)
             ?? $u->company?->translations->first();
@@ -243,6 +254,17 @@ final class CompanyApplicationController extends Controller
             'company_street' => $u->company?->street,
             'company_postal' => $u->company?->postal_code,
             'company_status' => $u->company?->status,
+            'plan_tier' => $u->company?->tier()->value,
+            'plan_label' => $u->company?->tier()->label(),
+            'pending_plan_request' => $pending === null ? null : [
+                'id' => (int) $pending->id,
+                'from_tier' => $pending->from_tier->value,
+                'from_label' => $pending->from_tier->label(),
+                'to_tier' => $pending->to_tier->value,
+                'to_label' => $pending->to_tier->label(),
+                'is_upgrade' => $pending->to_tier->isHigherThan($pending->from_tier),
+                'created_at' => $pending->created_at?->toIso8601String(),
+            ],
             'reviewer_name' => $u->reviewer?->name,
             'reviewed_at' => $u->reviewed_at?->toIso8601String(),
             'created_at' => $u->created_at?->toIso8601String(),

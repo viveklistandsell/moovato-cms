@@ -21,6 +21,9 @@ const props = defineProps<{
     gallery: GalleryItem[];
     locale: string;
     lazyLoaded: boolean;
+    photoCap?: number | null;
+    tierLabel?: string;
+    plansUrl?: string;
 }>();
 
 const emit = defineEmits<{
@@ -43,6 +46,10 @@ const de = {
     drop_hint: 'Bilder hierher ziehen oder',
     pick_file: 'auswählen',
     hint: 'JPG, PNG oder WebP · max. 5 MB pro Datei · bis zu 20 auf einmal',
+    cap_note: 'Ihr {tier}-Plan erlaubt bis zu {cap} Fotos.',
+    cap_reached: 'Grenze erreicht ({cap}). Löschen Sie ein Foto oder upgraden Sie Ihren Plan.',
+    err_cap_exceeded: 'Diese Auswahl würde Ihr Limit von {cap} Fotos überschreiten. Sie können noch {remaining} hinzufügen.',
+    upgrade_plan: 'Plan upgraden',
     err_too_large: '„{name}" ist zu groß. Maximale Dateigröße: 5 MB.',
     err_bad_type: '„{name}" hat einen nicht unterstützten Dateityp.',
     err_too_many: 'Maximal 20 Dateien pro Upload.',
@@ -64,6 +71,10 @@ const en = {
     drop_hint: 'Drag images here or',
     pick_file: 'browse',
     hint: 'JPG, PNG or WebP · max 5 MB per file · up to 20 at once',
+    cap_note: 'Your {tier} plan allows up to {cap} photos.',
+    cap_reached: 'Limit reached ({cap}). Remove a photo or upgrade your plan.',
+    err_cap_exceeded: 'This selection would exceed your {cap}-photo limit. You have room for {remaining} more.',
+    upgrade_plan: 'Upgrade plan',
     err_too_large: '"{name}" is too big. Maximum file size is 5 MB.',
     err_bad_type: '"{name}" has an unsupported file type.',
     err_too_many: 'Maximum of 20 files per upload.',
@@ -99,6 +110,18 @@ function validateBatch(files: File[]): { ok: File[]; errors: string[] } {
     if (files.length > MAX_FILES_PER_BATCH) {
         errors.push(t.value.err_too_many);
         files = files.slice(0, MAX_FILES_PER_BATCH);
+    }
+
+    if (props.photoCap !== null && props.photoCap !== undefined) {
+        const remaining = Math.max(0, props.photoCap - props.gallery.length);
+        if (files.length > remaining) {
+            errors.push(
+                t.value.err_cap_exceeded
+                    .replace('{cap}', String(props.photoCap))
+                    .replace('{remaining}', String(remaining)),
+            );
+            files = files.slice(0, remaining);
+        }
     }
 
     for (const f of files) {
@@ -237,6 +260,27 @@ onBeforeUnmount(() => {
                     </p>
                     <p class="mt-1 text-[11px] text-[var(--slate-light)]">
                         {{ t.hint }} · {{ t.count(gallery.length) }}
+                    </p>
+                    <p
+                        v-if="props.photoCap !== null && props.photoCap !== undefined"
+                        class="mt-1 text-[11px]"
+                        :class="props.gallery.length >= props.photoCap
+                            ? 'text-[var(--orange)] font-semibold'
+                            : 'text-[var(--slate-light)]'"
+                    >
+                        <template v-if="props.gallery.length >= props.photoCap">
+                            {{ t.cap_reached.replace('{cap}', String(props.photoCap)) }}
+                        </template>
+                        <template v-else>
+                            {{ t.cap_note.replace('{tier}', props.tierLabel ?? '').replace('{cap}', String(props.photoCap)) }}
+                        </template>
+                        <a
+                            v-if="props.plansUrl"
+                            :href="props.plansUrl"
+                            class="ml-1 font-semibold text-[var(--orange)] underline hover:no-underline"
+                        >
+                            {{ t.upgrade_plan }}
+                        </a>
                     </p>
                 </div>
 

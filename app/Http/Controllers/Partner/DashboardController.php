@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\CompanyReview;
 use App\Models\CompanyUser;
+use App\Models\PartnerNotification;
+use App\Models\PlanChangeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Inertia\Inertia;
@@ -36,6 +38,7 @@ final class DashboardController extends Controller
                 'stats' => null,
                 'recentReviews' => [],
                 'quickActions' => [],
+                'notifications' => [],
             ]);
         }
 
@@ -50,7 +53,35 @@ final class DashboardController extends Controller
             'stats' => $company === null ? null : $this->presentStats($company),
             'recentReviews' => $company === null ? [] : $this->presentRecentReviews($company),
             'quickActions' => $company === null ? [] : $this->presentQuickActions($company, $locale),
+            'notifications' => $this->presentNotifications($user),
         ]);
+    }
+
+    /**
+     * Unread notifications for the "What's new" card on the
+     * dashboard — capped at 10 so a partner who never dismisses
+     * doesn't drown in a giant scrolling list.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function presentNotifications(CompanyUser $user): array
+    {
+        return PartnerNotification::query()
+            ->forUser((int) $user->id)
+            ->unread()
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn (PartnerNotification $n): array => [
+                'id' => (int) $n->id,
+                'type' => (string) $n->type,
+                'title' => (string) $n->title,
+                'body' => $n->body,
+                'data' => $n->data,
+                'created_at' => $n->created_at?->toIso8601String(),
+            ])
+            ->values()
+            ->all();
     }
 
     /* ---------------------------------------------- loaders */
@@ -96,6 +127,7 @@ final class DashboardController extends Controller
     private function presentCompany(Company $company, string $locale): array
     {
         $translation = $company->translation($locale);
+        $tier = $company->tier();
 
         return [
             'id' => (int) $company->id,
@@ -116,6 +148,39 @@ final class DashboardController extends Controller
             'portal_url' => "/company-portal/{$company->id}"
                 .($translation?->permalink !== null ? "/{$translation->permalink}" : ''),
             'admin_edit_url' => null, // reserved — partner never gets admin edit
+            'plan_tier' => $tier->value,
+            'plan_label' => $tier->label(),
+            'plan_price' => $tier->price(),
+            'plan_currency' => (string) config('plans.currency', '€'),
+            'plan_period' => (string) config('plans.period', 'month'),
+            'plan_is_free' => $tier->isFree(),
+            'plans_url' => route('partner.plans.index'),
+            'pending_plan_request' => $this->pendingPlanRequest($company),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function pendingPlanRequest(Company $company): ?array
+    {
+        $pending = PlanChangeRequest::query()
+            ->forCompany((int) $company->id)
+            ->pending()
+            ->latest('created_at')
+            ->first();
+
+        if ($pending === null) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $pending->id,
+            'from_tier' => $pending->from_tier->value,
+            'from_label' => $pending->from_tier->label(),
+            'to_tier' => $pending->to_tier->value,
+            'to_label' => $pending->to_tier->label(),
+            'created_at' => $pending->created_at?->toIso8601String(),
         ];
     }
 

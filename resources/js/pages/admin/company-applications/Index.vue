@@ -3,6 +3,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
     AlertCircle,
+    ArrowRight,
     Building2,
     Check,
     CheckCircle2,
@@ -73,6 +74,17 @@ type Application = {
     company_street: string | null;
     company_postal: string | null;
     company_status: string | null;
+    plan_tier: 'basic' | 'premium' | 'gold' | null;
+    plan_label: string | null;
+    pending_plan_request: {
+        id: number;
+        from_tier: string;
+        from_label: string;
+        to_tier: string;
+        to_label: string;
+        is_upgrade: boolean;
+        created_at: string | null;
+    } | null;
     reviewer_name: string | null;
     reviewed_at: string | null;
     created_at: string | null;
@@ -148,6 +160,43 @@ function submitReject(): void {
     rejectForm.post(`/admin/company-applications/${rejectingApp.value.id}/reject`, {
         preserveScroll: true,
         onSuccess: () => { rejectingApp.value = null; },
+    });
+}
+
+const approvePlanForm = useForm({});
+const approvingPlanRequestId = ref<number | null>(null);
+function approvePlanRequest(app: Application): void {
+    if (!app.pending_plan_request) return;
+    const req = app.pending_plan_request;
+    if (!confirm(t('companies.confirm_approve_plan', { from: req.from_label, to: req.to_label }))) {
+        return;
+    }
+    approvingPlanRequestId.value = req.id;
+    approvePlanForm.post(`/admin/plan-change-requests/${req.id}/approve`, {
+        preserveScroll: true,
+        onFinish: () => {
+            approvingPlanRequestId.value = null;
+        },
+    });
+}
+
+const rejectPlanOpen = ref(false);
+const rejectPlanTarget = ref<Application | null>(null);
+const rejectPlanForm = useForm<{ admin_note: string }>({ admin_note: '' });
+function openRejectPlan(app: Application): void {
+    rejectPlanTarget.value = app;
+    rejectPlanForm.reset();
+    rejectPlanOpen.value = true;
+}
+function submitRejectPlan(): void {
+    if (rejectPlanTarget.value === null || rejectPlanTarget.value.pending_plan_request === null) return;
+    const id = rejectPlanTarget.value.pending_plan_request.id;
+    rejectPlanForm.post(`/admin/plan-change-requests/${id}/reject`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            rejectPlanOpen.value = false;
+            rejectPlanTarget.value = null;
+        },
     });
 }
 
@@ -310,6 +359,7 @@ const statusIcon = (s: string) => {
                             <tr>
                                 <th class="w-80 px-4 py-3 text-left">{{ t('applications.col_applicant') }}</th>
                                 <th class="px-4 py-3 text-left">{{ t('applications.col_company') }}</th>
+                                <th class="w-24 px-4 py-3 text-left">{{ t('applications.col_plan') }}</th>
                                 <th class="px-4 py-3 text-left">{{ t('applications.col_contact') }}</th>
                                 <th class="w-20 px-4 py-3 text-center">{{ t('applications.col_docs') }}</th>
                                 <th class="w-32 px-4 py-3 text-left">{{ t('applications.col_status') }}</th>
@@ -319,7 +369,7 @@ const statusIcon = (s: string) => {
                         </thead>
                         <tbody>
                             <tr v-if="applications.length === 0" class="border-t">
-                                <td :colspan="7" class="px-4 py-12 text-center text-muted-foreground">
+                                <td :colspan="8" class="px-4 py-12 text-center text-muted-foreground">
                                     {{ t('applications.no_applications') }}
                                 </td>
                             </tr>
@@ -370,6 +420,61 @@ const statusIcon = (s: string) => {
                                                 <span v-if="app.company_postal">{{ app.company_postal }} </span>
                                                 <span v-if="app.company_city">{{ app.company_city }}</span>
                                             </p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Plan badge -->
+                                <td class="px-4 py-3">
+                                    <Badge
+                                        v-if="app.plan_tier"
+                                        variant="outline"
+                                        class="capitalize"
+                                        :class="{
+                                            'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300': app.plan_tier === 'basic',
+                                            'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300': app.plan_tier === 'premium',
+                                            'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300': app.plan_tier === 'gold',
+                                        }"
+                                    >
+                                        {{ app.plan_label ?? app.plan_tier }}
+                                    </Badge>
+                                    <span v-else class="text-xs text-muted-foreground">—</span>
+                                    <div
+                                        v-if="app.pending_plan_request"
+                                        class="mt-2 flex flex-col gap-1.5 rounded-md border border-amber-300 bg-amber-50 p-2"
+                                    >
+                                        <div class="flex items-center gap-1 text-[11px] font-semibold text-amber-900">
+                                            <span>{{ app.pending_plan_request.from_label }}</span>
+                                            <ArrowRight class="size-3" />
+                                            <span>{{ app.pending_plan_request.to_label }}</span>
+                                            <span
+                                                :class="app.pending_plan_request.is_upgrade ? 'text-emerald-600' : 'text-amber-700'"
+                                                class="ml-1 text-[9px] uppercase"
+                                            >
+                                                {{ app.pending_plan_request.is_upgrade ? t('companies.plan_upgrade') : t('companies.plan_downgrade') }}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-7 shrink-0 gap-1 border-emerald-400 bg-emerald-50 px-2 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                                                :disabled="approvingPlanRequestId === app.pending_plan_request.id"
+                                                @click="approvePlanRequest(app)"
+                                            >
+                                                <Loader2 v-if="approvingPlanRequestId === app.pending_plan_request.id" class="size-3.5 animate-spin" />
+                                                <Check v-else class="size-3.5" />
+                                                {{ t('companies.approve_plan') }}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-7 shrink-0 gap-1 border-rose-400 bg-rose-50 px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800"
+                                                @click="openRejectPlan(app)"
+                                            >
+                                                <X class="size-3.5" />
+                                                {{ t('companies.decline_plan') }}
+                                            </Button>
                                         </div>
                                     </div>
                                 </td>
@@ -465,14 +570,19 @@ const statusIcon = (s: string) => {
                                                 <Pencil class="size-3.5" />
                                                 {{ t('applications.edit_company') }}
                                             </a>
-                                            <Link
-                                                v-if="app.company_id && app.company_permalink"
-                                                :href="`/company-portal/${app.company_id}/${app.company_permalink}`"
+                                            <!-- Public listing page (frontend), NOT the portal
+                                                 editor. Opens in a new tab so the admin doesn't
+                                                 lose their queue position. -->
+                                            <a
+                                                v-if="app.company_permalink"
+                                                :href="`/company/${app.company_permalink}`"
+                                                target="_blank"
+                                                rel="noopener"
                                                 class="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-foreground hover:border-primary hover:text-primary"
                                             >
                                                 <ExternalLink class="size-3.5" />
                                                 {{ t('applications.view_portal') }}
-                                            </Link>
+                                            </a>
                                         </div>
                                     </div>
                                 </td>
@@ -480,14 +590,15 @@ const statusIcon = (s: string) => {
                         </tbody>
                     </table>
                 </div>
+                <div class="flex items-center justify-between gap-4 border-t px-4 py-3">
+                    <PerPageSelect :model-value="perPage" @update:model-value="setPerPage" />
+                    <Pagination
+                        :pagination="pagination"
+                        :only="['applications', 'pagination', 'filters', 'stats']"
+                    />
+                </div>
             </CardContent>
         </Card>
-
-        <!-- Pagination + per-page -->
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <PerPageSelect :model-value="perPage" @update:model-value="setPerPage" />
-            <Pagination :pagination="pagination" />
-        </div>
 
         <!-- Reject dialog -->
         <Dialog :open="rejectingApp !== null" @update:open="(v: boolean) => !v && (rejectingApp = null)">
@@ -532,6 +643,35 @@ const statusIcon = (s: string) => {
                         </Button>
                     </DialogFooter>
                 </form>
+            </DialogContent>
+        </Dialog>
+        <Dialog v-model:open="rejectPlanOpen">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>{{ t('companies.decline_plan_title') }}</DialogTitle>
+                    <DialogDescription>{{ t('companies.decline_plan_hint') }}</DialogDescription>
+                </DialogHeader>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">{{ t('companies.decline_plan_note') }}</label>
+                    <textarea
+                        v-model="rejectPlanForm.admin_note"
+                        class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        rows="4"
+                        :placeholder="t('companies.decline_plan_note_placeholder')"
+                    ></textarea>
+                    <p v-if="rejectPlanForm.errors.admin_note" class="text-xs text-destructive">
+                        {{ rejectPlanForm.errors.admin_note }}
+                    </p>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" @click="rejectPlanOpen = false">
+                        {{ t('companies.decline_plan_cancel') }}
+                    </Button>
+                    <Button variant="destructive" :disabled="rejectPlanForm.processing" @click="submitRejectPlan">
+                        <Loader2 v-if="rejectPlanForm.processing" class="size-4 animate-spin" />
+                        {{ t('companies.decline_plan_confirm') }}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     </div>

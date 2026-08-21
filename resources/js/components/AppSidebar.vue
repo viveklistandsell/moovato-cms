@@ -143,6 +143,7 @@ const companiesItems = computed<NavItem[]>(() => [
     { title: t('sidebar.all_companies'), href: '/admin/companies', icon: List },
     { title: t('sidebar.add_company'), href: '/admin/companies/create', icon: Plus },
     { title: t('sidebar.partner_applications'), href: '/admin/company-applications', icon: UserRoundCheck },
+    { title: t('sidebar.plans'), href: '/admin/plans', icon: Boxes },
 ]);
 
 const navigationItems = computed<NavItem[]>(() => [

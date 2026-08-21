@@ -13,6 +13,37 @@ return [
         ],
     ],
 
+    'notifications' => [
+        'plan_updated_title' => 'Your :plan plan has been updated',
+        'plan_updated_body' => 'Our team has adjusted your plan. See the changes that now apply below.',
+    ],
+
+    'reviews' => [
+        'errors' => [
+            'reply_cap_reached' => 'You have reached your plan\'s reply limit. Upgrade your plan to reply to more reviews.',
+        ],
+        'flash' => [
+            'reply_saved' => 'Reply saved.',
+            'reply_deleted' => 'Reply removed.',
+            'hidden' => 'Review hidden.',
+            'unhidden' => 'Review is now visible again.',
+            'spam_marked' => 'Review marked as spam.',
+            'spam_unmarked' => 'Review is no longer marked as spam.',
+            'review_deleted' => 'Review deleted.',
+        ],
+    ],
+
+    'plans' => [
+        'already_on' => 'You are already on the :tier plan.',
+        'upgraded' => 'You are now on the :tier plan — new features are already active.',
+        'downgraded' => 'Your plan has been changed to :tier. Content beyond the new limits has been trimmed.',
+        'no_company' => 'No company linked to your account — please contact support.',
+        'request_submitted' => 'Request to change to the :tier plan sent. Our team will review it shortly.',
+        'request_already_pending' => 'You already have a plan-change request pending. Please cancel it first before submitting a new one.',
+        'request_not_pending' => 'This request has already been processed.',
+        'request_cancelled' => 'Your plan-change request has been cancelled.',
+    ],
+
     'auth' => [
         'invalid_credentials' => 'The email or password you entered is incorrect.',
         'status_pending' => 'Your application is still under review. You will receive an email once it is approved.',

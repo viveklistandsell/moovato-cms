@@ -221,7 +221,7 @@ const form = useForm({
     cover: props.company?.cover ?? '',
     verified: props.company?.verified ?? false,
     is_top_rated: props.company?.is_top_rated ?? false,
-    plan_tier: props.company?.plan_tier ?? 'free',
+    plan_tier: props.company?.plan_tier ?? 'basic',
     rating_avg: props.company?.rating_avg ?? null,
     review_count: props.company?.review_count ?? 0,
     recommend_pct: props.company?.recommend_pct ?? 0,
@@ -1393,11 +1393,14 @@ function submit(): void {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="free">Free</SelectItem>
-                                <SelectItem value="silver">Silver</SelectItem>
-                                <SelectItem value="gold">Gold</SelectItem>
+                                <SelectItem value="basic">Basic (€0)</SelectItem>
+                                <SelectItem value="premium">Premium (€19)</SelectItem>
+                                <SelectItem value="gold">Gold (€49)</SelectItem>
                             </SelectContent>
                         </Select>
+                        <p class="text-[11px] text-muted-foreground">
+                            {{ t('companies.field_plan_tier_hint') }}
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">

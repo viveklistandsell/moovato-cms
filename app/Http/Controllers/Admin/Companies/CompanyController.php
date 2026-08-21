@@ -17,6 +17,7 @@ use App\Models\CompanyFaqTranslation;
 use App\Models\Country;
 use App\Models\District;
 use App\Models\Language;
+use App\Models\PlanChangeRequest;
 use App\Models\ServiceCategory;
 use App\Models\ServiceParentCategory;
 use App\Models\State;
@@ -28,15 +29,6 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Admin CRUD for the Companies (business-listing) entity.
- *
- * Companies are the glue between Services (what they do) and Locations
- * (where they work). Every listing page on the public site intersects
- * these three sets — so this controller keeps the pivots (services,
- * service_areas), the translation sidecar, and the per-company FAQ
- * repeater all consistent inside a single DB transaction.
- */
 final class CompanyController extends Controller
 {
     private const SORTABLE_COLUMNS = [
@@ -123,8 +115,16 @@ final class CompanyController extends Controller
 
         $paginated = $query->paginate($perPage)->withQueryString();
 
+        $companyIds = $paginated->getCollection()->pluck('id')->all();
+        $pendingByCompany = PlanChangeRequest::query()
+            ->pending()
+            ->whereIn('company_id', $companyIds)
+            ->latest('created_at')
+            ->get()
+            ->keyBy('company_id');
+
         $companies = $paginated->getCollection()
-            ->map(fn (Company $c): array => $this->presentCompany($c))
+            ->map(fn (Company $c): array => $this->presentCompany($c, $pendingByCompany->get($c->id)))
             ->values()
             ->all();
 
@@ -527,7 +527,7 @@ final class CompanyController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function presentCompany(Company $company): array
+    private function presentCompany(Company $company, ?PlanChangeRequest $pending = null): array
     {
         return [
             'id' => $company->id,
@@ -544,7 +544,17 @@ final class CompanyController extends Controller
             'cover' => $company->cover,
             'verified' => (bool) $company->verified,
             'is_top_rated' => (bool) $company->is_top_rated,
-            'plan_tier' => $company->plan_tier,
+            'plan_tier' => $company->tier()->value,
+            'plan_label' => $company->tier()->label(),
+            'pending_plan_request' => $pending === null ? null : [
+                'id' => (int) $pending->id,
+                'from_tier' => $pending->from_tier->value,
+                'from_label' => $pending->from_tier->label(),
+                'to_tier' => $pending->to_tier->value,
+                'to_label' => $pending->to_tier->label(),
+                'is_upgrade' => $pending->to_tier->isHigherThan($pending->from_tier),
+                'created_at' => $pending->created_at?->toIso8601String(),
+            ],
             'rating_avg' => (float) $company->rating_avg,
             'review_count' => (int) $company->review_count,
             'recommend_pct' => (int) $company->recommend_pct,

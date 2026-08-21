@@ -2,21 +2,26 @@
 /**
  * Partner dashboard.
  */
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
+    ArrowRight,
     ArrowUpRight,
+    Bell,
     CheckCircle2,
     Circle,
+    Crown,
     ExternalLink,
     HelpCircle,
     Image as ImageIcon,
     MapPin,
     MessageCircleReply,
     Palette,
+    Sparkles,
     Star,
     Store,
     UserRound,
+    X,
 } from 'lucide-vue-next';
 import type { Component } from 'vue';
 import { computed } from 'vue';
@@ -40,6 +45,21 @@ type CompanyProp = {
     employee_count: number | null;
     portal_url: string;
     admin_edit_url: string | null;
+    plan_tier: 'basic' | 'premium' | 'gold';
+    plan_label: string;
+    plan_price: number;
+    plan_currency: string;
+    plan_period: string;
+    plan_is_free: boolean;
+    plans_url: string;
+    pending_plan_request: {
+        id: number;
+        from_tier: string;
+        from_label: string;
+        to_tier: string;
+        to_label: string;
+        created_at: string | null;
+    } | null;
 };
 
 type UserProp = {
@@ -88,6 +108,20 @@ type QuickActionProp = {
     icon: string;
 };
 
+type PlanChangeDiff = { label: string; from: string; to: string };
+type NotificationProp = {
+    id: number;
+    type: string;
+    title: string;
+    body: string | null;
+    data: {
+        plan_slug?: string;
+        plan_label?: string;
+        changes?: PlanChangeDiff[];
+    } | null;
+    created_at: string | null;
+};
+
 const props = defineProps<{
     locale: string;
     user: UserProp | null;
@@ -96,6 +130,7 @@ const props = defineProps<{
     stats: StatsProp | null;
     recentReviews: ReviewProp[];
     quickActions: QuickActionProp[];
+    notifications: NotificationProp[];
 }>();
 
 const de = {
@@ -139,6 +174,17 @@ const de = {
     reviews_anonymous_hint: 'Anonym',
 
     actions_title: 'Schnellzugriff',
+    your_plan_label: 'Ihr Plan',
+    plan_free: 'kostenlos',
+    basic_nudge: 'Sie sind auf dem Basic-Plan. Fragen Sie ein Upgrade an, um weitere Funktionen freizuschalten.',
+    upgrade_plan: 'Upgrade anfragen',
+    manage_plan: 'Plan verwalten',
+    pending_request_pill: 'Anfrage in Prüfung',
+    pending_request_body: 'Wechsel {from} → {to} wartet auf Freigabe.',
+    notifications_title: 'Neuigkeiten',
+    notifications_dismiss: 'Ausblenden',
+    notifications_dismiss_all: 'Alle als gelesen markieren',
+    notifications_confirm_dismiss: 'Diese Benachrichtigung wirklich ausblenden?',
 
     address_pieces: 'Adresse',
     founded_year: 'Gegründet',
@@ -187,11 +233,32 @@ const en = {
 
     actions_title: 'Quick actions',
 
+    your_plan_label: 'Your plan',
+    plan_free: 'free',
+    basic_nudge: "You're on the Basic plan. Request an upgrade to unlock more features.",
+    upgrade_plan: 'Request upgrade',
+    manage_plan: 'Manage plan',
+    pending_request_pill: 'Request under review',
+    pending_request_body: 'Change {from} → {to} is waiting for approval.',
+    notifications_title: 'What\'s new',
+    notifications_dismiss: 'Dismiss',
+    notifications_dismiss_all: 'Mark all read',
+    notifications_confirm_dismiss: 'Dismiss this notification?',
+
     address_pieces: 'Address',
     founded_year: 'Founded',
     employees_label: 'Employees',
 } as const;
 const t = computed(() => (props.locale === 'de' ? de : en));
+
+function dismissNotification(n: NotificationProp): void {
+    if (!confirm(t.value.notifications_confirm_dismiss)) return;
+    router.post(`/partner/notifications/${n.id}/read`, {}, { preserveScroll: true });
+}
+
+function dismissAllNotifications(): void {
+    router.post('/partner/notifications/read-all', {}, { preserveScroll: true });
+}
 
 function statusLabel(status: string): string {
     switch (status) {
@@ -203,11 +270,6 @@ function statusLabel(status: string): string {
     }
 }
 
-/**
- * Split a pipe-separated singular|plural template and interpolate
- * {n}. Mirrors Laravel's trans_choice on the client so we don't
- * ship an i18n library for a single string.
- */
 function plural(template: string, n: number): string {
     const [singular, pluralForm] = template.split('|');
     const chosen = n === 1 ? singular : (pluralForm ?? singular);
@@ -314,6 +376,123 @@ const iconMap: Record<string, Component> = {
                         <ArrowUpRight class="size-4" />
                     </a>
                 </header>
+                <section
+                    v-if="notifications.length > 0"
+                    class="mt-6 rounded-xl border border-[var(--orange)]/30 bg-[var(--orange-soft)]/40 p-4 shadow-sm sm:p-5"
+                    :aria-label="t.notifications_title"
+                >
+                    <header class="mb-3 flex items-center justify-between gap-3">
+                        <p class="flex items-center gap-2 text-sm font-semibold text-[var(--midnight)]">
+                            <Sparkles class="size-4 text-[var(--orange)]" />
+                            {{ t.notifications_title }}
+                            <span class="rounded-full bg-[var(--orange)] px-2 py-0.5 text-[10px] font-bold text-white">
+                                {{ notifications.length }}
+                            </span>
+                        </p>
+                        <button
+                            v-if="notifications.length > 1"
+                            type="button"
+                            class="text-xs font-medium text-[var(--slate)] hover:text-[var(--orange)]"
+                            @click="dismissAllNotifications"
+                        >
+                            {{ t.notifications_dismiss_all }}
+                        </button>
+                    </header>
+
+                    <ul class="space-y-2">
+                        <li
+                            v-for="n in notifications"
+                            :key="n.id"
+                            class="flex items-start gap-3 rounded-lg border border-[var(--linen)] bg-white p-3"
+                        >
+                            <div class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--orange-soft)] text-[var(--orange)]">
+                                <Bell class="size-4" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-[var(--midnight)]">
+                                    {{ n.title }}
+                                </p>
+                                <p v-if="n.body" class="mt-0.5 text-xs text-[var(--slate)]">
+                                    {{ n.body }}
+                                </p>
+
+                                <!-- Diff rows for plan_updated notifications. -->
+                                <ul
+                                    v-if="n.type === 'plan_updated' && n.data?.changes?.length"
+                                    class="mt-2 space-y-1 rounded-md border border-[var(--linen)] bg-[var(--paper)]/60 p-2"
+                                >
+                                    <li
+                                        v-for="(c, i) in n.data.changes"
+                                        :key="i"
+                                        class="flex flex-wrap items-baseline gap-1 text-[11px]"
+                                    >
+                                        <span class="font-semibold text-[var(--midnight)]">{{ c.label }}:</span>
+                                        <span class="text-[var(--slate-light)] line-through">{{ c.from }}</span>
+                                        <ArrowRight class="size-3 text-[var(--orange)]" />
+                                        <span class="font-medium text-[var(--midnight)]">{{ c.to }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <button
+                                type="button"
+                                class="shrink-0 rounded-md p-1 text-[var(--slate)] hover:bg-[var(--paper)] hover:text-[var(--midnight)]"
+                                :title="t.notifications_dismiss"
+                                :aria-label="t.notifications_dismiss"
+                                @click="dismissNotification(n)"
+                            >
+                                <X class="size-4" />
+                            </button>
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--linen)] bg-[var(--white)] p-4 shadow-sm sm:p-5">
+                    <div class="flex items-center gap-3">
+                        <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--orange-soft)] text-[var(--orange)]">
+                            <Crown class="size-5" />
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-semibold uppercase tracking-wider text-[var(--slate-light)]">
+                                {{ t.your_plan_label }}
+                            </p>
+                            <p class="mt-0.5 text-base font-bold text-[var(--midnight)]">
+                                {{ company.plan_label }}
+                                <span v-if="!company.plan_is_free" class="text-xs font-normal text-[var(--slate)]">
+                                    · {{ company.plan_currency }}{{ company.plan_price }} / {{ company.plan_period }}
+                                </span>
+                                <span v-else class="text-xs font-normal text-[var(--slate)]">
+                                    · {{ t.plan_free }}
+                                </span>
+                            </p>
+                            <p v-if="company.plan_tier === 'basic' && !company.pending_plan_request" class="mt-0.5 text-xs text-[var(--slate)]">
+                                {{ t.basic_nudge }}
+                            </p>
+                            <p
+                                v-if="company.pending_plan_request"
+                                class="mt-1 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+                            >
+                                <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                {{ t.pending_request_pill }} · {{ company.pending_plan_request.from_label }} → {{ company.pending_plan_request.to_label }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            v-if="company.plan_tier === 'basic' && !company.pending_plan_request"
+                            :href="company.plans_url"
+                            class="inline-flex items-center gap-1.5 rounded-lg bg-[var(--orange)] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                        >
+                            <ArrowUpRight class="size-3.5" />
+                            {{ t.upgrade_plan }}
+                        </Link>
+                        <Link
+                            :href="company.plans_url"
+                            class="inline-flex items-center gap-1 rounded-md border border-[var(--linen)] px-3 py-2 text-xs font-medium text-[var(--slate)] hover:border-[var(--orange)] hover:text-[var(--orange)]"
+                        >
+                            {{ t.manage_plan }}
+                        </Link>
+                    </div>
+                </div>
 
                 <!-- === Draft-status callout === -->
                 <div
