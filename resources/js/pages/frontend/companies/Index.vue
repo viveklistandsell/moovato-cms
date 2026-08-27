@@ -34,6 +34,8 @@ type Company = {
     coverage_cities: string[];
     primary_services: string[];
     primary_phone: string | null;
+    can_claim: boolean;
+    claim_url: string | null;
 };
 
 type PaginationLink = { url: string | null; label: string; active: boolean };
@@ -98,6 +100,7 @@ const t = computed(() => ({
     sort_newest: props.locale === 'de' ? 'Neueste' : 'Newest',
     request_quote: props.locale === 'de' ? 'Angebot anfordern' : 'Request a quote',
     details: props.locale === 'de' ? 'Details' : 'Details',
+    claim_listing: props.locale === 'de' ? 'Ist das Ihr Unternehmen?' : 'Is this your business?',
     top_rated: props.locale === 'de' ? 'Top-bewertetes Umzugsunternehmen' : 'Top-rated moving company',
     top_rated_short: props.locale === 'de' ? 'Top bewertet' : 'Top rated',
     verified: props.locale === 'de' ? 'Verifiziert' : 'Verified',
@@ -693,6 +696,13 @@ onBeforeUnmount(() => {
                                     >
                                         {{ t.details }}
                                     </Link>
+                                    <a
+                                        v-if="c.can_claim && c.claim_url"
+                                        :href="c.claim_url"
+                                        class="mv-directory__claim"
+                                    >
+                                        {{ t.claim_listing }}
+                                    </a>
                                 </div>
                             </article>
                         </li>

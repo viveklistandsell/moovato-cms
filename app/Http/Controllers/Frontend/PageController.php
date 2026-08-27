@@ -100,6 +100,16 @@ final class PageController extends Controller
             }
         }
 
+        $metaImagePath = $tr?->meta_image;
+        $seo = [
+            'meta_title' => $tr?->meta_title ?: null,
+            'meta_description' => $tr?->meta_description ?: null,
+            'schema' => $tr?->schema,
+            'meta_image_url' => $metaImagePath !== null && $metaImagePath !== ''
+                ? '/storage/'.mb_ltrim($metaImagePath, '/')
+                : null,
+        ];
+
         return Inertia::render('frontend/page/Index', [
             'locale' => $locale,
             'localeAlternates' => $localeAlternates,
@@ -112,6 +122,7 @@ final class PageController extends Controller
                 'is_home' => $page->is_home,
                 'author' => $page->user?->name,
                 'created_at' => $page->created_at?->toIso8601String(),
+                'seo' => $seo,
                 'categories' => $page->categories->map(function ($c) use ($locale): array {
                     $ctr = $c->translation($locale);
 

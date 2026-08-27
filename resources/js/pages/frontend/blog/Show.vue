@@ -44,6 +44,12 @@ type RelatedPost = {
     is_sticky: boolean;
     is_featured: boolean;
     categories: Category[];
+    seo?: {
+        meta_title: string | null;
+        meta_description: string | null;
+        schema: Record<string, unknown> | null;
+        meta_image_url: string | null;
+    };
 };
 
 const props = defineProps<{
@@ -73,7 +79,22 @@ const formattedDate = computed(() => {
     );
 });
 
-const documentTitle = computed(() => props.post.title);
+const documentTitle = computed(() => props.post.seo?.meta_title || props.post.title);
+const seoDescription = computed(
+    () => props.post.seo?.meta_description || props.post.excerpt || '',
+);
+const seoImage = computed(
+    () => props.post.seo?.meta_image_url || props.post.image_url || null,
+);
+const seoSchemaJson = computed<string | null>(() => {
+    const s = props.post.seo?.schema;
+    if (! s || typeof s !== 'object' || Object.keys(s).length === 0) return null;
+    try {
+        return JSON.stringify(s);
+    } catch {
+        return null;
+    }
+});
 
 const contentRef = ref<HTMLElement | null>(null);
 const toc = ref<TocEntry[]>([]);
@@ -193,15 +214,34 @@ onBeforeUnmount(() => observer?.disconnect());
     <Head>
         <title>{{ documentTitle }}</title>
         <meta
+            v-if="seoDescription"
+            head-key="description"
+            name="description"
+            :content="seoDescription"
+        />
+        <meta
             head-key="og:title"
             property="og:title"
             :content="documentTitle"
         />
         <meta
-            v-if="post.image_url"
+            v-if="seoDescription"
+            head-key="og:description"
+            property="og:description"
+            :content="seoDescription"
+        />
+        <meta
+            v-if="seoImage"
             head-key="og:image"
             property="og:image"
-            :content="post.image_url"
+            :content="seoImage"
+        />
+        <component
+            :is="'script'"
+            v-if="seoSchemaJson"
+            head-key="schema-ld"
+            type="application/ld+json"
+            v-html="seoSchemaJson"
         />
     </Head>
 

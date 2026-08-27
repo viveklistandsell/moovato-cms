@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     Activity,
     Bot,
@@ -139,10 +139,20 @@ const servicesItems = computed<NavItem[]>(() => [
     { title: t('sidebar.service_categories'), href: '/admin/services/categories', icon: FolderTree },
 ]);
 
+type SidebarCounts = { pending_applications?: number };
+const sidebarCounts = computed<SidebarCounts>(
+    () => (usePage().props.sidebarCounts as SidebarCounts | undefined) ?? {},
+);
+
 const companiesItems = computed<NavItem[]>(() => [
     { title: t('sidebar.all_companies'), href: '/admin/companies', icon: List },
     { title: t('sidebar.add_company'), href: '/admin/companies/create', icon: Plus },
-    { title: t('sidebar.partner_applications'), href: '/admin/company-applications', icon: UserRoundCheck },
+    {
+        title: t('sidebar.partner_applications'),
+        href: '/admin/company-applications',
+        icon: UserRoundCheck,
+        badge: sidebarCounts.value.pending_applications ?? 0,
+    },
     { title: t('sidebar.plans'), href: '/admin/plans', icon: Boxes },
 ]);
 
@@ -403,7 +413,7 @@ const isUserSectionActive = computed(
                         class="group/collapsible"
                         as-child
                     >
-                        <SidebarMenuItem>
+                        <SidebarMenuItem class="relative">
                             <CollapsibleTrigger as-child>
                                 <SidebarMenuButton
                                     as-child
@@ -425,6 +435,7 @@ const isUserSectionActive = computed(
                                     <SidebarMenuSubItem
                                         v-for="item in companiesItems"
                                         :key="item.title"
+                                        class="relative"
                                     >
                                         <SidebarMenuSubButton
                                             as-child
@@ -436,6 +447,12 @@ const isUserSectionActive = computed(
                                                 <span>{{ item.title }}</span>
                                             </Link>
                                         </SidebarMenuSubButton>
+                                        <span
+                                            v-if="item.badge && item.badge > 0"
+                                            class="pointer-events-none absolute right-0 top-1/2 z-10 inline-flex h-5 min-w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--orange)] px-1.5 text-[10px] font-semibold text-white shadow-sm group-data-[collapsible=icon]:hidden"
+                                        >
+                                            {{ item.badge > 99 ? '99+' : item.badge }}
+                                        </span>
                                     </SidebarMenuSubItem>
                                 </SidebarMenuSub>
                             </CollapsibleContent>

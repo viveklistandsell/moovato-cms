@@ -6974,6 +6974,27 @@
     color: var(--white);
 }
 
+.mv-directory__claim {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px dashed var(--orange);
+    border-radius: 999px;
+    background: var(--orange-soft);
+    color: var(--orange);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.mv-directory__claim:hover {
+    background: var(--orange);
+    color: var(--white);
+}
+
 .mv-directory__btn--solid {
     --sweep: var(--black);
     background: var(--orange);

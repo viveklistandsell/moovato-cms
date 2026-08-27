@@ -25,7 +25,7 @@ final readonly class UpdatePage
      *   template?: string,
      *   is_home?: bool,
      *   status?: string,
-     *   translations: array<string, array{title?: ?string, permalink?: ?string}>,
+     *   translations: array<string, array{title?: ?string, permalink?: ?string, meta_title?: ?string, meta_description?: ?string, schema?: ?string, meta_image?: ?string}>,
      *   widgets?: array<int, array<string, mixed>>|null
      * }  $data
      */
@@ -89,6 +89,10 @@ final readonly class UpdatePage
                     'lang' => $lang,
                     'title' => $translation['title'],
                     'permalink' => $translation['permalink'],
+                    'meta_title' => $translation['meta_title'] ?? null,
+                    'meta_description' => $translation['meta_description'] ?? null,
+                    'schema' => $this->normalizeSchema($translation['schema'] ?? null),
+                    'meta_image' => $translation['meta_image'] ?? null,
                 ]);
             }
 
@@ -98,5 +102,22 @@ final readonly class UpdatePage
 
             return $page->load(['translations', 'categories', 'widgets.translations']);
         });
+    }
+
+    /**
+     * Raw JSON-LD string → array (JSON column). Empty / invalid → null.
+     */
+    private function normalizeSchema(mixed $raw): ?array
+    {
+        if ($raw === null || $raw === '' || $raw === []) {
+            return null;
+        }
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        $decoded = json_decode((string) $raw, true);
+
+        return is_array($decoded) ? $decoded : null;
     }
 }

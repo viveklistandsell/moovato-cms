@@ -38,12 +38,16 @@ final class StorePartnerRegistrationRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:190', Rule::unique('company_users', 'email')],
             'phone' => ['nullable', 'string', 'max:50'],
-
-            // Company details
             'company_name' => ['required', 'string', 'max:255'],
             'street' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:10'],
             'city_id' => ['required', 'integer', Rule::exists('cities', 'id')],
+            'claim_company_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('companies', 'id'),
+                Rule::unique('company_users', 'company_id'),
+            ],
 
             // Docs — up to 5 files, 5 MB each. Optional.
             'documents' => ['nullable', 'array', 'max:5'],
