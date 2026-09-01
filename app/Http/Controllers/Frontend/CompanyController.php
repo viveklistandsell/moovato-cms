@@ -50,7 +50,6 @@ final class CompanyController extends Controller
         $verifiedOnly = $request->query('verified') === '1';
         $topRatedOnly = $request->query('top_rated') === '1';
         $minRating = (float) $request->query('min_rating', '0');
-        $minReviews = (int) $request->query('min_reviews', '0');
         $priceMin = self::floatQuery($request, 'price_min');
         $priceMax = self::floatQuery($request, 'price_max');
         $sort = $request->query('sort');
@@ -83,9 +82,6 @@ final class CompanyController extends Controller
         }
         if ($minRating > 0) {
             $query->where('rating_avg', '>=', $minRating);
-        }
-        if ($minReviews > 0) {
-            $query->where('review_count', '>=', $minReviews);
         }
         if ($priceMin !== null || $priceMax !== null) {
             $query->whereHas('services', function (Builder $q) use ($priceMin, $priceMax): void {
@@ -132,7 +128,6 @@ final class CompanyController extends Controller
             'verifiedOnly' => $verifiedOnly,
             'topRatedOnly' => $topRatedOnly,
             'minRating' => $minRating,
-            'minReviews' => $minReviews,
             'priceMin' => $priceMin,
             'priceMax' => $priceMax,
             'sort' => $sort,

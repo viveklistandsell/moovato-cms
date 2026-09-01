@@ -52,7 +52,6 @@ const props = defineProps<{
     verifiedOnly: boolean;
     topRatedOnly: boolean;
     minRating: number;
-    minReviews: number;
     priceMin: number | null;
     priceMax: number | null;
     sort: string;
@@ -87,7 +86,6 @@ const t = computed(() => ({
     verified_only: props.locale === 'de' ? 'Nur verifiziert' : 'Verified only',
     top_rated_only: props.locale === 'de' ? 'Nur Top-bewertet' : 'Top-rated only',
     min_rating: props.locale === 'de' ? 'Mindestbewertung' : 'Min. rating',
-    min_reviews: props.locale === 'de' ? 'Mindestanzahl Bewertungen' : 'Min. reviews',
     price_range: props.locale === 'de' ? 'Preisspanne (€)' : 'Price range (€)',
     price_from: props.locale === 'de' ? 'ab' : 'from',
     price_to: props.locale === 'de' ? 'bis' : 'to',
@@ -122,7 +120,6 @@ const localServices = ref<number[]>([...props.activeServiceIds]);
 const localVerified = ref<boolean>(props.verifiedOnly);
 const localTopRated = ref<boolean>(props.topRatedOnly);
 const localMinRating = ref<number>(props.minRating);
-const localMinReviews = ref<number>(props.minReviews);
 const localPriceMin = ref<string>(props.priceMin !== null ? String(props.priceMin) : '');
 const localPriceMax = ref<string>(props.priceMax !== null ? String(props.priceMax) : '');
 const localSort = ref<string>(props.sort);
@@ -161,7 +158,6 @@ function applyFilters(): void {
     if (localVerified.value) params.verified = '1';
     if (localTopRated.value) params.top_rated = '1';
     if (localMinRating.value > 0) params.min_rating = localMinRating.value;
-    if (localMinReviews.value > 0) params.min_reviews = localMinReviews.value;
     const pMin = Number(localPriceMin.value);
     const pMax = Number(localPriceMax.value);
     if (localPriceMin.value !== '' && Number.isFinite(pMin) && pMin > 0) params.price_min = pMin;
@@ -189,7 +185,6 @@ function resetFilters(): void {
     localVerified.value = false;
     localTopRated.value = false;
     localMinRating.value = 0;
-    localMinReviews.value = 0;
     localPriceMin.value = '';
     localPriceMax.value = '';
     localSort.value = 'relevant';
@@ -204,7 +199,6 @@ const hasFilters = computed(
         localVerified.value ||
         localTopRated.value ||
         localMinRating.value > 0 ||
-        localMinReviews.value > 0 ||
         localPriceMin.value !== '' ||
         localPriceMax.value !== '' ||
         localSort.value !== 'relevant',
@@ -218,7 +212,6 @@ const activeFilterCount = computed(() => {
     if (localVerified.value) count++;
     if (localTopRated.value) count++;
     if (localMinRating.value > 0) count++;
-    if (localMinReviews.value > 0) count++;
     if (localPriceMin.value !== '') count++;
     if (localPriceMax.value !== '') count++;
     if (localSort.value !== 'relevant') count++;
@@ -425,25 +418,6 @@ onBeforeUnmount(() => {
                                         step="0.5"
                                         class="mv-ci-range mt-4"
                                         :style="{ '--mv-ci-progress': ratingProgress }"
-                                        @change="applyFilters"
-                                    />
-                                </div>
-
-                                <div>
-                                    <div class="flex items-baseline justify-between gap-3">
-                                        <label for="mv-ci-reviews" class="mv-ci-label mb-0">{{ t.min_reviews }}</label>
-                                        <span class="mv-ci-rating-chip">
-                                            {{ localMinReviews > 0 ? localMinReviews : '—' }}
-                                        </span>
-                                    </div>
-                                    <input
-                                        id="mv-ci-reviews"
-                                        v-model.number="localMinReviews"
-                                        type="range"
-                                        min="0"
-                                        max="500"
-                                        step="10"
-                                        class="mv-ci-range mt-4"
                                         @change="applyFilters"
                                     />
                                 </div>

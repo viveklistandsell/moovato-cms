@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\Navigation\MenuController as AdminMenuController;
 use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
+use App\Http\Controllers\Admin\Page\PageImportController as AdminPageImportController;
 use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
 use App\Http\Controllers\Admin\PlanChangeRequests\PlanChangeRequestController as AdminPlanChangeRequestController;
 use App\Http\Controllers\Admin\Plans\PlanController as AdminPlanController;
@@ -365,6 +366,13 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
 
             Route::post('bulk-action', [AdminPageController::class, 'bulkAction'])
                 ->name('bulk-action');
+
+            Route::get('import', [AdminPageImportController::class, 'show'])
+                ->name('import.show');
+            Route::post('import', [AdminPageImportController::class, 'import'])
+                ->name('import.store');
+            Route::get('import/template', [AdminPageImportController::class, 'template'])
+                ->name('import.template');
 
             Route::post('{page}/duplicate', [AdminPageController::class, 'duplicate'])
                 ->where('page', '[0-9]+')

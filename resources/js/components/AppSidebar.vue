@@ -30,6 +30,7 @@ import {
     Settings2Icon,
     ShieldCheck,
     Tag,
+    Upload,
     UserPlus,
     UserRoundCheck,
     Users,
@@ -125,6 +126,7 @@ const blogItems = computed<NavItem[]>(() => [
 const pageItems = computed<NavItem[]>(() => [
     { title: t('sidebar.pages'), href: '/admin/pages', icon: Files },
     { title: t('sidebar.page_categories'), href: '/admin/pages/categories', icon: FolderTree },
+    { title: t('sidebar.page_bulk_import'), href: '/admin/pages/import', icon: Upload },
 ]);
 
 const directoryItems = computed<NavItem[]>(() => [
