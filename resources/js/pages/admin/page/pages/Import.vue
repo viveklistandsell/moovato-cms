@@ -154,7 +154,7 @@ const showResult = computed(() => !dismissedResult.value && importResult.value !
                             <div class="flex items-center gap-3 rounded border bg-muted/30 px-2 py-2">
                                 <button
                                     type="button"
-                                    class="rounded border bg-white px-3 py-1 text-sm font-medium shadow-sm hover:bg-muted"
+                                    class="group rounded-md border border-[var(--orange)]/40 bg-gradient-to-br from-[var(--orange-soft)] to-[color-mix(in_srgb,var(--orange-soft)_60%,white)] px-3 py-1.5 text-sm font-medium text-[var(--orange)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--orange)] hover:from-[var(--orange)] hover:to-[color-mix(in_srgb,var(--orange)_75%,black)] hover:text-white hover:shadow-md hover:shadow-[var(--orange)]/25"
                                     @click="fileInputRef?.click()"
                                 >
                                     {{ t('pages.import_file_button') }}
@@ -170,7 +170,7 @@ const showResult = computed(() => !dismissedResult.value && importResult.value !
                                     @change="onFileSelected"
                                 />
                             </div>
-                            <p class="mt-1.5 text-xs text-cyan-600">
+                            <p class="mt-1.5 text-xs text-muted-foreground">
                                 {{ t('pages.import_file_hint') }}
                             </p>
                             <p v-if="form.errors.file" class="mt-1 text-xs text-destructive">
@@ -190,7 +190,7 @@ const showResult = computed(() => !dismissedResult.value && importResult.value !
                                 max="500"
                                 class="block w-full rounded border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                             />
-                            <p class="mt-1.5 text-xs text-cyan-600">
+                            <p class="mt-1.5 text-xs text-muted-foreground">
                                 {{ t('pages.import_chunk_hint') }}
                             </p>
                         </div>
@@ -218,59 +218,60 @@ const showResult = computed(() => !dismissedResult.value && importResult.value !
                                         @change="toggleLang('de')"
                                     />
                                     <span>Deutsch (de)</span>
-                                    <span class="rounded bg-emerald-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                    <span class="rounded bg-gradient-to-r from-[var(--orange)] to-[color-mix(in_srgb,var(--orange)_70%,black)] px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
                                         {{ t('pages.import_lang_default') }}
                                     </span>
                                 </label>
                             </div>
-                            <p class="mt-2 text-xs text-cyan-600">
+                            <p class="mt-2 text-xs text-muted-foreground">
                                 {{ t('pages.import_lang_hint') }}
                             </p>
-
                             <button
                                 type="button"
-                                class="mt-5 inline-flex items-center gap-2 rounded-full bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                class="group relative mt-5 inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[var(--orange)] via-[color-mix(in_srgb,var(--orange)_75%,var(--midnight))] to-[var(--midnight)] px-7 py-2.5 text-sm font-semibold text-white shadow-md shadow-[var(--orange)]/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--orange)]/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                                 :disabled="!form.file || form.processing"
                                 @click="submit"
                             >
-                                {{ form.processing ? t('pages.import_button_processing') : t('pages.import_button') }}
+                                <span class="relative z-10">
+                                    {{ form.processing ? t('pages.import_button_processing') : t('pages.import_button') }}
+                                </span>
+                                <span
+                                    aria-hidden="true"
+                                    class="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[400%]"
+                                ></span>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Download Templates -->
                     <div class="grid grid-cols-1 items-start gap-3 px-6 py-5 md:grid-cols-[180px_1fr] md:items-center">
                         <label class="text-sm font-medium">{{ t('pages.import_templates_label') }}</label>
                         <div class="flex flex-wrap gap-2">
                             <a
                                 href="/admin/pages/import/template?lang=de&format=csv"
-                                class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-600"
+                                class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[var(--orange)] to-[color-mix(in_srgb,var(--orange)_65%,black)] px-5 py-2 text-sm font-semibold text-white shadow-md shadow-[var(--orange)]/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--orange)]/40 hover:brightness-110"
                             >
                                 {{ t('pages.import_templates_de') }}
                             </a>
                             <a
                                 href="/admin/pages/import/template?lang=en&format=csv"
-                                class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600"
+                                class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[var(--midnight)] to-[color-mix(in_srgb,var(--midnight)_65%,var(--slate))] px-5 py-2 text-sm font-semibold text-white shadow-md shadow-[var(--midnight)]/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--midnight)]/40 hover:brightness-110"
                             >
                                 {{ t('pages.import_templates_en') }}
                             </a>
                         </div>
                     </div>
-
-                    <!-- Download JSON Templates -->
                     <div class="grid grid-cols-1 items-start gap-3 px-6 py-5 md:grid-cols-[180px_1fr]">
                         <label class="pt-2 text-sm font-medium">{{ t('pages.import_json_templates_label') }}</label>
                         <div>
                             <div class="flex flex-wrap gap-2">
                                 <a
                                     href="/admin/pages/import/template?lang=de&format=json"
-                                    class="inline-flex items-center gap-2 rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+                                    class="inline-flex items-center gap-2 rounded-full border border-[var(--orange)]/40 bg-gradient-to-br from-[var(--orange-soft)] to-[color-mix(in_srgb,var(--orange-soft)_55%,white)] px-5 py-2 text-sm font-semibold text-[var(--orange)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--orange)] hover:from-[var(--orange)] hover:to-[color-mix(in_srgb,var(--orange)_75%,black)] hover:text-white hover:shadow-md hover:shadow-[var(--orange)]/25"
                                 >
                                     {{ t('pages.import_json_templates_de') }}
                                 </a>
                                 <a
                                     href="/admin/pages/import/template?lang=en&format=json"
-                                    class="inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-600"
+                                    class="inline-flex items-center gap-2 rounded-full border border-[var(--midnight)]/40 bg-gradient-to-br from-[var(--paper)] to-[var(--linen)] px-5 py-2 text-sm font-semibold text-[var(--midnight)] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--midnight)] hover:from-[var(--midnight)] hover:to-[color-mix(in_srgb,var(--midnight)_75%,var(--slate))] hover:text-white hover:shadow-md hover:shadow-[var(--midnight)]/25 dark:from-[var(--midnight-soft)] dark:to-[color-mix(in_srgb,var(--midnight-soft)_75%,black)] dark:text-[var(--linen)]"
                                 >
                                     {{ t('pages.import_json_templates_en') }}
                                 </a>
