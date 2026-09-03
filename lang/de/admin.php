@@ -258,6 +258,26 @@ return [
         'greeting_hi' => 'Hi',
         'logged_in_as' => 'Angemeldet als',
         'member_since' => 'Mitglied seit',
+
+        // Schnellzugriff
+        'quick_actions_title' => 'Schnellzugriff',
+        'quick_new_page' => 'Neue Seite',
+        'quick_new_post' => 'Neuer Blogbeitrag',
+        'quick_import_pages' => 'Seiten importieren (CSV)',
+        'quick_media' => 'Medienbibliothek',
+        'quick_menus' => 'Menüs',
+        'quick_go' => 'Öffnen',
+
+        // Unternehmens-Übersicht
+        'companies_title' => 'Unternehmen im Überblick',
+        'companies_total_hint' => 'Einträge gesamt',
+        'companies_subheading' => 'Verzeichnisumfang, freie Einträge und Tarifverteilung auf einen Blick.',
+        'companies_manage' => 'Unternehmen verwalten',
+        'companies_unclaimed' => 'Nicht übernommen',
+        'companies_pending' => 'Wartet auf Freigabe',
+        'companies_basic' => 'Basic',
+        'companies_premium' => 'Premium',
+        'companies_gold' => 'Gold',
         'new_page' => 'Neue Seite',
         'new_blog' => 'Neuer Blog',
         'new_user' => 'Neuer Benutzer',

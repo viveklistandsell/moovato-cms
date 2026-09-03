@@ -258,6 +258,26 @@ return [
         'greeting_hi' => 'Hi',
         'logged_in_as' => 'Logged in as',
         'member_since' => 'Member since',
+
+        // Quick actions strip
+        'quick_actions_title' => 'Quick actions',
+        'quick_new_page' => 'New page',
+        'quick_new_post' => 'New blog post',
+        'quick_import_pages' => 'Import pages (CSV)',
+        'quick_media' => 'Media library',
+        'quick_menus' => 'Menus',
+        'quick_go' => 'Open',
+
+        // Companies overview
+        'companies_title' => 'Companies snapshot',
+        'companies_total_hint' => 'total listings',
+        'companies_subheading' => 'Directory reach, unclaimed listings, and plan mix at a glance.',
+        'companies_manage' => 'Manage companies',
+        'companies_unclaimed' => 'Unclaimed',
+        'companies_pending' => 'Pending review',
+        'companies_basic' => 'Basic',
+        'companies_premium' => 'Premium',
+        'companies_gold' => 'Gold',
         'new_page' => 'New page',
         'new_blog' => 'New blog',
         'new_user' => 'New user',
