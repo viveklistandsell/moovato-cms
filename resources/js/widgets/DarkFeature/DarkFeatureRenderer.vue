@@ -53,12 +53,11 @@ defineProps<{ settings: Settings; data: Data }>();
                 >
                     {{ data.heading }}
                 </h2>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-5 max-w-xl text-base leading-relaxed whitespace-pre-line text-white/70"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte mt-5 max-w-xl text-base leading-relaxed text-white/70"
+                    v-html="data.body"
+                />
 
                 <p
                     v-if="data.list_title"

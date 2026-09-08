@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Item = { question: string; answer: string };
@@ -130,11 +130,7 @@ function removeItem(index: number): void {
             >
                 <div class="space-y-2">
                     <Input v-model="item.question" placeholder="Question" />
-                    <Textarea
-                        v-model="item.answer"
-                        :rows="3"
-                        placeholder="Answer"
-                    />
+                    <RichTextEditor v-model="item.answer" placeholder="Answer" />
                 </div>
                 <Button
                     type="button"

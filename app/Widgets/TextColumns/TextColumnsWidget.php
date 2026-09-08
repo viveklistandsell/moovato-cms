@@ -33,7 +33,9 @@ final class TextColumnsWidget implements WidgetContract
 
     public static function defaultSettings(): array
     {
-        return [];
+        return [
+            'read_more_enabled' => false,
+        ];
     }
 
     public static function defaultData(): array
@@ -56,7 +58,9 @@ final class TextColumnsWidget implements WidgetContract
 
     public static function settingsRules(): array
     {
-        return [];
+        return [
+            'read_more_enabled' => ['boolean'],
+        ];
     }
 
     public static function dataRules(): array

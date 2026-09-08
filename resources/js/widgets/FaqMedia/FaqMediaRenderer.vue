@@ -91,7 +91,10 @@ function toggle(i: number): void {
                         </button>
                         <div class="mv-faqmedia-a-wrap">
                             <div class="mv-faqmedia-a-inner">
-                                <p class="mv-faqmedia-a">{{ item.answer }}</p>
+                                <div
+                                    class="mv-rte mv-faqmedia-a"
+                                    v-html="item.answer"
+                                />
                             </div>
                         </div>
                     </li>

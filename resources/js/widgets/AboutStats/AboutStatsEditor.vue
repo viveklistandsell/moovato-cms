@@ -72,7 +72,7 @@ function removeStat(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Body</Label>
-                <Textarea v-model="data.body" :rows="4" />
+                <RichTextEditor v-model="data.body" placeholder="Body" />
             </div>
             <div class="grid gap-2">
                 <Label>Reviews label</Label>

@@ -113,23 +113,7 @@ const crumbs = computed<Crumb[]>(() => {
                 </nav>
 
                 <h1 class="mv-orbitbanner-title">
-                    <span
-                        v-if="data.highlight || settings.inline_image_url"
-                        class="flex flex-wrap items-center gap-3"
-                    >
-                        <img
-                            v-if="settings.inline_image_url"
-                            :src="settings.inline_image_url"
-                            :alt="data.inline_image_alt || ''"
-                            class="mv-orbitbanner-pill"
-                            loading="lazy"
-                            decoding="async"
-                        />
-                        <span class="mv-orbitbanner-highlight"
-                            ><span>{{ data.highlight }}</span></span
-                        >
-                    </span>
-                    <span class="block">{{ data.heading }}</span>
+                   {{ data.heading }}
                 </h1>
 
                 <div
@@ -159,7 +143,6 @@ const crumbs = computed<Crumb[]>(() => {
                     loading="lazy"
                     decoding="async"
                 />
-                <span class="mv-orbitbanner-star" aria-hidden="true"></span>
             </div>
         </div>
 

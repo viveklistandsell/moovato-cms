@@ -37,12 +37,11 @@ defineProps<{ settings: Settings; data: Data }>();
                 >
                     {{ data.heading }}
                 </h2>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
 
                 <ol v-if="data.features?.length" class="mt-9 space-y-6">
                     <li

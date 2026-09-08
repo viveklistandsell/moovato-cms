@@ -83,7 +83,7 @@ function removeFeature(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Body</Label>
-                <Textarea v-model="data.body" :rows="3" />
+                <RichTextEditor v-model="data.body" placeholder="Body" />
             </div>
         </div>
 

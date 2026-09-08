@@ -39,12 +39,11 @@ defineProps<{ settings: Settings; data: Data }>();
                 >
                     {{ data.heading }}
                 </h2>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
 
                 <ul
                     v-if="data.points?.length"
@@ -66,9 +65,11 @@ defineProps<{ settings: Settings; data: Data }>();
                     <h3 class="text-lg font-semibold text-white">
                         {{ data.cta_title }}
                     </h3>
-                    <p v-if="data.cta_body" class="mt-2 text-sm text-white/70">
-                        {{ data.cta_body }}
-                    </p>
+                    <div
+                        v-if="data.cta_body"
+                        class="mv-rte mt-2 text-sm text-white/70"
+                        v-html="data.cta_body"
+                    />
                     <NextButton
                         v-if="data.cta_button_label"
                         class="mt-5"

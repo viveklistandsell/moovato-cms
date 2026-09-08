@@ -34,7 +34,8 @@ final class ContentCollageWidget implements WidgetContract
     public static function defaultSettings(): array
     {
         return [
-            'images' => [], // array of {path, url}
+            'image_path' => null,
+            'image_url' => null,
             'image_side' => 'left', // left | right
             'marker_style' => 'check', // check | chevron
         ];
@@ -52,11 +53,7 @@ final class ContentCollageWidget implements WidgetContract
                 'Fernumzug',
                 'Spezialtransport',
             ],
-            'alts' => [
-                'Moovato Team belädt einen Umzugswagen',
-                'Moovato Mitarbeiter trägt Umzugskartons',
-                'Gestapelte Umzugskartons in einer Berliner Wohnung',
-            ],
+            'image_alt' => 'Moovato Team belädt einen Umzugswagen in Berlin',
             'button_label' => 'Angebot anfordern',
             'button_url' => '#kontakt',
         ];
@@ -65,9 +62,8 @@ final class ContentCollageWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'images' => ['nullable', 'array'],
-            'images.*.path' => ['nullable', 'string'],
-            'images.*.url' => ['nullable', 'string'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
             'marker_style' => ['required', 'in:check,chevron'],
         ];
@@ -81,8 +77,7 @@ final class ContentCollageWidget implements WidgetContract
             'body' => ['nullable', 'string'],
             'points' => ['nullable', 'array'],
             'points.*' => ['nullable', 'string'],
-            'alts' => ['nullable', 'array'],
-            'alts.*' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],
             'button_url' => ['nullable', 'string'],
         ];

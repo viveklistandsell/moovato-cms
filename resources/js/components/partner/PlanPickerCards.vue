@@ -14,7 +14,7 @@
  * Copy is bilingual and inline (short strings, no need for a
  * lang file — matches the pattern in the auth pages).
  */
-import { CheckCircle2, MinusCircle, Sparkles } from 'lucide-vue-next';
+import { CheckCircle2, CircleX, Crown, Sparkles, Truck } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 type Tier = {
@@ -44,6 +44,12 @@ const emit = defineEmits<{
 }>();
 
 const highlightSlug = computed(() => props.highlight ?? 'premium');
+
+const iconBySlug: Record<string, typeof Truck> = {
+    basic: Truck,
+    premium: Sparkles,
+    gold: Crown,
+};
 
 const t = computed(() => (props.locale === 'de'
     ? {
@@ -158,107 +164,87 @@ function select(slug: string): void {
 </script>
 
 <template>
-    <div class="grid gap-4 md:grid-cols-3">
+    <div class="mv-plan-picker grid gap-6 md:grid-cols-3">
         <div
             v-for="tier in tiers"
             :key="tier.slug"
-            class="relative flex flex-col rounded-xl border-2 p-5 transition-all"
+            class="mv-plan-picker__card"
             :class="[
-                modelValue === tier.slug
-                    ? 'border-[var(--orange)] bg-[var(--orange-soft)]/40 shadow-md'
-                    : 'border-[var(--linen)] bg-[var(--white)] hover:border-[var(--orange)]/40',
-                disabled ? 'opacity-70' : '',
-                tier.slug === highlightSlug ? 'md:-translate-y-1' : '',
+                modelValue === tier.slug ? 'is-selected' : '',
+                tier.slug === highlightSlug ? 'is-highlight' : '',
+                disabled ? 'is-disabled' : '',
             ]"
+            role="button"
+            :tabindex="disabled ? -1 : 0"
+            @click="select(tier.slug)"
+            @keydown.enter="select(tier.slug)"
+            @keydown.space.prevent="select(tier.slug)"
         >
-            <!-- "Most popular" ribbon -->
-            <div
-                v-if="tier.slug === highlightSlug"
-                class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--orange)] px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--white)] shadow"
-            >
-                <Sparkles class="mr-1 inline size-3" />
-                {{ t.most_popular }}
-            </div>
+            <div class="mv-plan-picker__shape" aria-hidden="true" />
+            <div class="mv-plan-picker__content">
+                <span v-if="tier.slug === highlightSlug" class="mv-plan-picker__ribbon">
+                    {{ t.most_popular }}
+                </span>
 
-            <!-- Header -->
-            <div class="mb-4">
-                <p class="text-xs font-semibold uppercase tracking-wider text-[var(--slate-light)]">
-                    {{ tier.label }}
-                </p>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span class="text-3xl font-bold text-[var(--midnight)]">
+                <div class="mv-plan-picker__inner">
+                    <div class="mv-plan-picker__icon">
+                        <component :is="iconBySlug[tier.slug] ?? Truck" :size="22" />
+                    </div>
+
+                    <p class="mv-plan-picker__label">{{ tier.label }}</p>
+                    <div class="mv-plan-picker__price">
                         {{ priceLabel(tier) }}
-                    </span>
-                    <span v-if="!tier.is_free" class="text-xs text-[var(--slate)]">
-                        / {{ t.per }} {{ tier.period }}
-                    </span>
-                </div>
-                <p class="mt-2 min-h-[36px] text-xs leading-relaxed text-[var(--slate)]">
-                    {{ tier.positioning }}
-                </p>
-            </div>
-
-            <!-- Current-plan pill -->
-            <div
-                v-if="currentTier === tier.slug"
-                class="mb-3 inline-flex w-fit items-center gap-1 rounded-full border border-[var(--orange)]/30 bg-[var(--orange-soft)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--orange)]"
-            >
-                <CheckCircle2 class="size-3" />
-                {{ t.current_plan }}
-            </div>
-
-            <!-- Placement -->
-            <p class="mb-4 flex items-center gap-1.5 text-[11px] font-medium text-[var(--midnight)]">
-                <CheckCircle2 class="size-3.5 text-[var(--orange)]" />
-                {{ placementLabel(tier.placement) }}
-            </p>
-
-            <!-- Caps -->
-            <div class="mb-3">
-                <p class="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--slate-light)]">
-                    {{ t.caps_heading }}
-                </p>
-                <ul class="space-y-1 text-xs">
-                    <li v-for="row in capRows" :key="row" class="flex items-center justify-between text-[var(--slate)]">
-                        <span>{{ capLabel(row) }}</span>
-                        <span class="font-medium text-[var(--midnight)]">
-                            {{ capValue(tier, row) }}
+                        <span v-if="!tier.is_free" class="mv-plan-picker__period">
+                            / {{ t.per }} {{ tier.period }}
                         </span>
-                    </li>
-                </ul>
-            </div>
+                    </div>
+                    <p class="mv-plan-picker__positioning">{{ tier.positioning }}</p>
 
-            <!-- Features -->
-            <div class="mb-4 flex-1">
-                <p class="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--slate-light)]">
-                    {{ t.features_heading }}
-                </p>
-                <ul class="space-y-1 text-xs">
-                    <li
-                        v-for="row in featureRows"
-                        :key="row"
-                        class="flex items-start gap-1.5"
-                        :class="tier.features[row] ? 'text-[var(--slate)]' : 'text-[var(--slate-light)] line-through'"
+                    <div v-if="currentTier === tier.slug" class="mv-plan-picker__current">
+                        <CheckCircle2 :size="12" />
+                        {{ t.current_plan }}
+                    </div>
+
+                    <p class="mv-plan-picker__placement">
+                        <CheckCircle2 :size="14" />
+                        {{ placementLabel(tier.placement) }}
+                    </p>
+
+                    <div class="mv-plan-picker__section">
+                        <p class="mv-plan-picker__section-heading">{{ t.caps_heading }}</p>
+                        <ul class="mv-plan-picker__caps">
+                            <li v-for="row in capRows" :key="row">
+                                <span>{{ capLabel(row) }}</span>
+                                <span>{{ capValue(tier, row) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mv-plan-picker__section mv-plan-picker__section--grow">
+                        <p class="mv-plan-picker__section-heading">{{ t.features_heading }}</p>
+                        <ul class="mv-plan-picker__features">
+                            <li
+                                v-for="row in featureRows"
+                                :key="row"
+                                :class="{ 'is-muted': !tier.features[row] }"
+                            >
+                                <CheckCircle2 v-if="tier.features[row]" :size="14" />
+                                <CircleX v-else :size="14" />
+                                <span>{{ featureLabel(row) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="mv-plan-picker__btn"
+                        :disabled="disabled"
+                        @click.stop="select(tier.slug)"
                     >
-                        <CheckCircle2 v-if="tier.features[row]" class="mt-0.5 size-3.5 shrink-0 text-[var(--orange)]" />
-                        <MinusCircle v-else class="mt-0.5 size-3.5 shrink-0 text-[var(--slate-light)]" />
-                        {{ featureLabel(row) }}
-                    </li>
-                </ul>
+                        {{ modelValue === tier.slug ? t.selected : t.select }}
+                    </button>
+                </div>
             </div>
-
-            <!-- Select button (bottom-anchored via flex-1 above) -->
-            <button
-                type="button"
-                class="w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                :class="modelValue === tier.slug
-                    ? 'bg-[var(--orange)] text-[var(--white)] hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]'
-                    : 'border border-[var(--orange)] text-[var(--orange)] hover:bg-[var(--orange-soft)]'"
-                :disabled="disabled"
-                @click="select(tier.slug)"
-            >
-                {{ modelValue === tier.slug ? t.selected : t.select }}
-            </button>
         </div>
     </div>
 </template>

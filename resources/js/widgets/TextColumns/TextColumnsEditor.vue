@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 
-type Settings = Record<string, never>;
+type Settings = {
+    read_more_enabled: boolean;
+};
 
 type Data = {
     heading: string;
@@ -16,7 +20,7 @@ type Data = {
     outro: string;
 };
 
-defineModel<Settings>('settings', { required: true });
+const settings = defineModel<Settings>('settings', { required: true });
 const data = defineModel<Data>('data', { required: true });
 
 function addPoint(): void {
@@ -30,6 +34,21 @@ function removePoint(index: number): void {
 
 <template>
     <div class="grid gap-6 md:grid-cols-2">
+        <div class="space-y-4 md:col-span-2">
+            <div
+                class="flex items-center justify-between rounded-md border p-3"
+            >
+                <Label for="textcols-read-more">Enable Read more / Read less</Label>
+                <Switch
+                    id="textcols-read-more"
+                    :model-value="settings.read_more_enabled"
+                    @update:model-value="
+                        (v) => (settings.read_more_enabled = v)
+                    "
+                />
+            </div>
+        </div>
+
         <div class="space-y-4">
             <div class="grid gap-2">
                 <Label>Heading</Label>
@@ -44,10 +63,7 @@ function removePoint(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Body (left column)</Label>
-                <Textarea v-model="data.body" :rows="6" />
-                <p class="text-xs text-muted-foreground">
-                    Leerzeile = neuer Absatz.
-                </p>
+                <RichTextEditor v-model="data.body" placeholder="Body" />
             </div>
         </div>
 

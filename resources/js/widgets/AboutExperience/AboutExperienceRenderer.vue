@@ -84,12 +84,11 @@ defineProps<{ settings: Settings; data: Data }>();
                         {{ data.heading_accent }}
                     </span>
                 </h2>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-6 max-w-xl text-base leading-relaxed text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte mt-6 max-w-xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
 
                 <ul v-if="data.points?.length" class="mt-8 space-y-4">
                     <li

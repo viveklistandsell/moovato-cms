@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Settings = {
-    bg_image_path: string | null;
-    bg_image_url: string | null;
-    inline_image_path: string | null;
-    inline_image_url: string | null;
+    media_image_path: string | null;
+    media_image_url: string | null;
 };
 
 type Data = {
-    title_before: string;
-    title_after: string;
-    inline_image_alt: string;
+    heading: string;
+    subtext: string;
+    media_image_alt: string;
     button_label: string;
     button_url: string;
 };
@@ -25,25 +24,28 @@ const data = defineModel<Data>('data', { required: true });
 <template>
     <div class="grid gap-6 md:grid-cols-2">
         <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-2">
-                <div class="grid gap-1">
-                    <Label class="text-xs">Title before image</Label>
-                    <Input v-model="data.title_before" placeholder="Jetzt" />
-                </div>
-                <div class="grid gap-1">
-                    <Label class="text-xs">Title after image</Label>
-                    <Input
-                        v-model="data.title_after"
-                        placeholder="Umzug starten"
-                    />
-                </div>
+            <div class="grid gap-2">
+                <Label>Heading</Label>
+                <Textarea
+                    v-model="data.heading"
+                    :rows="2"
+                    placeholder="Bereit für Ihren stressfreien Umzug mit Moovato?"
+                />
+            </div>
+            <div class="grid gap-2">
+                <Label>Subtext</Label>
+                <Textarea
+                    v-model="data.subtext"
+                    :rows="2"
+                    placeholder="Erhalten Sie in wenigen Minuten ein unverbindliches Angebot…"
+                />
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <div class="grid gap-1">
                     <Label class="text-xs">Button label</Label>
                     <Input
                         v-model="data.button_label"
-                        placeholder="Kontakt aufnehmen"
+                        placeholder="Jetzt Angebot anfordern"
                     />
                 </div>
                 <div class="grid gap-1">
@@ -52,39 +54,25 @@ const data = defineModel<Data>('data', { required: true });
                 </div>
             </div>
             <div class="grid gap-2">
-                <Label>Inline image alt text</Label>
+                <Label>Alt-Text (Deko-Bild)</Label>
                 <Input
-                    v-model="data.inline_image_alt"
-                    placeholder="Moovato Umzugsteam in Berlin"
+                    v-model="data.media_image_alt"
+                    placeholder="Umzugskartons und Sackkarre für Ihren Umzug mit Moovato"
                 />
             </div>
         </div>
 
         <div class="space-y-4">
             <div class="grid gap-2">
-                <Label>Background image</Label>
+                <Label>Deko-Bild (rechte Spalte)</Label>
                 <WidgetImageField
-                    :path="settings.bg_image_path"
-                    :url="settings.bg_image_url"
-                    aspect-class="aspect-[16/7] w-full"
+                    :path="settings.media_image_path"
+                    :url="settings.media_image_url"
+                    aspect-class="aspect-square w-full max-w-[220px]"
                     @update="
                         (v) => {
-                            settings.bg_image_path = v.path;
-                            settings.bg_image_url = v.url;
-                        }
-                    "
-                />
-            </div>
-            <div class="grid gap-2">
-                <Label>Inline title image (optional)</Label>
-                <WidgetImageField
-                    :path="settings.inline_image_path"
-                    :url="settings.inline_image_url"
-                    aspect-class="aspect-[2/1] w-full max-w-[200px]"
-                    @update="
-                        (v) => {
-                            settings.inline_image_path = v.path;
-                            settings.inline_image_url = v.url;
+                            settings.media_image_path = v.path;
+                            settings.media_image_url = v.url;
                         }
                     "
                 />
