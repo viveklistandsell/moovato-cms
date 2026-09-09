@@ -58,6 +58,7 @@ final class PricingWidget implements WidgetContract
         return [
             'eyebrow' => 'Für Umzugsunternehmen',
             'heading' => 'Werden Sie Moovato-Partner und erhalten Sie mehr Umzugsanfragen',
+            'description' => '',
             'cta_label' => 'Partner werden',
         ];
     }
@@ -81,6 +82,7 @@ final class PricingWidget implements WidgetContract
         return [
             'eyebrow' => ['nullable', 'string'],
             'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'cta_label' => ['nullable', 'string'],
         ];
     }

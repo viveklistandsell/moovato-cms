@@ -5,6 +5,7 @@ import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Data = {
     heading?: string;
+    description?: string;
     features?: string[];
     button_label?: string;
     button_url?: string;
@@ -39,6 +40,12 @@ const telHref = computed(
                         <h2 v-if="data.heading" class="mv-promocta-heading mv-section-heading">
                             {{ data.heading }}
                         </h2>
+
+                        <div
+                            v-if="data.description"
+                            class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                            v-html="data.description"
+                        />
 
                         <ul
                             v-if="data.features?.length"

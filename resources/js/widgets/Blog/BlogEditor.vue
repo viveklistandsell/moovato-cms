@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -21,6 +22,7 @@ type Data = {
     eyebrow: string;
     heading: string;
     subheading: string;
+    description: string;
     read_more_label: string;
     cta_label: string;
     cta_url: string;
@@ -47,6 +49,13 @@ const data = defineModel<Data>('data', { required: true });
             <div class="grid gap-2 md:col-span-2">
                 <Label>Subheading</Label>
                 <Textarea v-model="data.subheading" :rows="2" />
+            </div>
+            <div class="grid gap-2 md:col-span-2">
+                <Label>Description</Label>
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
         </div>
 

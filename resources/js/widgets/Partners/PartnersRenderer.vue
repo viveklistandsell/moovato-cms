@@ -19,6 +19,7 @@ type Data = {
     eyebrow?: string;
     heading?: string;
     subheading?: string;
+    description?: string;
     partners_title?: string;
     certificates_title?: string;
 };
@@ -30,7 +31,7 @@ defineProps<{ settings: Settings; data: Data }>();
     <section v-reveal class="mv-partners section-py">
         <div class="container-xl">
             <div
-                v-if="data.eyebrow || data.heading || data.subheading"
+                v-if="data.eyebrow || data.heading || data.subheading || data.description"
                 class="mx-auto max-w-2xl text-center"
             >
                 <span v-if="data.eyebrow" class="mv-partners-eyebrow">{{ data.eyebrow }}</span>
@@ -40,6 +41,11 @@ defineProps<{ settings: Settings; data: Data }>();
                 >
                     {{ data.heading }}
                 </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
                 <p
                     v-if="data.subheading"
                     class="mt-4 text-base text-[var(--slate)]"

@@ -16,6 +16,7 @@ type Settings = {
 type Data = {
     title?: string;
     subtitle?: string;
+    description?: string;
     card_prefix?: string;
     search_placeholder?: string;
     search_url?: string;
@@ -31,6 +32,11 @@ defineProps<{ settings: Settings; data: Data }>();
                 <h2 v-if="data.title" class="mv-citysearch-title mv-section-heading">
                     {{ data.title }}
                 </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
                 <p v-if="data.subtitle" class="mv-citysearch-subtitle">
                     {{ data.subtitle }}
                 </p>

@@ -49,6 +49,7 @@ final class TestimonialsShowcaseWidget implements WidgetContract
         return [
             'eyebrow' => 'Kundenstimmen',
             'heading' => 'Echte Bewertungen von Umzügen in Berlin.',
+            'description' => '',
             'button_label' => 'Alle Bewertungen',
             'button_url' => '/bewertungen',
             'items' => [
@@ -114,6 +115,7 @@ final class TestimonialsShowcaseWidget implements WidgetContract
         return [
             'eyebrow' => ['nullable', 'string'],
             'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],
             'button_url' => ['nullable', 'string'],
             'items' => ['nullable', 'array'],

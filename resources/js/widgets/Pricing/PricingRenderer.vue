@@ -25,6 +25,7 @@ type Settings = {
 type Data = {
     eyebrow?: string;
     heading?: string;
+    description?: string;
     cta_label?: string;
 };
 
@@ -174,6 +175,11 @@ const ctaHref = computed(() => props.settings.cta_url || '/partner/register');
                 <h2 v-if="data.heading" class="mv-pricing__title mv-section-heading">
                     {{ data.heading }}
                 </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
             </div>
 
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">

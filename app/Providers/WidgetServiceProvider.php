@@ -9,6 +9,7 @@ use App\Widgets\AboutExperience\AboutExperienceWidget;
 use App\Widgets\AboutStats\AboutStatsWidget;
 use App\Widgets\AssistantTools\AssistantToolsWidget;
 use App\Widgets\Blog\BlogWidget;
+use App\Widgets\CitySearch\CitySearchWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
 use App\Widgets\Comparison\ComparisonWidget;
 use App\Widgets\Contact\ContactWidget;
@@ -120,6 +121,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         ContactWidget::class,
         WorkProcessWidget::class,
         MissionVisionWidget::class,
+        CitySearchWidget::class,
     ];
 
     public function register(): void

@@ -7,6 +7,7 @@ import AboutExperienceRenderer from './AboutExperience/AboutExperienceRenderer.v
 import AboutStatsRenderer from './AboutStats/AboutStatsRenderer.vue';
 import AssistantToolsRenderer from './AssistantTools/AssistantToolsRenderer.vue';
 import BlogRenderer from './Blog/BlogRenderer.vue';
+import CitySearchRenderer from './CitySearch/CitySearchRenderer.vue';
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
 import ComparisonRenderer from './Comparison/ComparisonRenderer.vue';
 import ContactRenderer from './Contact/ContactRenderer.vue';
@@ -58,6 +59,7 @@ const AboutExperienceEditor = defineAsyncComponent(() => import('./AboutExperien
 const AboutStatsEditor = defineAsyncComponent(() => import('./AboutStats/AboutStatsEditor.vue'));
 const AssistantToolsEditor = defineAsyncComponent(() => import('./AssistantTools/AssistantToolsEditor.vue'));
 const BlogEditor = defineAsyncComponent(() => import('./Blog/BlogEditor.vue'));
+const CitySearchEditor = defineAsyncComponent(() => import('./CitySearch/CitySearchEditor.vue'));
 const CompanyDirectoryEditor = defineAsyncComponent(() => import('./CompanyDirectory/CompanyDirectoryEditor.vue'));
 const ContactEditor = defineAsyncComponent(() => import('./Contact/ContactEditor.vue'));
 const CostCalculatorEditor = defineAsyncComponent(() => import('./CostCalculator/CostCalculatorEditor.vue'));
@@ -221,6 +223,10 @@ export const widgetRegistry: WidgetRegistry = {
     mission_vision: {
         editor: MissionVisionEditor,
         renderer: MissionVisionRenderer,
+    },
+    city_search: {
+        editor: CitySearchEditor,
+        renderer: CitySearchRenderer,
     },
 };
 

@@ -72,7 +72,7 @@ defineProps<{ settings: Settings; data: Data }>();
                     <li
                         v-for="(point, i) in data.points"
                         :key="i"
-                        class="flex items-center gap-2.5 text-sm font-medium text-white/90"
+                        class="flex items-center gap-2.5 text-base font-medium text-white/90"
                     >
                         <Check class="size-4 shrink-0 text-[var(--orange)]" />
                         <span>{{ point }}</span>

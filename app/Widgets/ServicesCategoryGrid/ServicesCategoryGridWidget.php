@@ -60,6 +60,7 @@ final class ServicesCategoryGridWidget implements WidgetContract
             'eyebrow' => 'Unsere Services',
             'heading' => 'Alle Dienstleistungen im Überblick',
             'subheading' => 'Wähle eine Kategorie, um passende Anbieter in deiner Stadt zu sehen.',
+            'description' => '',
         ];
     }
 
@@ -86,6 +87,7 @@ final class ServicesCategoryGridWidget implements WidgetContract
             'eyebrow' => ['nullable', 'string'],
             'heading' => ['nullable', 'string'],
             'subheading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }

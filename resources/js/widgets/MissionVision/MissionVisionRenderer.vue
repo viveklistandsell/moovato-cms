@@ -94,7 +94,7 @@ defineProps<{ settings: Settings; data: Data }>();
                             <li
                                 v-for="(point, i) in data.panel_one_points"
                                 :key="i"
-                                class="flex items-center gap-2.5 text-sm font-medium text-[var(--midnight)]"
+                                class="flex items-center gap-2.5 text-base font-medium text-[var(--midnight)]"
                             >
                                 <Check
                                     class="size-4 shrink-0 text-[var(--orange)]"
@@ -130,7 +130,7 @@ defineProps<{ settings: Settings; data: Data }>();
                             <li
                                 v-for="(point, i) in data.panel_two_points"
                                 :key="i"
-                                class="flex items-center gap-2.5 text-sm font-medium text-[var(--midnight)]"
+                                class="flex items-center gap-2.5 text-base font-medium text-[var(--midnight)]"
                             >
                                 <Check
                                     class="size-4 shrink-0 text-[var(--orange)]"

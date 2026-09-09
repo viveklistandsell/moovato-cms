@@ -23,7 +23,7 @@
 }
 
 .section-py h2 {
-    font-family: "Instrument Serif", ui-serif, Georgia !important;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif !important;
     font-size: 44px;
     line-height: 1.15;
     font-weight: 700;
@@ -31,7 +31,7 @@
 }
 
 .mv-section-heading {
-    font-family: "Instrument Serif", ui-serif, Georgia;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
     font-size: 44px;
     line-height: 1.15;
     font-weight: 700;
@@ -9633,6 +9633,7 @@
 .mv-workcta {
     position: relative;
     isolation: isolate;
+    z-index: 1;
 }
 
 .mv-workcta__bg {
@@ -11250,7 +11251,7 @@
 .mv-mv-media-text {
     position: absolute;
     z-index: 1;
-    inset: auto 2rem 2rem 2rem;
+    inset: auto 20px 20px 20px;
 }
 
 .mv-mv-footer {
@@ -11268,7 +11269,7 @@
     isolation: isolate;
     overflow: hidden;
     border-radius: 1rem;
-    padding: 2.25rem;
+    padding: 20px;
     background: var(--white);
     border: 1px solid color-mix(in srgb, var(--midnight) 8%, transparent);
     box-shadow: 0 24px 48px -34px rgba(15, 23, 42, 0.16);

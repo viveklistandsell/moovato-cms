@@ -12,6 +12,7 @@ type Testimonial = {
 
 type Data = {
     heading?: string;
+    description?: string;
     badge?: string;
     rating_value?: string;
     rating_label?: string;
@@ -105,7 +106,11 @@ function initials(name?: string): string {
                 <h2 v-if="data.heading" class="mv-reviews__heading mv-section-heading">
                     {{ data.heading }}
                 </h2>
-
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
             </div>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.7fr]">

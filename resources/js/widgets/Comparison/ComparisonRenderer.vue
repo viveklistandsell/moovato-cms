@@ -14,6 +14,7 @@ type Tab = {
 type Data = {
     eyebrow?: string;
     heading?: string;
+    description?: string;
     tabs?: Tab[];
 };
 
@@ -33,6 +34,11 @@ const active = ref(0);
                 <h2 v-if="data.heading" class="mv-comparison-heading mv-section-heading">
                     {{ data.heading }}
                 </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 max-w-2xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
             </div>
 
             <div

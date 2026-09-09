@@ -43,7 +43,7 @@ defineProps<{ settings: Settings; data: Data }>();
                     v-html="data.body"
                 />
 
-                <ol v-if="data.features?.length" class="mt-9 space-y-6">
+                <ol v-if="data.features?.length" class="mt-5 space-y-6">
                     <li
                         v-for="(feature, i) in data.features"
                         :key="i"

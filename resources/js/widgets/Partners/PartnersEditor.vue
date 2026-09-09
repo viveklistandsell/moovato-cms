@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ type Data = {
     eyebrow: string;
     heading: string;
     subheading: string;
+    description: string;
     partners_title: string;
     certificates_title: string;
 };
@@ -78,6 +80,13 @@ function removeCertificate(index: number): void {
             <div class="grid gap-2 md:col-span-2">
                 <Label>Subheading</Label>
                 <Textarea v-model="data.subheading" :rows="2" />
+            </div>
+            <div class="grid gap-2 md:col-span-2">
+                <Label>Description</Label>
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
             <div class="grid gap-2">
                 <Label>Partners title</Label>

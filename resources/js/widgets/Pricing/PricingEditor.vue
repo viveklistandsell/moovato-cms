@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -18,6 +19,7 @@ type Settings = {
 type Data = {
     eyebrow: string;
     heading: string;
+    description: string;
     cta_label: string;
 };
 
@@ -37,6 +39,13 @@ const data = defineModel<Data>('data', { required: true });
                 <Input
                     v-model="data.heading"
                     placeholder="Werden Sie Moovato-Partner"
+                />
+            </div>
+            <div class="grid gap-2 md:col-span-2">
+                <Label>Description</Label>
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
                 />
             </div>
         </div>

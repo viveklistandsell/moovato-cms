@@ -35,6 +35,7 @@ final class PromoCtaWidget implements WidgetContract
     {
         return [
             'heading' => 'Warum Moovato?',
+            'description' => '',
             'features' => [
                 'Festpreisgarantie',
                 'Kostenlose Beratung',
@@ -55,6 +56,7 @@ final class PromoCtaWidget implements WidgetContract
     {
         return [
             'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'features' => ['nullable', 'array'],
             'features.*' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],

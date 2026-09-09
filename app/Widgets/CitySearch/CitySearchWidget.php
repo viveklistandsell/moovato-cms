@@ -59,6 +59,7 @@ final class CitySearchWidget implements WidgetContract
         return [
             'title' => 'Finden Sie die besten Umzugsunternehmen in Ihrer Nähe',
             'subtitle' => 'Auf der Suche nach den besten Umzugsunternehmen in Deutschland? Suchen & vergleichen Sie ganz einfach Umzugsunternehmen in Ihrer Region, bevor Sie eine Wahl treffen.',
+            'description' => '',
             'card_prefix' => 'Top 10 Umzugsunternehmen in',
             'search_placeholder' => 'Stadt oder Umzugsfirma suchen',
             'search_url' => '#',
@@ -88,6 +89,7 @@ final class CitySearchWidget implements WidgetContract
         return [
             'title' => ['nullable', 'string'],
             'subtitle' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'card_prefix' => ['nullable', 'string'],
             'search_placeholder' => ['nullable', 'string'],
             'search_url' => ['nullable', 'string'],

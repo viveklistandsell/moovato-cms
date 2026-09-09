@@ -45,6 +45,7 @@ final class GalleryWidget implements WidgetContract
     {
         return [
             'heading' => '',
+            'description' => '',
             // Per-image captions keyed by index. Settings store the image
             // references (same for all locales); only captions translate.
             'captions' => [],
@@ -67,6 +68,7 @@ final class GalleryWidget implements WidgetContract
     {
         return [
             'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'captions' => ['nullable', 'array'],
             'captions.*' => ['nullable', 'string'],
         ];

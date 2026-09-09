@@ -26,6 +26,7 @@ type Data = {
     eyebrow?: string;
     heading?: string;
     subheading?: string;
+    description?: string;
     read_more_label?: string;
     cta_label?: string;
     cta_url?: string;
@@ -103,6 +104,11 @@ function formattedDate(value?: string | null): string {
                 >
                     {{ data.heading }}
                 </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
                 <p
                     v-if="data.subheading"
                     class="mt-4 text-base text-[var(--slate)]"

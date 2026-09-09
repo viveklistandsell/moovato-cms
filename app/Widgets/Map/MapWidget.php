@@ -59,6 +59,7 @@ final class MapWidget implements WidgetContract
             'eyebrow' => 'Einsatzgebiete',
             'heading' => 'In jedem Berliner Bezirk für Sie da',
             'subheading' => 'Von Mitte bis Köpenick – Moovato übernimmt Ihren Umzug in ganz Berlin. Fahren Sie über die Bezirke, um mehr zu erfahren.',
+            'description' => '',
         ];
     }
 
@@ -83,6 +84,7 @@ final class MapWidget implements WidgetContract
             'eyebrow' => ['nullable', 'string'],
             'heading' => ['nullable', 'string'],
             'subheading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }

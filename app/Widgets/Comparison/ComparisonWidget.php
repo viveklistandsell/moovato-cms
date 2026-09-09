@@ -47,6 +47,7 @@ final class ComparisonWidget implements WidgetContract
         return [
             'eyebrow' => 'Warum Moovato',
             'heading' => 'Moovato im Vergleich',
+            'description' => '',
             'tabs' => [
                 [
                     'label' => 'Preisvergleich',
@@ -99,6 +100,7 @@ final class ComparisonWidget implements WidgetContract
         return [
             'eyebrow' => ['nullable', 'string'],
             'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'tabs' => ['nullable', 'array'],
             'tabs.*.label' => ['nullable', 'string'],
             'tabs.*.mode' => ['nullable', 'in:value,check'],
