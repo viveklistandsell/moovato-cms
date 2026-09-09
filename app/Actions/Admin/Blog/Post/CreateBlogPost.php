@@ -24,7 +24,7 @@ final readonly class CreateBlogPost
      *   reading_time?: int,
      *   is_sticky?: bool,
      *   is_featured?: bool,
-     *   translations: array<string, array{name?: ?string, permalink?: ?string, short_description?: ?string, content?: ?string, meta_title?: ?string, meta_description?: ?string}>
+     *   translations: array<string, array{name?: ?string, permalink?: ?string, short_description?: ?string, content?: ?string, meta_title?: ?string, meta_description?: ?string, schema?: ?string, meta_image?: ?string}>
      * }  $data
      */
     public function handle(array $data): Blog
@@ -92,6 +92,8 @@ final readonly class CreateBlogPost
                     'content' => $translation['content'] ?? null,
                     'meta_title' => $translation['meta_title'] ?? null,
                     'meta_description' => $translation['meta_description'] ?? null,
+                    'schema' => $this->normalizeSchema($translation['schema'] ?? null),
+                    'meta_image' => $translation['meta_image'] ?? null,
                 ]);
             }
 
@@ -99,5 +101,19 @@ final readonly class CreateBlogPost
 
             return $post->load(['translations', 'categories', 'tags']);
         });
+    }
+
+    private function normalizeSchema(mixed $raw): ?array
+    {
+        if ($raw === null || $raw === '' || $raw === []) {
+            return null;
+        }
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        $decoded = json_decode((string) $raw, true);
+
+        return is_array($decoded) ? $decoded : null;
     }
 }

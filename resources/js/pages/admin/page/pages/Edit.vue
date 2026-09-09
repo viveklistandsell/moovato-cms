@@ -37,6 +37,8 @@ import { Switch } from '@/components/ui/switch';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useT } from '@/composables/useT';
 import MediaPicker from '@/components/common/MediaPicker.vue';
+import SeoMetaFields from '@/components/admin/seo/SeoMetaFields.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import { localizedUrl } from '@/lib/localizedUrl';
 import { slugify } from '@/lib/slug';
 
@@ -45,6 +47,10 @@ const t = useT();
 type Translation = {
     title: string;
     permalink: string;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    schema?: string | null;
+    meta_image?: string | null;
 };
 
 type Page = {
@@ -94,13 +100,22 @@ setBreadcrumbs(() => [
 ]);
 
 const initialTranslations: Record<string, Translation> = Object.fromEntries(
-    props.languages.map((lang) => [
-        lang.code,
-        props.page?.translations[lang.code] ?? {
-            title: '',
-            permalink: '',
-        },
-    ]),
+    props.languages.map((lang) => {
+        const existing = props.page?.translations[lang.code];
+        return [
+            lang.code,
+            {
+                title: existing?.title ?? '',
+                permalink: existing?.permalink ?? '',
+                meta_title: existing?.meta_title ?? '',
+                meta_description: existing?.meta_description ?? '',
+                schema: typeof existing?.schema === 'string'
+                    ? existing.schema
+                    : (existing?.schema ? JSON.stringify(existing.schema, null, 2) : ''),
+                meta_image: existing?.meta_image ?? '',
+            },
+        ];
+    }),
 );
 
 const form = useForm({
@@ -118,6 +133,12 @@ const form = useForm({
 const editWidgets = ref<WidgetInstance[]>(props.pageWidgets ?? []);
 
 const activeLocale = ref(
+    props.languages.find((l) => l.is_default)?.code ??
+        props.languages[0]?.code ??
+        'de',
+);
+
+const seoActiveLocale = ref(
     props.languages.find((l) => l.is_default)?.code ??
         props.languages[0]?.code ??
         'de',
@@ -344,6 +365,50 @@ const errorFor = (code: string, field: keyof Translation) =>
                             :available-widgets="availableWidgets"
                             :languages="languages"
                         />
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ t('pages.seo_title') }}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="mb-4 inline-flex rounded-md border border-input p-0.5">
+                            <button
+                                v-for="lang in languages"
+                                :key="lang.code"
+                                type="button"
+                                class="inline-flex items-center gap-2 rounded px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-colors"
+                                :class="seoActiveLocale === lang.code
+                                    ? 'bg-[var(--orange)] text-white'
+                                    : 'text-muted-foreground hover:text-foreground'"
+                                @click="seoActiveLocale = lang.code"
+                            >
+                                <FlagImage :code="lang.flag ?? lang.code" size="xs" />
+                                {{ lang.code }}
+                            </button>
+                        </div>
+
+                        <template v-for="lang in languages" :key="`seo-${lang.code}`">
+                            <div v-if="seoActiveLocale === lang.code">
+                                <SeoMetaFields
+                                    :meta-title="form.translations[lang.code].meta_title ?? ''"
+                                    :meta-description="form.translations[lang.code].meta_description ?? ''"
+                                    :schema="form.translations[lang.code].schema ?? ''"
+                                    :meta-image="form.translations[lang.code].meta_image ?? ''"
+                                    :locale="lang.code"
+                                    :errors="{
+                                        meta_title: errorFor(lang.code, 'meta_title'),
+                                        meta_description: errorFor(lang.code, 'meta_description'),
+                                        schema: errorFor(lang.code, 'schema'),
+                                        meta_image: errorFor(lang.code, 'meta_image'),
+                                    }"
+                                    @update:meta-title="(v) => (form.translations[lang.code].meta_title = v)"
+                                    @update:meta-description="(v) => (form.translations[lang.code].meta_description = v)"
+                                    @update:schema="(v) => (form.translations[lang.code].schema = v)"
+                                    @update:meta-image="(v) => (form.translations[lang.code].meta_image = v)"
+                                />
+                            </div>
+                        </template>
                     </CardContent>
                 </Card>
             </div>

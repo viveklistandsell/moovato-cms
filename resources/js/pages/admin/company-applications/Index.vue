@@ -570,11 +570,8 @@ const statusIcon = (s: string) => {
                                                 <Pencil class="size-3.5" />
                                                 {{ t('applications.edit_company') }}
                                             </a>
-                                            <!-- Public listing page (frontend), NOT the portal
-                                                 editor. Opens in a new tab so the admin doesn't
-                                                 lose their queue position. -->
                                             <a
-                                                v-if="app.company_permalink"
+                                                v-if="app.status === 'approved' && app.company_permalink && app.company_status === 'published'"
                                                 :href="`/company/${app.company_permalink}`"
                                                 target="_blank"
                                                 rel="noopener"

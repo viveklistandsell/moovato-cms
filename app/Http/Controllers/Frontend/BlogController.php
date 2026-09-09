@@ -229,9 +229,20 @@ final class BlogController extends Controller
     private function presentDetail(Blog $blog, string $locale): array
     {
         $card = $this->presentCard($blog, $locale, full: true);
+        $tr = $blog->translation($locale);
+        $metaImagePath = $tr?->meta_image;
+        $seo = [
+            'meta_title' => $tr?->meta_title ?: null,
+            'meta_description' => $tr?->meta_description ?: null,
+            'schema' => $tr?->schema,
+            'meta_image_url' => $metaImagePath !== null && $metaImagePath !== ''
+                ? '/storage/'.mb_ltrim($metaImagePath, '/')
+                : null,
+        ];
 
         return $card + [
             'view_count' => $blog->view_count,
+            'seo' => $seo,
             'tags' => $blog->relationLoaded('tags')
                 ? $blog->tags->map(function ($t) use ($locale): array {
                     $ttr = $t->translation($locale);

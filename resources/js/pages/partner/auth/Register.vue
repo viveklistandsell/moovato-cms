@@ -14,6 +14,7 @@ import {
     ChevronRight,
     Crown,
     FileText,
+    Lock,
     Loader2,
     Mail,
     MapPin,
@@ -41,11 +42,21 @@ type PlanTier = {
     is_free: boolean;
 };
 
+type ClaimPrefill = {
+    company_id: number;
+    company_name: string;
+    street: string;
+    postal_code: string;
+    city_id: number | null;
+    city_name: string | null;
+};
+
 const props = defineProps<{
     locale: string;
     cities: CityOption[];
     recaptchaSiteKey: string | null;
     plans: PlanTier[];
+    claim?: ClaimPrefill | null;
 }>();
 
 const de = {
@@ -98,6 +109,10 @@ const de = {
     err_duplicate: '„{name}" wurde bereits ausgewählt.',
     err_dismiss: 'Ausblenden',
     upload_progress: 'Wird hochgeladen: {p}%',
+    claim_banner_title: 'Sie übernehmen einen bestehenden Eintrag',
+    claim_banner_body: 'Die markierten Felder wurden aus dem bestehenden Firmenprofil übernommen und können nicht geändert werden. Nach der Freigabe durch unser Team können Sie alle Angaben in Ihrem Portal anpassen.',
+    claim_locked_hint: 'Aus dem bestehenden Eintrag übernommen',
+    claim_plan_note: 'Ihre Übernahme startet automatisch mit dem kostenlosen Basic-Plan. Nach der Freigabe können Sie in Ihrem Portal jederzeit auf Premium oder Gold upgraden.',
 } as const;
 
 const en = {
@@ -150,8 +165,14 @@ const en = {
     err_duplicate: '"{name}" is already selected.',
     err_dismiss: 'Dismiss',
     upload_progress: 'Uploading: {p}%',
+    claim_banner_title: 'You are claiming an existing listing',
+    claim_banner_body: 'The highlighted fields were carried over from the existing company profile and cannot be changed here. Once our team approves you, you can adjust everything from your portal.',
+    claim_locked_hint: 'Carried over from the existing listing',
+    claim_plan_note: 'Your claim starts automatically on the free Basic plan. Once approved, you can upgrade to Premium or Gold any time from your portal.',
 } as const;
 const t = computed(() => (props.locale === 'de' ? de : en));
+
+const isClaim = computed<boolean>(() => !!props.claim && props.claim.company_id > 0);
 
 const form = useForm<{
     first_name: string;
@@ -167,20 +188,33 @@ const form = useForm<{
     website_url: string;
     'g-recaptcha-response': string;
     plan_tier: 'basic' | 'premium' | 'gold';
+    claim_company_id: number | null;
 }>({
     first_name: '',
     last_name: '',
     email: '',
     phone: '',
-    company_name: '',
-    street: '',
-    postal_code: '',
-    city_id: null,
+    company_name: props.claim?.company_name ?? '',
+    street: props.claim?.street ?? '',
+    postal_code: props.claim?.postal_code ?? '',
+    city_id: props.claim?.city_id ?? null,
     documents: [],
     accept_terms: false,
     website_url: '',
     'g-recaptcha-response': '',
     plan_tier: 'basic',
+    claim_company_id: props.claim?.company_id ?? null,
+});
+
+const cityOptions = computed<CityOption[]>(() => {
+    const base = props.cities;
+    if (isClaim.value && props.claim?.city_id && props.claim.city_name) {
+        const already = base.some((c) => c.id === props.claim!.city_id);
+        if (!already) {
+            return [{ id: props.claim.city_id, name: props.claim.city_name }, ...base];
+        }
+    }
+    return base;
 });
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -319,6 +353,13 @@ function humanSize(bytes: number): string {
 }
 
 function submit(): void {
+    // Claim flow always starts on the free Basic plan. Upgrades
+    // happen from the partner portal after admin approval, so we
+    // pin the tier here rather than trusting whatever the picker
+    // last held (belt-and-braces — the picker is already hidden).
+    if (isClaim.value) {
+        form.plan_tier = 'basic';
+    }
     form.post('/partner/register', {
         forceFormData: true,
         preserveScroll: true,
@@ -344,10 +385,27 @@ function submit(): void {
                 <h1 class="text-2xl font-bold text-[var(--midnight)]">{{ t.card_title }}</h1>
                 <p class="mt-1.5 text-sm text-[var(--slate)]">{{ t.card_subtitle }}</p>
             </div>
+            <div
+                v-if="isClaim && props.claim"
+                class="mb-6 flex items-start gap-3 rounded-xl border-2 border-[var(--orange)] bg-[var(--orange-soft)] p-4"
+            >
+                <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--white)] text-[var(--orange)]">
+                    <Lock class="size-4" />
+                </div>
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-[var(--midnight)]">
+                        {{ t.claim_banner_title }}
+                    </p>
+                    <p class="mt-0.5 text-sm font-medium text-[var(--midnight)]">
+                        „{{ props.claim.company_name }}"
+                    </p>
+                    <p class="mt-1.5 text-xs leading-relaxed text-[var(--slate)]">
+                        {{ t.claim_banner_body }}
+                    </p>
+                </div>
+            </div>
 
             <form class="space-y-7" @submit.prevent="submit">
-                <!-- Honeypot — hidden bot bait. Bots that auto-fill "url" fields
-                     will complete this and get rejected server-side. -->
                 <div class="pointer-events-none absolute -left-[9999px] size-0 opacity-0" aria-hidden="true">
                     <label>
                         Website URL — leave empty
@@ -432,53 +490,78 @@ function submit(): void {
                     </header>
                     <div class="grid gap-3">
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-[var(--slate)]">
-                                {{ t.label_company }} <span class="text-[var(--orange)]">*</span>
+                            <label class="mb-1 flex items-center gap-1.5 text-xs font-medium text-[var(--slate)]">
+                                <span>{{ t.label_company }} <span class="text-[var(--orange)]">*</span></span>
+                                <Lock v-if="isClaim" class="size-3 text-[var(--orange)]" />
                             </label>
                             <input
                                 v-model="form.company_name"
                                 type="text"
                                 required
                                 autocomplete="organization"
+                                :readonly="isClaim"
+                                :aria-readonly="isClaim"
                                 class="w-full rounded-lg border border-[var(--linen)] bg-[var(--white)] px-3 py-2 text-sm text-[var(--midnight)] transition-colors focus:border-[var(--orange)] focus:outline-none focus:ring-2 focus:ring-[var(--orange)]/15"
-                                :class="{ 'border-[var(--orange)]': !!form.errors.company_name }"
+                                :class="[
+                                    { 'border-[var(--orange)]': !!form.errors.company_name },
+                                    isClaim ? 'cursor-not-allowed bg-[var(--paper)] text-[var(--slate)]' : '',
+                                ]"
                             />
+                            <p v-if="isClaim" class="mt-1 text-[11px] text-[var(--slate-light)]">{{ t.claim_locked_hint }}</p>
                             <p v-if="form.errors.company_name" class="mt-1 text-xs text-[var(--orange)]">{{ form.errors.company_name }}</p>
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-[var(--slate)]">{{ t.label_street }}</label>
+                            <label class="mb-1 flex items-center gap-1.5 text-xs font-medium text-[var(--slate)]">
+                                <span>{{ t.label_street }}</span>
+                                <Lock v-if="isClaim" class="size-3 text-[var(--orange)]" />
+                            </label>
                             <div class="relative">
                                 <MapPin class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--slate-light)]" />
                                 <input
                                     v-model="form.street"
                                     type="text"
                                     autocomplete="street-address"
+                                    :readonly="isClaim"
+                                    :aria-readonly="isClaim"
                                     class="w-full rounded-lg border border-[var(--linen)] bg-[var(--white)] py-2 pl-10 pr-3 text-sm text-[var(--midnight)] transition-colors focus:border-[var(--orange)] focus:outline-none focus:ring-2 focus:ring-[var(--orange)]/15"
+                                    :class="isClaim ? 'cursor-not-allowed bg-[var(--paper)] text-[var(--slate)]' : ''"
                                 />
                             </div>
                         </div>
                         <div class="grid gap-3 sm:grid-cols-[140px_1fr]">
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-[var(--slate)]">{{ t.label_postal }}</label>
+                                <label class="mb-1 flex items-center gap-1.5 text-xs font-medium text-[var(--slate)]">
+                                    <span>{{ t.label_postal }}</span>
+                                    <Lock v-if="isClaim" class="size-3 text-[var(--orange)]" />
+                                </label>
                                 <input
                                     v-model="form.postal_code"
                                     type="text"
                                     autocomplete="postal-code"
+                                    :readonly="isClaim"
+                                    :aria-readonly="isClaim"
                                     class="w-full rounded-lg border border-[var(--linen)] bg-[var(--white)] px-3 py-2 text-sm text-[var(--midnight)] transition-colors focus:border-[var(--orange)] focus:outline-none focus:ring-2 focus:ring-[var(--orange)]/15"
+                                    :class="isClaim ? 'cursor-not-allowed bg-[var(--paper)] text-[var(--slate)]' : ''"
                                 />
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-[var(--slate)]">
-                                    {{ t.label_city }} <span class="text-[var(--orange)]">*</span>
+                                <label class="mb-1 flex items-center gap-1.5 text-xs font-medium text-[var(--slate)]">
+                                    <span>{{ t.label_city }} <span class="text-[var(--orange)]">*</span></span>
+                                    <Lock v-if="isClaim" class="size-3 text-[var(--orange)]" />
                                 </label>
                                 <select
                                     v-model.number="form.city_id"
                                     required
+                                    :disabled="isClaim"
+                                    :aria-disabled="isClaim"
                                     class="w-full rounded-lg border border-[var(--linen)] bg-[var(--white)] px-3 py-2 text-sm text-[var(--midnight)] transition-colors focus:border-[var(--orange)] focus:outline-none focus:ring-2 focus:ring-[var(--orange)]/15"
-                                    :class="{ 'border-[var(--orange)]': !!form.errors.city_id }"
+                                    :class="[
+                                        { 'border-[var(--orange)]': !!form.errors.city_id },
+                                        isClaim ? 'cursor-not-allowed bg-[var(--paper)] text-[var(--slate)]' : '',
+                                    ]"
                                 >
                                     <option :value="null">{{ t.city_placeholder }}</option>
-                                    <option v-for="c in cities" :key="c.id" :value="c.id">
+                                    <option v-for="c in cityOptions" :key="c.id" :value="c.id">
                                         {{ c.name }}
                                     </option>
                                 </select>
@@ -591,8 +674,11 @@ function submit(): void {
                     </p>
                 </section>
 
-                <!-- === Plan picker (button opens modal with the tier cards) === -->
-                <section>
+                <!-- === Plan picker (button opens modal with the tier cards) ===
+                     Skipped in claim mode: pre-existing (admin-created)
+                     listings always start on Basic, and the partner can
+                     upgrade later from their portal. -->
+                <section v-if="!isClaim">
                     <header class="mb-3 border-b border-[var(--linen)] pb-2">
                         <h2 class="text-sm font-semibold text-[var(--midnight)]">{{ t.section_plan }}</h2>
                         <p class="mt-0.5 text-[11px] text-[var(--slate-light)]">
@@ -637,6 +723,16 @@ function submit(): void {
 
                     <p v-if="form.errors.plan_tier" class="mt-2 text-xs text-[var(--orange)]">
                         {{ form.errors.plan_tier }}
+                    </p>
+                </section>
+
+                <!-- Compact "starts on Basic" note shown for claim flow. -->
+                <section v-else class="flex items-start gap-3 rounded-xl border border-[var(--linen)] bg-[var(--paper)] p-4">
+                    <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--orange-soft)] text-[var(--orange)]">
+                        <Crown class="size-4" />
+                    </div>
+                    <p class="text-xs leading-relaxed text-[var(--slate)]">
+                        {{ t.claim_plan_note }}
                     </p>
                 </section>
 

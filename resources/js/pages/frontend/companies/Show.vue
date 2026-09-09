@@ -76,6 +76,8 @@ type Company = {
     service_areas: ServiceArea[];
     gallery: GalleryItem[];
     faqs: Faq[];
+    can_claim: boolean;
+    claim_url: string | null;
 };
 
 type PublicReview = {
@@ -130,6 +132,11 @@ const t = computed(() => ({
     section_areas: props.locale === 'de' ? 'Einsatzgebiete' : 'Service areas',
     section_faq: props.locale === 'de' ? 'Häufige Fragen' : 'Frequently asked',
     section_reviews: props.locale === 'de' ? 'Bewertungen' : 'Reviews',
+    claim_title: props.locale === 'de' ? 'Ist das Ihr Unternehmen?' : 'Is this your business?',
+    claim_hint: props.locale === 'de'
+        ? 'Übernehmen Sie diesen Eintrag und pflegen Sie Ihr Profil selbst.'
+        : 'Claim this listing and manage your profile yourself.',
+    claim_button: props.locale === 'de' ? 'Eintrag übernehmen' : 'Claim this listing',
     contact: props.locale === 'de' ? 'Kontakt' : 'Contact',
     call: props.locale === 'de' ? 'Anrufen' : 'Call',
     email: 'E-Mail',
@@ -436,6 +443,25 @@ function markHelpful(review: PublicReview): void {
                         {{ t.top_rated }}
                     </span>
                 </div>
+                <div
+                    v-if="company.can_claim && company.claim_url"
+                    class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border-2 border-dashed border-[var(--orange)] bg-[var(--orange-soft)] p-4"
+                >
+                    <div>
+                        <p class="text-sm font-semibold text-[var(--midnight)]">
+                            {{ t.claim_title }}
+                        </p>
+                        <p class="mt-0.5 text-xs text-[var(--slate)]">
+                            {{ t.claim_hint }}
+                        </p>
+                    </div>
+                    <a
+                        :href="company.claim_url"
+                        class="inline-flex items-center gap-2 rounded-lg bg-[var(--orange)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[color-mix(in_srgb,var(--orange)_85%,black)]"
+                    >
+                        {{ t.claim_button }}
+                    </a>
+                </div>
 
                 <div class="grid gap-4 md:grid-cols-[1fr_auto]">
                     <div>
@@ -564,7 +590,7 @@ function markHelpful(review: PublicReview): void {
                         <h2 class="mb-4 text-xl font-bold text-[var(--midnight)]">
                             {{ t.section_gallery }}
                         </h2>
-                        <div
+                        <div         
                             v-if="company.gallery.length === 0"
                             class="text-sm text-[var(--slate)]"
                         >

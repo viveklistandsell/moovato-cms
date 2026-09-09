@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\Company;
 use App\Models\CompanyReview;
 use App\Models\CompanyTranslation;
+use App\Models\CompanyUser;
 use App\Models\District;
 use App\Models\Language;
 use App\Models\ServiceCategory;
@@ -49,7 +50,6 @@ final class CompanyController extends Controller
         $verifiedOnly = $request->query('verified') === '1';
         $topRatedOnly = $request->query('top_rated') === '1';
         $minRating = (float) $request->query('min_rating', '0');
-        $minReviews = (int) $request->query('min_reviews', '0');
         $priceMin = self::floatQuery($request, 'price_min');
         $priceMax = self::floatQuery($request, 'price_max');
         $sort = $request->query('sort');
@@ -83,9 +83,6 @@ final class CompanyController extends Controller
         if ($minRating > 0) {
             $query->where('rating_avg', '>=', $minRating);
         }
-        if ($minReviews > 0) {
-            $query->where('review_count', '>=', $minReviews);
-        }
         if ($priceMin !== null || $priceMax !== null) {
             $query->whereHas('services', function (Builder $q) use ($priceMin, $priceMax): void {
                 $q->whereNotNull('company_services.price_from');
@@ -109,8 +106,13 @@ final class CompanyController extends Controller
 
         $paginated = $query->paginate(self::PER_PAGE)->withQueryString();
 
+        $claimedIds = CompanyUser::query()
+            ->whereIn('company_id', $paginated->getCollection()->pluck('id'))
+            ->pluck('company_id')
+            ->flip();
+
         $companies = $paginated->getCollection()
-            ->map(fn (Company $c): array => $this->presentCard($c, $locale))
+            ->map(fn (Company $c): array => $this->presentCard($c, $locale, ! $claimedIds->has($c->id)))
             ->values()
             ->all();
 
@@ -126,7 +128,6 @@ final class CompanyController extends Controller
             'verifiedOnly' => $verifiedOnly,
             'topRatedOnly' => $topRatedOnly,
             'minRating' => $minRating,
-            'minReviews' => $minReviews,
             'priceMin' => $priceMin,
             'priceMax' => $priceMax,
             'sort' => $sort,
@@ -187,10 +188,11 @@ final class CompanyController extends Controller
                 : "/{$t->lang}/company/{$t->permalink}";
         }
 
+        $isClaimed = CompanyUser::query()->where('company_id', $company->id)->exists();
+
         return Inertia::render('frontend/companies/Show', [
             'locale' => $locale,
-            'company' => $this->presentDetail($company, $locale),
-            // Shared with SiteHeader — see `switchHref` computed there.
+            'company' => $this->presentDetail($company, $locale, ! $isClaimed),
             'localeAlternates' => $localeAlternates,
             'reviews' => fn (): array => $this->presentReviews($request, (int) $company->id),
         ]);
@@ -302,7 +304,7 @@ final class CompanyController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function presentCard(Company $c, string $locale): array
+    private function presentCard(Company $c, string $locale, bool $canClaim = false): array
     {
         $t = $this->pickTranslation($c->translations, $locale);
         $primaryContact = $c->contacts->firstWhere('is_primary', true) ?? $c->contacts->first();
@@ -342,13 +344,15 @@ final class CompanyController extends Controller
             'coverage_cities' => $coverageCityNames,
             'primary_services' => $servicesForCard,
             'primary_phone' => $primaryContact?->type === 'phone' ? $primaryContact->value : null,
+            'can_claim' => $canClaim,
+            'claim_url' => $canClaim ? '/partner/register?claim='.$c->id : null,
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function presentDetail(Company $c, string $locale): array
+    private function presentDetail(Company $c, string $locale, bool $canClaim = false): array
     {
         $t = $this->pickTranslation($c->translations, $locale);
         $galleryUrls = $c->media
@@ -433,6 +437,8 @@ final class CompanyController extends Controller
                     'answer' => $ft?->answer ?? '',
                 ];
             })->values()->all(),
+            'can_claim' => $canClaim,
+            'claim_url' => $canClaim ? '/partner/register?claim='.$c->id : null,
         ];
     }
 

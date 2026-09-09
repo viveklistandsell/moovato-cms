@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\CompanyUser;
 use App\Models\Language;
 use App\Models\Menu;
 use App\Models\Page;
@@ -78,6 +79,18 @@ final class HandleInertiaRequests extends Middleware
             'translations' => fn (): array => $this->isAdminRoute($request)
                 ? (array) trans('admin')
                 : [],
+            'sidebarCounts' => fn (): array => $this->isAdminRoute($request)
+                ? $this->sidebarCounts()
+                : [],
+        ];
+    }
+
+    private function sidebarCounts(): array
+    {
+        return [
+            'pending_applications' => CompanyUser::query()
+                ->where('status', CompanyUser::STATUS_PENDING)
+                ->count(),
         ];
     }
 

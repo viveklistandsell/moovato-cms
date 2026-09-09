@@ -3,17 +3,22 @@ import { Head, Link } from '@inertiajs/vue3';
 import {
     AlertTriangle,
     ArrowUpRight,
+    Building2,
+    Crown,
     Eye,
     FileEdit,
     Files,
     HardDrive,
     Image as ImageIcon,
     Languages as LanguagesIcon,
+    Menu as MenuIcon,
     Newspaper,
     Plus,
+    ShieldCheck,
     Sparkles,
     TrendingDown,
     TrendingUp,
+    Upload,
     UserPlus,
     Users,
     Zap,
@@ -89,6 +94,15 @@ type Attention = {
     missing_translations: number;
 };
 
+type CompaniesOverview = {
+    total: number;
+    unclaimed: number;
+    pending_applications: number;
+    plan_basic: number;
+    plan_premium: number;
+    plan_gold: number;
+};
+
 type Permissions = {
     users_view: boolean;
     pages_create: boolean;
@@ -114,6 +128,7 @@ const props = defineProps<{
     languageCoverage: LangCoverage[];
     topCategories: TopCategory[];
     attention: Attention;
+    companiesOverview?: CompaniesOverview;
     permissions: Permissions;
 }>();
 
@@ -260,6 +275,162 @@ function publishedRatio(total: number, published: number): number {
     if (total === 0) return 0;
     return Math.round((published / total) * 100);
 }
+
+type QuickTile = {
+    key: string;
+    label: string;
+    icon: unknown;
+    manageHref: string;
+    manageLabel: string;
+    createHref: string | null;
+    createLabel: string | null;
+    kpiCount: number | null;
+    kpiHint: string | null;
+    tone: 'orange' | 'yellow' | 'emerald' | 'violet' | 'midnight' | 'linen';
+    show: boolean;
+};
+
+const quickTiles = computed<QuickTile[]>(() =>
+    ([
+        {
+            key: 'pages',
+            label: t('dashboard.kpi_pages'),
+            icon: Files,
+            manageHref: '/admin/pages',
+            manageLabel: t('dashboard.manage_pages'),
+            createHref: props.permissions.pages_create ? '/admin/pages/create' : null,
+            createLabel: props.permissions.pages_create ? t('dashboard.quick_new_page') : null,
+            kpiCount: props.kpis.pages.total,
+            kpiHint: `${props.kpis.pages.published} ${t('dashboard.published')} · ${props.kpis.pages.draft} ${t('dashboard.draft')}`,
+            tone: 'orange',
+            show: true,
+        },
+        {
+            key: 'blogs',
+            label: t('dashboard.kpi_blogs'),
+            icon: Newspaper,
+            manageHref: '/admin/blog/posts',
+            manageLabel: t('dashboard.manage_blogs'),
+            createHref: props.permissions.posts_create ? '/admin/blog/posts/create' : null,
+            createLabel: props.permissions.posts_create ? t('dashboard.quick_new_post') : null,
+            kpiCount: props.kpis.posts.total,
+            kpiHint: `${props.kpis.posts.views.toLocaleString()} ${t('dashboard.total_views')}`,
+            tone: 'yellow',
+            show: true,
+        },
+        {
+            key: 'users',
+            label: t('dashboard.kpi_users'),
+            icon: Users,
+            manageHref: '/admin/users',
+            manageLabel: t('dashboard.manage_users'),
+            createHref: props.permissions.users_create ? '/admin/users/create' : null,
+            createLabel: props.permissions.users_create ? t('dashboard.new_user') : null,
+            kpiCount: props.kpis.users.total,
+            kpiHint: `+${props.kpis.users.new_in_range} ${newInRangeLabel.value}`,
+            tone: 'emerald',
+            show: props.permissions.users_view,
+        },
+        {
+            key: 'media',
+            label: t('dashboard.kpi_media'),
+            icon: HardDrive,
+            manageHref: '/admin/media',
+            manageLabel: t('dashboard.open_library'),
+            createHref: null,
+            createLabel: null,
+            kpiCount: props.kpis.media.files,
+            kpiHint: `${formatBytes(props.kpis.media.bytes)} · ${props.kpis.media.folders} ${t('dashboard.folders')}`,
+            tone: 'violet',
+            show: true,
+        },
+        {
+            key: 'import_pages',
+            label: t('dashboard.quick_import_pages'),
+            icon: Upload,
+            manageHref: '/admin/pages/import',
+            manageLabel: t('dashboard.quick_go'),
+            createHref: null,
+            createLabel: null,
+            kpiCount: null,
+            kpiHint: null,
+            tone: 'midnight',
+            show: props.permissions.pages_create,
+        },
+        {
+            key: 'menus',
+            label: t('dashboard.quick_menus'),
+            icon: MenuIcon,
+            manageHref: '/admin/menus',
+            manageLabel: t('dashboard.quick_go'),
+            createHref: null,
+            createLabel: null,
+            kpiCount: null,
+            kpiHint: null,
+            tone: 'linen',
+            show: true,
+        },
+    ] as QuickTile[]).filter((row) => row.show),
+);
+type ToneStyle = {
+    card: string;
+    ringHover: string;
+    iconChip: string;
+    accentText: string;
+    createChip: string;
+    manageText: string;
+};
+const toneStyles: Record<QuickTile['tone'], ToneStyle> = {
+    orange: {
+        card: 'bg-gradient-to-br from-[var(--orange-soft)] to-[color-mix(in_srgb,var(--orange-soft)_50%,white)] ring-[var(--orange)]/25 dark:from-[var(--midnight-soft)]/70 dark:to-[var(--midnight-soft)]/40 dark:ring-white/10',
+        ringHover: 'hover:ring-[var(--orange)]/60 hover:shadow-[var(--orange)]/20',
+        iconChip: 'bg-gradient-to-br from-[var(--orange)]/25 to-[var(--orange)]/10 text-[var(--orange)] ring-[var(--orange)]/30',
+        accentText: 'text-[var(--orange)]',
+        createChip: 'bg-[var(--orange)] text-white hover:bg-[color-mix(in_srgb,var(--orange)_80%,black)]',
+        manageText: 'text-[var(--orange)]',
+    },
+    yellow: {
+        card: 'bg-gradient-to-br from-amber-50 to-yellow-100 ring-amber-400/30 dark:from-amber-950/50 dark:to-yellow-950/40 dark:ring-amber-400/30',
+        ringHover: 'hover:ring-amber-500/60 hover:shadow-amber-500/20',
+        iconChip: 'bg-gradient-to-br from-amber-400/25 to-yellow-500/10 text-amber-700 ring-amber-500/30 dark:text-amber-300',
+        accentText: 'text-amber-700 dark:text-amber-300',
+        createChip: 'bg-amber-500 text-white hover:bg-amber-600',
+        manageText: 'text-amber-700 dark:text-amber-300',
+    },
+    emerald: {
+        card: 'bg-gradient-to-br from-emerald-50 to-teal-50 ring-emerald-400/30 dark:from-emerald-950/50 dark:to-teal-950/40 dark:ring-emerald-400/30',
+        ringHover: 'hover:ring-emerald-500/60 hover:shadow-emerald-500/20',
+        iconChip: 'bg-gradient-to-br from-emerald-400/25 to-teal-500/10 text-emerald-700 ring-emerald-500/30 dark:text-emerald-300',
+        accentText: 'text-emerald-700 dark:text-emerald-300',
+        createChip: 'bg-emerald-500 text-white hover:bg-emerald-600',
+        manageText: 'text-emerald-700 dark:text-emerald-300',
+    },
+    violet: {
+        card: 'bg-gradient-to-br from-violet-50 to-indigo-50 ring-violet-400/30 dark:from-violet-950/50 dark:to-indigo-950/40 dark:ring-violet-400/30',
+        ringHover: 'hover:ring-violet-500/60 hover:shadow-violet-500/20',
+        iconChip: 'bg-gradient-to-br from-violet-400/25 to-indigo-500/10 text-violet-700 ring-violet-500/30 dark:text-violet-300',
+        accentText: 'text-violet-700 dark:text-violet-300',
+        createChip: 'bg-violet-500 text-white hover:bg-violet-600',
+        manageText: 'text-violet-700 dark:text-violet-300',
+    },
+    midnight: {
+        card: 'bg-gradient-to-br from-[color-mix(in_srgb,var(--midnight)_92%,var(--orange))] to-[var(--midnight)] ring-white/10 text-white',
+        ringHover: 'hover:ring-white/25 hover:shadow-[var(--midnight)]/40',
+        iconChip: 'bg-white/15 text-white ring-white/20',
+        accentText: 'text-white/80',
+        createChip: '',
+        manageText: 'text-white',
+    },
+    linen: {
+        card: 'bg-gradient-to-br from-[var(--paper)] to-[var(--linen)] ring-[var(--midnight)]/10 dark:from-[var(--midnight)]/70 dark:to-[var(--midnight-soft)]/60 dark:ring-white/10',
+        ringHover: 'hover:ring-[var(--midnight)]/25 hover:shadow-slate-400/20',
+        iconChip: 'bg-white/70 text-[var(--midnight)] ring-[var(--midnight)]/15 dark:bg-white/10 dark:text-[var(--linen)] dark:ring-white/15',
+        accentText: 'text-[var(--midnight)] dark:text-[var(--linen)]',
+        createChip: '',
+        manageText: 'text-[var(--midnight)] dark:text-[var(--linen)]',
+    },
+};
+const styleFor = (tone: QuickTile['tone']): ToneStyle => toneStyles[tone];
 </script>
 
 <template>
@@ -267,40 +438,46 @@ function publishedRatio(total: number, published: number): number {
 
     <div class="flex flex-col gap-5 p-4 sm:p-6">
         <div
-            class="relative z-30 rounded-2xl border border-white/40 bg-white/70 p-5 backdrop-blur-xl dark:border-white/5 dark:bg-[var(--midnight)]/70"
+            class="relative z-30 overflow-hidden rounded-2xl border border-white/40 bg-gradient-to-br from-white/85 via-[var(--paper)]/70 to-[var(--orange-soft)]/40 p-5 shadow-lg backdrop-blur-xl sm:p-6 dark:border-white/5 dark:from-[var(--midnight)]/85 dark:via-[var(--midnight)]/75 dark:to-[var(--midnight-soft)]/60"
         >
-            <div
-                class="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
-                aria-hidden="true"
-            >
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                 <div
-                    class="absolute -top-16 -right-16 size-64 rounded-full bg-gradient-to-br from-[var(--orange)]/25 to-transparent blur-3xl"
+                    class="absolute -top-20 -right-20 size-72 rounded-full bg-gradient-to-br from-[var(--orange)]/30 to-transparent blur-3xl"
+                />
+                <div
+                    class="absolute -bottom-24 -left-16 size-64 rounded-full bg-gradient-to-tr from-[var(--midnight)]/15 to-transparent blur-3xl dark:from-[var(--orange)]/10"
                 />
             </div>
             <div
-                class="relative flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center"
+                class="relative flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
             >
                 <div class="flex items-center gap-4">
-                    <div
-                        class="flex size-12 items-center justify-center overflow-hidden rounded-full bg-[var(--midnight)] text-[var(--linen)] ring-2 ring-[var(--orange)]/40"
-                    >
-                        <img
-                            v-if="welcome.avatar_url"
-                            :src="welcome.avatar_url"
-                            :alt="welcome.name ?? ''"
-                            class="size-full object-cover"
+                    <div class="relative">
+                        <span
+                            aria-hidden="true"
+                            class="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--orange)] to-[color-mix(in_srgb,var(--orange)_55%,var(--midnight))] opacity-60 blur-md"
                         />
-                        <Users v-else class="size-5" />
+                        <div
+                            class="relative flex size-14 items-center justify-center overflow-hidden rounded-full bg-[var(--midnight)] text-[var(--linen)] shadow-md ring-2 ring-[var(--orange)]/60"
+                        >
+                            <img
+                                v-if="welcome.avatar_url"
+                                :src="welcome.avatar_url"
+                                :alt="welcome.name ?? ''"
+                                class="size-full object-cover"
+                            />
+                            <Users v-else class="size-6" />
+                        </div>
                     </div>
                     <div>
                         <p
-                            class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[var(--orange)]"
+                            class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[var(--orange)]"
                         >
                             <Zap class="size-3" />
                             {{ greeting }}
                         </p>
                         <h1
-                            class="text-xl font-bold tracking-tight text-[var(--midnight)] dark:text-[var(--linen)]"
+                            class="mt-0.5 bg-gradient-to-r from-[var(--midnight)] to-[color-mix(in_srgb,var(--midnight)_55%,var(--orange))] bg-clip-text text-2xl font-bold leading-tight tracking-tight text-transparent dark:from-[var(--linen)] dark:to-[color-mix(in_srgb,var(--linen)_75%,var(--orange))]"
                         >
                             {{ welcome.name ?? 'there' }}
                         </h1>
@@ -329,306 +506,338 @@ function publishedRatio(total: number, published: number): number {
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <Button v-if="permissions.pages_create" as-child size="sm">
-                        <Link href="/admin/pages/create">
-                            <Plus class="size-4" />
-                            {{ t('dashboard.new_page') }}
-                        </Link>
-                    </Button>
-                    <Button
-                        v-if="permissions.posts_create"
-                        as-child
-                        size="sm"
-                        variant="secondary"
-                    >
-                        <Link href="/admin/blog/posts/create">
-                            <Plus class="size-4" />
-                            {{ t('dashboard.new_blog') }}
-                        </Link>
-                    </Button>
-                    <Button
-                        v-if="permissions.users_create"
-                        as-child
-                        size="sm"
-                        variant="outline"
-                    >
-                        <Link href="/admin/users/create">
-                            <UserPlus class="size-4" />
-                            {{ t('dashboard.new_user') }}
-                        </Link>
-                    </Button>
-                    <DateRangeSelector :value="range" />
-                </div>
+                <DateRangeSelector :value="range" />
             </div>
-        </div>
-
-        <!-- Hero metric -->
-        <div
-            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--midnight)] via-[var(--midnight-soft)] to-[var(--midnight)] p-5 text-[var(--linen)] shadow-lg"
-        >
             <div
-                class="pointer-events-none absolute -top-16 -left-10 size-48 rounded-full bg-[var(--orange)]/20 blur-3xl"
-                aria-hidden="true"
-            />
-            <div
-                class="pointer-events-none absolute -right-10 -bottom-16 size-48 rounded-full bg-[var(--yellow-dark)]/15 blur-3xl"
-                aria-hidden="true"
-            />
-            <div
-                class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+                class="relative mt-5 overflow-hidden rounded-xl bg-gradient-to-br from-[var(--midnight)] via-[var(--midnight-soft)] to-[var(--midnight)] p-4 text-[var(--linen)] shadow-md"
             >
-                <div>
-                    <div
-                        class="inline-flex items-center gap-1.5 rounded-full bg-[var(--orange)]/15 px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--orange)] ring-1 ring-inset ring-[var(--orange)]/30"
-                    >
-                        <Sparkles class="size-3" />
-                        {{ t('dashboard.hero_velocity_range', { range: rangeLabel }) }}
-                    </div>
-                    <div class="mt-3 flex items-end gap-2">
-                        <span class="text-4xl font-bold leading-none tracking-tight">
-                            {{ heroTotal.toLocaleString() }}
-                        </span>
-                        <span class="pb-0.5 text-xs text-[var(--linen)]/60">
-                            {{ t('dashboard.hero_items_created') }}
-                        </span>
-                    </div>
-                    <div
-                        v-if="heroDelta !== null"
-                        class="mt-2 flex items-center gap-2 text-xs"
-                    >
-                        <span
-                            v-if="heroDelta >= 0"
-                            class="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/30"
+                <div
+                    aria-hidden="true"
+                    class="pointer-events-none absolute -top-16 -left-10 size-48 rounded-full bg-[var(--orange)]/25 blur-3xl"
+                />
+                <div
+                    aria-hidden="true"
+                    class="pointer-events-none absolute -bottom-16 -right-10 size-48 rounded-full bg-[var(--yellow-dark)]/15 blur-3xl"
+                />
+                <div
+                    class="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div>
+                        <div
+                            class="inline-flex items-center gap-1.5 rounded-full bg-[var(--orange)]/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--orange)] ring-1 ring-inset ring-[var(--orange)]/30"
                         >
-                            <TrendingUp class="size-3" />
-                            +{{ heroDelta }}%
-                        </span>
-                        <span
-                            v-else
-                            class="inline-flex items-center gap-1 rounded-md bg-rose-500/15 px-1.5 py-0.5 font-semibold text-rose-300 ring-1 ring-inset ring-rose-500/30"
+                            <Sparkles class="size-3" />
+                            {{ t('dashboard.hero_velocity_range', { range: rangeLabel }) }}
+                        </div>
+                        <div class="mt-2 flex items-baseline gap-2">
+                            <span class="text-3xl font-bold leading-none tracking-tight">
+                                {{ heroTotal.toLocaleString() }}
+                            </span>
+                            <span class="text-xs text-[var(--linen)]/60">
+                                {{ t('dashboard.hero_items_created') }}
+                            </span>
+                            <span
+                                v-if="heroDelta !== null && heroDelta >= 0"
+                                class="ml-1 inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-500/30"
+                            >
+                                <TrendingUp class="size-3" />
+                                +{{ heroDelta }}%
+                            </span>
+                            <span
+                                v-else-if="heroDelta !== null"
+                                class="ml-1 inline-flex items-center gap-1 rounded-md bg-rose-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-rose-300 ring-1 ring-inset ring-rose-500/30"
+                            >
+                                <TrendingDown class="size-3" />
+                                {{ heroDelta }}%
+                            </span>
+                        </div>
+                        <p
+                            v-if="heroDelta !== null"
+                            class="mt-1 text-[10px] uppercase tracking-wider text-[var(--linen)]/40"
                         >
-                            <TrendingDown class="size-3" />
-                            {{ heroDelta }}%
-                        </span>
-                        <span class="text-[var(--linen)]/60">
                             {{ t('dashboard.hero_vs_prior_half') }}
-                        </span>
+                        </p>
+                    </div>
+                    <div class="w-full max-w-[260px] shrink-0 sm:w-56">
+                        <svg
+                            viewBox="0 0 200 40"
+                            class="h-10 w-full"
+                            preserveAspectRatio="none"
+                        >
+                            <defs>
+                                <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--orange)" stop-opacity="0.5" />
+                                    <stop offset="100%" stop-color="var(--orange)" stop-opacity="0" />
+                                </linearGradient>
+                                <linearGradient id="sparkLine" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="var(--orange)" />
+                                    <stop offset="100%" stop-color="var(--yellow-dark)" />
+                                </linearGradient>
+                            </defs>
+                            <path
+                                v-if="sparklineAreaPath"
+                                :d="sparklineAreaPath"
+                                fill="url(#sparkFill)"
+                            />
+                            <path
+                                v-if="sparklinePath"
+                                :d="sparklinePath"
+                                fill="none"
+                                stroke="url(#sparkLine)"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                        <p
+                            class="mt-0.5 text-right text-[9px] uppercase tracking-wider text-[var(--linen)]/40"
+                        >
+                            {{ t('dashboard.hero_trend') }}
+                        </p>
                     </div>
                 </div>
-                <div class="w-full max-w-xs">
-                    <svg
-                        viewBox="0 0 200 40"
-                        class="h-12 w-full"
-                        preserveAspectRatio="none"
+            </div>
+            <div
+                v-if="quickTiles.length > 0"
+                class="relative mt-6 border-t border-white/40 pt-5 dark:border-white/10"
+            >
+                <header class="mb-3 flex items-center gap-2">
+                    <span
+                        class="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-[var(--orange)] to-[color-mix(in_srgb,var(--orange)_60%,var(--midnight))] text-white shadow-sm"
                     >
-                        <defs>
-                            <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="var(--orange)" stop-opacity="0.5" />
-                                <stop offset="100%" stop-color="var(--orange)" stop-opacity="0" />
-                            </linearGradient>
-                            <linearGradient id="sparkLine" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="0%" stop-color="var(--orange)" />
-                                <stop offset="100%" stop-color="var(--yellow-dark)" />
-                            </linearGradient>
-                        </defs>
-                        <path
-                            v-if="sparklineAreaPath"
-                            :d="sparklineAreaPath"
-                            fill="url(#sparkFill)"
-                        />
-                        <path
-                            v-if="sparklinePath"
-                            :d="sparklinePath"
-                            fill="none"
-                            stroke="url(#sparkLine)"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-                    <p
-                        class="mt-1 text-right text-[9px] uppercase tracking-wider text-[var(--linen)]/40"
+                        <Zap class="size-3" />
+                    </span>
+                    <h2 class="text-[11px] font-bold uppercase tracking-widest text-[var(--midnight)]/70 dark:text-[var(--linen)]/70">
+                        {{ t('dashboard.quick_actions_title') }}
+                    </h2>
+                </header>
+                <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                    <li v-for="tile in quickTiles" :key="tile.key">
+                        <div
+                            class="group relative flex h-full flex-col overflow-hidden rounded-xl p-3 shadow-md ring-1 transition-all duration-300 hover:-translate-y-0.5"
+                            :class="[styleFor(tile.tone).card, styleFor(tile.tone).ringHover]"
+                        >
+                            <span
+                                aria-hidden="true"
+                                class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                            />
+                            <div class="relative flex items-start justify-between gap-2">
+                                <span
+                                    class="flex size-8 shrink-0 items-center justify-center rounded-lg ring-1 backdrop-blur-sm"
+                                    :class="styleFor(tile.tone).iconChip"
+                                >
+                                    <component :is="tile.icon" class="size-4" />
+                                </span>
+                                <Link
+                                    v-if="tile.createHref"
+                                    :href="tile.createHref"
+                                    class="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-all hover:scale-110"
+                                    :class="styleFor(tile.tone).createChip"
+                                    :title="tile.createLabel ?? undefined"
+                                    :aria-label="tile.createLabel ?? undefined"
+                                >
+                                    <Plus class="size-3.5" />
+                                </Link>
+                            </div>
+                            <div class="relative mt-2">
+                                <p
+                                    class="text-[10px] font-bold uppercase tracking-widest"
+                                    :class="styleFor(tile.tone).accentText"
+                                >
+                                    {{ tile.label }}
+                                </p>
+                                <div
+                                    v-if="tile.kpiCount !== null"
+                                    class="mt-0.5 text-2xl font-bold leading-none tracking-tight text-[var(--midnight)] dark:text-[var(--linen)]"
+                                    :class="tile.tone === 'midnight' ? '!text-white' : ''"
+                                >
+                                    {{ tile.kpiCount.toLocaleString() }}
+                                </div>
+                            </div>
+                            <p
+                                v-if="tile.kpiHint"
+                                class="relative mt-1 line-clamp-2 text-[11px] text-muted-foreground"
+                                :class="tile.tone === 'midnight' ? '!text-white/70' : ''"
+                            >
+                                {{ tile.kpiHint }}
+                            </p>
+                            <Link
+                                :href="tile.manageHref"
+                                class="relative mt-auto pt-3 inline-flex items-center gap-0.5 text-[11px] font-semibold transition-all hover:gap-1.5"
+                                :class="styleFor(tile.tone).manageText"
+                            >
+                                {{ tile.manageLabel }}
+                                <ArrowUpRight class="size-3" />
+                            </Link>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div
+                v-if="companiesOverview"
+                class="relative mt-6 border-t border-white/40 pt-5 dark:border-white/10"
+            >
+                <header class="mb-3 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-[var(--midnight)] to-[color-mix(in_srgb,var(--midnight)_60%,var(--orange))] text-white shadow-sm"
+                        >
+                            <Building2 class="size-3" />
+                        </span>
+                        <h2 class="text-[11px] font-bold uppercase tracking-widest text-[var(--midnight)]/70 dark:text-[var(--linen)]/70">
+                            {{ t('dashboard.companies_title') }}
+                        </h2>
+                    </div>
+                    <Link
+                        href="/admin/companies"
+                        class="group inline-flex items-center gap-1 rounded-full border border-[var(--midnight)]/15 bg-white/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--midnight)] backdrop-blur-sm transition-all hover:border-[var(--midnight)] hover:bg-[var(--midnight)] hover:text-white dark:border-white/20 dark:bg-white/10 dark:text-[var(--linen)] dark:hover:bg-white/25"
                     >
-                        {{ t('dashboard.hero_trend') }}
-                    </p>
-                </div>
+                        {{ t('dashboard.companies_manage') }}
+                        <ArrowUpRight class="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </Link>
+                </header>
+
+                <ul class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+                    <li
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[var(--orange)] to-[color-mix(in_srgb,var(--orange)_60%,var(--midnight))] p-3 text-white shadow-md shadow-[var(--orange)]/25 ring-1 ring-white/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[var(--orange)]/40"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                        />
+                        <div
+                            aria-hidden="true"
+                            class="pointer-events-none absolute -top-6 -right-6 size-20 rounded-full bg-white/15 blur-2xl"
+                        />
+                        <div class="relative flex items-center gap-1.5">
+                            <span class="flex size-6 items-center justify-center rounded-md bg-white/20 ring-1 ring-white/30 backdrop-blur-sm">
+                                <Building2 class="size-3" />
+                            </span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider">
+                                {{ t('dashboard.companies_total_hint') }}
+                            </span>
+                        </div>
+                        <div class="relative mt-1 text-3xl font-bold leading-none tracking-tight">
+                            {{ companiesOverview.total.toLocaleString() }}
+                        </div>
+                        <p class="relative mt-1 text-[10px] text-white/70">
+                            {{ t('dashboard.companies_subheading') }}
+                        </p>
+                    </li>
+                    <li
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50 to-sky-50 p-3 shadow-sm ring-1 ring-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:shadow-emerald-500/20 dark:from-emerald-950/50 dark:to-sky-950/50 dark:ring-emerald-400/30"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                        />
+                        <div class="relative flex items-center gap-1.5">
+                            <span class="flex size-6 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-700 ring-1 ring-emerald-500/30 dark:text-emerald-300">
+                                <ShieldCheck class="size-3" />
+                            </span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                                {{ t('dashboard.companies_unclaimed') }}
+                            </span>
+                        </div>
+                        <div class="relative mt-1 text-2xl font-bold text-[var(--midnight)] dark:text-[var(--linen)]">
+                            {{ companiesOverview.unclaimed.toLocaleString() }}
+                        </div>
+                    </li>
+                    <li
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-50 to-rose-50 p-3 shadow-sm ring-1 ring-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:shadow-amber-500/20 dark:from-amber-950/50 dark:to-rose-950/40 dark:ring-amber-400/40"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                        />
+                        <div class="relative flex items-center gap-1.5">
+                            <span class="flex size-6 items-center justify-center rounded-md bg-amber-500/15 text-amber-700 ring-1 ring-amber-500/40 dark:text-amber-300">
+                                <AlertTriangle class="size-3" />
+                            </span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                                {{ t('dashboard.companies_pending') }}
+                            </span>
+                        </div>
+                        <div class="relative mt-1 flex items-baseline gap-1.5">
+                            <span class="text-2xl font-bold text-[var(--midnight)] dark:text-[var(--linen)]">
+                                {{ companiesOverview.pending_applications.toLocaleString() }}
+                            </span>
+                            <span
+                                v-if="companiesOverview.pending_applications > 0"
+                                aria-hidden="true"
+                                class="relative flex size-2"
+                            >
+                                <span class="absolute inline-flex size-full animate-ping rounded-full bg-amber-500 opacity-70" />
+                                <span class="relative inline-flex size-2 rounded-full bg-amber-500" />
+                            </span>
+                        </div>
+                    </li>
+                    <li
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-3 shadow-sm ring-1 ring-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-400/20 dark:from-slate-800/60 dark:to-slate-900/60 dark:ring-slate-600/50"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                        />
+                        <div class="relative flex items-center gap-1.5">
+                            <span class="flex size-6 items-center justify-center rounded-md bg-slate-500/15 text-slate-700 ring-1 ring-slate-400/40 dark:text-slate-300">
+                                <Building2 class="size-3" />
+                            </span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                                {{ t('dashboard.companies_basic') }}
+                            </span>
+                        </div>
+                        <div class="relative mt-1 text-2xl font-bold text-[var(--midnight)] dark:text-[var(--linen)]">
+                            {{ companiesOverview.plan_basic.toLocaleString() }}
+                        </div>
+                    </li>
+                    <li
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-50 to-indigo-100 p-3 shadow-sm ring-1 ring-violet-400/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:shadow-violet-500/25 dark:from-violet-950/60 dark:to-indigo-950/60 dark:ring-violet-400/40"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                        />
+                        <div class="relative flex items-center gap-1.5">
+                            <span class="flex size-6 items-center justify-center rounded-md bg-violet-500/20 text-violet-700 ring-1 ring-violet-400/40 dark:text-violet-300">
+                                <Sparkles class="size-3" />
+                            </span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+                                {{ t('dashboard.companies_premium') }}
+                            </span>
+                        </div>
+                        <div class="relative mt-1 text-2xl font-bold text-[var(--midnight)] dark:text-[var(--linen)]">
+                            {{ companiesOverview.plan_premium.toLocaleString() }}
+                        </div>
+                    </li>
+                    <li
+                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-200 via-yellow-200 to-amber-300 p-3 shadow-md shadow-amber-500/30 ring-1 ring-amber-400/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/40 dark:from-amber-900/60 dark:via-yellow-900/50 dark:to-amber-800/60 dark:ring-amber-400/50"
+                    >
+                        <span
+                            aria-hidden="true"
+                            class="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                        />
+                        <div class="relative flex items-center gap-1.5">
+                            <span class="flex size-6 items-center justify-center rounded-md bg-white/40 text-amber-800 ring-1 ring-amber-500/50 backdrop-blur-sm dark:bg-white/10 dark:text-amber-200">
+                                <Crown class="size-3" />
+                            </span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+                                {{ t('dashboard.companies_gold') }}
+                            </span>
+                        </div>
+                        <div class="relative mt-1 text-2xl font-bold text-[var(--midnight)] dark:text-[var(--linen)]">
+                            {{ companiesOverview.plan_gold.toLocaleString() }}
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
-
-        <!-- KPI tiles -->
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div
-                class="group relative overflow-hidden rounded-2xl border border-white/40 bg-white/70 p-5 backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-[var(--orange)]/40 hover:shadow-2xl hover:shadow-[var(--orange)]/15 dark:border-white/5 dark:bg-[var(--midnight)]/60"
-            >
-                <div
-                    class="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-gradient-to-br from-[var(--orange)]/25 to-transparent blur-2xl"
-                    aria-hidden="true"
-                />
-                <div class="relative">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                {{ t('dashboard.kpi_pages') }}
-                            </p>
-                            <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
-                                {{ kpis.pages.total.toLocaleString() }}
-                            </div>
-                        </div>
-                        <div
-                            class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--orange)]/20 to-[var(--orange)]/5 text-[var(--orange)] ring-1 ring-[var(--orange)]/20"
-                        >
-                            <Files class="size-5" />
-                        </div>
-                    </div>
-                    <p class="mt-2 text-xs text-muted-foreground">
-                        <span class="font-semibold text-foreground">{{ kpis.pages.published }}</span>
-                        {{ t('dashboard.published') }} · {{ kpis.pages.draft }} {{ t('dashboard.draft') }}
-                    </p>
-                    <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                            class="h-full rounded-full bg-gradient-to-r from-[var(--orange)] to-[var(--yellow-dark)]"
-                            :style="{ width: `${publishedRatio(kpis.pages.total, kpis.pages.published)}%` }"
-                        />
-                    </div>
-                    <Link
-                        href="/admin/pages"
-                        class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
-                    >
-                        {{ t('dashboard.manage_pages') }} <ArrowUpRight class="size-3" />
-                    </Link>
-                </div>
-            </div>
-
-            <div
-                class="group relative overflow-hidden rounded-2xl border border-white/40 bg-white/70 p-5 backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-[var(--orange)]/40 hover:shadow-2xl hover:shadow-[var(--orange)]/15 dark:border-white/5 dark:bg-[var(--midnight)]/60"
-            >
-                <div
-                    class="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-gradient-to-br from-[var(--yellow-dark)]/25 to-transparent blur-2xl"
-                    aria-hidden="true"
-                />
-                <div class="relative">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                {{ t('dashboard.kpi_blogs') }}
-                            </p>
-                            <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
-                                {{ kpis.posts.total.toLocaleString() }}
-                            </div>
-                        </div>
-                        <div
-                            class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--yellow-dark)]/20 to-[var(--yellow-dark)]/5 text-[var(--yellow-dark)] ring-1 ring-[var(--yellow-dark)]/20"
-                        >
-                            <Newspaper class="size-5" />
-                        </div>
-                    </div>
-                    <p class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Eye class="size-3" />
-                        <span class="font-semibold text-foreground">
-                            {{ kpis.posts.views.toLocaleString() }}
-                        </span>
-                        {{ t('dashboard.total_views') }}
-                    </p>
-                    <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                            class="h-full rounded-full bg-gradient-to-r from-[var(--orange)] to-[var(--yellow-dark)]"
-                            :style="{ width: `${publishedRatio(kpis.posts.total, kpis.posts.published)}%` }"
-                        />
-                    </div>
-                    <Link
-                        href="/admin/blog/posts"
-                        class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
-                    >
-                        {{ t('dashboard.manage_blogs') }} <ArrowUpRight class="size-3" />
-                    </Link>
-                </div>
-            </div>
-
-            <div
-                v-if="permissions.users_view"
-                class="group relative overflow-hidden rounded-2xl border border-white/40 bg-white/70 p-5 backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-[var(--orange)]/40 hover:shadow-2xl hover:shadow-[var(--orange)]/15 dark:border-white/5 dark:bg-[var(--midnight)]/60"
-            >
-                <div
-                    class="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-gradient-to-br from-emerald-400/20 to-transparent blur-2xl"
-                    aria-hidden="true"
-                />
-                <div class="relative">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                {{ t('dashboard.kpi_users') }}
-                            </p>
-                            <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
-                                {{ kpis.users.total.toLocaleString() }}
-                            </div>
-                        </div>
-                        <div
-                            class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 text-emerald-600 ring-1 ring-emerald-500/20"
-                        >
-                            <Users class="size-5" />
-                        </div>
-                    </div>
-                    <p class="mt-2 text-xs text-muted-foreground">
-                        <span class="font-semibold text-foreground">+{{ kpis.users.new_in_range }}</span>
-                        {{ newInRangeLabel }}
-                    </p>
-                    <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                            class="h-full rounded-full bg-emerald-500"
-                            :style="{ width: `${publishedRatio(kpis.users.total, kpis.users.verified)}%` }"
-                        />
-                    </div>
-                    <Link
-                        href="/admin/users"
-                        class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
-                    >
-                        {{ t('dashboard.manage_users') }} <ArrowUpRight class="size-3" />
-                    </Link>
-                </div>
-            </div>
-
-            <div
-                class="group relative overflow-hidden rounded-2xl border border-white/40 bg-white/70 p-5 backdrop-blur-xl transition-all hover:-translate-y-1 hover:border-[var(--orange)]/40 hover:shadow-2xl hover:shadow-[var(--orange)]/15 dark:border-white/5 dark:bg-[var(--midnight)]/60"
-            >
-                <div
-                    class="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-gradient-to-br from-violet-400/20 to-transparent blur-2xl"
-                    aria-hidden="true"
-                />
-                <div class="relative">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
-                                {{ t('dashboard.kpi_media') }}
-                            </p>
-                            <div class="mt-1 text-4xl font-black text-[var(--midnight)] dark:text-[var(--linen)]">
-                                {{ kpis.media.files.toLocaleString() }}
-                            </div>
-                        </div>
-                        <div
-                            class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 text-violet-600 ring-1 ring-violet-500/20"
-                        >
-                            <HardDrive class="size-5" />
-                        </div>
-                    </div>
-                    <p class="mt-2 text-xs text-muted-foreground">
-                        <span class="font-semibold text-foreground">{{ formatBytes(kpis.media.bytes) }}</span>
-                        · {{ kpis.media.folders }} {{ t('dashboard.folders') }}
-                    </p>
-                    <div class="mt-3 h-1.5 rounded-full bg-violet-500/20" />
-                    <Link
-                        href="/admin/media"
-                        class="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--orange)] transition-all hover:gap-1.5"
-                    >
-                        {{ t('dashboard.open_library') }} <ArrowUpRight class="size-3" />
-                    </Link>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chart + Top blogs -->
         <div class="grid gap-4 lg:grid-cols-2">
-            <Card class="overflow-hidden border-white/40 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-[var(--midnight)]/60">
+            <Card class="group relative overflow-hidden border-white/40 bg-gradient-to-br from-[var(--orange-soft)]/70 via-white/80 to-[var(--orange-soft)]/40 shadow-md shadow-[var(--orange)]/10 backdrop-blur-xl dark:border-white/5 dark:from-[var(--midnight)]/85 dark:via-[var(--midnight)]/70 dark:to-[color-mix(in_srgb,var(--midnight)_70%,var(--orange))]">
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 -left-1/2 z-10 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                />
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <div
@@ -687,11 +896,15 @@ function publishedRatio(total: number, published: number): number {
                 </CardContent>
             </Card>
 
-            <Card class="overflow-hidden border-white/40 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-[var(--midnight)]/60">
+            <Card class="group relative overflow-hidden border-white/40 bg-gradient-to-br from-amber-50/80 via-white/80 to-yellow-50/60 shadow-md shadow-amber-500/10 backdrop-blur-xl dark:border-white/5 dark:from-amber-950/40 dark:via-[var(--midnight)]/70 dark:to-yellow-950/40">
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 -left-1/2 z-10 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                />
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <div
-                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-[var(--orange)] to-[var(--yellow-dark)] text-white shadow-md shadow-[var(--orange)]/30"
+                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-amber-500 to-yellow-500 text-white shadow-md shadow-amber-500/40"
                         >
                             <Eye class="size-3.5" />
                         </div>
@@ -746,11 +959,15 @@ function publishedRatio(total: number, published: number): number {
 
         <!-- System overview -->
         <div class="grid gap-4 lg:grid-cols-3">
-            <Card class="overflow-hidden border-white/40 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-[var(--midnight)]/60">
+            <Card class="group relative overflow-hidden border-white/40 bg-gradient-to-br from-sky-50/80 via-white/80 to-cyan-50/60 shadow-md shadow-sky-500/10 backdrop-blur-xl dark:border-white/5 dark:from-sky-950/40 dark:via-[var(--midnight)]/70 dark:to-cyan-950/40">
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 -left-1/2 z-10 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                />
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <div
-                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-[var(--orange)] to-[var(--yellow-dark)] text-white shadow-md shadow-[var(--orange)]/30"
+                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-md shadow-sky-500/40"
                         >
                             <LanguagesIcon class="size-3.5" />
                         </div>
@@ -810,11 +1027,15 @@ function publishedRatio(total: number, published: number): number {
                 </CardContent>
             </Card>
 
-            <Card class="overflow-hidden border-white/40 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-[var(--midnight)]/60">
+            <Card class="group relative overflow-hidden border-white/40 bg-gradient-to-br from-emerald-50/80 via-white/80 to-teal-50/60 shadow-md shadow-emerald-500/10 backdrop-blur-xl dark:border-white/5 dark:from-emerald-950/40 dark:via-[var(--midnight)]/70 dark:to-teal-950/40">
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 -left-1/2 z-10 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                />
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <div
-                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-[var(--orange)] to-[var(--yellow-dark)] text-white shadow-md shadow-[var(--orange)]/30"
+                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/40"
                         >
                             <ImageIcon class="size-3.5" />
                         </div>
@@ -848,11 +1069,15 @@ function publishedRatio(total: number, published: number): number {
                 </CardContent>
             </Card>
 
-            <Card class="overflow-hidden border-white/40 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-[var(--midnight)]/60">
+            <Card class="group relative overflow-hidden border-white/40 bg-gradient-to-br from-rose-50/80 via-white/80 to-orange-50/60 shadow-md shadow-rose-500/10 backdrop-blur-xl dark:border-white/5 dark:from-rose-950/40 dark:via-[var(--midnight)]/70 dark:to-orange-950/40">
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute inset-y-0 -left-1/2 z-10 w-1/3 skew-x-[-20deg] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[500%]"
+                />
                 <CardHeader>
                     <CardTitle class="flex items-center gap-2 text-base">
                         <div
-                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-[var(--orange)] to-[var(--yellow-dark)] text-white shadow-md shadow-[var(--orange)]/30"
+                            class="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/40"
                         >
                             <AlertTriangle class="size-3.5" />
                         </div>

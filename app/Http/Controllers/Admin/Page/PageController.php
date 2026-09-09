@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -229,14 +228,13 @@ final class PageController extends Controller
 
         $count = DB::transaction(function () use ($action, $ids): int {
             if ($action === 'delete') {
-                $pages = Page::query()->whereIn('id', $ids)->get(['id', 'image']);
+                $deletePage = app(DeletePage::class);
+                $pages = Page::query()->whereIn('id', $ids)->get();
                 foreach ($pages as $page) {
-                    if ($page->image !== null) {
-                        Storage::disk('public')->delete($page->image);
-                    }
+                    $deletePage->handle($page);
                 }
 
-                return Page::query()->whereIn('id', $ids)->delete();
+                return $pages->count();
             }
 
             $update = match ($action) {
