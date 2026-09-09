@@ -35,6 +35,7 @@ use App\Widgets\Image\ImageWidget;
 use App\Widgets\Map\MapWidget;
 use App\Widgets\Marquee\MarqueeWidget;
 use App\Widgets\MediaChecklist\MediaChecklistWidget;
+use App\Widgets\MissionVision\MissionVisionWidget;
 use App\Widgets\OrbitBanner\OrbitBannerWidget;
 use App\Widgets\Partners\PartnersWidget;
 use App\Widgets\Pricing\PricingWidget;
@@ -118,6 +119,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         CompanyDirectoryWidget::class,
         ContactWidget::class,
         WorkProcessWidget::class,
+        MissionVisionWidget::class,
     ];
 
     public function register(): void

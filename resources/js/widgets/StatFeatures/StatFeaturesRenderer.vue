@@ -61,7 +61,7 @@ defineProps<{ settings: Settings; data: Data }>();
                             </span>
                             <div
                                 v-if="feature.description"
-                                class="mv-rte mt-1 block text-[15px] leading-relaxed text-[var(--slate)]"
+                                class="mv-rte block text-[15px] leading-relaxed text-[var(--slate)]"
                                 v-html="feature.description"
                             />
                         </span>

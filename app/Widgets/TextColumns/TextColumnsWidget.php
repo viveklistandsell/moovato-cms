@@ -35,6 +35,10 @@ final class TextColumnsWidget implements WidgetContract
     {
         return [
             'read_more_enabled' => false,
+            'image_card_enabled' => false,
+            'image_card_read_more_enabled' => false,
+            'image_path' => null,
+            'image_url' => null,
         ];
     }
 
@@ -53,6 +57,9 @@ final class TextColumnsWidget implements WidgetContract
                 'Erfahrenes, freundliches Team',
             ],
             'outro' => 'Unser Umzugsprozess ist immer respektvoll, individuell und auf Ihre Bedürfnisse zugeschnitten.',
+            'image_alt' => 'Glückliches Paar mit Umzugskartons in ihrer neuen Wohnung in Berlin',
+            'image_card_heading' => 'Festpreis statt Stundenzettel',
+            'image_card_body' => "Nach der kostenlosen Besichtigung bekommen Sie ein schriftliches Angebot, das jede Position einzeln ausweist: Personal, Fahrzeug, Packmaterial, Möbellift, Halteverbot sowie De- und Montage. Sie sehen genau, wofür Sie zahlen.\n\nWas dort steht, wird berechnet – auch wenn der Umzugstag länger dauert als gedacht. Nachträgliche Stundenzuschläge gibt es bei uns nicht, und ein Sofa, das im Treppenhaus klemmt, geht nicht zu Ihren Lasten.\n\nNur wenn Sie selbst den Umfang ändern, etwa weil der Keller doch mitkommt, passen wir das Angebot gemeinsam an. Diese Entscheidung treffen Sie – nicht der Vorarbeiter am Umzugstag.",
         ];
     }
 
@@ -60,6 +67,10 @@ final class TextColumnsWidget implements WidgetContract
     {
         return [
             'read_more_enabled' => ['boolean'],
+            'image_card_enabled' => ['boolean'],
+            'image_card_read_more_enabled' => ['boolean'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
@@ -73,6 +84,9 @@ final class TextColumnsWidget implements WidgetContract
             'points' => ['nullable', 'array'],
             'points.*' => ['nullable', 'string'],
             'outro' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'image_card_heading' => ['nullable', 'string'],
+            'image_card_body' => ['nullable', 'string'],
         ];
     }
 }

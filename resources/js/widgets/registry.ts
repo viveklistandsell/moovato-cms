@@ -29,6 +29,7 @@ import ImageRenderer from './Image/ImageRenderer.vue';
 import MapRenderer from './Map/MapRenderer.vue';
 import MarqueeRenderer from './Marquee/MarqueeRenderer.vue';
 import MediaChecklistRenderer from './MediaChecklist/MediaChecklistRenderer.vue';
+import MissionVisionRenderer from './MissionVision/MissionVisionRenderer.vue';
 import OrbitBannerRenderer from './OrbitBanner/OrbitBannerRenderer.vue';
 import PartnersRenderer from './Partners/PartnersRenderer.vue';
 import PricingRenderer from './Pricing/PricingRenderer.vue';
@@ -68,6 +69,7 @@ const DarkFeatureEditor = defineAsyncComponent(() => import('./DarkFeature/DarkF
 const DashboardPromoEditor = defineAsyncComponent(() => import('./DashboardPromo/DashboardPromoEditor.vue'));
 const ExpertsChoiceEditor = defineAsyncComponent(() => import('./ExpertsChoice/ExpertsChoiceEditor.vue'));
 const MediaChecklistEditor = defineAsyncComponent(() => import('./MediaChecklist/MediaChecklistEditor.vue'));
+const MissionVisionEditor = defineAsyncComponent(() => import('./MissionVision/MissionVisionEditor.vue'));
 const SplitMediaEditor = defineAsyncComponent(() => import('./SplitMedia/SplitMediaEditor.vue'));
 const StatFeaturesEditor = defineAsyncComponent(() => import('./StatFeatures/StatFeaturesEditor.vue'));
 const TeamCtaEditor = defineAsyncComponent(() => import('./TeamCta/TeamCtaEditor.vue'));
@@ -215,6 +217,10 @@ export const widgetRegistry: WidgetRegistry = {
     work_process: {
         editor: WorkProcessEditor,
         renderer: WorkProcessRenderer,
+    },
+    mission_vision: {
+        editor: MissionVisionEditor,
+        renderer: MissionVisionRenderer,
     },
 };
 

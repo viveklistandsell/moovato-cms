@@ -45,7 +45,7 @@ const hasMedia = computed(() => Boolean(props.settings.media_image_url));
 
                     <p
                         v-if="data.subtext"
-                        class="mx-auto mt-4  text-[15px] leading-relaxed text-white/60"
+                        class="mx-auto mt-4 text-base leading-relaxed text-white/60"
                         :class="hasMedia ? 'lg:mx-0' : ''"
                     >
                         {{ data.subtext }}

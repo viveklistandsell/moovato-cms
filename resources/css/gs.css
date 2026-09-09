@@ -1901,6 +1901,7 @@
 .next-cta {
     display: inline-flex;
     align-items: center;
+    align-self: flex-start;
     padding: 8px 25px;
     text-decoration: none;
     font-size: 18px;
@@ -6263,7 +6264,7 @@
     padding: 3.5rem 1.75rem 7rem;
     background:
         url('https://html.dynamiclayers.net/te/logisko/assets/img/footer-shape.png') bottom / 100% auto no-repeat,
-        var(--linen);
+        #ff57221a;
     overflow: hidden;
 }
 
@@ -9758,7 +9759,7 @@
 
 .mv-workproc__text {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.7;
     color: var(--slate-light);
 }
@@ -10968,11 +10969,17 @@
     font-size: 28px;
 }
 
+.mv-textcols .mv-textcols__collapse {
+    background: var(--white);
+    padding-bottom: 150px;
+}
+
 .mv-textcols__collapse {
     position: relative;
     overflow: hidden;
     max-height: none;
     transition: max-height 0.5s ease;
+    background: var(--white);
 }
 
 .mv-textcols__collapse.is-collapsed {
@@ -11017,9 +11024,253 @@
     }
 }
 
+.new-collapsable-section {
+    margin-top: 3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .new-collapsable-section {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .new-collapsable-section {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+.mv-textcols__card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 1rem;
+    padding: 2.75rem;
+    background: color-mix(in srgb, var(--slate-light) 32%, var(--white));
+}
+
+.mv-textcols__card-ring {
+    position: absolute;
+    z-index: 0;
+    right: -2.5rem;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--white) 75%, transparent);
+    background: color-mix(in srgb, var(--white) 30%, transparent);
+    pointer-events: none;
+}
+
+.mv-textcols__card-ring:nth-child(1) {
+    top: -1.5rem;
+    width: 7rem;
+    height: 7rem;
+}
+
+.mv-textcols__card-ring:nth-child(2) {
+    top: 7rem;
+    right: -1rem;
+    width: 4.5rem;
+    height: 4.5rem;
+}
+
+.mv-textcols__card-ring:nth-child(3) {
+    top: 13rem;
+    right: 1.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+.mv-textcols__card-ring:nth-child(4) {
+    bottom: 1.5rem;
+    right: -0.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.mv-textcols__card-media {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 10px;
+    aspect-ratio: 4 / 3;
+}
+
+.mv-textcols__card-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mv-textcols__card-placeholder {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--slate-light) 55%, var(--white));
+    color: color-mix(in srgb, var(--midnight) 30%, transparent);
+}
+
+.mv-textcols__card-collapse {
+    position: relative;
+    max-height: none;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+}
+
+.mv-textcols__card-collapse.is-collapsed {
+    max-height: 280px;
+}
+
+.mv-textcols__card-collapse.is-collapsed::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 5rem;
+    background: linear-gradient(to bottom,
+            transparent,
+            color-mix(in srgb, var(--slate-light) 32%, var(--white)));
+    pointer-events: none;
+}
+
+.mv-textcols__card-toggle {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--midnight) 12%, transparent);
+    background: var(--linen);
+    color: var(--midnight);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease;
+}
+
+.mv-textcols__card-toggle:hover {
+    background: color-mix(in srgb, var(--linen) 70%, var(--orange-soft));
+    transform: translateY(-1px);
+}
+
+@media (max-width: 1024px) {
+    .mv-textcols__card {
+        border-radius: 1.5rem;
+        padding: 1.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mv-textcols__card-collapse {
+        transition: none;
+    }
+
+    .mv-textcols__card-toggle:hover {
+        transform: none;
+    }
+}
+
 .mv-directory__entry {
     padding: 2rem;
     background: var(--white);
     border-radius: 1.5rem;
     box-shadow: 0 24px 48px -34px rgba(15, 23, 42, 0.16);
+}
+
+.new-collapsable-section {
+    max-width: 1600px;
+    margin: -100px auto 0;
+}
+
+.mv-mv-media {
+    position: relative;
+    isolation: isolate;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.mv-mv-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mv-mv-placeholder {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--slate-light) 55%, var(--white));
+    color: color-mix(in srgb, var(--midnight) 30%, transparent);
+}
+
+.mv-mv-media-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--midnight) 88%, transparent) 0%,
+        transparent 65%
+    );
+    pointer-events: none;
+}
+
+.mv-mv-media-text {
+    position: absolute;
+    z-index: 1;
+    inset: auto 2rem 2rem 2rem;
+}
+
+.mv-mv-footer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    padding-top: 2rem ;
+    background: var(--paper);
+}
+
+.mv-mv-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 1rem;
+    padding: 2.25rem;
+    background: var(--white);
+    border: 1px solid color-mix(in srgb, var(--midnight) 8%, transparent);
+    box-shadow: 0 24px 48px -34px rgba(15, 23, 42, 0.16);
+}
+
+.mv-mv-panel-ring {
+    position: absolute;
+    z-index: 0;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--midnight) 10%, transparent);
+    pointer-events: none;
+}
+
+.mv-mv-panel-ring:nth-child(1) {
+    right: -3rem;
+    bottom: -3rem;
+    width: 9rem;
+    height: 9rem;
+}
+
+.mv-mv-panel-ring:nth-child(2) {
+    right: 1rem;
+    bottom: 2rem;
+    width: 3rem;
+    height: 3rem;
 }
