@@ -99,12 +99,6 @@ const visiblePills = computed(() =>
                             class="mask1" loading="lazy" decoding="async" />
                     </div>
 
-                    <!-- Floating service pills -->
-                    <div v-for="(pill, i) in visiblePills" :key="i" class="pill" :class="pillPositions[i]">
-                        <WidgetIcon :name="pill.icon" fallback="Box" class="ico size-[13px]" />
-                        {{ pill.label }}
-                    </div>
-
                     <!-- Trust strip -->
                     <div v-if="data.trust_title" class="trust-strip">
                         <BestQualityBadge class="trust-strip-badge" />

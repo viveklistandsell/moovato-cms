@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { CircleCheck } from 'lucide-vue-next';
+import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Data = {
     heading?: string;
     subheading?: string;
     body?: string;
     intro?: string;
-    points?: string[];
     outro?: string;
+    button_label?: string;
+    button_url?: string;
 };
 
-defineProps<{ data: Data }>();
+defineProps<{ settings: Record<string, unknown>; data: Data }>();
 </script>
 
 <template>
@@ -29,39 +30,31 @@ defineProps<{ data: Data }>();
                 >
                     {{ data.subheading }}
                 </h3>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-4 text-base leading-relaxed whitespace-pre-line text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
             </div>
 
             <div class="lg:pt-2">
-                <p
+                <div
                     v-if="data.intro"
-                    class="text-lg font-semibold text-[var(--midnight)]"
-                >
-                    {{ data.intro }}
-                </p>
-                <ul v-if="data.points?.length" class="mt-6 space-y-4">
-                    <li
-                        v-for="(point, i) in data.points"
-                        :key="i"
-                        class="flex items-center gap-3 font-semibold text-[var(--midnight)]"
-                    >
-                        <CircleCheck
-                            class="size-5 shrink-0 text-[var(--orange)]"
-                        />
-                        <span>{{ point }}</span>
-                    </li>
-                </ul>
+                    class="mv-rte text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.intro"
+                />
                 <p
                     v-if="data.outro"
                     class="mt-6 text-base leading-relaxed text-[var(--slate)]"
                 >
                     {{ data.outro }}
                 </p>
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-6"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
         </div>
     </section>

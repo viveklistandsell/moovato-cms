@@ -45,9 +45,10 @@ function toggle(i: number): void {
                         class="rounded-xl border bg-card p-5 shadow-sm"
                     >
                         <h3 class="font-semibold">{{ item.question }}</h3>
-                        <p class="mt-2 text-sm text-muted-foreground">
-                            {{ item.answer }}
-                        </p>
+                        <div
+                            class="mv-rte mt-2 text-sm text-muted-foreground"
+                            v-html="item.answer"
+                        />
                     </div>
                 </div>
 
@@ -66,10 +67,9 @@ function toggle(i: number): void {
                         </button>
                         <div
                             v-if="openIndex === i"
-                            class="px-5 pb-5 text-sm text-muted-foreground"
-                        >
-                            {{ item.answer }}
-                        </div>
+                            class="mv-rte px-5 pb-5 text-sm text-muted-foreground"
+                            v-html="item.answer"
+                        />
                     </div>
                 </div>
             </div>

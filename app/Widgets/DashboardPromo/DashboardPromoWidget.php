@@ -56,6 +56,7 @@ final class DashboardPromoWidget implements WidgetContract
     {
         return [
             'promo_title' => 'Ihr persönliches Dashboard',
+            'promo_description' => '',
             'promo_text' => 'Personalisieren Sie Ihre Umzugsdaten, empfohlenen Artikel und Umzugsdienste.',
             'promo_cta_label' => 'Jetzt kostenlos loslegen',
             'promo_cta_url' => '#',
@@ -95,6 +96,7 @@ final class DashboardPromoWidget implements WidgetContract
     {
         return [
             'promo_title' => ['nullable', 'string'],
+            'promo_description' => ['nullable', 'string'],
             'promo_text' => ['nullable', 'string'],
             'promo_cta_label' => ['nullable', 'string'],
             'promo_cta_url' => ['nullable', 'string'],

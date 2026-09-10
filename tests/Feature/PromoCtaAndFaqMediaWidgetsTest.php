@@ -15,10 +15,10 @@ test('both new widgets are registered with their type slugs', function (): void 
         ->and($registry->resolve('faq_media'))->toBe(FaqMediaWidget::class);
 });
 
-test('promo cta ships a checklist, call block and is a marketing widget', function (): void {
+test('promo cta ships a checklist body, call block and is a marketing widget', function (): void {
     $data = PromoCtaWidget::defaultData();
 
-    expect($data['features'])->toHaveCount(4)
+    expect($data['description'])->toContain('<ul>')
         ->and($data)->toHaveKeys(['heading', 'button_label', 'badge_number', 'call_label', 'phone'])
         ->and($data['phone'])->toBe('030 1234 5678')
         ->and(PromoCtaWidget::category())->toBe('marketing');

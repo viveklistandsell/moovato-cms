@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 
 type Item = { question: string; answer: string };
 
@@ -105,11 +105,7 @@ function removeItem(index: number): void {
                         <Trash2 class="size-4 text-destructive" />
                     </Button>
                 </div>
-                <Textarea
-                    v-model="item.answer"
-                    :rows="3"
-                    placeholder="Answer"
-                />
+                <RichTextEditor v-model="item.answer" placeholder="Answer" />
             </div>
         </div>
     </div>

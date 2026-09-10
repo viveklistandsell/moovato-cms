@@ -50,14 +50,13 @@ defineProps<{ settings: Settings; data: Data }>();
             </div>
 
             <div
-                class="mt-8 grid gap-6 border-b border-black/10 pb-5 lg:grid-cols-2 lg:items-end"
+                class="mt-8"
             >
-                <p
+                <div
                     v-if="data.body"
-                    class="text-base leading-relaxed text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
             </div>
 
             <div class="mt-5 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-x-10">

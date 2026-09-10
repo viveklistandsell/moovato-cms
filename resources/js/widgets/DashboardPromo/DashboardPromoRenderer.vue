@@ -13,6 +13,7 @@ type Settings = {
 
 type Data = {
     promo_title?: string;
+    promo_description?: string;
     promo_text?: string;
     promo_cta_label?: string;
     promo_cta_url?: string;
@@ -41,6 +42,11 @@ defineProps<{ settings: Settings; data: Data }>();
                         <h2 v-if="data.promo_title" class="mv-dashpromo-title mv-section-heading">
                             {{ data.promo_title }}
                         </h2>
+                        <div
+                            v-if="data.promo_description"
+                            class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                            v-html="data.promo_description"
+                        />
                         <p v-if="data.promo_text" class="mv-dashpromo-text">
                             {{ data.promo_text }}
                         </p>

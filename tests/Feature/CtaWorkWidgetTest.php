@@ -12,18 +12,14 @@ test('cta work widget is registered under its type slug', function (): void {
         ->and($registry->resolve('cta_work'))->toBe(CtaWorkWidget::class);
 });
 
-test('cta work ships a background + inline image slot and a german cta', function (): void {
+test('cta work ships a default decorative image, heading, subtext, and a german cta', function (): void {
     $settings = CtaWorkWidget::defaultSettings();
     $data = CtaWorkWidget::defaultData();
 
-    expect($settings)->toHaveKeys([
-        'bg_image_path',
-        'bg_image_url',
-        'inline_image_path',
-        'inline_image_url',
-    ])
-        ->and($data)->toHaveKeys(['title_before', 'title_after', 'button_label', 'button_url'])
-        ->and($data['button_label'])->toBe('Kontakt aufnehmen')
+    expect($settings)->toHaveKeys(['media_image_path', 'media_image_url'])
+        ->and($settings['media_image_url'])->toBe('/images/boxes-dolly.png')
+        ->and($data)->toHaveKeys(['heading', 'subtext', 'media_image_alt', 'button_label', 'button_url'])
+        ->and($data['button_label'])->toBe('Jetzt Angebot anfordern')
         ->and(CtaWorkWidget::category())->toBe('marketing');
 });
 

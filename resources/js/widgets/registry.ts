@@ -7,6 +7,7 @@ import AboutExperienceRenderer from './AboutExperience/AboutExperienceRenderer.v
 import AboutStatsRenderer from './AboutStats/AboutStatsRenderer.vue';
 import AssistantToolsRenderer from './AssistantTools/AssistantToolsRenderer.vue';
 import BlogRenderer from './Blog/BlogRenderer.vue';
+import CitySearchRenderer from './CitySearch/CitySearchRenderer.vue';
 import CompanyDirectoryRenderer from './CompanyDirectory/CompanyDirectoryRenderer.vue';
 import ComparisonRenderer from './Comparison/ComparisonRenderer.vue';
 import ContactRenderer from './Contact/ContactRenderer.vue';
@@ -27,9 +28,11 @@ import HeronewRenderer from './Heronew/HeronewRenderer.vue';
 import HowItWorksRenderer from './HowItWorks/HowItWorksRenderer.vue';
 import ImageRenderer from './Image/ImageRenderer.vue';
 import LocationSearchRenderer from './LocationSearch/LocationSearchRenderer.vue';
+import ImageCardRenderer from './ImageCard/ImageCardRenderer.vue';
 import MapRenderer from './Map/MapRenderer.vue';
 import MarqueeRenderer from './Marquee/MarqueeRenderer.vue';
 import MediaChecklistRenderer from './MediaChecklist/MediaChecklistRenderer.vue';
+import MissionVisionRenderer from './MissionVision/MissionVisionRenderer.vue';
 import OrbitBannerRenderer from './OrbitBanner/OrbitBannerRenderer.vue';
 import PartnersRenderer from './Partners/PartnersRenderer.vue';
 import PricingRenderer from './Pricing/PricingRenderer.vue';
@@ -58,6 +61,7 @@ const AboutExperienceEditor = defineAsyncComponent(() => import('./AboutExperien
 const AboutStatsEditor = defineAsyncComponent(() => import('./AboutStats/AboutStatsEditor.vue'));
 const AssistantToolsEditor = defineAsyncComponent(() => import('./AssistantTools/AssistantToolsEditor.vue'));
 const BlogEditor = defineAsyncComponent(() => import('./Blog/BlogEditor.vue'));
+const CitySearchEditor = defineAsyncComponent(() => import('./CitySearch/CitySearchEditor.vue'));
 const CompanyDirectoryEditor = defineAsyncComponent(() => import('./CompanyDirectory/CompanyDirectoryEditor.vue'));
 const ContactEditor = defineAsyncComponent(() => import('./Contact/ContactEditor.vue'));
 const CostCalculatorEditor = defineAsyncComponent(() => import('./CostCalculator/CostCalculatorEditor.vue'));
@@ -69,6 +73,7 @@ const DarkFeatureEditor = defineAsyncComponent(() => import('./DarkFeature/DarkF
 const DashboardPromoEditor = defineAsyncComponent(() => import('./DashboardPromo/DashboardPromoEditor.vue'));
 const ExpertsChoiceEditor = defineAsyncComponent(() => import('./ExpertsChoice/ExpertsChoiceEditor.vue'));
 const MediaChecklistEditor = defineAsyncComponent(() => import('./MediaChecklist/MediaChecklistEditor.vue'));
+const MissionVisionEditor = defineAsyncComponent(() => import('./MissionVision/MissionVisionEditor.vue'));
 const SplitMediaEditor = defineAsyncComponent(() => import('./SplitMedia/SplitMediaEditor.vue'));
 const StatFeaturesEditor = defineAsyncComponent(() => import('./StatFeatures/StatFeaturesEditor.vue'));
 const TeamCtaEditor = defineAsyncComponent(() => import('./TeamCta/TeamCtaEditor.vue'));
@@ -83,6 +88,7 @@ const HeronewEditor = defineAsyncComponent(() => import('./Heronew/HeronewEditor
 const HowItWorksEditor = defineAsyncComponent(() => import('./HowItWorks/HowItWorksEditor.vue'));
 const ImageEditor = defineAsyncComponent(() => import('./Image/ImageEditor.vue'));
 const LocationSearchEditor = defineAsyncComponent(() => import('./LocationSearch/LocationSearchEditor.vue'));
+const ImageCardEditor = defineAsyncComponent(() => import('./ImageCard/ImageCardEditor.vue'));
 const MapEditor = defineAsyncComponent(() => import('./Map/MapEditor.vue'));
 const MarqueeEditor = defineAsyncComponent(() => import('./Marquee/MarqueeEditor.vue'));
 const OrbitBannerEditor = defineAsyncComponent(() => import('./OrbitBanner/OrbitBannerEditor.vue'));
@@ -221,6 +227,18 @@ export const widgetRegistry: WidgetRegistry = {
     work_process: {
         editor: WorkProcessEditor,
         renderer: WorkProcessRenderer,
+    },
+    mission_vision: {
+        editor: MissionVisionEditor,
+        renderer: MissionVisionRenderer,
+    },
+    city_search: {
+        editor: CitySearchEditor,
+        renderer: CitySearchRenderer,
+    },
+    image_card: {
+        editor: ImageCardEditor,
+        renderer: ImageCardRenderer,
     },
 };
 

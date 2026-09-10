@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Pin = {
     x?: number;
@@ -20,6 +21,9 @@ type Data = {
     eyebrow?: string;
     heading?: string;
     subheading?: string;
+    description?: string;
+    button_label?: string;
+    button_url?: string;
 };
 
 const props = defineProps<{
@@ -72,7 +76,7 @@ function isMatched(pin: Pin) {
     <section v-reveal class="mv-map section-py">
         <div class="container-xl">
             <div
-                v-if="data.eyebrow || data.heading || data.subheading"
+                v-if="data.eyebrow || data.heading || data.subheading || data.description"
                 class="mx-auto max-w-2xl text-center"
             >
                 <span
@@ -84,10 +88,16 @@ function isMatched(pin: Pin) {
 
                 <h2
                     v-if="data.heading"
-                    class="mt- text-[var(--white)] mv-section-heading"
+                    class="mt-5 text-[var(--white)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>
+
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate-light)]"
+                    v-html="data.description"
+                />
 
                 <p
                     v-if="data.subheading"
@@ -95,6 +105,12 @@ function isMatched(pin: Pin) {
                 >
                     {{ data.subheading }}
                 </p>
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-6"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
 
             <!-- Search -->

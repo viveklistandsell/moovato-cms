@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CircleCheck, Image as ImageIcon } from 'lucide-vue-next';
+import { Image as ImageIcon } from 'lucide-vue-next';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Settings = {
@@ -20,7 +20,6 @@ type Data = {
     experience_label?: string;
     image_alt?: string;
     image_2_alt?: string;
-    points?: string[];
     button_label?: string;
     button_url?: string;
     founder_name?: string;
@@ -84,25 +83,11 @@ defineProps<{ settings: Settings; data: Data }>();
                         {{ data.heading_accent }}
                     </span>
                 </h2>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-6 max-w-xl text-base leading-relaxed text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
-
-                <ul v-if="data.points?.length" class="mt-8 space-y-4">
-                    <li
-                        v-for="(point, i) in data.points"
-                        :key="i"
-                        class="flex items-center gap-3 text-[var(--midnight)]"
-                    >
-                        <CircleCheck
-                            class="size-5 shrink-0 text-[var(--orange)]"
-                        />
-                        <span>{{ point }}</span>
-                    </li>
-                </ul>
+                    class="mv-rte mt-6 max-w-xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
 
                 <div class="mt-10 flex flex-col sm:flex-row flex-wrap items-center gap-6">
                     <NextButton

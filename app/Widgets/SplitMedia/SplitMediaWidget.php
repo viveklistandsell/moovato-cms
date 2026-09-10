@@ -37,8 +37,6 @@ final class SplitMediaWidget implements WidgetContract
             'image_path' => null,
             'image_url' => null,
             'image_side' => 'right', // left | right
-            'marker_style' => 'check', // check | chevron
-            'heading_style' => 'italic', // bold | italic
         ];
     }
 
@@ -47,15 +45,8 @@ final class SplitMediaWidget implements WidgetContract
         return [
             'eyebrow' => '',
             'heading' => 'Ihre Vorteile bei Moovato Berlin',
-            'body' => '',
+            'body' => '<ul><li><strong>Günstige Umzugskosten bei hoher Servicequalität</strong> – Faire Preise, ohne Abstriche bei Sorgfalt und Zuverlässigkeit.</li><li><strong>Persönliche Beratung und individuelle Planung</strong> – Wir gehen auf Ihre individuellen Wünsche ein und planen den Umzug entsprechend.</li><li><strong>Zuverlässige und diskrete Fachpersonen</strong> – Unser Team arbeitet diskret und respektvoll in Ihrem privaten Umfeld.</li><li><strong>Auch Umzüge ohne Ihre Anwesenheit möglich</strong> – Auf Wunsch übernehmen wir den Umzug auch, wenn Sie selbst nicht vor Ort sein können.</li><li><strong>Transparente Preisgestaltung ohne versteckte Kosten</strong> – Ihr Festpreis-Angebot zeigt alle Kosten offen und nachvollziehbar.</li></ul>',
             'image_alt' => 'Moovato Mitarbeiter belädt einen Umzugswagen in Berlin',
-            'points' => [
-                'Günstige Umzugskosten bei hoher Servicequalität',
-                'Persönliche Beratung und individuelle Planung',
-                'Zuverlässige und diskrete Fachpersonen',
-                'Auch Umzüge ohne Ihre Anwesenheit möglich',
-                'Transparente Preisgestaltung ohne versteckte Kosten',
-            ],
             'button_label' => '',
             'button_url' => '',
         ];
@@ -67,8 +58,6 @@ final class SplitMediaWidget implements WidgetContract
             'image_path' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
-            'marker_style' => ['required', 'in:check,chevron'],
-            'heading_style' => ['nullable', 'in:bold,italic'],
         ];
     }
 
@@ -79,8 +68,6 @@ final class SplitMediaWidget implements WidgetContract
             'heading' => ['nullable', 'string'],
             'body' => ['nullable', 'string'],
             'image_alt' => ['nullable', 'string'],
-            'points' => ['nullable', 'array'],
-            'points.*' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],
             'button_url' => ['nullable', 'string'],
         ];

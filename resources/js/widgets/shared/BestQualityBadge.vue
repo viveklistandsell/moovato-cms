@@ -1,36 +1,11 @@
 <script setup lang="ts">
-import { onMounted, useId, useTemplateRef } from 'vue';
+import { useId } from 'vue';
 
 const uid = useId();
-const root = useTemplateRef<SVGSVGElement>('root');
-
-onMounted(() => {
-    const el = root.value;
-    if (!el) {
-        return;
-    }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        el.style.opacity = '1';
-        return;
-    }
-
-    const rect = el.getBoundingClientRect();
-    const dx = window.innerWidth / 2 - (rect.left + rect.width / 2);
-    const dy = window.innerHeight / 2 - (rect.top + rect.height / 2);
-
-    el.style.opacity = '1';
-    el.style.transform = `translate(${dx}px, ${dy}px) scale(5) rotate(360deg)`;
-
-    requestAnimationFrame(() => {
-        el.style.transition = 'transform 2s cubic-bezier(0.32, 0.72, 0, 1)';
-        el.style.transform = 'translate(0, 0) scale(1) rotate(0deg)';
-    });
-});
 </script>
 
 <template>
     <svg
-        ref="root"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 512 512"
         class="mv-badge-quality"

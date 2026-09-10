@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChevronDown, Image as ImageIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Item = { question?: string; answer?: string };
 
@@ -18,6 +19,8 @@ type Data = {
     heading_highlight?: string;
     heading_tail?: string;
     items?: Item[];
+    button_label?: string;
+    button_url?: string;
 };
 
 const props = defineProps<{ settings: Settings; data: Data }>();
@@ -91,11 +94,21 @@ function toggle(i: number): void {
                         </button>
                         <div class="mv-faqmedia-a-wrap">
                             <div class="mv-faqmedia-a-inner">
-                                <p class="mv-faqmedia-a">{{ item.answer }}</p>
+                                <div
+                                    class="mv-rte mv-faqmedia-a"
+                                    v-html="item.answer"
+                                />
                             </div>
                         </div>
                     </li>
                 </ul>
+
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-8"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
         </div>
     </section>

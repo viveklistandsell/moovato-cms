@@ -21,7 +21,7 @@ test('why choose media defaults to an image on the right with no button', functi
 
     expect($settings['image_side'])->toBe('right')
         ->and($settings['card'])->toBeFalse()
-        ->and($data['points'])->toHaveCount(4)
+        ->and($data['body'])->toContain('<ul>')
         ->and($data['button_label'])->toBe('');
 });
 
@@ -30,8 +30,7 @@ test('supporting media defaults to an image on the left with paragraph body', fu
     $data = SupportingMediaWidget::defaultData();
 
     expect($settings['image_side'])->toBe('left')
-        ->and($data['body'])->toContain("\n\n")
-        ->and($data['points'])->toHaveCount(4);
+        ->and($data['body'])->toContain('<ul>');
 });
 
 test('dark intro defaults to no list and a button', function (): void {

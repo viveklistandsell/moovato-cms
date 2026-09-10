@@ -55,6 +55,8 @@ final class FaqMediaWidget implements WidgetContract
                 ['question' => 'Sind meine Möbel während des Umzugs versichert?', 'answer' => 'Ja, alle Transporte sind versichert – vom Privatumzug bis zum Spezialtransport. Auf Wunsch bieten wir zusätzlichen Schutz für besonders wertvolle Gegenstände an.'],
                 ['question' => 'In welchen Gebieten ist Moovato tätig?', 'answer' => 'Wir sind in ganz Berlin und Umgebung für Sie da – und übernehmen mit unserem Fernumzug auf Anfrage auch deutschlandweite Umzüge.'],
             ],
+            'button_label' => 'Weitere Fragen? Kontaktieren Sie uns',
+            'button_url' => '#kontakt',
         ];
     }
 
@@ -79,6 +81,8 @@ final class FaqMediaWidget implements WidgetContract
             'items' => ['nullable', 'array'],
             'items.*.question' => ['nullable', 'string'],
             'items.*.answer' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

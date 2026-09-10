@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, ArrowRight, Star } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 type Testimonial = {
     quote?: string;
@@ -12,6 +12,7 @@ type Testimonial = {
 
 type Data = {
     heading?: string;
+    description?: string;
     badge?: string;
     rating_value?: string;
     rating_label?: string;
@@ -48,6 +49,41 @@ function next(): void {
     const n = items.value.length;
     if (n) current.value = (current.value + 1) % n;
 }
+
+const AUTOPLAY_DELAY = 6000;
+let autoplayTimer: ReturnType<typeof setInterval> | undefined;
+const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function stopAutoplay(): void {
+    if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = undefined;
+    }
+}
+
+function startAutoplay(): void {
+    stopAutoplay();
+    if (prefersReducedMotion || items.value.length < 2) return;
+    autoplayTimer = setInterval(next, AUTOPLAY_DELAY);
+}
+
+function handlePrev(): void {
+    prev();
+    startAutoplay();
+}
+function handleNext(): void {
+    next();
+    startAutoplay();
+}
+function handleGoTo(index: number): void {
+    current.value = index;
+    startAutoplay();
+}
+
+onMounted(startAutoplay);
+onBeforeUnmount(stopAutoplay);
 function starCount(rating?: number): number {
     return Math.max(1, Math.min(5, rating ?? 5));
 }
@@ -70,7 +106,11 @@ function initials(name?: string): string {
                 <h2 v-if="data.heading" class="mv-reviews__heading mv-section-heading">
                     {{ data.heading }}
                 </h2>
-
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
             </div>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.7fr]">
@@ -101,6 +141,10 @@ function initials(name?: string): string {
                     v-if="active"
                     class="mv-reviews__card"
                     :class="{ 'is-pulsing': isPulsing }"
+                    @mouseenter="stopAutoplay"
+                    @mouseleave="startAutoplay"
+                    @focusin="stopAutoplay"
+                    @focusout="startAutoplay"
                 >
                     <Transition name="mv-reviews-fade" mode="out-in">
                         <div :key="current" class="mv-reviews__content">
@@ -148,7 +192,7 @@ function initials(name?: string): string {
                                 class="mv-reviews__dot"
                                 :class="{ 'is-active': i === current }"
                                 :aria-label="`Bewertung ${i + 1}`"
-                                @click="current = i"
+                                @click="handleGoTo(i)"
                             ></button>
                         </div>
                         <div class="mv-reviews__arrows">
@@ -156,7 +200,7 @@ function initials(name?: string): string {
                                 type="button"
                                 class="mv-reviews__arrow"
                                 aria-label="Vorherige"
-                                @click="prev"
+                                @click="handlePrev"
                             >
                                 <ArrowLeft :size="18" />
                             </button>
@@ -164,7 +208,7 @@ function initials(name?: string): string {
                                 type="button"
                                 class="mv-reviews__arrow"
                                 aria-label="Nächste"
-                                @click="next"
+                                @click="handleNext"
                             >
                                 <ArrowRight :size="18" />
                             </button>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Plus, Trash2 } from 'lucide-vue-next';
-import { Button } from '@/components/ui/button';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,8 +9,6 @@ type Settings = {
     image_path: string | null;
     image_url: string | null;
     image_side: 'left' | 'right';
-    marker_style: 'check' | 'chevron';
-    heading_style?: 'bold' | 'italic';
 };
 
 type Data = {
@@ -19,21 +16,12 @@ type Data = {
     heading: string;
     body: string;
     image_alt: string;
-    points: string[];
     button_label: string;
     button_url: string;
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
 const data = defineModel<Data>('data', { required: true });
-
-function addPoint(): void {
-    data.value.points = [...(data.value.points ?? []), ''];
-}
-
-function removePoint(index: number): void {
-    data.value.points = (data.value.points ?? []).filter((_, i) => i !== index);
-}
 </script>
 
 <template>
@@ -58,37 +46,15 @@ function removePoint(index: number): void {
                     placeholder="Moovato Mitarbeiter belädt einen Umzugswagen"
                 />
             </div>
-            <div class="grid grid-cols-3 gap-2">
-                <div class="grid gap-1">
-                    <Label class="text-xs">Image side</Label>
-                    <select
-                        v-model="settings.image_side"
-                        class="h-9 rounded-md border bg-background px-2 text-sm"
-                    >
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </select>
-                </div>
-                <div class="grid gap-1">
-                    <Label class="text-xs">Marker</Label>
-                    <select
-                        v-model="settings.marker_style"
-                        class="h-9 rounded-md border bg-background px-2 text-sm"
-                    >
-                        <option value="check">Check</option>
-                        <option value="chevron">Chevron</option>
-                    </select>
-                </div>
-                <div class="grid gap-1">
-                    <Label class="text-xs">Heading style</Label>
-                    <select
-                        v-model="settings.heading_style"
-                        class="h-9 rounded-md border bg-background px-2 text-sm"
-                    >
-                        <option value="bold">Bold</option>
-                        <option value="italic">Italic (serif)</option>
-                    </select>
-                </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Image side</Label>
+                <select
+                    v-model="settings.image_side"
+                    class="h-9 rounded-md border bg-background px-2 text-sm"
+                >
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                </select>
             </div>
         </div>
 
@@ -103,39 +69,7 @@ function removePoint(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Body (optional)</Label>
-                <Textarea v-model="data.body" :rows="3" />
-            </div>
-            <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                    <Label class="text-sm font-semibold">Checklist</Label>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        @click="addPoint"
-                    >
-                        <Plus class="size-4" />
-                        Add
-                    </Button>
-                </div>
-                <div
-                    v-for="(_, i) in data.points ?? []"
-                    :key="i"
-                    class="flex gap-2"
-                >
-                    <Input
-                        v-model="data.points[i]"
-                        placeholder="Persönliche Beratung und individuelle Planung"
-                    />
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        @click="removePoint(i)"
-                    >
-                        <Trash2 class="size-4 text-destructive" />
-                    </Button>
-                </div>
+                <RichTextEditor v-model="data.body" placeholder="Body" />
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <div class="grid gap-1">

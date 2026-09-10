@@ -46,6 +46,7 @@ final class ReviewsWidget implements WidgetContract
     {
         return [
             'heading' => 'Erfolgsgeschichten: Was unsere Kunden sagen',
+            'description' => '',
             'badge' => 'Moovato ist mit 4,9 / 5 aus über 1.200 Google-Bewertungen ausgezeichnet',
             'rating_value' => '4,9',
             'rating_label' => 'Sternebewertung auf Google',
@@ -93,6 +94,7 @@ final class ReviewsWidget implements WidgetContract
     {
         return [
             'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'badge' => ['nullable', 'string'],
             'rating_value' => ['nullable', 'string'],
             'rating_label' => ['nullable', 'string'],

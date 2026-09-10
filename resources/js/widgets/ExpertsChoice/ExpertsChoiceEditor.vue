@@ -4,7 +4,6 @@ import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 type Card = { icon: string; title: string; description: string };
 
@@ -60,7 +59,7 @@ function removeCard(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Body</Label>
-                <Textarea v-model="data.body" :rows="3" />
+                <RichTextEditor v-model="data.body" placeholder="Body" />
             </div>
             <div class="space-y-2">
                 <div class="flex items-center justify-between">

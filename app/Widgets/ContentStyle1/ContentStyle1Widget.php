@@ -37,9 +37,7 @@ final class ContentStyle1Widget implements WidgetContract
             'image_path' => null,
             'image_url' => null,
             'image_side' => 'left',
-            'marker_style' => 'check',
             'card' => false,
-            'heading_style' => 'italic',
             'bg' => 'none',
         ];
     }
@@ -51,7 +49,6 @@ final class ContentStyle1Widget implements WidgetContract
             'heading' => 'Warum Berliner Kunden ihren Umzug uns anvertrauen',
             'body' => "Vertrauen entsteht durch saubere Arbeit. Ob Privatumzug, Gewerbeumzug, Fernumzug oder Spezialtransport – unsere geschulten Teams in Berlin packen, transportieren und montieren sorgfältig, schnell und ohne Beschädigungen.\n\nMit Moovato wissen Sie genau, woran Sie sind: feste Ansprechpartner, klare Absprachen und ein Ergebnis, das hält. So wird Ihr Umzug in Berlin zur Nebensache.",
             'image_alt' => 'Moovato Umzugsteam bei einem Umzug in einer Berliner Wohnung',
-            'points' => [],
             'button_label' => '',
             'button_url' => '',
         ];
@@ -63,9 +60,7 @@ final class ContentStyle1Widget implements WidgetContract
             'image_path' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
-            'marker_style' => ['required', 'in:check,chevron'],
             'card' => ['boolean'],
-            'heading_style' => ['nullable', 'in:bold,italic'],
             'bg' => ['nullable', 'in:none,tinted,dark'],
         ];
     }
@@ -77,8 +72,6 @@ final class ContentStyle1Widget implements WidgetContract
             'heading' => ['nullable', 'string'],
             'body' => ['nullable', 'string'],
             'image_alt' => ['nullable', 'string'],
-            'points' => ['nullable', 'array'],
-            'points.*' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],
             'button_url' => ['nullable', 'string'],
         ];

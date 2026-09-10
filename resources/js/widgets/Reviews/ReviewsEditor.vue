@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +16,7 @@ type Testimonial = {
 
 type Data = {
     heading: string;
+    description: string;
     badge: string;
     rating_value: string;
     rating_label: string;
@@ -46,6 +48,13 @@ function removeItem(index: number): void {
         <div class="grid gap-2">
             <Label>Heading</Label>
             <Input v-model="data.heading" />
+        </div>
+        <div class="grid gap-2">
+            <Label>Description</Label>
+            <RichTextEditor
+                v-model="data.description"
+                placeholder="Beschreibung"
+            />
         </div>
         <div class="grid gap-2">
             <Label>Badge</Label>

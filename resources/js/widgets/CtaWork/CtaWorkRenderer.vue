@@ -3,53 +3,72 @@ import { computed } from 'vue';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Settings = {
-    bg_image_path?: string | null;
-    bg_image_url?: string | null;
-    inline_image_path?: string | null;
-    inline_image_url?: string | null;
+    media_image_path?: string | null;
+    media_image_url?: string | null;
 };
 
 type Data = {
-    title_before?: string;
-    title_after?: string;
-    inline_image_alt?: string;
+    heading?: string;
+    subtext?: string;
+    media_image_alt?: string;
     button_label?: string;
     button_url?: string;
 };
 
 const props = defineProps<{ settings: Settings; data: Data }>();
 
-const bgStyle = computed(() =>
-    props.settings.bg_image_url
-        ? { backgroundImage: `url('${props.settings.bg_image_url}')` }
-        : undefined,
-);
+const hasMedia = computed(() => Boolean(props.settings.media_image_url));
 </script>
 
 <template>
-    <section v-reveal class="mv-workcta section-py">
-        <div class="mv-workcta__bg" :style="bgStyle" aria-hidden="true"></div>
-        <div class="mv-workcta__inner container-xl">
-            <h2 class="mv-workcta__title">
-                <span v-if="data.title_before">{{ data.title_before }}</span>
-                <img
-                    class="!mb-5
-                    
-                    "
-                    v-if="settings.inline_image_url"
-                    :src="settings.inline_image_url"
-                    :alt="data.inline_image_alt || ''"
-                    loading="lazy"
-                    decoding="async"
-                />
-                <span v-if="data.title_after">{{ data.title_after }}</span>
-            </h2>
+    <section v-reveal class="mv-workcta">
+        <div class="mv-workcta__bg" aria-hidden="true" />
+        <div class="mv-workcta__overlay" aria-hidden="true" />
 
-            <NextButton
-                v-if="data.button_label"
-                :label="data.button_label"
-                :href="data.button_url || '#'"
-            />
+        <div class="container-xl relative z-10">
+            <div
+                class="grid items-center gap-10 lg:gap-16"
+                :class="
+                    hasMedia
+                        ? 'grid-cols-1 text-center lg:grid-cols-[1.45fr_0.55fr] lg:text-left'
+                        : 'grid-cols-1 justify-items-center text-center'
+                "
+            >
+                <div>
+                    <h2
+                        v-if="data.heading"
+                        class="mv-workcta__heading mx-auto max-w-xl text-3xl leading-tight font-bold text-white sm:text-4xl"
+                        :class="hasMedia ? 'lg:mx-0' : ''"
+                    >
+                        {{ data.heading }}
+                    </h2>
+
+                    <p
+                        v-if="data.subtext"
+                        class="mx-auto mt-4 text-base leading-relaxed text-white/60"
+                        :class="hasMedia ? 'lg:mx-0' : ''"
+                    >
+                        {{ data.subtext }}
+                    </p>
+
+                    <NextButton
+                        v-if="data.button_label"
+                        class="mt-9"
+                        :label="data.button_label"
+                        :href="data.button_url || '#'"
+                    />
+                </div>
+
+                <div v-if="hasMedia" class="mv-workcta__media">
+                    <img
+                        class="mv-workcta__image"
+                        :src="settings.media_image_url!"
+                        :alt="data.media_image_alt || ''"
+                        loading="lazy"
+                        decoding="async"
+                    />
+                </div>
+            </div>
         </div>
     </section>
 </template>

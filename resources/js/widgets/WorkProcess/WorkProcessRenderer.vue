@@ -50,7 +50,9 @@ function connectorStyle(i: number): Record<string, string> {
 
 <template>
     <section v-reveal class="mv-workproc section-py" :style="bgStyle">
-        <div class="container-xl">
+        <div class="mv-orbitbanner-fade-top" aria-hidden="true"></div>
+        <div class="mv-orbitbanner-glow-top" aria-hidden="true"></div>
+        <div class="container-xl relative z-[6]">
             <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
                 <div>
                     <span v-if="data.eyebrow" class="mv-howitworks__eyebrow">{{
@@ -60,9 +62,11 @@ function connectorStyle(i: number): Record<string, string> {
                         {{ data.heading }}
                     </h2>
                 </div>
-                <p v-if="data.description" class="mv-workproc__text">
-                    {{ data.description }}
-                </p>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mv-workproc__text"
+                    v-html="data.description"
+                />
             </div>
 
             <div

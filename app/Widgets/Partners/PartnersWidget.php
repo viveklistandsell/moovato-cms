@@ -76,6 +76,9 @@ final class PartnersWidget implements WidgetContract
             'eyebrow' => 'Vertrauen & Qualität',
             'heading' => 'Unsere Partner & Zertifikate',
             'subheading' => 'Moovato arbeitet mit etablierten Partnern zusammen und erfüllt höchste Qualitätsstandards für Ihren Umzug in Berlin.',
+            'description' => '',
+            'button_label' => '',
+            'button_url' => '',
             'partners_title' => 'Starke Partner an unserer Seite',
             'certificates_title' => 'Geprüft & zertifiziert',
         ];
@@ -101,6 +104,9 @@ final class PartnersWidget implements WidgetContract
             'eyebrow' => ['nullable', 'string'],
             'heading' => ['nullable', 'string'],
             'subheading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
             'partners_title' => ['nullable', 'string'],
             'certificates_title' => ['nullable', 'string'],
         ];
