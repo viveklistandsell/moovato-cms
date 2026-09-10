@@ -14,7 +14,6 @@ import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
 import MultiSelect from '@/components/common/MultiSelect.vue';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
-import { localizedUrl } from '@/lib/localizedUrl';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -241,16 +240,24 @@ function submit(): void {
     }
 }
 
-const previewUrl = computed<string | null>(() => {
-    if (!props.post) return null;
-    const defaultLocale =
-        props.languages.find((l) => l.is_default)?.code ?? 'de';
-    const slug =
-        props.post.translations[defaultLocale]?.permalink ??
-        Object.values(props.post.translations)[0]?.permalink ??
-        null;
-    return slug ? localizedUrl(defaultLocale, `/blog/${slug}`) : null;
-});
+function saveAndStay(): void {
+    if (!isEdit.value) return;
+    form.transform((data) => ({ ...data, _method: 'put' })).post(
+        `/admin/blog/posts/${props.post!.id}?stay=1`,
+        {
+            forceFormData: true,
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+}
+
+function livePermalinkUrl(code: string): string | null {
+    const slug = form.translations[code]?.permalink ?? '';
+    if (!slug) return null;
+    const prefix = props.urlPrefixes[code] ?? '';
+    return `${prefix}${slug}`;
+}
 
 const errorFor = (code: string, field: keyof Translation) =>
     form.errors[`translations.${code}.${field}` as keyof typeof form.errors] as
@@ -359,13 +366,20 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             class="text-xs text-muted-foreground"
                                         >
                                             {{ t('pages.preview_label') }}:
-                                            <span class="text-primary">
+                                            <a
+                                                v-if="livePermalinkUrl(code)"
+                                                :href="livePermalinkUrl(code)!"
+                                                target="_blank"
+                                                rel="noopener"
+                                                class="inline-flex items-center gap-1 font-medium text-[var(--orange)] underline underline-offset-4 hover:text-[color-mix(in_srgb,var(--orange)_80%,black)]"
+                                            >
                                                 {{ urlPrefixes[code]
-                                                }}{{
-                                                    form.translations[code]
-                                                        .permalink ||
-                                                    t('blog.permalink_placeholder')
-                                                }}
+                                                }}{{ form.translations[code].permalink }}
+                                                <ExternalLink class="size-3" />
+                                            </a>
+                                            <span v-else class="text-[var(--orange)]">
+                                                {{ urlPrefixes[code]
+                                                }}{{ t('blog.permalink_placeholder') }}
                                             </span>
                                         </p>
                                         <InputError
@@ -507,20 +521,15 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 {{ t('blog.save_exit') }}
                             </Button>
                             <Button
-                                v-if="previewUrl"
-                                as-child
+                                v-if="isEdit"
                                 type="button"
-                                variant="default"
+                                variant="secondary"
+                                :disabled="form.processing"
+                                class="flex-1"
+                                @click="saveAndStay"
                             >
-                                <a
-                                    :href="previewUrl"
-                                    target="_blank"
-                                    rel="noopener"
-                                    class="flex-1"
-                                >
-                                    <ExternalLink class="size-4" />
-                                    {{ t('blog.preview_button') }}
-                                </a>
+                                <Save class="size-4" />
+                                {{ t('common.save') }}
                             </Button>
                             <Button
                                 as-child

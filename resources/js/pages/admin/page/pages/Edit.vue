@@ -4,7 +4,6 @@ import {
     ArrowLeft,
     ExternalLink,
     Image as ImageIcon,
-    Save,
     Upload,
     X,
 } from 'lucide-vue-next';
@@ -39,7 +38,6 @@ import { useT } from '@/composables/useT';
 import MediaPicker from '@/components/common/MediaPicker.vue';
 import SeoMetaFields from '@/components/admin/seo/SeoMetaFields.vue';
 import FlagImage from '@/components/common/FlagImage.vue';
-import { localizedUrl } from '@/lib/localizedUrl';
 import { slugify } from '@/lib/slug';
 
 const t = useT();
@@ -187,11 +185,15 @@ function onMediaPicked(file: {
     imagePreview.value = file.url;
 }
 
+function serializeWidgets(): WidgetInstance[] {
+    return (
+        JSON.parse(JSON.stringify(editWidgets.value)) as WidgetInstance[]
+    ).filter((w) => getWidgetEntry(w.type) !== null);
+}
+
 function submit(): void {
     if (isEdit.value) {
-        const widgets = (
-            JSON.parse(JSON.stringify(editWidgets.value)) as WidgetInstance[]
-        ).filter((w) => getWidgetEntry(w.type) !== null);
+        const widgets = serializeWidgets();
 
         form.transform((data) => ({ ...data, widgets })).put(
             `/admin/pages/${props.page!.id}`,
@@ -201,16 +203,22 @@ function submit(): void {
     }
 }
 
-const previewUrl = computed<string | null>(() => {
-    if (!props.page) return null;
-    const defaultLocale =
-        props.languages.find((l) => l.is_default)?.code ?? 'de';
-    const slug =
-        props.page.translations[defaultLocale]?.permalink ??
-        Object.values(props.page.translations)[0]?.permalink ??
-        null;
-    return slug ? localizedUrl(defaultLocale, `/${slug}`) : null;
-});
+function saveAndStay(): void {
+    if (!isEdit.value) return;
+    const widgets = serializeWidgets();
+
+    form.transform((data) => ({ ...data, widgets })).put(
+        `/admin/pages/${props.page!.id}?stay=1`,
+        { preserveScroll: true, preserveState: true },
+    );
+}
+
+function livePermalinkUrl(code: string): string | null {
+    const slug = form.translations[code]?.permalink ?? '';
+    if (!slug) return null;
+    const prefix = props.urlPrefixes[code] ?? '';
+    return `${prefix}${slug}`;
+}
 
 const errorFor = (code: string, field: keyof Translation) =>
     form.errors[`translations.${code}.${field}` as keyof typeof form.errors] as
@@ -319,13 +327,20 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             class="text-xs text-muted-foreground"
                                         >
                                             {{ t('pages.preview_label') }}:
-                                            <span class="text-primary">
+                                            <a
+                                                v-if="livePermalinkUrl(code)"
+                                                :href="livePermalinkUrl(code)!"
+                                                target="_blank"
+                                                rel="noopener"
+                                                class="inline-flex items-center gap-1 font-medium text-[var(--orange)] underline underline-offset-4 hover:text-[color-mix(in_srgb,var(--orange)_80%,black)]"
+                                            >
                                                 {{ urlPrefixes[code]
-                                                }}{{
-                                                    form.translations[code]
-                                                        .permalink ||
-                                                    t('pages.permalink_placeholder')
-                                                }}
+                                                }}{{ form.translations[code].permalink }}
+                                                <ExternalLink class="size-3" />
+                                            </a>
+                                            <span v-else class="text-[var(--orange)]">
+                                                {{ urlPrefixes[code]
+                                                }}{{ t('pages.permalink_placeholder') }}
                                             </span>
                                         </p>
                                         <InputError
@@ -339,11 +354,6 @@ const errorFor = (code: string, field: keyof Translation) =>
                         </LocaleTabs>
                     </CardContent>
                 </Card>
-
-                <!-- Widget Builder: available on BOTH create and edit.
-                     On create, widgets are part of the main page form (no
-                     internal Save button); on edit they have their own
-                     Save button that hits the sync endpoint directly. -->
                 <Card>
                     <CardHeader>
                         <CardTitle>{{ t('pages.widgets_title') }}</CardTitle>
@@ -355,7 +365,6 @@ const errorFor = (code: string, field: keyof Translation) =>
                         <WidgetsCanvas
                             v-if="isEdit && page"
                             v-model:widgets="editWidgets"
-                            :page-id="page.id"
                             :available-widgets="availableWidgets"
                             :languages="languages"
                         />
@@ -429,20 +438,14 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 {{ t('pages.save_exit') }}
                             </Button>
                             <Button
-                                v-if="previewUrl"
-                                as-child
+                                v-if="isEdit"
                                 type="button"
-                                variant="default"
+                                variant="secondary"
+                                :disabled="form.processing"
+                                class="flex-1"
+                                @click="saveAndStay"
                             >
-                                <a
-                                    :href="previewUrl"
-                                    target="_blank"
-                                    rel="noopener"
-                                    class="flex-1"
-                                >
-                                    <ExternalLink class="size-4" />
-                                    {{ t('pages.preview_button') }}
-                                </a>
+                                {{ t('common.save') }}
                             </Button>
                             <Button
                                 as-child

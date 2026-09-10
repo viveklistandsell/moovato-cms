@@ -190,6 +190,11 @@ final class PageController extends Controller
         $data['image'] = $request->file('image');
 
         $action->handle($page, $data);
+        if ($request->boolean('stay')) {
+            return redirect()
+                ->route('admin.pages.edit', $page)
+                ->with('toast', ['type' => 'success', 'message' => 'Page updated.']);
+        }
 
         return redirect()
             ->route('admin.pages.index')
@@ -320,7 +325,13 @@ final class PageController extends Controller
      */
     private function urlPrefixes(): array
     {
-        $base = mb_rtrim((string) config('app.url'), '/');
+        $request = request();
+        $base = mb_rtrim(
+            $request instanceof Request
+                ? $request->getSchemeAndHttpHost()
+                : (string) config('app.url'),
+            '/',
+        );
         $defaultCode = Language::query()
             ->where('lang_is_default', true)
             ->where('status', true)

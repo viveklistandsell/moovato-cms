@@ -23,7 +23,7 @@ final class PlanController extends Controller
 {
     private const FEATURE_KEYS = [
         'short_description', 'about', 'founded', 'employees',
-        'faqs', 'cover', 'trust', 'google',
+        'faqs', 'cover', 'trust', 'google', 'lead',
     ];
 
     private const CAP_KEYS = ['contacts', 'services', 'areas', 'gallery', 'faqs', 'reply_reviews'];
@@ -98,6 +98,8 @@ final class PlanController extends Controller
             'period' => (string) $data['period'],
             'positioning' => $data['positioning'] ?? null,
             'placement' => (string) $data['placement'],
+            'lead_url' => $this->trimToNull($data['lead_url'] ?? null),
+            'lead_label' => $this->trimToNull($data['lead_label'] ?? null),
             'is_active' => (bool) $data['is_active'],
             'features' => $features,
             'caps' => $caps,
@@ -125,7 +127,6 @@ final class PlanController extends Controller
     }
 
     /**
-     *
      * @param  array<string, mixed>  $before
      * @param  array<string, mixed>  $after
      * @return int Number of partners emailed (0 if nothing changed
@@ -247,6 +248,8 @@ final class PlanController extends Controller
             'period' => (string) $p->period,
             'positioning' => $p->positioning,
             'placement' => (string) $p->placement,
+            'lead_url' => $p->lead_url,
+            'lead_label' => $p->lead_label,
             'features' => (array) ($p->features ?? []),
             'caps' => (array) ($p->caps ?? []),
             'sort_order' => (int) $p->sort_order,
@@ -259,5 +262,14 @@ final class PlanController extends Controller
         }
 
         return $out;
+    }
+    private function trimToNull(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+        $trimmed = mb_trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 }

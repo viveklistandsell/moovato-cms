@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     --midnight: #202020;
     --midnight-soft: #1e293b;
     --black: #0c0c0c;
@@ -10612,3 +10612,153 @@
     border-radius: 1.5rem;
     box-shadow: 0 24px 48px -34px rgba(15, 23, 42, 0.16);
 }
+
+.mv-locsearch { position: relative; }
+.mv-locsearch--orange-soft { background: var(--orange-soft); }
+.mv-locsearch--paper       { background: var(--paper); }
+.mv-locsearch--midnight    { background: var(--midnight); color: var(--linen); }
+.mv-locsearch--none        { background: transparent; }
+.mv-locsearch--midnight .mv-locsearch__eyebrow,
+.mv-locsearch--midnight .mv-locsearch__title,
+.mv-locsearch--midnight .mv-locsearch__subtitle { color: var(--linen); }
+
+.mv-locsearch__eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--orange);
+    margin-bottom: 0.5rem;
+}
+.mv-locsearch__title {
+    color: var(--midnight);
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0 0 0.75rem;
+}
+.mv-locsearch__subtitle {
+    color: var(--slate);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.mv-locsearch__inner.text-left .mv-locsearch__subtitle { margin-left: 0; margin-right: 0; }
+
+.mv-locsearch__form {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    background: var(--white);
+    border: 1px solid var(--linen);
+    border-radius: 999px;
+    padding: 0.4rem;
+    box-shadow: 0 24px 48px -34px rgba(15, 23, 42, 0.18);
+}
+.mv-locsearch__form input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-size: 1rem;
+    color: var(--midnight);
+    padding: 0.5rem 1rem;
+}
+.mv-locsearch__form input::placeholder { color: var(--slate-light); }
+.mv-locsearch__form button {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 999px;
+    background: var(--orange);
+    color: var(--white);
+    font-weight: 600;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.mv-locsearch__form button:hover { background: color-mix(in srgb, var(--orange) 85%, black); }
+.mv-locsearch__button-label { font-size: 0.95rem; }
+@media (max-width: 480px) {
+    .mv-locsearch__button-label { display: none; }
+    .mv-locsearch__form button { padding: 0.65rem 0.9rem; }
+}
+
+.mv-locsearch__results {
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 0.5rem;
+    z-index: 20;
+    background: var(--white);
+    border: 1px solid var(--linen);
+    border-radius: 1rem;
+    max-height: 20rem;
+    overflow-y: auto;
+    box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.22);
+    padding: 0.25rem;
+    list-style: none;
+}
+.mv-locsearch__empty {
+    padding: 0.85rem 1rem;
+    color: var(--slate);
+    font-size: 0.9rem;
+}
+.mv-locsearch__result {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.mv-locsearch__result:hover,
+.mv-locsearch__result.is-active { background: var(--orange-soft); }
+.mv-locsearch__result-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: var(--orange-soft);
+    color: var(--orange);
+    flex-shrink: 0;
+}
+.mv-locsearch__result-text { flex: 1; min-width: 0; }
+.mv-locsearch__result-name {
+    display: block;
+    font-weight: 600;
+    color: var(--midnight);
+    line-height: 1.2;
+    truncate: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.mv-locsearch__result-sub {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--slate);
+    line-height: 1.2;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.mv-locsearch__result-kind {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--slate);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
+    flex-shrink: 0;
+}
+.mv-locsearch__result-chevron { color: var(--slate-light); flex-shrink: 0; }

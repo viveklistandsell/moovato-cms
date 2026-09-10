@@ -41,6 +41,8 @@ final class UpdatePlanRequest extends FormRequest
             'period' => ['required', 'string', 'max:32'],
             'positioning' => ['nullable', 'string', 'max:255'],
             'placement' => ['required', Rule::in(['standard', 'boosted', 'featured'])],
+            'lead_url' => ['nullable', 'string', 'max:2048'],
+            'lead_label' => ['nullable', 'string', 'max:80'],
             'is_active' => ['required', 'boolean'],
             'features' => ['required', 'array'],
             'caps' => ['required', 'array'],

@@ -8,6 +8,7 @@ export type WidgetMeta = {
     category: string;
     default_settings: Record<string, unknown>;
     default_data: Record<string, unknown>;
+    default_data_by_locale?: Record<string, Record<string, unknown>>;
 };
 
 /** Translatable payload keyed by language code. */

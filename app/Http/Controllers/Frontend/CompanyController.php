@@ -12,6 +12,7 @@ use App\Models\CompanyTranslation;
 use App\Models\CompanyUser;
 use App\Models\District;
 use App\Models\Language;
+use App\Models\Plan;
 use App\Models\ServiceCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -43,6 +44,8 @@ final class CompanyController extends Controller
         $locale = App::getLocale();
         $cityId = self::intQuery($request, 'city');
         $districtId = self::intQuery($request, 'district');
+        $stateId = self::intQuery($request, 'state');
+        $countryId = self::intQuery($request, 'country');
         $serviceIds = self::intArrayQuery($request, 'services');
         if ($serviceIds === [] && ($legacy = self::intQuery($request, 'service')) !== null) {
             $serviceIds = [$legacy];
@@ -70,6 +73,10 @@ final class CompanyController extends Controller
             $query->whereHas('serviceAreas', fn (Builder $q) => $q->where('districts.id', $districtId));
         } elseif ($cityId !== null) {
             $query->where('primary_city_id', $cityId);
+        } elseif ($stateId !== null) {
+            $query->whereHas('primaryCity', fn (Builder $q) => $q->where('state_id', $stateId));
+        } elseif ($countryId !== null) {
+            $query->whereHas('primaryCity.state', fn (Builder $q) => $q->where('country_id', $countryId));
         }
         if ($serviceIds !== []) {
             $query->whereHas('services', fn (Builder $q) => $q->whereIn('service_categories.id', $serviceIds));
@@ -406,6 +413,13 @@ final class CompanyController extends Controller
             'verified' => (bool) $c->verified,
             'is_top_rated' => (bool) $c->is_top_rated,
             'plan_tier' => $c->plan_tier,
+            'plan_lead_url' => (
+                ($tierPlan = Plan::findBySlug($c->tier()->value))
+                && ! empty($tierPlan['features']['lead'])
+            ) ? ($tierPlan['lead_url'] ?? null) : null,
+            'plan_lead_label' => (
+                $tierPlan && ! empty($tierPlan['features']['lead'])
+            ) ? ($tierPlan['lead_label'] ?? null) : null,
             'rating_avg' => (float) $c->rating_avg,
             'review_count' => (int) $c->review_count,
             'recommend_pct' => (int) $c->recommend_pct,

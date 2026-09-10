@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Cache;
     'period',
     'positioning',
     'placement',
+    'lead_url',
+    'lead_label',
     'features',
     'caps',
     'sort_order',
@@ -24,7 +26,7 @@ use Illuminate\Support\Facades\Cache;
 ])]
 final class Plan extends Model
 {
-    public const CACHE_KEY = 'plans.registry.v1';
+    public const CACHE_KEY = 'plans.registry.v4';
 
     public $incrementing = false;
 
@@ -60,6 +62,8 @@ final class Plan extends Model
                     'period' => (string) $p->period,
                     'positioning' => $p->positioning === null ? null : (string) $p->positioning,
                     'placement' => (string) $p->placement,
+                    'lead_url' => $p->lead_url === null ? null : (string) $p->lead_url,
+                    'lead_label' => $p->lead_label === null ? null : (string) $p->lead_label,
                     'features' => (array) ($p->features ?? []),
                     'caps' => (array) ($p->caps ?? []),
                     'sort_order' => (int) $p->sort_order,

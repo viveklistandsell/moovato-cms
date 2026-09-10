@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\PlanTier;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Storage;
 ])]
 final class Company extends Model
 {
+    use HasFactory;
+
     protected $table = 'companies';
 
     protected $casts = [
@@ -195,6 +198,7 @@ final class Company extends Model
 
         return PlanTier::tryFrom((string) $raw) ?? PlanTier::Basic;
     }
+
     public function enforceLimits(): void
     {
         $tier = $this->tier();
@@ -304,6 +308,7 @@ final class Company extends Model
             $victim->delete();
         }
     }
+
     private function stripLockedFeatures(PlanTier $tier): void
     {
         $updates = [];

@@ -45,6 +45,22 @@ trait ProvidesWidgetDefaults
     }
 
     /**
+     * Locale-specific defaults for the translatable payload, keyed by language
+     * code (e.g. `['de' => [...], 'en' => [...]]`). Widgets that need different
+     * initial copy per language override this; everyone else keeps returning
+     * an empty map and the frontend falls back to {@see defaultData()} for
+     * every language tab. Only defined here (not on the interface) so the
+     * addition stays backward compatible — every concrete widget uses this
+     * trait and therefore inherits the empty default automatically.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function defaultDataByLocale(): array
+    {
+        return [];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function settingsRules(): array
@@ -63,7 +79,7 @@ trait ProvidesWidgetDefaults
     /**
      * Metadata shape consumed by the admin frontend picker.
      *
-     * @return array{type: string, label: string, icon: string, category: string, default_settings: array<string, mixed>, default_data: array<string, mixed>}
+     * @return array{type: string, label: string, icon: string, category: string, default_settings: array<string, mixed>, default_data: array<string, mixed>, default_data_by_locale: array<string, array<string, mixed>>}
      */
     public static function toArray(): array
     {
@@ -74,6 +90,7 @@ trait ProvidesWidgetDefaults
             'category' => static::category(),
             'default_settings' => static::defaultSettings(),
             'default_data' => static::defaultData(),
+            'default_data_by_locale' => static::defaultDataByLocale(),
         ];
     }
 }

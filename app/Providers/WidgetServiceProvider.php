@@ -32,6 +32,7 @@ use App\Widgets\Hero\HeroWidget;
 use App\Widgets\Heronew\HeronewWidget;
 use App\Widgets\HowItWorks\HowItWorksWidget;
 use App\Widgets\Image\ImageWidget;
+use App\Widgets\LocationSearch\LocationSearchWidget;
 use App\Widgets\Map\MapWidget;
 use App\Widgets\Marquee\MarqueeWidget;
 use App\Widgets\MediaChecklist\MediaChecklistWidget;
@@ -118,6 +119,7 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         CompanyDirectoryWidget::class,
         ContactWidget::class,
         WorkProcessWidget::class,
+        LocationSearchWidget::class,
     ];
 
     public function register(): void

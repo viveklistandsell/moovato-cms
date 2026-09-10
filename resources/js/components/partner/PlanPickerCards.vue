@@ -72,6 +72,7 @@ const t = computed(() => (props.locale === 'de'
         feat_cover: 'Titelbild',
         feat_trust: 'Vertrauens-Abzeichen',
         feat_google: 'Google-Bewertungen',
+        feat_lead: 'Lead-Button',
         feat_reply_reviews: 'Auf Bewertungen antworten',
         placement_standard: 'Standard-Platzierung',
         placement_boosted: 'Bevorzugte Platzierung',
@@ -103,6 +104,7 @@ const t = computed(() => (props.locale === 'de'
         feat_cover: 'Cover image',
         feat_trust: 'Trust badges',
         feat_google: 'Google reviews',
+        feat_lead: 'Lead button',
         feat_reply_reviews: 'Reply to reviews',
         placement_standard: 'Standard placement',
         placement_boosted: 'Boosted placement',
@@ -122,6 +124,7 @@ const featureRows = [
     'cover',
     'trust',
     'google',
+    'lead',
 ] as const;
 
 // `reply_reviews` moved from features → caps so it can express a

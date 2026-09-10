@@ -35,11 +35,12 @@ return [
         'short_description',
         'about',
         'founded',
-        'employees',         
-        'faqs',             
-        'cover',            
-        'trust',            
-        'google',           
+        'employees',
+        'faqs',
+        'cover',
+        'trust',
+        'google',
+        'lead',
         'reply_reviews',
     ],
 
@@ -65,6 +66,7 @@ return [
                 'cover' => false,
                 'trust' => false,
                 'google' => false,
+                'lead' => false,
                 'reply_reviews' => false,
             ],
             'caps' => [
@@ -90,6 +92,7 @@ return [
                 'cover' => true,
                 'trust' => false,
                 'google' => true,
+                'lead' => false,
                 'reply_reviews' => true,
             ],
             'caps' => [
@@ -115,6 +118,7 @@ return [
                 'cover' => true,
                 'trust' => true,
                 'google' => true,
+                'lead' => true,
                 'reply_reviews' => true,
             ],
             'caps' => [

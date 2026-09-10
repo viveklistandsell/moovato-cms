@@ -57,6 +57,8 @@ type Company = {
     verified: boolean;
     is_top_rated: boolean;
     plan_tier: string;
+    plan_lead_url: string | null;
+    plan_lead_label: string | null;
     rating_avg: number;
     review_count: number;
     recommend_pct: number;
@@ -514,6 +516,15 @@ function markHelpful(review: PublicReview): void {
                             >
                                 <Phone class="size-3.5" />
                                 {{ t.request_quote }}
+                            </a>
+                            <a
+                                v-if="company.plan_lead_url"
+                                :href="company.plan_lead_url"
+                                target="_blank"
+                                rel="noopener"
+                                class="inline-flex items-center gap-1.5 rounded-xl bg-[var(--midnight)] px-4 py-2 text-sm font-semibold text-white hover:bg-[color-mix(in_srgb,var(--midnight)_85%,var(--orange))]"
+                            >
+                                {{ company.plan_lead_label || 'Lead' }}
                             </a>
                             <Link
                                 :href="reviewFormUrl"

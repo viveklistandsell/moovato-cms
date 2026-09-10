@@ -26,6 +26,8 @@ type Plan = {
     period: string;
     positioning: string | null;
     placement: string;
+    lead_url: string | null;
+    lead_label: string | null;
     features: Record<string, boolean>;
     caps: Record<string, number | null>;
     is_active: boolean;
@@ -57,6 +59,8 @@ const form = useForm<{
     period: string;
     positioning: string;
     placement: string;
+    lead_url: string;
+    lead_label: string;
     is_active: boolean;
     features: Record<string, boolean>;
     caps: Record<string, number | string>;
@@ -67,6 +71,8 @@ const form = useForm<{
     period: props.plan.period,
     positioning: props.plan.positioning ?? '',
     placement: props.plan.placement,
+    lead_url: props.plan.lead_url ?? '',
+    lead_label: props.plan.lead_label ?? '',
     is_active: props.plan.is_active,
     features: props.feature_keys.reduce<Record<string, boolean>>((acc, k) => {
         acc[k] = Boolean(props.plan.features[k]);
@@ -84,7 +90,9 @@ function submit(): void {
     });
 }
 
-function toggleUnlimited(k: string, checked: boolean): void {
+function toggleUnlimited(k: string, checked: boolean | 'indeterminate'): void {
+    if (checked === 'indeterminate') return;
+
     form.caps[k] = checked ? '' : 0;
 }
 function isUnlimited(k: string): boolean {
@@ -193,6 +201,27 @@ function isUnlimited(k: string): boolean {
                             {{ t(`plans.feat_${k}`) }}
                         </label>
                     </div>
+                    <div
+                        v-if="form.features.lead"
+                        class="mt-4 rounded-md border border-dashed border-[var(--orange)]/40 bg-[var(--orange-soft)]/40 p-3"
+                    >
+                        <p class="mb-2 text-xs font-semibold text-[var(--midnight)]">
+                            {{ t('plans.section_lead') }}
+                        </p>
+                        <div class="grid gap-3 md:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-[11px] font-medium">{{ t('plans.label_lead_url') }}</label>
+                                <Input v-model="form.lead_url" :placeholder="t('plans.lead_url_placeholder')" />
+                                <p v-if="form.errors.lead_url" class="mt-1 text-xs text-destructive">{{ form.errors.lead_url }}</p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-[11px] font-medium">{{ t('plans.label_lead_label') }}</label>
+                                <Input v-model="form.lead_label" :placeholder="t('plans.lead_label_placeholder')" />
+                                <p v-if="form.errors.lead_label" class="mt-1 text-xs text-destructive">{{ form.errors.lead_label }}</p>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-[11px] text-muted-foreground">{{ t('plans.lead_url_hint') }}</p>
+                    </div>
                 </CardContent>
             </Card>
 
@@ -218,7 +247,7 @@ function isUnlimited(k: string): boolean {
                                 <label class="flex cursor-pointer items-center gap-1.5 text-[11px] text-muted-foreground">
                                     <Checkbox
                                         :model-value="isUnlimited(k)"
-                                        @update:model-value="(v: boolean) => toggleUnlimited(k, v)"
+                                        @update:model-value="(v: boolean | 'indeterminate') => toggleUnlimited(k, v === true)"
                                     />
                                     {{ t('plans.unlimited') }}
                                 </label>

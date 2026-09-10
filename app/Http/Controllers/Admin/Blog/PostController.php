@@ -188,6 +188,12 @@ final class PostController extends Controller
 
         $action->handle($post, $data);
 
+        if ($request->boolean('stay')) {
+            return redirect()
+                ->route('admin.blog.posts.edit', $post)
+                ->with('toast', ['type' => 'success', 'message' => 'Post updated.']);
+        }
+
         return redirect()
             ->route('admin.blog.posts.index')
             ->with('toast', ['type' => 'success', 'message' => 'Post updated.']);
@@ -355,7 +361,13 @@ final class PostController extends Controller
      */
     private function urlPrefixes(): array
     {
-        $base = mb_rtrim((string) config('app.url'), '/');
+        $request = request();
+        $base = mb_rtrim(
+            $request instanceof Request
+                ? $request->getSchemeAndHttpHost()
+                : (string) config('app.url'),
+            '/',
+        );
         $defaultCode = Language::query()
             ->where('lang_is_default', true)
             ->where('status', true)

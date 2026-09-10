@@ -24,7 +24,6 @@ use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSett
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
 use App\Http\Controllers\Admin\Page\PageImportController as AdminPageImportController;
-use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
 use App\Http\Controllers\Admin\PlanChangeRequests\PlanChangeRequestController as AdminPlanChangeRequestController;
 use App\Http\Controllers\Admin\Plans\PlanController as AdminPlanController;
 use App\Http\Controllers\Admin\Reviews\ReviewController as AdminReviewController;
@@ -46,6 +45,7 @@ use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\CompanyController as FrontendCompanyController;
 use App\Http\Controllers\Frontend\CompanyReviewController as FrontendCompanyReviewController;
 use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
+use App\Http\Controllers\Frontend\LocationSearchController as FrontendLocationSearchController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\PlaceSearchController;
 use App\Http\Controllers\Frontend\RobotsController;
@@ -81,6 +81,15 @@ Route::middleware('throttle:60,1')->group(function (): void {
         ->name('places.suggest');
     Route::get('places/resolve', [PlaceSearchController::class, 'resolve'])
         ->name('places.resolve');
+});
+
+Route::middleware('throttle:60,1')->group(function (): void {
+    Route::get('location-search/suggest', [FrontendLocationSearchController::class, 'suggest'])
+        ->name('location-search.suggest');
+    Route::get('location-search/resolve', [FrontendLocationSearchController::class, 'resolve'])
+        ->name('location-search.resolve');
+    Route::get('location-search/go', [FrontendLocationSearchController::class, 'redirect'])
+        ->name('location-search.go');
 });
 
 // Default-locale (DE) routes live at the root with no /de prefix.
@@ -377,10 +386,6 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             Route::post('{page}/duplicate', [AdminPageController::class, 'duplicate'])
                 ->where('page', '[0-9]+')
                 ->name('duplicate');
-
-            Route::post('{page}/widgets', [AdminPageWidgetController::class, 'sync'])
-                ->where('page', '[0-9]+')
-                ->name('widgets.sync');
 
             Route::resource('/', AdminPageController::class)
                 ->parameters(['' => 'page'])
