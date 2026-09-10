@@ -53,6 +53,8 @@ final class HowItWorksWidget implements WidgetContract
                 ['icon' => 'CalendarCheck', 'title' => 'Termin buchen', 'description' => 'Wählen Sie Ihren Wunschtermin – den Rest übernehmen wir für Sie.'],
                 ['icon' => 'Truck', 'title' => 'Umzug genießen', 'description' => 'Unser Team packt, transportiert und baut auf. Sie lehnen sich entspannt zurück.'],
             ],
+            'button_label' => 'Kostenloses Angebot anfordern',
+            'button_url' => '#angebot',
         ];
     }
 
@@ -76,6 +78,8 @@ final class HowItWorksWidget implements WidgetContract
             'steps.*.icon' => ['nullable', 'string'],
             'steps.*.title' => ['nullable', 'string'],
             'steps.*.description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

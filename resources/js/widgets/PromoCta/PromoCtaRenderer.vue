@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { Check } from 'lucide-vue-next';
 import { computed } from 'vue';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Data = {
     heading?: string;
     description?: string;
-    features?: string[];
     button_label?: string;
     button_url?: string;
     badge_number?: string;
@@ -34,70 +32,34 @@ const telHref = computed(
         <div class="container-xl">
             <div class="mv-promocta-card">
                 <div
-                    class="mv-promocta-inner grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-x-10"
-                >
+                    class="mv-promocta-inner grid grid-cols-1 items-center gap-10 lg:grid-cols-[4fr_1fr] lg:gap-x-10">
                     <div>
                         <h2 v-if="data.heading" class="mv-promocta-heading mv-section-heading">
                             {{ data.heading }}
                         </h2>
 
-                        <div
-                            v-if="data.description"
-                            class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
-                            v-html="data.description"
-                        />
+                        <div v-if="data.description" class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                            v-html="data.description" />
 
-                        <ul
-                            v-if="data.features?.length"
-                            class="mt-7 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2"
-                        >
-                            <li
-                                v-for="(feature, i) in data.features"
-                                :key="i"
-                                class="mv-promocta-feature"
-                            >
-                                <span class="mv-promocta-check">
-                                    <Check class="size-4" />
-                                </span>
-                                {{ feature }}
-                            </li>
-                        </ul>
-
-                        <NextButton
-                            v-if="data.button_label"
-                            class="mt-8"
-                            :label="data.button_label"
-                            :href="data.button_url || '#'"
-                        />
+                        <NextButton v-if="data.button_label" class="mt-8" :label="data.button_label"
+                            :href="data.button_url || '#'" />
                     </div>
 
                     <div class="mv-promocta-call">
                         <div class="mv-promocta-badge">
                             <span class="mv-promocta-badge-num">{{
                                 data.badge_number || '24'
-                            }}</span>
+                                }}</span>
                             <span class="mv-promocta-badge-stack">
                                 <span class="mv-promocta-badge-unit">{{
                                     data.badge_unit
-                                }}</span>
+                                    }}</span>
                                 <span class="mv-promocta-badge-label">{{
                                     data.badge_label
-                                }}</span>
+                                    }}</span>
                             </span>
                         </div>
-                        <p
-                            v-if="data.call_label"
-                            class="mv-promocta-call-label"
-                        >
-                            {{ data.call_label }}
-                        </p>
-                        <a
-                            v-if="data.phone"
-                            :href="telHref"
-                            class="mv-promocta-phone"
-                        >
-                            {{ data.phone }}
-                        </a>
+                        
                     </div>
                 </div>
             </div>

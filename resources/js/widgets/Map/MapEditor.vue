@@ -27,6 +27,8 @@ type Data = {
     heading: string;
     subheading: string;
     description: string;
+    button_label: string;
+    button_url: string;
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
@@ -70,6 +72,17 @@ function removePin(index: number): void {
                     v-model="data.description"
                     placeholder="Beschreibung"
                 />
+            </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Button label</Label>
+                <Input
+                    v-model="data.button_label"
+                    placeholder="Kostenloses Angebot anfordern"
+                />
+            </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Button URL</Label>
+                <Input v-model="data.button_url" placeholder="#angebot" />
             </div>
         </div>
 

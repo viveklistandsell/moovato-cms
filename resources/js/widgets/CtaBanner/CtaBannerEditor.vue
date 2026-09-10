@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,11 +12,13 @@ type Settings = {
     image_url: string | null;
 };
 
+type Point = { title: string; description: string };
+
 type Data = {
     heading: string;
     primary_label: string;
     primary_url: string;
-    points: string[];
+    points: Point[];
     image_alt: string;
 };
 
@@ -23,7 +26,10 @@ const settings = defineModel<Settings>('settings', { required: true });
 const data = defineModel<Data>('data', { required: true });
 
 function addPoint(): void {
-    data.value.points = [...(data.value.points ?? []), ''];
+    data.value.points = [
+        ...(data.value.points ?? []),
+        { title: '', description: '' },
+    ];
 }
 
 function removePoint(index: number): void {
@@ -89,22 +95,28 @@ function removePoint(index: number): void {
                     </Button>
                 </div>
                 <div
-                    v-for="(_, i) in data.points ?? []"
+                    v-for="(point, i) in data.points ?? []"
                     :key="i"
-                    class="flex gap-2"
+                    class="space-y-2 rounded-md border bg-muted/30 p-3"
                 >
-                    <Input
-                        v-model="data.points[i]"
-                        placeholder="Erfahrene Profis für Umzug und Entrümpelung"
+                    <div class="flex items-center gap-2">
+                        <Input
+                            v-model="point.title"
+                            placeholder="Erfahrene Profis für Umzug und Entrümpelung"
+                        />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            @click="removePoint(i)"
+                        >
+                            <Trash2 class="size-4 text-destructive" />
+                        </Button>
+                    </div>
+                    <RichTextEditor
+                        v-model="point.description"
+                        placeholder="Beschreibung"
                     />
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        @click="removePoint(i)"
-                    >
-                        <Trash2 class="size-4 text-destructive" />
-                    </Button>
                 </div>
             </div>
         </div>

@@ -11,6 +11,8 @@ type Data = {
     eyebrow: string;
     heading: string;
     steps: Step[];
+    button_label: string;
+    button_url: string;
 };
 
 defineModel<Record<string, unknown>>('settings', { required: true });
@@ -38,6 +40,17 @@ function removeStep(index: number): void {
             <div class="grid gap-2">
                 <Label>Heading</Label>
                 <Input v-model="data.heading" />
+            </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Button label (optional)</Label>
+                <Input
+                    v-model="data.button_label"
+                    placeholder="Kostenloses Angebot anfordern"
+                />
+            </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Button URL</Label>
+                <Input v-model="data.button_url" placeholder="#angebot" />
             </div>
         </div>
 

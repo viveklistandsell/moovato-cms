@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NextButton from '@/widgets/shared/NextButton.vue';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 
 type Partner = {
@@ -20,6 +21,8 @@ type Data = {
     heading?: string;
     subheading?: string;
     description?: string;
+    button_label?: string;
+    button_url?: string;
     partners_title?: string;
     certificates_title?: string;
 };
@@ -52,6 +55,12 @@ defineProps<{ settings: Settings; data: Data }>();
                 >
                     {{ data.subheading }}
                 </p>
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-6"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
 
             <div v-if="(settings.partners ?? []).length" class="mt-4 lg:mt-6">

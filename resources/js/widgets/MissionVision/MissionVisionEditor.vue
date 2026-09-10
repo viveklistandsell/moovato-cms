@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { Plus, Trash2 } from 'lucide-vue-next';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,25 +19,12 @@ type Data = {
     button_url: string;
     panel_one_heading: string;
     panel_one_body: string;
-    panel_one_points: string[];
     panel_two_heading: string;
     panel_two_body: string;
-    panel_two_points: string[];
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
 const data = defineModel<Data>('data', { required: true });
-
-function addPoint(key: 'panel_one_points' | 'panel_two_points'): void {
-    data.value[key] = [...(data.value[key] ?? []), ''];
-}
-
-function removePoint(
-    key: 'panel_one_points' | 'panel_two_points',
-    index: number,
-): void {
-    data.value[key] = (data.value[key] ?? []).filter((_, i) => i !== index);
-}
 </script>
 
 <template>
@@ -102,40 +87,13 @@ function removePoint(
                     />
                 </div>
                 <div class="grid gap-2">
-                    <Label class="text-xs">Body</Label>
-                    <Textarea v-model="data.panel_one_body" :rows="4" />
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <Label class="text-xs">Checklist</Label>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            @click="addPoint('panel_one_points')"
-                        >
-                            <Plus class="size-4" />
-                            Add
-                        </Button>
-                    </div>
-                    <div
-                        v-for="(_, i) in data.panel_one_points ?? []"
-                        :key="i"
-                        class="flex gap-2"
+                    <Label class="text-xs"
+                        >Body (add a bullet list for checkmarks)</Label
                     >
-                        <Input
-                            v-model="data.panel_one_points[i]"
-                            placeholder="Maßgeschneiderte Umzugslösungen"
-                        />
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            @click="removePoint('panel_one_points', i)"
-                        >
-                            <Trash2 class="size-4 text-destructive" />
-                        </Button>
-                    </div>
+                    <RichTextEditor
+                        v-model="data.panel_one_body"
+                        placeholder="Body"
+                    />
                 </div>
             </div>
 
@@ -149,40 +107,13 @@ function removePoint(
                     />
                 </div>
                 <div class="grid gap-2">
-                    <Label class="text-xs">Body</Label>
-                    <Textarea v-model="data.panel_two_body" :rows="4" />
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <Label class="text-xs">Checklist</Label>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            @click="addPoint('panel_two_points')"
-                        >
-                            <Plus class="size-4" />
-                            Add
-                        </Button>
-                    </div>
-                    <div
-                        v-for="(_, i) in data.panel_two_points ?? []"
-                        :key="i"
-                        class="flex gap-2"
+                    <Label class="text-xs"
+                        >Body (add a bullet list for checkmarks)</Label
                     >
-                        <Input
-                            v-model="data.panel_two_points[i]"
-                            placeholder="Innovativer Ansatz"
-                        />
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            @click="removePoint('panel_two_points', i)"
-                        >
-                            <Trash2 class="size-4 text-destructive" />
-                        </Button>
-                    </div>
+                    <RichTextEditor
+                        v-model="data.panel_two_body"
+                        placeholder="Body"
+                    />
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Image as ImageIcon } from 'lucide-vue-next';
+import NextButton from '@/widgets/shared/NextButton.vue';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 
 type Card = { icon?: string; title?: string; description?: string };
@@ -14,6 +15,8 @@ type Data = {
     heading?: string;
     subheading?: string;
     image_alt?: string;
+    button_label?: string;
+    button_url?: string;
     cards?: Card[];
 };
 
@@ -54,6 +57,13 @@ defineProps<{ settings: Settings; data: Data }>();
                         <ImageIcon class="size-10" />
                     </div>
                 </div>
+
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-8"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
 
             <ul class="wc-stack">

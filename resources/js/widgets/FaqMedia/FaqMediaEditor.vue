@@ -23,6 +23,8 @@ type Data = {
     heading_highlight: string;
     heading_tail: string;
     items: Item[];
+    button_label: string;
+    button_url: string;
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
@@ -106,6 +108,17 @@ function removeItem(index: number): void {
                         :model-value="settings.first_open"
                         @update:model-value="(v) => (settings.first_open = v)"
                     />
+                </div>
+                <div class="grid gap-2">
+                    <Label>Button label (optional)</Label>
+                    <Input
+                        v-model="data.button_label"
+                        placeholder="Weitere Fragen? Kontaktieren Sie uns"
+                    />
+                </div>
+                <div class="grid gap-2">
+                    <Label>Button URL</Label>
+                    <Input v-model="data.button_url" placeholder="#kontakt" />
                 </div>
             </div>
         </div>

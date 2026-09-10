@@ -44,15 +44,12 @@ final class StatFeaturesWidget implements WidgetContract
         return [
             'eyebrow' => '',
             'heading' => 'Warum Kundinnen und Kunden Moovato vertrauen',
-            'body' => 'Wir setzen auf strukturierte Umzüge mit sorgfältiger Planung, geschultem Personal und einem klar organisierten Ablauf.',
+            'body' => '<p>Wir setzen auf strukturierte Umzüge mit sorgfältiger Planung, geschultem Personal und einem klar organisierten Ablauf.</p><ol><li><strong>Geschulte Umzugsprofis</strong> – Unser erfahrenes Team nutzt die richtigen Techniken und Schutzmaterialien für einen sicheren Transport.</li><li><strong>Pünktliche Termine</strong> – Wir planen Zeitfenster und Routen so, dass Ihre Sachen genau wie vereinbart ankommen.</li><li><strong>Sichere Verpackung</strong> – Hochwertige Materialien und ein klares Beschriftungssystem verhindern Schäden während des Umzugs.</li></ol>',
             'image_alt' => 'Moovato Mitarbeiter trägt einen Karton vor einem Mehrfamilienhaus',
             'stat_value' => '1.5k+',
             'stat_label' => 'Kunden',
-            'features' => [
-                ['title' => 'Geschulte Umzugsprofis', 'description' => 'Unser erfahrenes Team nutzt die richtigen Techniken und Schutzmaterialien für einen sicheren Transport.'],
-                ['title' => 'Pünktliche Termine', 'description' => 'Wir planen Zeitfenster und Routen so, dass Ihre Sachen genau wie vereinbart ankommen.'],
-                ['title' => 'Sichere Verpackung', 'description' => 'Hochwertige Materialien und ein klares Beschriftungssystem verhindern Schäden während des Umzugs.'],
-            ],
+            'button_label' => 'Kostenloses Angebot anfordern',
+            'button_url' => '#angebot',
         ];
     }
 
@@ -73,9 +70,8 @@ final class StatFeaturesWidget implements WidgetContract
             'image_alt' => ['nullable', 'string'],
             'stat_value' => ['nullable', 'string'],
             'stat_label' => ['nullable', 'string'],
-            'features' => ['nullable', 'array'],
-            'features.*.title' => ['nullable', 'string'],
-            'features.*.description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

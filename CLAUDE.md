@@ -240,6 +240,12 @@ These are standing rules for this project. Follow them without being reminded.
 - Every widget's main description/intro paragraph (the `.mv-rte` block or plain `<p>` under the heading) and its section-level checklist/points `<li>` items MUST be **`text-base`** (16px) — never `text-sm`, `text-[15px]`, `text-lg`, etc. This is about the one heading+paragraph+list that introduces the section; nested item/card-level copy (a feature card's own description or bullet) may stay smaller (`text-sm`) for visual hierarchy.
 - Exception: hero and banner-style widgets (`Hero`, `Heronew`, `OrbitBanner`, `CtaBanner`, `CtaWork`, `Marquee`, `TrustBar`, and any page-header block using `<h1>`) keep their own distinct, larger typography — they aren't "content sections" in this sense and are exempt, same as they're already exempt from `section-py`.
 
+## Checklist items: title + description objects
+
+- A widget's checklist/points list (the one rendered with a `Check`/`CircleCheck` icon per item) stores each item as `{ title: string; description: string }`, not a plain string — the description is a RichTextEditor field, rendered via `.mv-rte v-html`, hidden when empty. This lets each point carry its own explanation, matching the StatFeatures numbered-item pattern (bold title + `text-[15px]` description).
+- Exception: a list rendered as small flex-wrap pill/badge elements (e.g. `About`'s `features`) stays plain strings — a title+description block doesn't fit inside a pill.
+- When adding this shape to a widget already live on pages, write a data migration (see `database/migrations/2026_09_09_120000_backfill_checklist_point_objects.php`) that wraps existing plain strings as `{title: <string>, description: ''}` so saved content isn't blanked out.
+
 ## Brand & content (Moovato)
 
 - The site/brand is **Moovato**, a modern moving company (**Umzugsunternehmen**) based in **Berlin**, serving Berlin and all its districts/surrounding cities.

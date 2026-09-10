@@ -46,10 +46,10 @@ final class CtaBannerWidget implements WidgetContract
             'primary_label' => 'Kostenloses Angebot anfordern',
             'primary_url' => '#angebot',
             'points' => [
-                'Privat, Gewerbe, Fernumzug & Spezialtransport',
-                'Engagierter, zuverlässiger und stressfreier Service',
-                'Kundenorientiert mit transparenter Kommunikation',
-                'Für Privatkunden und Unternehmen mit Sorgfalt',
+                ['title' => 'Privat, Gewerbe, Fernumzug & Spezialtransport', 'description' => 'Wir decken jede Art von Umzug ab – ganz gleich, wie groß oder klein.'],
+                ['title' => 'Engagierter, zuverlässiger und stressfreier Service', 'description' => 'Unser Team sorgt dafür, dass Ihr Umzugstag entspannt und reibungslos verläuft.'],
+                ['title' => 'Kundenorientiert mit transparenter Kommunikation', 'description' => 'Sie erfahren jederzeit, was als Nächstes ansteht – ohne versteckte Überraschungen.'],
+                ['title' => 'Für Privatkunden und Unternehmen mit Sorgfalt', 'description' => 'Ob Wohnung oder Büro – wir behandeln jeden Auftrag mit derselben Sorgfalt.'],
             ],
             'image_alt' => 'Moovato Umzugsteam bei der Arbeit in Berlin',
         ];
@@ -70,7 +70,8 @@ final class CtaBannerWidget implements WidgetContract
             'primary_label' => ['nullable', 'string'],
             'primary_url' => ['nullable', 'string'],
             'points' => ['nullable', 'array'],
-            'points.*' => ['nullable', 'string'],
+            'points.*.title' => ['nullable', 'string'],
+            'points.*.description' => ['nullable', 'string'],
             'image_alt' => ['nullable', 'string'],
         ];
     }

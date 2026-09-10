@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Pin = {
     x?: number;
@@ -21,6 +22,8 @@ type Data = {
     heading?: string;
     subheading?: string;
     description?: string;
+    button_label?: string;
+    button_url?: string;
 };
 
 const props = defineProps<{
@@ -102,6 +105,12 @@ function isMatched(pin: Pin) {
                 >
                     {{ data.subheading }}
                 </p>
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-6"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
 
             <!-- Search -->

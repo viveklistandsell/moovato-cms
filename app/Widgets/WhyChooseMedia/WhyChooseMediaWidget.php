@@ -37,9 +37,7 @@ final class WhyChooseMediaWidget implements WidgetContract
             'image_path' => null,
             'image_url' => null,
             'image_side' => 'right',
-            'marker_style' => 'check',
             'card' => false,
-            'heading_style' => 'bold',
             'bg' => 'none',
         ];
     }
@@ -49,14 +47,8 @@ final class WhyChooseMediaWidget implements WidgetContract
         return [
             'eyebrow' => 'Warum wir',
             'heading' => 'Warum Moovato die richtige Wahl ist',
-            'body' => 'Wir verbinden Sie mit erfahrenen Umzugsprofis aus Berlin – zuverlässig, sicher und zu fairen Festpreisen, ganz bequem von zu Hause aus geplant.',
+            'body' => '<p>Wir verbinden Sie mit erfahrenen Umzugsprofis aus Berlin – zuverlässig, sicher und zu fairen Festpreisen, ganz bequem von zu Hause aus geplant.</p><ul><li><strong>Der passende Umzugsexperte für Sie</strong> – Wir vermitteln den Umzugspartner, der am besten zu Ihrem Vorhaben passt.</li><li><strong>Termine rund um Ihren Zeitplan</strong> – Ihr Umzugstermin richtet sich nach Ihrem Alltag, nicht umgekehrt.</li><li><strong>Faire Preise, transparent kalkuliert</strong> – Sie erhalten ein Angebot, das jede Leistung einzeln aufschlüsselt.</li><li><strong>Freundlicher, aufmerksamer Service</strong> – Von der ersten Anfrage an begleiten wir Sie zuvorkommend durch den Umzug.</li></ul>',
             'image_alt' => 'Moovato Berater im Gespräch mit einem Kunden',
-            'points' => [
-                'Der passende Umzugsexperte für Sie',
-                'Termine rund um Ihren Zeitplan',
-                'Faire Preise, transparent kalkuliert',
-                'Freundlicher, aufmerksamer Service',
-            ],
             'button_label' => '',
             'button_url' => '',
         ];
@@ -68,9 +60,7 @@ final class WhyChooseMediaWidget implements WidgetContract
             'image_path' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
-            'marker_style' => ['required', 'in:check,chevron'],
             'card' => ['boolean'],
-            'heading_style' => ['nullable', 'in:bold,italic'],
             'bg' => ['nullable', 'in:none,tinted,dark'],
         ];
     }
@@ -82,8 +72,6 @@ final class WhyChooseMediaWidget implements WidgetContract
             'heading' => ['nullable', 'string'],
             'body' => ['nullable', 'string'],
             'image_alt' => ['nullable', 'string'],
-            'points' => ['nullable', 'array'],
-            'points.*' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],
             'button_url' => ['nullable', 'string'],
         ];

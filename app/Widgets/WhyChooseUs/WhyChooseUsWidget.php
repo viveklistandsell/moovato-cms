@@ -46,6 +46,8 @@ final class WhyChooseUsWidget implements WidgetContract
             'heading' => 'Darum vertraut Berlin auf Moovato',
             'subheading' => 'Tausende zufriedene Kundinnen und Kunden setzen bei ihrem Umzug auf unseren Service – aus gutem Grund.',
             'image_alt' => 'Moovato Umzugsteam bei der Arbeit in Berlin',
+            'button_label' => 'Kostenloses Angebot anfordern',
+            'button_url' => '#angebot',
             'cards' => [
                 ['icon' => 'ShieldCheck', 'title' => 'Festpreisgarantie', 'description' => 'Transparente Festpreise ohne versteckte Kosten – Sie wissen vorab genau, was Ihr Umzug in Berlin kostet.'],
                 ['icon' => 'BadgeCheck', 'title' => 'Versichert & geprüft', 'description' => 'Ihr Hab und Gut ist bei uns umfassend versichert. Geschultes Personal und geprüfte Ausrüstung sorgen für Sicherheit.'],
@@ -71,6 +73,8 @@ final class WhyChooseUsWidget implements WidgetContract
             'heading' => ['nullable', 'string'],
             'subheading' => ['nullable', 'string'],
             'image_alt' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
             'cards' => ['nullable', 'array'],
             'cards.*.icon' => ['nullable', 'string'],
             'cards.*.title' => ['nullable', 'string'],

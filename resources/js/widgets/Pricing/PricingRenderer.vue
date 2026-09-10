@@ -232,6 +232,7 @@ const ctaHref = computed(() => props.settings.cta_url || '/partner/register');
                                 v-if="data.cta_label"
                                 :href="ctaHref"
                                 class="mv-pricing__btn"
+                                :class="{ 'mv-pricing__btn--gold': plan.slug === 'gold' }"
                                 @click.stop
                             >
                                 <span>{{ data.cta_label }}</span>

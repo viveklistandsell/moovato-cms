@@ -8,12 +8,14 @@ type Settings = {
     image_side: 'left' | 'right';
 };
 
+type Point = { title?: string; description?: string };
+
 type Data = {
     eyebrow?: string;
     heading?: string;
     body?: string;
     list_title?: string;
-    points?: string[];
+    points?: Point[];
     button_label?: string;
     button_url?: string;
 };
@@ -67,15 +69,27 @@ defineProps<{ settings: Settings; data: Data }>();
                 </p>
                 <ul
                     v-if="data.points?.length"
-                    class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2"
+                    class="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2"
                 >
                     <li
                         v-for="(point, i) in data.points"
                         :key="i"
-                        class="flex items-center gap-2.5 text-base font-medium text-white/90"
+                        class="flex items-start gap-2.5"
                     >
-                        <Check class="size-4 shrink-0 text-[var(--orange)]" />
-                        <span>{{ point }}</span>
+                        <Check class="mt-1 size-4 shrink-0 text-[var(--orange)]" />
+                        <span>
+                            <span
+                                v-if="point.title"
+                                class="block text-lg font-semibold text-white"
+                            >
+                                {{ point.title }}
+                            </span>
+                            <div
+                                v-if="point.description"
+                                class="mv-rte block text-[15px] leading-relaxed text-white/70"
+                                v-html="point.description"
+                            />
+                        </span>
                     </li>
                 </ul>
 

@@ -19,11 +19,11 @@ test('mission vision ships German hero and panel copy with an image slot', funct
     expect($settings)->toHaveKeys(['image_path', 'image_url'])
         ->and($data)->toHaveKeys([
             'image_alt', 'heading', 'subheading', 'body', 'button_label', 'button_url',
-            'panel_one_heading', 'panel_one_body', 'panel_one_points',
-            'panel_two_heading', 'panel_two_body', 'panel_two_points',
+            'panel_one_heading', 'panel_one_body',
+            'panel_two_heading', 'panel_two_body',
         ])
-        ->and($data['panel_one_points'])->toBeArray()->not->toBeEmpty()
-        ->and($data['panel_two_points'])->toBeArray()->not->toBeEmpty();
+        ->and($data['panel_one_body'])->toBeString()->not->toBeEmpty()
+        ->and($data['panel_two_body'])->toBeString()->not->toBeEmpty();
 });
 
 test('mission vision exposes the picker metadata shape', function (): void {

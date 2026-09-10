@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Image as ImageIcon } from 'lucide-vue-next';
-
-type Feature = { title?: string; description?: string };
+import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Settings = {
     image_path: string | null;
@@ -15,7 +14,8 @@ type Data = {
     image_alt?: string;
     stat_value?: string;
     stat_label?: string;
-    features?: Feature[];
+    button_label?: string;
+    button_url?: string;
 };
 
 defineProps<{ settings: Settings; data: Data }>();
@@ -43,30 +43,12 @@ defineProps<{ settings: Settings; data: Data }>();
                     v-html="data.body"
                 />
 
-                <ol v-if="data.features?.length" class="mt-5 space-y-6">
-                    <li
-                        v-for="(feature, i) in data.features"
-                        :key="i"
-                        class="flex gap-4"
-                    >
-                        <span class="mv-sf-num">
-                            {{ String(i + 1).padStart(2, '0') }}
-                        </span>
-                        <span>
-                            <span
-                                v-if="feature.title"
-                                class="block text-lg font-semibold text-[var(--midnight)]"
-                            >
-                                {{ feature.title }}
-                            </span>
-                            <div
-                                v-if="feature.description"
-                                class="mv-rte block text-[15px] leading-relaxed text-[var(--slate)]"
-                                v-html="feature.description"
-                            />
-                        </span>
-                    </li>
-                </ol>
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-8"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
 
             <div class="mv-sf-media">

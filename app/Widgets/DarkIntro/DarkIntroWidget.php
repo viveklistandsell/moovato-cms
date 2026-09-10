@@ -70,7 +70,8 @@ final class DarkIntroWidget implements WidgetContract
             'body' => ['nullable', 'string'],
             'list_title' => ['nullable', 'string'],
             'points' => ['nullable', 'array'],
-            'points.*' => ['nullable', 'string'],
+            'points.*.title' => ['nullable', 'string'],
+            'points.*.description' => ['nullable', 'string'],
             'button_label' => ['nullable', 'string'],
             'button_url' => ['nullable', 'string'],
         ];

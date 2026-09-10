@@ -12,7 +12,7 @@ test('about experience widget is registered under the about_experience slug', fu
         ->and($registry->resolve('about_experience'))->toBe(AboutExperienceWidget::class);
 });
 
-test('about experience ships image slots, founder and checklist', function (): void {
+test('about experience ships image slots and founder details', function (): void {
     $settings = AboutExperienceWidget::defaultSettings();
     $data = AboutExperienceWidget::defaultData();
 
@@ -31,13 +31,12 @@ test('about experience ships image slots, founder and checklist', function (): v
             'body',
             'experience_value',
             'experience_label',
-            'points',
             'button_label',
             'button_url',
             'founder_name',
             'founder_role',
         ])
-        ->and($data['points'])->toHaveCount(4)
+        ->and($data['body'])->toContain('<ul>')
         ->and($data['experience_value'])->toBe('25+')
         ->and($data['eyebrow'])->toBe('Über uns');
 });

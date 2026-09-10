@@ -8,11 +8,13 @@ type Settings = {
     image_side: 'left' | 'right';
 };
 
+type Point = { title?: string; description?: string };
+
 type Data = {
     eyebrow?: string;
     heading?: string;
     body?: string;
-    points?: string[];
+    points?: Point[];
     image_alt?: string;
     cta_title?: string;
     cta_body?: string;
@@ -47,17 +49,29 @@ defineProps<{ settings: Settings; data: Data }>();
 
                 <ul
                     v-if="data.points?.length"
-                    class="mt-7 grid gap-x-8 gap-y-3 sm:grid-cols-2"
+                    class="mt-7 grid gap-x-8 gap-y-5 sm:grid-cols-2"
                 >
                     <li
                         v-for="(point, i) in data.points"
                         :key="i"
-                        class="flex items-center gap-2.5 font-medium text-[var(--midnight)]"
+                        class="flex items-start gap-2.5"
                     >
-                        <span class="mv-teamcta-check">
+                        <span class="mv-teamcta-check mt-1">
                             <Check class="size-3.5" />
                         </span>
-                        <span>{{ point }}</span>
+                        <span>
+                            <span
+                                v-if="point.title"
+                                class="block font-semibold text-[var(--midnight)]"
+                            >
+                                {{ point.title }}
+                            </span>
+                            <div
+                                v-if="point.description"
+                                class="mv-rte block text-[15px] leading-relaxed text-[var(--slate)]"
+                                v-html="point.description"
+                            />
+                        </span>
                     </li>
                 </ul>
 

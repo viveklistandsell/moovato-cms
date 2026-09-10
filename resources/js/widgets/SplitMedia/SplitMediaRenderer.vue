@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ChevronRight, CircleCheck, Image as ImageIcon } from 'lucide-vue-next';
+import { Image as ImageIcon } from 'lucide-vue-next';
 import NextButton from '@/widgets/shared/NextButton.vue';
 
 type Settings = {
     image_path: string | null;
     image_url: string | null;
     image_side: 'left' | 'right';
-    marker_style: 'check' | 'chevron';
-    heading_style?: 'bold' | 'italic';
 };
 
 type Data = {
@@ -15,7 +13,6 @@ type Data = {
     heading?: string;
     body?: string;
     image_alt?: string;
-    points?: string[];
     button_label?: string;
     button_url?: string;
 };
@@ -37,10 +34,7 @@ defineProps<{ settings: Settings; data: Data }>();
                 <h2
                     v-if="data.heading"
                     class="text-[var(--midnight)] mv-section-heading"
-                    :class="[
-                        data.eyebrow ? 'mt-5' : '',
-                        settings.heading_style === 'italic' ? 'italic' : '',
-                    ]"
+                    :class="data.eyebrow ? 'mt-5' : ''"
                 >
                     {{ data.heading }}
                 </h2>
@@ -49,23 +43,6 @@ defineProps<{ settings: Settings; data: Data }>();
                     class="mv-rte mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)]"
                     v-html="data.body"
                 />
-
-                <ul v-if="data.points?.length" class="mt-7 space-y-4">
-                    <li
-                        v-for="(point, i) in data.points"
-                        :key="i"
-                        class="flex items-center gap-3 font-medium text-[var(--midnight)]"
-                    >
-                        <CircleCheck
-                            v-if="settings.marker_style === 'check'"
-                            class="size-5 shrink-0 text-[var(--orange)]"
-                        />
-                        <span v-else class="mv-splitmedia-chevron">
-                            <ChevronRight class="size-3.5" />
-                        </span>
-                        <span>{{ point }}</span>
-                    </li>
-                </ul>
 
                 <NextButton
                     v-if="data.button_label"

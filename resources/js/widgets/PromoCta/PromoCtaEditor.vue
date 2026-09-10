@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { Plus, Trash2 } from 'lucide-vue-next';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 type Data = {
     heading: string;
     description: string;
-    features: string[];
     button_label: string;
     button_url: string;
     badge_number: string;
@@ -20,16 +17,6 @@ type Data = {
 
 const data = defineModel<Data>('data', { required: true });
 defineModel<Record<string, unknown>>('settings', { required: true });
-
-function addFeature(): void {
-    data.value.features = [...(data.value.features ?? []), ''];
-}
-
-function removeFeature(index: number): void {
-    data.value.features = (data.value.features ?? []).filter(
-        (_, i) => i !== index,
-    );
-}
 </script>
 
 <template>
@@ -45,39 +32,6 @@ function removeFeature(index: number): void {
                 v-model="data.description"
                 placeholder="Beschreibung"
             />
-        </div>
-
-        <div class="space-y-2">
-            <div class="flex items-center justify-between">
-                <Label class="text-sm font-semibold">Features</Label>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    @click="addFeature"
-                >
-                    <Plus class="size-4" />
-                    Add
-                </Button>
-            </div>
-            <div
-                v-for="(_, i) in data.features ?? []"
-                :key="i"
-                class="flex gap-2"
-            >
-                <Input
-                    v-model="data.features[i]"
-                    placeholder="Festpreisgarantie"
-                />
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    @click="removeFeature(i)"
-                >
-                    <Trash2 class="size-4 text-destructive" />
-                </Button>
-            </div>
         </div>
 
         <div class="grid gap-4 md:grid-cols-2">

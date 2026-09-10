@@ -26,6 +26,8 @@ type Data = {
     heading: string;
     subheading: string;
     description: string;
+    button_label: string;
+    button_url: string;
     partners_title: string;
     certificates_title: string;
 };
@@ -87,6 +89,17 @@ function removeCertificate(index: number): void {
                     v-model="data.description"
                     placeholder="Beschreibung"
                 />
+            </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Button label (optional)</Label>
+                <Input
+                    v-model="data.button_label"
+                    placeholder="Mehr erfahren"
+                />
+            </div>
+            <div class="grid gap-1">
+                <Label class="text-xs">Button URL</Label>
+                <Input v-model="data.button_url" placeholder="#leistungen" />
             </div>
             <div class="grid gap-2">
                 <Label>Partners title</Label>

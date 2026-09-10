@@ -27,6 +27,7 @@ import HeroRenderer from './Hero/HeroRenderer.vue';
 import HeronewRenderer from './Heronew/HeronewRenderer.vue';
 import HowItWorksRenderer from './HowItWorks/HowItWorksRenderer.vue';
 import ImageRenderer from './Image/ImageRenderer.vue';
+import ImageCardRenderer from './ImageCard/ImageCardRenderer.vue';
 import MapRenderer from './Map/MapRenderer.vue';
 import MarqueeRenderer from './Marquee/MarqueeRenderer.vue';
 import MediaChecklistRenderer from './MediaChecklist/MediaChecklistRenderer.vue';
@@ -85,6 +86,7 @@ const HeroEditor = defineAsyncComponent(() => import('./Hero/HeroEditor.vue'));
 const HeronewEditor = defineAsyncComponent(() => import('./Heronew/HeronewEditor.vue'));
 const HowItWorksEditor = defineAsyncComponent(() => import('./HowItWorks/HowItWorksEditor.vue'));
 const ImageEditor = defineAsyncComponent(() => import('./Image/ImageEditor.vue'));
+const ImageCardEditor = defineAsyncComponent(() => import('./ImageCard/ImageCardEditor.vue'));
 const MapEditor = defineAsyncComponent(() => import('./Map/MapEditor.vue'));
 const MarqueeEditor = defineAsyncComponent(() => import('./Marquee/MarqueeEditor.vue'));
 const OrbitBannerEditor = defineAsyncComponent(() => import('./OrbitBanner/OrbitBannerEditor.vue'));
@@ -227,6 +229,10 @@ export const widgetRegistry: WidgetRegistry = {
     city_search: {
         editor: CitySearchEditor,
         renderer: CitySearchRenderer,
+    },
+    image_card: {
+        editor: ImageCardEditor,
+        renderer: ImageCardRenderer,
     },
 };
 

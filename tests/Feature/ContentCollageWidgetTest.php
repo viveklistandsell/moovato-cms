@@ -9,13 +9,13 @@ test('content collage is registered under the content_collage slug', function ()
     expect(app(WidgetRegistry::class)->resolve('content_collage'))->toBe(ContentCollageWidget::class);
 });
 
-test('content collage exposes a single image, checklist and button', function (): void {
+test('content collage exposes a single image, body and button', function (): void {
     $settings = ContentCollageWidget::defaultSettings();
     $data = ContentCollageWidget::defaultData();
 
-    expect($settings)->toHaveKeys(['image_path', 'image_url', 'image_side', 'marker_style'])
-        ->and($data)->toHaveKeys(['heading', 'body', 'points', 'image_alt', 'button_label', 'button_url'])
-        ->and($data['points'])->toHaveCount(4);
+    expect($settings)->toHaveKeys(['image_path', 'image_url', 'image_side'])
+        ->and($data)->toHaveKeys(['heading', 'body', 'image_alt', 'button_label', 'button_url'])
+        ->and($data['body'])->toContain('<ul>');
 });
 
 test('content collage exposes the picker metadata shape', function (): void {
