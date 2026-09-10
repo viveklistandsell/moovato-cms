@@ -13,14 +13,9 @@ type Settings = {
 type Data = {
     image_alt: string;
     heading: string;
-    subheading: string;
     body: string;
     button_label: string;
     button_url: string;
-    panel_one_heading: string;
-    panel_one_body: string;
-    panel_two_heading: string;
-    panel_two_body: string;
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
@@ -54,10 +49,6 @@ const data = defineModel<Data>('data', { required: true });
                     <Label>Heading</Label>
                     <Textarea v-model="data.heading" :rows="2" />
                 </div>
-                <div class="grid gap-2">
-                    <Label>Subheading</Label>
-                    <Input v-model="data.subheading" />
-                </div>
             </div>
         </div>
 
@@ -73,48 +64,6 @@ const data = defineModel<Data>('data', { required: true });
             <div class="grid gap-2">
                 <Label>Button URL</Label>
                 <Input v-model="data.button_url" placeholder="#leistungen" />
-            </div>
-        </div>
-
-        <div class="grid gap-4 md:grid-cols-2">
-            <div class="space-y-3 rounded-md border p-4">
-                <Label class="text-sm font-semibold">Panel one</Label>
-                <div class="grid gap-2">
-                    <Label class="text-xs">Heading</Label>
-                    <Input
-                        v-model="data.panel_one_heading"
-                        placeholder="Unser Auftrag"
-                    />
-                </div>
-                <div class="grid gap-2">
-                    <Label class="text-xs"
-                        >Body (add a bullet list for checkmarks)</Label
-                    >
-                    <RichTextEditor
-                        v-model="data.panel_one_body"
-                        placeholder="Body"
-                    />
-                </div>
-            </div>
-
-            <div class="space-y-3 rounded-md border p-4">
-                <Label class="text-sm font-semibold">Panel two</Label>
-                <div class="grid gap-2">
-                    <Label class="text-xs">Heading</Label>
-                    <Input
-                        v-model="data.panel_two_heading"
-                        placeholder="Unsere Vision"
-                    />
-                </div>
-                <div class="grid gap-2">
-                    <Label class="text-xs"
-                        >Body (add a bullet list for checkmarks)</Label
-                    >
-                    <RichTextEditor
-                        v-model="data.panel_two_body"
-                        placeholder="Body"
-                    />
-                </div>
             </div>
         </div>
     </div>

@@ -26,7 +26,7 @@ defineProps<{ settings: Settings; data: Data }>();
             class="container-xl grid items-center gap-10 lg:grid-cols-2 lg:gap-x-10"
         >
             <div
-                class="mv-collage-photo relative mx-auto aspect-[4/5] w-full max-w-md"
+                class="mv-collage-photo relative mx-auto aspect-[4/5] w-full"
                 :class="settings.image_side === 'right' ? 'lg:order-2' : ''"
             >
                 <img

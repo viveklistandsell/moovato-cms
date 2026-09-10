@@ -10,14 +10,9 @@ type Settings = {
 type Data = {
     image_alt?: string;
     heading?: string;
-    subheading?: string;
     body?: string;
     button_label?: string;
     button_url?: string;
-    panel_one_heading?: string;
-    panel_one_body?: string;
-    panel_two_heading?: string;
-    panel_two_body?: string;
 };
 
 defineProps<{ settings: Settings; data: Data }>();
@@ -34,13 +29,6 @@ defineProps<{ settings: Settings; data: Data }>();
                     >
                         {{ data.heading }}
                     </h2>
-                    <p
-                        v-if="data.subheading"
-                        class="mt-3 text-base text-[var(--slate)]"
-                    >
-                        {{ data.subheading }}
-                    </p>
-
                     <div class="mv-mv-media" :class="data.heading ? 'mt-6' : ''">
                         <img
                             v-if="settings.image_url"
@@ -55,11 +43,6 @@ defineProps<{ settings: Settings; data: Data }>();
                     </div>
 
                     <div class="mv-mv-footer">
-                        <div
-                            v-if="data.body"
-                            class="mv-rte text-base leading-relaxed text-[var(--slate)]"
-                            v-html="data.body"
-                        />
                         <NextButton
                             v-if="data.button_label"
                             class="mt-6 self-center"
@@ -69,40 +52,12 @@ defineProps<{ settings: Settings; data: Data }>();
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div class="mv-mv-panel">
-                        <h3
-                            v-if="data.panel_one_heading"
-                            class="relative text-xl font-bold text-[var(--midnight)]"
-                        >
-                            {{ data.panel_one_heading }}
-                        </h3>
-                        <div
-                            v-if="data.panel_one_body"
-                            class="mv-rte relative mt-3 text-base leading-relaxed text-[var(--slate)]"
-                            v-html="data.panel_one_body"
-                        />
-                    </div>
-
-                    <div class="mv-mv-panel">
-                        <span
-                            v-for="n in 2"
-                            :key="n"
-                            class="mv-mv-panel-ring"
-                            aria-hidden="true"
-                        />
-                        <h3
-                            v-if="data.panel_two_heading"
-                            class="relative text-xl font-bold text-[var(--midnight)]"
-                        >
-                            {{ data.panel_two_heading }}
-                        </h3>
-                        <div
-                            v-if="data.panel_two_body"
-                            class="mv-rte relative mt-3 text-base leading-relaxed text-[var(--slate)]"
-                            v-html="data.panel_two_body"
-                        />
-                    </div>
+                <div class="mv-mv-panel">
+                    <div
+                        v-if="data.body"
+                        class="mv-rte text-base leading-relaxed text-[var(--slate)]"
+                        v-html="data.body"
+                    />
                 </div>
             </div>
         </div>
