@@ -21,6 +21,7 @@ type Settings = {
 type Data = {
     eyebrow?: string;
     heading?: string;
+    description?: string;
     button_label?: string;
     button_url?: string;
     items?: Item[];
@@ -68,7 +69,7 @@ function thumbStyle(i: number): Record<string, string> {
 </script>
 
 <template>
-    <section class="mv-testimonials section-py" :style="bgStyle">
+    <section v-reveal class="mv-testimonials section-py" :style="bgStyle">
         <div class="mv-testimonials__bg" aria-hidden="true"></div>
 
         <div class="relative z-[2] container-xl">
@@ -79,9 +80,14 @@ function thumbStyle(i: number): Record<string, string> {
                     <span v-if="data.eyebrow" class="mv-howitworks__eyebrow">{{
                         data.eyebrow
                     }}</span>
-                    <h2 v-if="data.heading" class="mv-testimonials__heading">
+                    <h2 v-if="data.heading" class="mv-testimonials__heading mv-section-heading">
                         {{ data.heading }}
                     </h2>
+                    <div
+                        v-if="data.description"
+                        class="mv-rte mt-4 text-base leading-relaxed text-white/70"
+                        v-html="data.description"
+                    />
                 </div>
                 <NextButton
                     v-if="data.button_label"

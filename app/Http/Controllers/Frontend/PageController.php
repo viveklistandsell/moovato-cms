@@ -10,6 +10,7 @@ use App\Models\Language;
 use App\Models\Page;
 use App\Models\PageTranslation;
 use App\Models\PageWidget;
+use App\Models\Plan;
 use App\Models\ServiceParentCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -100,6 +101,16 @@ final class PageController extends Controller
             }
         }
 
+        $metaImagePath = $tr?->meta_image;
+        $seo = [
+            'meta_title' => $tr?->meta_title ?: null,
+            'meta_description' => $tr?->meta_description ?: null,
+            'schema' => $tr?->schema,
+            'meta_image_url' => $metaImagePath !== null && $metaImagePath !== ''
+                ? '/storage/'.mb_ltrim($metaImagePath, '/')
+                : null,
+        ];
+
         return Inertia::render('frontend/page/Index', [
             'locale' => $locale,
             'localeAlternates' => $localeAlternates,
@@ -112,6 +123,7 @@ final class PageController extends Controller
                 'is_home' => $page->is_home,
                 'author' => $page->user?->name,
                 'created_at' => $page->created_at?->toIso8601String(),
+                'seo' => $seo,
                 'categories' => $page->categories->map(function ($c) use ($locale): array {
                     $ctr = $c->translation($locale);
 
@@ -157,6 +169,10 @@ final class PageController extends Controller
 
                 if ($w->type === 'services_category_grid') {
                     $settings['categories'] = $this->resolveServiceParentCategories($settings, $locale);
+                }
+
+                if ($w->type === 'pricing') {
+                    $settings['plans'] = $this->resolveLivePlans();
                 }
 
                 return [
@@ -289,6 +305,35 @@ final class PageController extends Controller
                     'is_popular' => (bool) $p->is_popular,
                 ];
             })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Resolve the live plan cards rendered by a `pricing` widget. Reads
+     * straight from `Plan::registry()` (the same cached source the partner
+     * portal and admin dashboard use) so the public pricing table always
+     * matches whatever a Super Admin last saved in Admin > Plans. Injected
+     * at render time — never persisted on the widget itself.
+     *
+     * @return array<int, array{slug: string, label: string, price: int, currency: string, period: string, positioning: ?string, placement: string, features: array<string, mixed>, caps: array<string, mixed>, is_free: bool}>
+     */
+    private function resolveLivePlans(): array
+    {
+        return Plan::registry()
+            ->filter(static fn (array $p): bool => $p['is_active'])
+            ->map(static fn (array $p): array => [
+                'slug' => $p['slug'],
+                'label' => $p['label'],
+                'price' => $p['price'],
+                'currency' => $p['currency'],
+                'period' => $p['period'],
+                'positioning' => $p['positioning'],
+                'placement' => $p['placement'],
+                'features' => $p['features'],
+                'caps' => $p['caps'],
+                'is_free' => $p['price'] === 0,
+            ])
             ->values()
             ->all();
     }

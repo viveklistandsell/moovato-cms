@@ -64,9 +64,9 @@ final class FaqWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
-            'items' => ['nullable', 'array', 'max:30'],
-            'items.*.question' => ['nullable', 'string', 'max:500'],
+            'heading' => ['nullable', 'string'],
+            'items' => ['nullable', 'array'],
+            'items.*.question' => ['nullable', 'string'],
             'items.*.answer' => ['nullable', 'string'],
         ];
     }

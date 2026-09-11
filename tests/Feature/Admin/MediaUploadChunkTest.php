@@ -7,13 +7,16 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     Storage::fake('public');
-    $this->admin = User::factory()->create(['is_admin' => true]);
-    $this->actingAs($this->admin);
+    $role = Role::findOrCreate(User::SUPER_ADMIN_ROLE, 'web');
+    $admin = User::factory()->create();
+    $admin->assignRole($role);
+    $this->actingAs($admin);
 });
 
 test('the chunk store endpoint accepts a single-chunk upload and creates a media file', function (): void {
@@ -36,9 +39,8 @@ test('the chunk store endpoint accepts a single-chunk upload and creates a media
     $file = MediaFile::query()->firstWhere('original_name', 'note.txt');
 
     expect($file)->not->toBeNull()
-        ->and($file->size)->toBe(11);
-
-    Storage::disk('public')->assertExists($file->path);
+        ->and($file->size)->toBe(11)
+        ->and(Storage::disk('public')->exists($file->path))->toBeTrue();
 });
 
 test('blocked extensions are rejected', function (): void {

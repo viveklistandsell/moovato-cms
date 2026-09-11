@@ -17,6 +17,12 @@ type Page = {
     author: string | null;
     created_at: string | null;
     categories: Category[];
+    seo?: {
+        meta_title: string | null;
+        meta_description: string | null;
+        schema: Record<string, unknown> | null;
+        meta_image_url: string | null;
+    };
 };
 
 type WidgetVisibility = {
@@ -103,17 +109,53 @@ const isNolayout = computed(() => props.page.template === 'nolayout');
 const hasOwnBreadcrumb = computed(() =>
     (props.widgets ?? []).some((w) => w.type === 'orbit_banner'),
 );
+
+/* -------------------- SEO metadata -------------------- */
+
+const documentTitle = computed(() => props.page.seo?.meta_title || props.page.title);
+const seoDescription = computed(() => props.page.seo?.meta_description || '');
+const seoImage = computed(
+    () => props.page.seo?.meta_image_url || props.page.image_url || null,
+);
+const seoSchemaJson = computed<string | null>(() => {
+    const s = props.page.seo?.schema;
+    if (! s || typeof s !== 'object' || Object.keys(s).length === 0) return null;
+    try {
+        return JSON.stringify(s);
+    } catch {
+        return null;
+    }
+});
 </script>
 
 <template>
     <Head>
-        <title>{{ page.title }}</title>
-        <meta head-key="og:title" property="og:title" :content="page.title" />
+        <title>{{ documentTitle }}</title>
         <meta
-            v-if="page.image_url"
+            v-if="seoDescription"
+            head-key="description"
+            name="description"
+            :content="seoDescription"
+        />
+        <meta head-key="og:title" property="og:title" :content="documentTitle" />
+        <meta
+            v-if="seoDescription"
+            head-key="og:description"
+            property="og:description"
+            :content="seoDescription"
+        />
+        <meta
+            v-if="seoImage"
             head-key="og:image"
             property="og:image"
-            :content="page.image_url"
+            :content="seoImage"
+        />
+        <component
+            :is="'script'"
+            v-if="seoSchemaJson"
+            head-key="schema-ld"
+            type="application/ld+json"
+            v-html="seoSchemaJson"
         />
     </Head>
 

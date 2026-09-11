@@ -14,7 +14,6 @@ import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
 import MultiSelect from '@/components/common/MultiSelect.vue';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
-import { localizedUrl } from '@/lib/localizedUrl';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -35,6 +34,8 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import MediaPicker from '@/components/common/MediaPicker.vue';
+import SeoMetaFields from '@/components/admin/seo/SeoMetaFields.vue';
+import FlagImage from '@/components/common/FlagImage.vue';
 import { setBreadcrumbs } from '@/composables/common/useBreadcrumbs';
 import { useT } from '@/composables/useT';
 import { slugify } from '@/lib/slug';
@@ -46,6 +47,10 @@ type Translation = {
     permalink: string;
     short_description: string | null;
     content: string | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
+    schema?: string | null;
+    meta_image?: string | null;
 };
 
 type Post = {
@@ -97,15 +102,24 @@ setBreadcrumbs(() => [
 ]);
 
 const initialTranslations: Record<string, Translation> = Object.fromEntries(
-    props.languages.map((lang) => [
-        lang.code,
-        props.post?.translations[lang.code] ?? {
-            name: '',
-            permalink: '',
-            short_description: '',
-            content: '',
-        },
-    ]),
+    props.languages.map((lang) => {
+        const existing = props.post?.translations[lang.code];
+        return [
+            lang.code,
+            {
+                name: existing?.name ?? '',
+                permalink: existing?.permalink ?? '',
+                short_description: existing?.short_description ?? '',
+                content: existing?.content ?? '',
+                meta_title: existing?.meta_title ?? '',
+                meta_description: existing?.meta_description ?? '',
+                schema: typeof existing?.schema === 'string'
+                    ? existing.schema
+                    : (existing?.schema ? JSON.stringify(existing.schema, null, 2) : ''),
+                meta_image: existing?.meta_image ?? '',
+            },
+        ];
+    }),
 );
 
 const form = useForm({
@@ -123,6 +137,12 @@ const form = useForm({
 });
 
 const activeLocale = ref(
+    props.languages.find((l) => l.is_default)?.code ??
+        props.languages[0]?.code ??
+        'de',
+);
+
+const seoActiveLocale = ref(
     props.languages.find((l) => l.is_default)?.code ??
         props.languages[0]?.code ??
         'de',
@@ -220,16 +240,24 @@ function submit(): void {
     }
 }
 
-const previewUrl = computed<string | null>(() => {
-    if (!props.post) return null;
-    const defaultLocale =
-        props.languages.find((l) => l.is_default)?.code ?? 'de';
-    const slug =
-        props.post.translations[defaultLocale]?.permalink ??
-        Object.values(props.post.translations)[0]?.permalink ??
-        null;
-    return slug ? localizedUrl(defaultLocale, `/blog/${slug}`) : null;
-});
+function saveAndStay(): void {
+    if (!isEdit.value) return;
+    form.transform((data) => ({ ...data, _method: 'put' })).post(
+        `/admin/blog/posts/${props.post!.id}?stay=1`,
+        {
+            forceFormData: true,
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+}
+
+function livePermalinkUrl(code: string): string | null {
+    const slug = form.translations[code]?.permalink ?? '';
+    if (!slug) return null;
+    const prefix = props.urlPrefixes[code] ?? '';
+    return `${prefix}${slug}`;
+}
 
 const errorFor = (code: string, field: keyof Translation) =>
     form.errors[`translations.${code}.${field}` as keyof typeof form.errors] as
@@ -338,13 +366,20 @@ const errorFor = (code: string, field: keyof Translation) =>
                                             class="text-xs text-muted-foreground"
                                         >
                                             {{ t('pages.preview_label') }}:
-                                            <span class="text-primary">
+                                            <a
+                                                v-if="livePermalinkUrl(code)"
+                                                :href="livePermalinkUrl(code)!"
+                                                target="_blank"
+                                                rel="noopener"
+                                                class="inline-flex items-center gap-1 font-medium text-[var(--orange)] underline underline-offset-4 hover:text-[color-mix(in_srgb,var(--orange)_80%,black)]"
+                                            >
                                                 {{ urlPrefixes[code]
-                                                }}{{
-                                                    form.translations[code]
-                                                        .permalink ||
-                                                    t('blog.permalink_placeholder')
-                                                }}
+                                                }}{{ form.translations[code].permalink }}
+                                                <ExternalLink class="size-3" />
+                                            </a>
+                                            <span v-else class="text-[var(--orange)]">
+                                                {{ urlPrefixes[code]
+                                                }}{{ t('blog.permalink_placeholder') }}
                                             </span>
                                         </p>
                                         <InputError
@@ -423,6 +458,50 @@ const errorFor = (code: string, field: keyof Translation) =>
                         </LocaleTabs>
                     </CardContent>
                 </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{{ t('blog.seo_title') }}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div class="mb-4 inline-flex rounded-md border border-input p-0.5">
+                            <button
+                                v-for="lang in languages"
+                                :key="lang.code"
+                                type="button"
+                                class="inline-flex items-center gap-2 rounded px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-colors"
+                                :class="seoActiveLocale === lang.code
+                                    ? 'bg-[var(--orange)] text-white'
+                                    : 'text-muted-foreground hover:text-foreground'"
+                                @click="seoActiveLocale = lang.code"
+                            >
+                                <FlagImage :code="lang.flag ?? lang.code" size="xs" />
+                                {{ lang.code }}
+                            </button>
+                        </div>
+
+                        <template v-for="lang in languages" :key="`seo-${lang.code}`">
+                            <div v-if="seoActiveLocale === lang.code">
+                                <SeoMetaFields
+                                    :meta-title="form.translations[lang.code].meta_title ?? ''"
+                                    :meta-description="form.translations[lang.code].meta_description ?? ''"
+                                    :schema="form.translations[lang.code].schema ?? ''"
+                                        :meta-image="form.translations[lang.code].meta_image ?? ''"
+                                        :locale="lang.code"
+                                        :errors="{
+                                            meta_title: errorFor(lang.code, 'meta_title'),
+                                            meta_description: errorFor(lang.code, 'meta_description'),
+                                            schema: errorFor(lang.code, 'schema'),
+                                            meta_image: errorFor(lang.code, 'meta_image'),
+                                        }"
+                                        @update:meta-title="(v) => (form.translations[lang.code].meta_title = v)"
+                                        @update:meta-description="(v) => (form.translations[lang.code].meta_description = v)"
+                                        @update:schema="(v) => (form.translations[lang.code].schema = v)"
+                                        @update:meta-image="(v) => (form.translations[lang.code].meta_image = v)"
+                                    />
+                            </div>
+                        </template>
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- RIGHT: publish, blog status, blog image, settings, stats -->
@@ -442,20 +521,15 @@ const errorFor = (code: string, field: keyof Translation) =>
                                 {{ t('blog.save_exit') }}
                             </Button>
                             <Button
-                                v-if="previewUrl"
-                                as-child
+                                v-if="isEdit"
                                 type="button"
-                                variant="default"
+                                variant="secondary"
+                                :disabled="form.processing"
+                                class="flex-1"
+                                @click="saveAndStay"
                             >
-                                <a
-                                    :href="previewUrl"
-                                    target="_blank"
-                                    rel="noopener"
-                                    class="flex-1"
-                                >
-                                    <ExternalLink class="size-4" />
-                                    {{ t('blog.preview_button') }}
-                                </a>
+                                <Save class="size-4" />
+                                {{ t('common.save') }}
                             </Button>
                             <Button
                                 as-child

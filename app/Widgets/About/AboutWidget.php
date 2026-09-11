@@ -63,26 +63,26 @@ final class AboutWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'body' => ['nullable', 'string', 'max:600'],
-            'badge' => ['nullable', 'string', 'max:60'],
-            'features' => ['nullable', 'array', 'max:8'],
-            'features.*' => ['nullable', 'string', 'max:120'],
-            'trusted_label' => ['nullable', 'string', 'max:80'],
-            'avatars' => ['nullable', 'array', 'max:8'],
-            'avatars.*' => ['nullable', 'string', 'max:3'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'badge' => ['nullable', 'string'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['nullable', 'string'],
+            'trusted_label' => ['nullable', 'string'],
+            'avatars' => ['nullable', 'array'],
+            'avatars.*' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

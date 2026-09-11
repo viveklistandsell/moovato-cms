@@ -12,6 +12,7 @@ type Settings = {
 
 type Data = {
     heading?: string;
+    description?: string;
     captions?: Record<string, string>;
 };
 
@@ -47,14 +48,18 @@ function caption(i: number): string | undefined {
 </script>
 
 <template>
-    <section v-if="images.length > 0" class="w-full section-py">
+    <section v-if="images.length > 0" v-reveal class="w-full section-py">
         <div class="container-xl">
-            <h2
-                v-if="data.heading"
-                class="mb-10 text-center text-3xl font-bold tracking-tight sm:text-4xl"
-            >
-                {{ data.heading }}
-            </h2>
+            <div v-if="data.heading || data.description" class="mb-10 text-center">
+                <h2 v-if="data.heading" class="mv-section-heading">
+                    {{ data.heading }}
+                </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
+            </div>
 
             <div
                 v-if="settings.layout === 'carousel'"

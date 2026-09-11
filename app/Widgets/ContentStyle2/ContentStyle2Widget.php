@@ -37,9 +37,7 @@ final class ContentStyle2Widget implements WidgetContract
             'image_path' => null,
             'image_url' => null,
             'image_side' => 'right',
-            'marker_style' => 'check',
             'card' => false,
-            'heading_style' => 'italic',
             'bg' => 'none',
         ];
     }
@@ -51,7 +49,6 @@ final class ContentStyle2Widget implements WidgetContract
             'heading' => 'Von Berlin aus für jeden Umzug an Ihrer Seite',
             'body' => 'Unser Zuhause ist Berlin, aber unser Leistungsspektrum reicht weit: vom Privatumzug über den Gewerbeumzug und den Fernumzug quer durch Deutschland bis zum Spezialtransport empfindlicher Güter. Egal welches Projekt Sie planen – wir kennen die Abläufe, die Wege und die Anforderungen und bringen Ihr Hab und Gut sicher ans Ziel.',
             'image_alt' => 'Moovato Mitarbeiter mit Umzugskartons',
-            'points' => [],
             'button_label' => '',
             'button_url' => '',
         ];
@@ -60,12 +57,10 @@ final class ContentStyle2Widget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
-            'marker_style' => ['required', 'in:check,chevron'],
             'card' => ['boolean'],
-            'heading_style' => ['nullable', 'in:bold,italic'],
             'bg' => ['nullable', 'in:none,tinted,dark'],
         ];
     }
@@ -73,14 +68,12 @@ final class ContentStyle2Widget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:1200'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

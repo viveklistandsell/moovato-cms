@@ -28,6 +28,7 @@ type Data = {
     eyebrow?: string;
     heading?: string;
     subheading?: string;
+    description?: string;
 };
 
 const props = defineProps<{
@@ -56,10 +57,10 @@ const gridColsClass = computed<string>(() => {
 </script>
 
 <template>
-    <section class="mv-services-grid section-py">
+    <section v-reveal class="mv-services-grid section-py">
         <div class="container-xl">
             <header
-                v-if="data.eyebrow || data.heading || data.subheading"
+                v-if="data.eyebrow || data.heading || data.subheading || data.description"
                 class="mv-services-grid__header"
             >
                 <p
@@ -70,10 +71,15 @@ const gridColsClass = computed<string>(() => {
                 </p>
                 <h2
                     v-if="data.heading"
-                    class="mv-services-grid__heading"
+                    class="mv-services-grid__heading mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>
+                <div
+                    v-if="data.description"
+                    class="mv-rte mt-4 text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.description"
+                />
                 <p
                     v-if="data.subheading"
                     class="mv-services-grid__subheading"

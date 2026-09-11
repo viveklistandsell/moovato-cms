@@ -9,6 +9,7 @@ use App\Widgets\AboutExperience\AboutExperienceWidget;
 use App\Widgets\AboutStats\AboutStatsWidget;
 use App\Widgets\AssistantTools\AssistantToolsWidget;
 use App\Widgets\Blog\BlogWidget;
+use App\Widgets\CitySearch\CitySearchWidget;
 use App\Widgets\CompanyDirectory\CompanyDirectoryWidget;
 use App\Widgets\Comparison\ComparisonWidget;
 use App\Widgets\Contact\ContactWidget;
@@ -32,9 +33,12 @@ use App\Widgets\Hero\HeroWidget;
 use App\Widgets\Heronew\HeronewWidget;
 use App\Widgets\HowItWorks\HowItWorksWidget;
 use App\Widgets\Image\ImageWidget;
+use App\Widgets\LocationSearch\LocationSearchWidget;
+use App\Widgets\ImageCard\ImageCardWidget;
 use App\Widgets\Map\MapWidget;
 use App\Widgets\Marquee\MarqueeWidget;
 use App\Widgets\MediaChecklist\MediaChecklistWidget;
+use App\Widgets\MissionVision\MissionVisionWidget;
 use App\Widgets\OrbitBanner\OrbitBannerWidget;
 use App\Widgets\Partners\PartnersWidget;
 use App\Widgets\Pricing\PricingWidget;
@@ -118,6 +122,10 @@ final class WidgetServiceProvider extends ServiceProvider implements DeferrableP
         CompanyDirectoryWidget::class,
         ContactWidget::class,
         WorkProcessWidget::class,
+        LocationSearchWidget::class,
+        MissionVisionWidget::class,
+        CitySearchWidget::class,
+        ImageCardWidget::class,
     ];
 
     public function register(): void

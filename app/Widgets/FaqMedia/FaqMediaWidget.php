@@ -55,14 +55,16 @@ final class FaqMediaWidget implements WidgetContract
                 ['question' => 'Sind meine Möbel während des Umzugs versichert?', 'answer' => 'Ja, alle Transporte sind versichert – vom Privatumzug bis zum Spezialtransport. Auf Wunsch bieten wir zusätzlichen Schutz für besonders wertvolle Gegenstände an.'],
                 ['question' => 'In welchen Gebieten ist Moovato tätig?', 'answer' => 'Wir sind in ganz Berlin und Umgebung für Sie da – und übernehmen mit unserem Fernumzug auf Anfrage auch deutschlandweite Umzüge.'],
             ],
+            'button_label' => 'Weitere Fragen? Kontaktieren Sie uns',
+            'button_url' => '#kontakt',
         ];
     }
 
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'first_open' => ['boolean'],
         ];
     }
@@ -70,15 +72,17 @@ final class FaqMediaWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'vertical_label' => ['nullable', 'string', 'max:120'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading_lead' => ['nullable', 'string', 'max:160'],
-            'heading_highlight' => ['nullable', 'string', 'max:80'],
-            'heading_tail' => ['nullable', 'string', 'max:160'],
-            'items' => ['nullable', 'array', 'max:30'],
-            'items.*.question' => ['nullable', 'string', 'max:500'],
+            'vertical_label' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading_lead' => ['nullable', 'string'],
+            'heading_highlight' => ['nullable', 'string'],
+            'heading_tail' => ['nullable', 'string'],
+            'items' => ['nullable', 'array'],
+            'items.*.question' => ['nullable', 'string'],
             'items.*.answer' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

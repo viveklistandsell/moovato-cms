@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 final class City extends Model
 {
+    use HasFactory;
+
     protected $table = 'cities';
 
     public static function nextSortOrder(?int $stateId = null): int
@@ -67,6 +70,7 @@ final class City extends Model
     {
         return $this->belongsTo(State::class);
     }
+
     public function districts(): HasMany
     {
         return $this->hasMany(District::class);

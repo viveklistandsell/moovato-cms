@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
+import { reveal } from '@/directives/reveal';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import FrontendLayout from '@/layouts/frontend/FrontendLayout.vue';
@@ -24,12 +25,21 @@ createInertiaApp({
                 return FrontendLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
+            case name.startsWith('portal/'):
+                return null;
+            // Partner (company owner) auth + dashboard pages — bespoke
+            // centered-card layout, no admin chrome, no public site header.
+            case name.startsWith('partner/'):
+                return null;
             default:
                 return AppLayout;
         }
     },
     progress: {
         color: '#4B5563',
+    },
+    withApp(app) {
+        app.directive('reveal', reveal);
     },
 });
 

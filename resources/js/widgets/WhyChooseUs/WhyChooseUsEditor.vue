@@ -19,6 +19,8 @@ type Data = {
     heading: string;
     subheading: string;
     image_alt: string;
+    button_label: string;
+    button_url: string;
     cards: Card[];
 };
 
@@ -75,6 +77,19 @@ function removeCard(index: number): void {
                     v-model="data.image_alt"
                     placeholder="Moovato Umzugsteam bei der Arbeit in Berlin"
                 />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="grid gap-1">
+                    <Label class="text-xs">Button label (optional)</Label>
+                    <Input
+                        v-model="data.button_label"
+                        placeholder="Kostenloses Angebot anfordern"
+                    />
+                </div>
+                <div class="grid gap-1">
+                    <Label class="text-xs">Button URL</Label>
+                    <Input v-model="data.button_url" placeholder="#angebot" />
+                </div>
             </div>
         </div>
 

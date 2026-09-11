@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\CompanyUser;
 use App\Models\Language;
 use App\Models\Menu;
 use App\Models\Page;
@@ -49,7 +50,7 @@ final class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $this->presentAuthUser($request->user()),
+                'user' => $this->presentAuthUser($request->user('web')),
             ],
             'locale' => App::getLocale(),
             'defaultLocale' => $this->defaultLocaleCode(),
@@ -75,14 +76,21 @@ final class HandleInertiaRequests extends Middleware
             // requests to keep public payloads small.
             'adminLanguages' => fn (): array => $this->adminLanguages(),
             'adminLocale' => $request->user()?->admin_locale,
-            // Admin UI translation dict — only resolved on admin /
-            // dashboard requests so the public payload stays small.
-            // Re-resolved on every request (cheap — Laravel caches
-            // the loaded lang file in memory) so a locale change
-            // is reflected after the next navigation.
             'translations' => fn (): array => $this->isAdminRoute($request)
                 ? (array) trans('admin')
                 : [],
+            'sidebarCounts' => fn (): array => $this->isAdminRoute($request)
+                ? $this->sidebarCounts()
+                : [],
+        ];
+    }
+
+    private function sidebarCounts(): array
+    {
+        return [
+            'pending_applications' => CompanyUser::query()
+                ->where('status', CompanyUser::STATUS_PENDING)
+                ->count(),
         ];
     }
 

@@ -27,7 +27,7 @@ final readonly class UpdateBlogPost
      *   reading_time?: int,
      *   is_sticky?: bool,
      *   is_featured?: bool,
-     *   translations: array<string, array{name?: ?string, permalink?: ?string, short_description?: ?string, content?: ?string, meta_title?: ?string, meta_description?: ?string}>
+     *   translations: array<string, array{name?: ?string, permalink?: ?string, short_description?: ?string, content?: ?string, meta_title?: ?string, meta_description?: ?string, schema?: ?string, meta_image?: ?string}>
      * }  $data
      */
     public function handle(Blog $post, array $data): Blog
@@ -99,6 +99,10 @@ final readonly class UpdateBlogPost
                         'permalink' => $translation['permalink'],
                         'short_description' => $translation['short_description'] ?? null,
                         'content' => $translation['content'] ?? null,
+                        'meta_title' => $translation['meta_title'] ?? null,
+                        'meta_description' => $translation['meta_description'] ?? null,
+                        'schema' => $this->normalizeSchema($translation['schema'] ?? null),
+                        'meta_image' => $translation['meta_image'] ?? null,
                     ],
                 );
             }
@@ -108,5 +112,19 @@ final readonly class UpdateBlogPost
             return $post->fresh(['translations', 'categories', 'tags'])
                 ?? throw new RuntimeException('Failed to reload post after update.');
         });
+    }
+
+    private function normalizeSchema(mixed $raw): ?array
+    {
+        if ($raw === null || $raw === '' || $raw === []) {
+            return null;
+        }
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        $decoded = json_decode((string) $raw, true);
+
+        return is_array($decoded) ? $decoded : null;
     }
 }

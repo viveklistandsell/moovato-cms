@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use App\Models\BlogTranslation;
+use App\Models\Company;
+use App\Models\CompanyUser;
 use App\Models\Language;
 use App\Models\MediaFile;
 use App\Models\MediaFolder;
@@ -17,6 +19,7 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -65,6 +68,7 @@ final class DashboardController extends Controller
             'languageCoverage' => fn (): array => $this->languageCoverage(),
             'topCategories' => fn (): array => $this->topCategories(),
             'attention' => fn (): array => $this->attention($rangeStart),
+            'companiesOverview' => fn (): array => $this->companiesOverview(),
             'permissions' => [
                 'users_view' => $user?->can('users.view') ?? false,
                 'pages_create' => $user?->can('pages.create') ?? false,
@@ -494,6 +498,49 @@ final class DashboardController extends Controller
                 ->where('created_at', '>=', $rangeStart)
                 ->count(),
             'missing_translations' => $missingTranslations,
+        ];
+    }
+
+    /**
+     * Business-facing snapshot for the "Companies" dashboard tile:
+     * how many companies live in the directory, how they split across
+     * plan tiers, how many haven't been claimed by a partner yet, and
+     * how many partner applications are waiting for admin review.
+     *
+     * @return array{
+     *   total: int,
+     *   unclaimed: int,
+     *   pending_applications: int,
+     *   plan_basic: int,
+     *   plan_premium: int,
+     *   plan_gold: int,
+     * }
+     */
+    private function companiesOverview(): array
+    {
+        $tierCounts = Company::query()
+            ->selectRaw('plan_tier, COUNT(*) as n')
+            ->groupBy('plan_tier')
+            ->pluck('n', 'plan_tier')
+            ->all();
+
+        $unclaimed = Company::query()
+            ->whereNotExists(function ($q): void {
+                $q->select(DB::raw(1))
+                    ->from('company_users')
+                    ->whereColumn('company_users.company_id', 'companies.id');
+            })
+            ->count();
+
+        return [
+            'total' => Company::query()->count(),
+            'unclaimed' => $unclaimed,
+            'pending_applications' => CompanyUser::query()
+                ->where('status', CompanyUser::STATUS_PENDING)
+                ->count(),
+            'plan_basic' => (int) ($tierCounts['basic'] ?? 0),
+            'plan_premium' => (int) ($tierCounts['premium'] ?? 0),
+            'plan_gold' => (int) ($tierCounts['gold'] ?? 0),
         ];
     }
 }

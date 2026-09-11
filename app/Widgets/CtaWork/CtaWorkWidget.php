@@ -8,8 +8,8 @@ use App\Widgets\Concerns\ProvidesWidgetDefaults;
 use App\Widgets\Contracts\WidgetContract;
 
 /**
- * Work CTA: a full-width dark call-to-action with a background image + overlay,
- * a large uppercase headline that wraps around an inline image, and a button.
+ * Work CTA: a dark two-column call-to-action card with a headline, supporting
+ * copy, a pill button, and a decorative illustration inside glowing rings.
  */
 final class CtaWorkWidget implements WidgetContract
 {
@@ -38,20 +38,18 @@ final class CtaWorkWidget implements WidgetContract
     public static function defaultSettings(): array
     {
         return [
-            'bg_image_path' => null,
-            'bg_image_url' => null,
-            'inline_image_path' => null,
-            'inline_image_url' => null,
+            'media_image_path' => null,
+            'media_image_url' => '/images/boxes-dolly.png',
         ];
     }
 
     public static function defaultData(): array
     {
         return [
-            'title_before' => 'Jetzt',
-            'title_after' => 'Umzug starten',
-            'inline_image_alt' => 'Moovato Umzugsteam in Berlin',
-            'button_label' => 'Kontakt aufnehmen',
+            'heading' => 'Bereit für Ihren stressfreien Umzug mit Moovato?',
+            'subtext' => 'Erhalten Sie in wenigen Minuten ein unverbindliches Angebot und starten Sie entspannt in Ihr neues Zuhause in Berlin.',
+            'media_image_alt' => 'Umzugskartons und Sackkarre für Ihren Umzug mit Moovato',
+            'button_label' => 'Jetzt Angebot anfordern',
             'button_url' => '/kontakt',
         ];
     }
@@ -59,21 +57,19 @@ final class CtaWorkWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'bg_image_path' => ['nullable', 'string', 'max:1000'],
-            'bg_image_url' => ['nullable', 'string', 'max:2000'],
-            'inline_image_path' => ['nullable', 'string', 'max:1000'],
-            'inline_image_url' => ['nullable', 'string', 'max:2000'],
+            'media_image_path' => ['nullable', 'string'],
+            'media_image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'title_before' => ['nullable', 'string', 'max:120'],
-            'title_after' => ['nullable', 'string', 'max:120'],
-            'inline_image_alt' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2048'],
+            'heading' => ['nullable', 'string'],
+            'subtext' => ['nullable', 'string'],
+            'media_image_alt' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

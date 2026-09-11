@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsurePartnerOwnsCompany;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -40,12 +41,28 @@ return Application::configure(basePath: dirname(__DIR__))
             'locale' => SetLocale::class,
             'admin' => EnsureUserIsAdmin::class,
             'admin.locale' => SetAdminLocale::class,
-            // Spatie permission middleware aliases. Used in routes/web.php as
-            // ->middleware('permission:users.create') etc.
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'partner.owns.company' => EnsurePartnerOwnsCompany::class,
         ]);
+
+        // Where `auth:<guard>` sends anonymous visitors.
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('company-portal/*') || $request->is('partner/*')) {
+                return route('partner.login');
+            }
+
+            return route('login');
+        });
+
+        $middleware->redirectUsersTo(function ($request) {
+            if ($request->is('partner/*') || $request->is('company-portal/*')) {
+                return route('partner.dashboard');
+            }
+
+            return '/dashboard';
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {

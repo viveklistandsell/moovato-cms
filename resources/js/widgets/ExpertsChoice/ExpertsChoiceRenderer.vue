@@ -20,7 +20,7 @@ defineProps<{ data: Data }>();
 </script>
 
 <template>
-    <section class="mv-experts section-py">
+    <section v-reveal class="mv-experts section-py">
         <div
             class="container-xl grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
@@ -37,10 +37,14 @@ defineProps<{ data: Data }>();
                     <span v-if="data.eyebrow" class="ec-eyebrow">
                         {{ data.eyebrow }}
                     </span>
-                    <h2 v-if="data.heading" class="ec-title">
+                    <h2 v-if="data.heading" class="ec-title mv-section-heading">
                         {{ data.heading }}
                     </h2>
-                    <p v-if="data.body" class="ec-body">{{ data.body }}</p>
+                    <div
+                        v-if="data.body"
+                        class="mv-rte ec-body"
+                        v-html="data.body"
+                    />
 
                     <ul v-if="data.points?.length" class="ec-points">
                         <li v-for="(point, i) in data.points" :key="i">

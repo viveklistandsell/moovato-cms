@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ type Tab = {
 type Data = {
     eyebrow: string;
     heading: string;
+    description: string;
     tabs: Tab[];
 };
 
@@ -95,6 +97,13 @@ function removeRow(tabIndex: number, rowIndex: number): void {
             <div class="grid gap-2">
                 <Label>Heading</Label>
                 <Input v-model="data.heading" />
+            </div>
+            <div class="grid gap-2 md:col-span-2">
+                <Label>Description</Label>
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
         </div>
 

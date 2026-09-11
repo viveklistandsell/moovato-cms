@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +22,7 @@ type Settings = {
 type Data = {
     title: string;
     subtitle: string;
+    description: string;
     card_prefix: string;
     search_placeholder: string;
     search_url: string;
@@ -56,6 +58,13 @@ function removeCity(index: number): void {
             <div class="grid gap-2 md:col-span-2">
                 <Label>Subtitle</Label>
                 <Textarea v-model="data.subtitle" :rows="2" />
+            </div>
+            <div class="grid gap-2 md:col-span-2">
+                <Label>Description</Label>
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
             <div class="grid gap-2">
                 <Label>Card prefix</Label>

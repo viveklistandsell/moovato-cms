@@ -46,43 +46,26 @@ const categoryLabel = computed(() => {
 </script>
 
 <template>
-    <Link
-        :href="detailHref"
-        class="group flex flex-col overflow-hidden rounded-lg border border-transparent transition-all hover:border-border"
-    >
-        <div
-            class="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-lg bg-muted"
-        >
-            <img
-                v-if="post.image_url"
-                :src="post.image_url"
-                :alt="post.title"
-                class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            />
+    <Link :href="detailHref"
+        class="group flex flex-col overflow-hidden rounded-lg border rounded-lg transition-all hover:border-border bg-white dark:bg-muted hover:shadow-lg">
+        <div class="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-lg bg-muted">
+            <img v-if="post.image_url" :src="post.image_url" :alt="post.title"
+                class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             <ImageIcon v-else class="size-10 text-muted-foreground/50" />
         </div>
 
-        <div class="flex flex-col gap-2 px-1 pt-4">
-            <p
-                v-if="categoryLabel"
-                class="text-xs font-semibold tracking-wider text-rose-600 uppercase dark:text-rose-400"
-            >
+        <div class="flex flex-col gap-2 p-4 py-6">
+            <p v-if="categoryLabel"
+                class="text-xs font-bold tracking-wider text-[var(--orange)] uppercase dark:var(--orange)">
                 {{ categoryLabel }}
             </p>
-            <h3
-                class="text-lg leading-tight font-bold text-foreground group-hover:underline"
-            >
+            <h3 class="text-xl leading-tight font-extrabold text-foreground group-hover:underline">
                 {{ post.title }}
             </h3>
-            <p
-                v-if="post.excerpt"
-                class="line-clamp-3 text-sm text-muted-foreground"
-            >
+            <p v-if="post.excerpt" class="line-clamp-3 text-sm text-muted-foreground">
                 {{ post.excerpt }}
             </p>
-            <div
-                class="mt-2 flex items-center gap-2 text-xs text-muted-foreground"
-            >
+            <div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                 <span v-if="post.author">{{ post.author }}</span>
                 <span v-if="post.author && formattedDate">·</span>
                 <span v-if="formattedDate">{{ formattedDate }}</span>

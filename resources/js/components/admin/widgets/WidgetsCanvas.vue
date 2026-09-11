@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3';
-import {
-    ClipboardPaste,
-    LayoutTemplate,
-    Loader2,
-    Plus,
-    Save,
-} from 'lucide-vue-next';
+import { ClipboardPaste, LayoutTemplate, Plus } from 'lucide-vue-next';
 import { computed, nextTick, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import draggable from 'vuedraggable';
@@ -21,12 +14,7 @@ import type { WidgetInstance, WidgetMeta } from '@/widgets/types';
 
 const t = useT();
 const clipboard = useWidgetClipboard();
-
 const props = defineProps<{
-    // When provided (edit mode), the canvas owns its Save button and syncs
-    // directly to /admin/pages/{pageId}/widgets. When null (create mode), the
-    // parent form bundles widgets into the main page submission.
-    pageId?: number | null;
     availableWidgets: WidgetMeta[];
     languages: LocaleOption[];
 }>();
@@ -44,7 +32,7 @@ watch(
         const normalized = val.map((w) => {
             const next = normalizeWidget(w);
             if (next !== w) mutated = true;
-            return next;
+            return next;               
         });
         if (mutated) {
             widgets.value = normalized;
@@ -56,10 +44,6 @@ watch(
 const pickerOpen = ref(false);
 const drawerOpen = ref(false);
 const editingIndex = ref<number | null>(null);
-const saving = ref(false);
-
-const hasSaveEndpoint = computed(() => typeof props.pageId === 'number');
-
 const defaultLang = computed<string>(
     () =>
         props.languages.find((l) => l.is_default)?.code ??
@@ -87,6 +71,11 @@ const editingMeta = computed<WidgetMeta | null>(() =>
         : null,
 );
 
+function defaultsFor(meta: WidgetMeta | undefined, lang: string): Record<string, unknown> {
+    const perLocale = meta?.default_data_by_locale?.[lang];
+    return { ...(perLocale ?? meta?.default_data ?? {}) };
+}
+
 /** Ensure every active language has a translation slot for editing. */
 function normalizeWidget(w: WidgetInstance): WidgetInstance {
     const meta = props.availableWidgets.find((m) => m.type === w.type);
@@ -94,7 +83,7 @@ function normalizeWidget(w: WidgetInstance): WidgetInstance {
     let translationsChanged = false;
     for (const lang of props.languages) {
         if (!translations[lang.code]) {
-            translations[lang.code] = { ...(meta?.default_data ?? {}) };
+            translations[lang.code] = defaultsFor(meta, lang.code);
             translationsChanged = true;
         }
     }
@@ -137,7 +126,7 @@ function normalizeWidget(w: WidgetInstance): WidgetInstance {
 function onPick(meta: WidgetMeta): void {
     const translations: Record<string, Record<string, unknown>> = {};
     for (const lang of props.languages) {
-        translations[lang.code] = { ...meta.default_data };
+        translations[lang.code] = defaultsFor(meta, lang.code);
     }
 
     // Capture the landing index BEFORE the push. Because `widgets` is a
@@ -233,7 +222,7 @@ function paste(): void {
     for (const lang of props.languages) {
         translations[lang.code] = sourceTranslations[lang.code]
             ? { ...sourceTranslations[lang.code] }
-            : { ...meta.default_data };
+            : defaultsFor(meta, lang.code);
     }
 
     const newIndex = widgets.value.length;
@@ -267,57 +256,6 @@ function toggleActive(index: number): void {
     next[index] = { ...next[index], is_active: !next[index].is_active };
     widgets.value = next;
 }
-
-function save(): void {
-    if (!hasSaveEndpoint.value || props.pageId == null) return;
-    saving.value = true;
-
-    // Re-number positions based on current order; the server is authoritative
-    // but sending the array index keeps things explicit. Visibility + css_class
-    // travel with each row so per-device toggles in the drawer actually persist.
-    //
-    // We deep-clone via JSON to strip any Vue reactive proxies — proxies
-    // serialize fine via JSON.stringify in theory, but unwrapping here is the
-    // belt-and-suspenders fix for the "second-save loses the toggle" bug.
-    const snapshot: WidgetInstance[] = JSON.parse(
-        JSON.stringify(widgets.value),
-    );
-    const payload = snapshot.map((w, i) => ({
-        id: w.id ?? null,
-        type: w.type,
-        position: i,
-        is_active: w.is_active,
-        settings: w.settings ?? {},
-        translations: w.translations ?? {},
-        visibility: {
-            desktop: w.visibility?.desktop ?? true,
-            tablet: w.visibility?.tablet ?? true,
-            mobile: w.visibility?.mobile ?? true,
-        },
-        css_class: w.css_class ?? '',
-    }));
-
-    router.post(
-        `/admin/pages/${props.pageId}/widgets`,
-        // Inertia accepts plain objects; cast to satisfy its FormDataConvertible.
-        { widgets: payload } as never,
-        {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: () => {
-                toast.success('Widgets saved.');
-            },
-            onError: () => {
-                toast.error(
-                    'Could not save widgets. Check the form for errors.',
-                );
-            },
-            onFinish: () => {
-                saving.value = false;
-            },
-        },
-    );
-}
 </script>
 
 <template>
@@ -348,22 +286,10 @@ function save(): void {
                     <ClipboardPaste class="size-4" />
                     {{ t('widgets.paste') }}
                 </Button>
-                <Button
-                    v-if="hasSaveEndpoint"
-                    type="button"
-                    size="sm"
-                    :disabled="saving"
-                    @click="save"
-                >
-                    <Loader2 v-if="saving" class="size-4 animate-spin" />
-                    <Save v-else class="size-4" />
-                    {{ t('widgets.save') }}
-                </Button>
             </div>
         </div>
 
         <p
-            v-if="!hasSaveEndpoint"
             class="rounded-md border border-dashed bg-muted/30 px-3 py-2 text-xs text-muted-foreground"
         >
             {{ t('widgets.create_hint') }}

@@ -44,38 +44,34 @@ final class StatFeaturesWidget implements WidgetContract
         return [
             'eyebrow' => '',
             'heading' => 'Warum Kundinnen und Kunden Moovato vertrauen',
-            'body' => 'Wir setzen auf strukturierte Umzüge mit sorgfältiger Planung, geschultem Personal und einem klar organisierten Ablauf.',
+            'body' => '<p>Wir setzen auf strukturierte Umzüge mit sorgfältiger Planung, geschultem Personal und einem klar organisierten Ablauf.</p><ol><li><strong>Geschulte Umzugsprofis</strong> – Unser erfahrenes Team nutzt die richtigen Techniken und Schutzmaterialien für einen sicheren Transport.</li><li><strong>Pünktliche Termine</strong> – Wir planen Zeitfenster und Routen so, dass Ihre Sachen genau wie vereinbart ankommen.</li><li><strong>Sichere Verpackung</strong> – Hochwertige Materialien und ein klares Beschriftungssystem verhindern Schäden während des Umzugs.</li></ol>',
             'image_alt' => 'Moovato Mitarbeiter trägt einen Karton vor einem Mehrfamilienhaus',
             'stat_value' => '1.5k+',
             'stat_label' => 'Kunden',
-            'features' => [
-                ['title' => 'Geschulte Umzugsprofis', 'description' => 'Unser erfahrenes Team nutzt die richtigen Techniken und Schutzmaterialien für einen sicheren Transport.'],
-                ['title' => 'Pünktliche Termine', 'description' => 'Wir planen Zeitfenster und Routen so, dass Ihre Sachen genau wie vereinbart ankommen.'],
-                ['title' => 'Sichere Verpackung', 'description' => 'Hochwertige Materialien und ein klares Beschriftungssystem verhindern Schäden während des Umzugs.'],
-            ],
+            'button_label' => 'Kostenloses Angebot anfordern',
+            'button_url' => '#angebot',
         ];
     }
 
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:600'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'stat_value' => ['nullable', 'string', 'max:16'],
-            'stat_label' => ['nullable', 'string', 'max:40'],
-            'features' => ['nullable', 'array', 'max:6'],
-            'features.*.title' => ['nullable', 'string', 'max:120'],
-            'features.*.description' => ['nullable', 'string', 'max:300'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'stat_value' => ['nullable', 'string'],
+            'stat_label' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

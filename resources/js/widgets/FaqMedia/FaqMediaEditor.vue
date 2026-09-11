@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Item = { question: string; answer: string };
@@ -23,6 +23,8 @@ type Data = {
     heading_highlight: string;
     heading_tail: string;
     items: Item[];
+    button_label: string;
+    button_url: string;
 };
 
 const settings = defineModel<Settings>('settings', { required: true });
@@ -107,6 +109,17 @@ function removeItem(index: number): void {
                         @update:model-value="(v) => (settings.first_open = v)"
                     />
                 </div>
+                <div class="grid gap-2">
+                    <Label>Button label (optional)</Label>
+                    <Input
+                        v-model="data.button_label"
+                        placeholder="Weitere Fragen? Kontaktieren Sie uns"
+                    />
+                </div>
+                <div class="grid gap-2">
+                    <Label>Button URL</Label>
+                    <Input v-model="data.button_url" placeholder="#kontakt" />
+                </div>
             </div>
         </div>
 
@@ -130,11 +143,7 @@ function removeItem(index: number): void {
             >
                 <div class="space-y-2">
                     <Input v-model="item.question" placeholder="Question" />
-                    <Textarea
-                        v-model="item.answer"
-                        :rows="3"
-                        placeholder="Answer"
-                    />
+                    <RichTextEditor v-model="item.answer" placeholder="Answer" />
                 </div>
                 <Button
                     type="button"

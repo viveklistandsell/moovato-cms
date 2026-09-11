@@ -19,22 +19,21 @@ test('the new content section widgets are registered under their slugs', functio
         ->and($registry->resolve('stat_features'))->toBe(StatFeaturesWidget::class);
 });
 
-test('media checklist exposes image-side, marker style and a checklist', function (): void {
+test('media checklist exposes image-side, card style and a checklist body', function (): void {
     $settings = MediaChecklistWidget::defaultSettings();
     $data = MediaChecklistWidget::defaultData();
 
-    expect($settings)->toHaveKeys(['image_path', 'image_url', 'image_side', 'marker_style', 'card'])
+    expect($settings)->toHaveKeys(['image_path', 'image_url', 'image_side', 'card'])
         ->and($settings['image_side'])->toBe('left')
-        ->and($settings['marker_style'])->toBe('check')
-        ->and($data)->toHaveKeys(['eyebrow', 'heading', 'body', 'points', 'button_label', 'button_url'])
-        ->and($data['points'])->toHaveCount(4);
+        ->and($data)->toHaveKeys(['eyebrow', 'heading', 'body', 'button_label', 'button_url'])
+        ->and($data['body'])->toContain('<ul>');
 });
 
 test('text columns exposes a two column body and checklist', function (): void {
     $data = TextColumnsWidget::defaultData();
 
-    expect($data)->toHaveKeys(['heading', 'subheading', 'body', 'intro', 'points', 'outro'])
-        ->and($data['points'])->not->toBeEmpty();
+    expect($data)->toHaveKeys(['heading', 'subheading', 'body', 'intro', 'outro'])
+        ->and($data['intro'])->toContain('<ul>');
 });
 
 test('dark feature exposes an image side, two column list and button', function (): void {
@@ -61,12 +60,11 @@ test('team cta exposes a checklist and an embedded hiring card', function (): vo
         ->and($data['points'])->not->toBeEmpty();
 });
 
-test('stat features exposes numbered features and a stat badge', function (): void {
+test('stat features exposes a numbered checklist body and a stat badge', function (): void {
     $data = StatFeaturesWidget::defaultData();
 
-    expect($data)->toHaveKeys(['heading', 'body', 'stat_value', 'stat_label', 'features'])
-        ->and($data['features'])->toHaveCount(3)
-        ->and($data['features'][0])->toHaveKeys(['title', 'description'])
+    expect($data)->toHaveKeys(['heading', 'body', 'stat_value', 'stat_label'])
+        ->and($data['body'])->toContain('<ol>')
         ->and($data['stat_value'])->toBe('1.5k+');
 });
 

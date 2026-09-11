@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import {
+    ArrowRight,
     BadgeCheck,
     Briefcase,
+    Check,
     ExternalLink,
     GripVertical,
+    Loader2,
     Pencil,
     Plus,
     Star,
     Trash2,
+    X,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import Heading from '@/components/Heading.vue';
 import BulkActions, {
     type BulkAction,
@@ -26,6 +30,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     Select,
     SelectContent,
@@ -49,6 +61,15 @@ setBreadcrumbs(() => [
 ]);
 
 type Translation = { lang: string; name: string; permalink: string };
+type PendingPlanRequest = {
+    id: number;
+    from_tier: string;
+    from_label: string;
+    to_tier: string;
+    to_label: string;
+    is_upgrade: boolean;
+    created_at: string | null;
+};
 type Company = {
     id: number;
     primary_city_id: number | null;
@@ -64,6 +85,8 @@ type Company = {
     verified: boolean;
     is_top_rated: boolean;
     plan_tier: string;
+    plan_label: string;
+    pending_plan_request: PendingPlanRequest | null;
     rating_avg: number;
     review_count: number;
     status: string;
@@ -318,6 +341,44 @@ const deleteForm = useForm({});
 function performDelete(c: Company): void {
     if (!confirmDelete(c)) return;
     deleteForm.delete(`/admin/companies/${c.id}`, { preserveScroll: true });
+}
+
+/* ---------- inline plan-request approve / reject ---------- */
+const approveForm = useForm({});
+const approvingRequestId = ref<number | null>(null);
+function approvePlanRequest(row: Company): void {
+    if (!row.pending_plan_request) return;
+    const req = row.pending_plan_request;
+    if (!confirm(t('companies.confirm_approve_plan', { from: req.from_label, to: req.to_label }))) {
+        return;
+    }
+    approvingRequestId.value = req.id;
+    approveForm.post(`/admin/plan-change-requests/${req.id}/approve`, {
+        preserveScroll: true,
+        onFinish: () => {
+            approvingRequestId.value = null;
+        },
+    });
+}
+
+const rejectOpen = ref(false);
+const rejectTarget = ref<Company | null>(null);
+const rejectForm = useForm<{ admin_note: string }>({ admin_note: '' });
+function openReject(row: Company): void {
+    rejectTarget.value = row;
+    rejectForm.reset();
+    rejectOpen.value = true;
+}
+function submitReject(): void {
+    if (rejectTarget.value === null || rejectTarget.value.pending_plan_request === null) return;
+    const id = rejectTarget.value.pending_plan_request.id;
+    rejectForm.post(`/admin/plan-change-requests/${id}/reject`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            rejectOpen.value = false;
+            rejectTarget.value = null;
+        },
+    });
 }
 
 </script>
@@ -695,11 +756,49 @@ function performDelete(c: Company): void {
                                 </td>
                                 <td class="px-4 py-3">
                                     <Badge
-                                        :variant="row.plan_tier === 'gold' ? 'default' : row.plan_tier === 'silver' ? 'secondary' : 'outline'"
+                                        :variant="row.plan_tier === 'gold' ? 'default' : row.plan_tier === 'premium' ? 'secondary' : 'outline'"
                                         class="text-xs capitalize"
                                     >
-                                        {{ row.plan_tier }}
+                                        {{ row.plan_label ?? row.plan_tier }}
                                     </Badge>
+                                    <div
+                                        v-if="row.pending_plan_request"
+                                        class="mt-2 flex flex-col gap-1.5 rounded-md border border-amber-300 bg-amber-50 p-2"
+                                    >
+                                        <div class="flex items-center gap-1 text-[11px] font-semibold text-amber-900">
+                                            <span>{{ row.pending_plan_request.from_label }}</span>
+                                            <ArrowRight class="size-3" />
+                                            <span>{{ row.pending_plan_request.to_label }}</span>
+                                            <span
+                                                :class="row.pending_plan_request.is_upgrade ? 'text-emerald-600' : 'text-amber-700'"
+                                                class="ml-1 text-[9px] uppercase"
+                                            >
+                                                {{ row.pending_plan_request.is_upgrade ? t('companies.plan_upgrade') : t('companies.plan_downgrade') }}
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-7 gap-1 border-emerald-400 bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                                                :disabled="approvingRequestId === row.pending_plan_request.id"
+                                                @click="approvePlanRequest(row)"
+                                            >
+                                                <Loader2 v-if="approvingRequestId === row.pending_plan_request.id" class="size-3.5 animate-spin" />
+                                                <Check v-else class="size-3.5" />
+                                                {{ t('companies.approve_plan') }}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-7 gap-1 border-rose-400 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 hover:text-rose-800"
+                                                @click="openReject(row)"
+                                            >
+                                                <X class="size-3.5" />
+                                                {{ t('companies.decline_plan') }}
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <Badge
@@ -717,7 +816,7 @@ function performDelete(c: Company): void {
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-1">
-                                        <Button variant="ghost" size="icon-sm" as-child>
+                                        <Button variant="ghost" size="icon-sm" as-child :title="t('profile.open_full_editor')">
                                             <Link :href="`/admin/companies/${row.id}/edit`">
                                                 <Pencil class="size-4" />
                                             </Link>
@@ -746,5 +845,36 @@ function performDelete(c: Company): void {
                 </div>
             </CardContent>
         </Card>
+        <Dialog v-model:open="rejectOpen">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{{ t('companies.decline_plan_title') }}</DialogTitle>
+                    <DialogDescription>
+                        {{ t('companies.decline_plan_hint') }}
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">{{ t('companies.decline_plan_note') }}</label>
+                    <textarea
+                        v-model="rejectForm.admin_note"
+                        class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        rows="4"
+                        :placeholder="t('companies.decline_plan_note_placeholder')"
+                    ></textarea>
+                    <p v-if="rejectForm.errors.admin_note" class="text-xs text-destructive">
+                        {{ rejectForm.errors.admin_note }}
+                    </p>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" @click="rejectOpen = false">
+                        {{ t('companies.decline_plan_cancel') }}
+                    </Button>
+                    <Button variant="destructive" :disabled="rejectForm.processing" @click="submitReject">
+                        <Loader2 v-if="rejectForm.processing" class="size-4 animate-spin" />
+                        {{ t('companies.decline_plan_confirm') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

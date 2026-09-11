@@ -7,9 +7,12 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Company;
+use App\Models\CompanyReview;
 use App\Models\CompanyTranslation;
+use App\Models\CompanyUser;
 use App\Models\District;
 use App\Models\Language;
+use App\Models\Plan;
 use App\Models\ServiceCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -41,6 +44,8 @@ final class CompanyController extends Controller
         $locale = App::getLocale();
         $cityId = self::intQuery($request, 'city');
         $districtId = self::intQuery($request, 'district');
+        $stateId = self::intQuery($request, 'state');
+        $countryId = self::intQuery($request, 'country');
         $serviceIds = self::intArrayQuery($request, 'services');
         if ($serviceIds === [] && ($legacy = self::intQuery($request, 'service')) !== null) {
             $serviceIds = [$legacy];
@@ -48,7 +53,6 @@ final class CompanyController extends Controller
         $verifiedOnly = $request->query('verified') === '1';
         $topRatedOnly = $request->query('top_rated') === '1';
         $minRating = (float) $request->query('min_rating', '0');
-        $minReviews = (int) $request->query('min_reviews', '0');
         $priceMin = self::floatQuery($request, 'price_min');
         $priceMax = self::floatQuery($request, 'price_max');
         $sort = $request->query('sort');
@@ -69,6 +73,10 @@ final class CompanyController extends Controller
             $query->whereHas('serviceAreas', fn (Builder $q) => $q->where('districts.id', $districtId));
         } elseif ($cityId !== null) {
             $query->where('primary_city_id', $cityId);
+        } elseif ($stateId !== null) {
+            $query->whereHas('primaryCity', fn (Builder $q) => $q->where('state_id', $stateId));
+        } elseif ($countryId !== null) {
+            $query->whereHas('primaryCity.state', fn (Builder $q) => $q->where('country_id', $countryId));
         }
         if ($serviceIds !== []) {
             $query->whereHas('services', fn (Builder $q) => $q->whereIn('service_categories.id', $serviceIds));
@@ -81,9 +89,6 @@ final class CompanyController extends Controller
         }
         if ($minRating > 0) {
             $query->where('rating_avg', '>=', $minRating);
-        }
-        if ($minReviews > 0) {
-            $query->where('review_count', '>=', $minReviews);
         }
         if ($priceMin !== null || $priceMax !== null) {
             $query->whereHas('services', function (Builder $q) use ($priceMin, $priceMax): void {
@@ -108,8 +113,13 @@ final class CompanyController extends Controller
 
         $paginated = $query->paginate(self::PER_PAGE)->withQueryString();
 
+        $claimedIds = CompanyUser::query()
+            ->whereIn('company_id', $paginated->getCollection()->pluck('id'))
+            ->pluck('company_id')
+            ->flip();
+
         $companies = $paginated->getCollection()
-            ->map(fn (Company $c): array => $this->presentCard($c, $locale))
+            ->map(fn (Company $c): array => $this->presentCard($c, $locale, ! $claimedIds->has($c->id)))
             ->values()
             ->all();
 
@@ -125,7 +135,6 @@ final class CompanyController extends Controller
             'verifiedOnly' => $verifiedOnly,
             'topRatedOnly' => $topRatedOnly,
             'minRating' => $minRating,
-            'minReviews' => $minReviews,
             'priceMin' => $priceMin,
             'priceMax' => $priceMax,
             'sort' => $sort,
@@ -186,11 +195,13 @@ final class CompanyController extends Controller
                 : "/{$t->lang}/company/{$t->permalink}";
         }
 
+        $isClaimed = CompanyUser::query()->where('company_id', $company->id)->exists();
+
         return Inertia::render('frontend/companies/Show', [
             'locale' => $locale,
-            'company' => $this->presentDetail($company, $locale),
-            // Shared with SiteHeader — see `switchHref` computed there.
+            'company' => $this->presentDetail($company, $locale, ! $isClaimed),
             'localeAlternates' => $localeAlternates,
+            'reviews' => fn (): array => $this->presentReviews($request, (int) $company->id),
         ]);
     }
 
@@ -232,12 +243,75 @@ final class CompanyController extends Controller
             ->all();
     }
 
+    /**
+     * Load one page of public reviews for the profile page.
+     *
+     * Query params:
+     *   reviews_sort → newest (default) | oldest | rating_high | rating_low
+     *   reviews_page → 1..N (default 1)
+     *
+     * Namespaced under `reviews_` so future filters on the profile URL
+     * don't collide.
+     *
+     * @return array<string, mixed>
+     */
+    private function presentReviews(Request $request, int $companyId): array
+    {
+        $sort = (string) $request->query('reviews_sort', 'newest');
+        $sort = in_array($sort, ['newest', 'oldest', 'rating_high', 'rating_low'], true)
+            ? $sort
+            : 'newest';
+
+        $query = CompanyReview::query()
+            ->published()
+            ->where('company_id', $companyId)
+            ->with(['replyAuthor:id,name']);
+
+        match ($sort) {
+            'oldest' => $query->orderBy('published_at')->orderBy('id'),
+            'rating_high' => $query->orderByDesc('rating')->orderByDesc('id'),
+            'rating_low' => $query->orderBy('rating')->orderByDesc('id'),
+            default => $query->latest('published_at')->orderByDesc('id'),
+        };
+
+        $perPage = max(1, min(50, (int) $request->query('reviews_per_page', '6')));
+        $paginated = $query->paginate($perPage, ['*'], 'reviews_page')
+            ->withQueryString();
+
+        return [
+            'sort' => $sort,
+            'data' => $paginated->getCollection()
+                ->map(fn (CompanyReview $r): array => [
+                    'id' => (int) $r->id,
+                    'public_name' => $r->publicName(),
+                    'is_anonymous' => (bool) $r->is_anonymous,
+                    'rating' => (int) $r->rating,
+                    'body' => $r->body,
+                    'advantages' => $r->advantages ?? [],
+                    'disadvantages' => $r->disadvantages ?? [],
+                    'source' => $r->source,
+                    'helpful_count' => (int) $r->helpful_count,
+                    'published_at' => $r->published_at?->toIso8601String(),
+                    'reply_body' => $r->reply_body,
+                    'replied_at' => $r->replied_at?->toIso8601String(),
+                    'reply_author_name' => $r->replyAuthor?->name,
+                ])
+                ->values()
+                ->all(),
+            'current_page' => $paginated->currentPage(),
+            'last_page' => $paginated->lastPage(),
+            'per_page' => $paginated->perPage(),
+            'total' => $paginated->total(),
+            'has_more' => $paginated->currentPage() < $paginated->lastPage(),
+        ];
+    }
+
     /* ---------------------------------------------------------- presenters */
 
     /**
      * @return array<string, mixed>
      */
-    private function presentCard(Company $c, string $locale): array
+    private function presentCard(Company $c, string $locale, bool $canClaim = false): array
     {
         $t = $this->pickTranslation($c->translations, $locale);
         $primaryContact = $c->contacts->firstWhere('is_primary', true) ?? $c->contacts->first();
@@ -277,13 +351,15 @@ final class CompanyController extends Controller
             'coverage_cities' => $coverageCityNames,
             'primary_services' => $servicesForCard,
             'primary_phone' => $primaryContact?->type === 'phone' ? $primaryContact->value : null,
+            'can_claim' => $canClaim,
+            'claim_url' => $canClaim ? '/partner/register?claim='.$c->id : null,
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    private function presentDetail(Company $c, string $locale): array
+    private function presentDetail(Company $c, string $locale, bool $canClaim = false): array
     {
         $t = $this->pickTranslation($c->translations, $locale);
         $galleryUrls = $c->media
@@ -337,6 +413,13 @@ final class CompanyController extends Controller
             'verified' => (bool) $c->verified,
             'is_top_rated' => (bool) $c->is_top_rated,
             'plan_tier' => $c->plan_tier,
+            'plan_lead_url' => (
+                ($tierPlan = Plan::findBySlug($c->tier()->value))
+                && ! empty($tierPlan['features']['lead'])
+            ) ? ($tierPlan['lead_url'] ?? null) : null,
+            'plan_lead_label' => (
+                $tierPlan && ! empty($tierPlan['features']['lead'])
+            ) ? ($tierPlan['lead_label'] ?? null) : null,
             'rating_avg' => (float) $c->rating_avg,
             'review_count' => (int) $c->review_count,
             'recommend_pct' => (int) $c->recommend_pct,
@@ -345,6 +428,9 @@ final class CompanyController extends Controller
             'google_review_count' => (int) $c->google_review_count,
             'founded_year' => $c->founded_year,
             'employee_count' => $c->employee_count,
+            'opening_hours' => (
+                $tierPlan && ! empty($tierPlan['features']['opening_hours'])
+            ) ? $c->opening_hours : null,
             'street' => $c->street,
             'postal_code' => $c->postal_code,
             'city_name' => $c->primaryCity?->name,
@@ -368,6 +454,8 @@ final class CompanyController extends Controller
                     'answer' => $ft?->answer ?? '',
                 ];
             })->values()->all(),
+            'can_claim' => $canClaim,
+            'claim_url' => $canClaim ? '/partner/register?claim='.$c->id : null,
         ];
     }
 

@@ -24,7 +24,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-about section-py">
+    <section v-reveal class="mv-about section-py">
         <div
             class="container-xl grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center lg:gap-x-10"
         >
@@ -70,16 +70,15 @@ defineProps<{ settings: Settings; data: Data }>();
                 </span>
                 <h2
                     v-if="data.heading"
-                    class="mt-5 text-3xl font-bold tracking-tight text-[var(--midnight)] sm:text-4xl lg:text-5xl"
+                    class="mt-5 text-[var(--midnight)] mv-section-heading"
                 >
                     {{ data.heading }}
                 </h2>
-                <p
+                <div
                     v-if="data.body"
-                    class="mt-6 max-w-xl text-base leading-relaxed text-[var(--slate)]"
-                >
-                    {{ data.body }}
-                </p>
+                    class="mv-rte mt-6 max-w-xl text-base leading-relaxed text-[var(--slate)]"
+                    v-html="data.body"
+                />
 
                 <ul
                     v-if="data.features?.length"

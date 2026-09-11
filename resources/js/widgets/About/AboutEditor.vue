@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -127,7 +128,7 @@ function removeAvatar(index: number): void {
             </div>
             <div class="grid gap-2">
                 <Label>Body</Label>
-                <Textarea v-model="data.body" :rows="3" />
+                <RichTextEditor v-model="data.body" placeholder="Body" />
             </div>
             <div class="space-y-2">
                 <div class="flex items-center justify-between">

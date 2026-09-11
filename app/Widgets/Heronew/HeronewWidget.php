@@ -87,8 +87,8 @@ final class HeronewWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
@@ -98,24 +98,24 @@ final class HeronewWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'badge' => ['nullable', 'string', 'max:120'],
-            'title_lead' => ['nullable', 'string', 'max:160'],
-            'title_highlight' => ['nullable', 'string', 'max:40'],
-            'title_tail' => ['nullable', 'string', 'max:160'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'features' => ['nullable', 'array', 'max:8'],
-            'features.*' => ['nullable', 'string', 'max:120'],
-            'primary_label' => ['nullable', 'string', 'max:80'],
-            'primary_url' => ['nullable', 'string', 'max:2000'],
-            'secondary_label' => ['nullable', 'string', 'max:80'],
-            'secondary_url' => ['nullable', 'string', 'max:2000'],
-            'pills' => ['nullable', 'array', 'max:6'],
-            'pills.*.icon' => ['nullable', 'string', 'max:64'],
-            'pills.*.label' => ['nullable', 'string', 'max:60'],
-            'avatars' => ['nullable', 'array', 'max:5'],
-            'avatars.*' => ['nullable', 'string', 'max:3'],
-            'trust_title' => ['nullable', 'string', 'max:120'],
-            'trust_subtitle' => ['nullable', 'string', 'max:120'],
+            'badge' => ['nullable', 'string'],
+            'title_lead' => ['nullable', 'string'],
+            'title_highlight' => ['nullable', 'string'],
+            'title_tail' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['nullable', 'string'],
+            'primary_label' => ['nullable', 'string'],
+            'primary_url' => ['nullable', 'string'],
+            'secondary_label' => ['nullable', 'string'],
+            'secondary_url' => ['nullable', 'string'],
+            'pills' => ['nullable', 'array'],
+            'pills.*.icon' => ['nullable', 'string'],
+            'pills.*.label' => ['nullable', 'string'],
+            'avatars' => ['nullable', 'array'],
+            'avatars.*' => ['nullable', 'string'],
+            'trust_title' => ['nullable', 'string'],
+            'trust_subtitle' => ['nullable', 'string'],
         ];
     }
 }

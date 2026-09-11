@@ -48,10 +48,10 @@ final class DarkFeatureWidget implements WidgetContract
             'body' => "Egal ob privater Wohnungswechsel, Firmenumzug, Umzug in eine andere Stadt oder der Transport empfindlicher Güter: Unser erfahrenes Berliner Team plant jedes Projekt sorgfältig und führt es zuverlässig aus.\n\nWir packen, transportieren und montieren effizient – mit Liebe zum Detail, voll versichert und zum Festpreis.",
             'list_title' => 'Unsere Leistungen',
             'points' => [
-                'Privatumzug',
-                'Gewerbeumzug',
-                'Fernumzug',
-                'Spezialtransport',
+                ['title' => 'Privatumzug', 'description' => 'Ihr Wohnungswechsel in Berlin – von der Einzimmerwohnung bis zum Familienhaus.'],
+                ['title' => 'Gewerbeumzug', 'description' => 'Büro- und Firmenumzüge mit minimaler Ausfallzeit für Ihr Unternehmen.'],
+                ['title' => 'Fernumzug', 'description' => 'Zuverlässiger Transport deutschlandweit, egal wie weit der Weg ist.'],
+                ['title' => 'Spezialtransport', 'description' => 'Sicherer Transport für Klaviere, Kunstwerke und andere empfindliche Gegenstände.'],
             ],
             'button_label' => 'Service anfragen',
             'button_url' => '#kontakt',
@@ -61,8 +61,8 @@ final class DarkFeatureWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
         ];
     }
@@ -70,14 +70,15 @@ final class DarkFeatureWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:1200'],
-            'list_title' => ['nullable', 'string', 'max:120'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'list_title' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*.title' => ['nullable', 'string'],
+            'points.*.description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

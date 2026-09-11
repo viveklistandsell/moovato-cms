@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -14,7 +15,7 @@ test('guests are redirected to login when visiting media', function (): void {
 });
 
 test('non-admin users get a 403 when visiting media', function (): void {
-    $user = User::factory()->create(['is_admin' => false]);
+    $user = User::factory()->create();
 
     $this->actingAs($user)
         ->get(route('admin.media.index'))
@@ -22,7 +23,9 @@ test('non-admin users get a 403 when visiting media', function (): void {
 });
 
 test('admin users can visit media', function (): void {
-    $user = User::factory()->create(['is_admin' => true]);
+    $role = Role::findOrCreate(User::SUPER_ADMIN_ROLE, 'web');
+    $user = User::factory()->create();
+    $user->assignRole($role);
 
     $this->actingAs($user)
         ->get(route('admin.media.index'))

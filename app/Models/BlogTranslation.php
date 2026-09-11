@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'blog_id', 'lang', 'name', 'permalink', 'short_description', 'content',
+    'meta_title', 'meta_description', 'schema', 'meta_image',
 ])]
 final class BlogTranslation extends Model
 {
@@ -29,6 +30,7 @@ final class BlogTranslation extends Model
     {
         return [
             'content' => 'array',
+            'schema' => 'array',
         ];
     }
 }

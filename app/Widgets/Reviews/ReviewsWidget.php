@@ -46,6 +46,7 @@ final class ReviewsWidget implements WidgetContract
     {
         return [
             'heading' => 'Erfolgsgeschichten: Was unsere Kunden sagen',
+            'description' => '',
             'badge' => 'Moovato ist mit 4,9 / 5 aus über 1.200 Google-Bewertungen ausgezeichnet',
             'rating_value' => '4,9',
             'rating_label' => 'Sternebewertung auf Google',
@@ -92,18 +93,19 @@ final class ReviewsWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:200'],
-            'badge' => ['nullable', 'string', 'max:200'],
-            'rating_value' => ['nullable', 'string', 'max:10'],
-            'rating_label' => ['nullable', 'string', 'max:80'],
-            'rating_sub' => ['nullable', 'string', 'max:160'],
-            'cta_label' => ['nullable', 'string', 'max:80'],
-            'cta_url' => ['nullable', 'string', 'max:2000'],
-            'testimonials' => ['nullable', 'array', 'max:12'],
-            'testimonials.*.quote' => ['nullable', 'string', 'max:600'],
-            'testimonials.*.author' => ['nullable', 'string', 'max:120'],
-            'testimonials.*.role' => ['nullable', 'string', 'max:120'],
-            'testimonials.*.avatar_url' => ['nullable', 'string', 'max:2000'],
+            'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'badge' => ['nullable', 'string'],
+            'rating_value' => ['nullable', 'string'],
+            'rating_label' => ['nullable', 'string'],
+            'rating_sub' => ['nullable', 'string'],
+            'cta_label' => ['nullable', 'string'],
+            'cta_url' => ['nullable', 'string'],
+            'testimonials' => ['nullable', 'array'],
+            'testimonials.*.quote' => ['nullable', 'string'],
+            'testimonials.*.author' => ['nullable', 'string'],
+            'testimonials.*.role' => ['nullable', 'string'],
+            'testimonials.*.avatar_url' => ['nullable', 'string'],
             'testimonials.*.rating' => ['nullable', 'integer', 'min:1', 'max:5'],
         ];
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import {
     Activity,
     Bot,
@@ -30,6 +30,7 @@ import {
     Settings2Icon,
     ShieldCheck,
     Tag,
+    Upload,
     UserPlus,
     UserRoundCheck,
     Users,
@@ -125,6 +126,7 @@ const blogItems = computed<NavItem[]>(() => [
 const pageItems = computed<NavItem[]>(() => [
     { title: t('sidebar.pages'), href: '/admin/pages', icon: Files },
     { title: t('sidebar.page_categories'), href: '/admin/pages/categories', icon: FolderTree },
+    { title: t('sidebar.page_bulk_import'), href: '/admin/pages/import', icon: Upload },
 ]);
 
 const directoryItems = computed<NavItem[]>(() => [
@@ -139,9 +141,21 @@ const servicesItems = computed<NavItem[]>(() => [
     { title: t('sidebar.service_categories'), href: '/admin/services/categories', icon: FolderTree },
 ]);
 
+type SidebarCounts = { pending_applications?: number };
+const sidebarCounts = computed<SidebarCounts>(
+    () => (usePage().props.sidebarCounts as SidebarCounts | undefined) ?? {},
+);
+
 const companiesItems = computed<NavItem[]>(() => [
     { title: t('sidebar.all_companies'), href: '/admin/companies', icon: List },
     { title: t('sidebar.add_company'), href: '/admin/companies/create', icon: Plus },
+    {
+        title: t('sidebar.partner_applications'),
+        href: '/admin/company-applications',
+        icon: UserRoundCheck,
+        badge: sidebarCounts.value.pending_applications ?? 0,
+    },
+    { title: t('sidebar.plans'), href: '/admin/plans', icon: Boxes },
 ]);
 
 const navigationItems = computed<NavItem[]>(() => [
@@ -149,9 +163,6 @@ const navigationItems = computed<NavItem[]>(() => [
     { title: t('sidebar.footer_menu'), href: '/admin/menus/footer', icon: MenuIcon },
 ]);
 
-// User management sub-menu shown under the collapsible "User Management"
-// item. "Add User" jumps to the index page with `?new=1` so Index.vue
-// auto-opens the create drawer — no separate route required.
 const userItems = computed<NavItem[]>(() => [
     { title: t('sidebar.all_users'), href: '/admin/users', icon: Users },
     { title: t('sidebar.add_user'), href: '/admin/users/create', icon: UserPlus },
@@ -404,7 +415,7 @@ const isUserSectionActive = computed(
                         class="group/collapsible"
                         as-child
                     >
-                        <SidebarMenuItem>
+                        <SidebarMenuItem class="relative">
                             <CollapsibleTrigger as-child>
                                 <SidebarMenuButton
                                     as-child
@@ -426,6 +437,7 @@ const isUserSectionActive = computed(
                                     <SidebarMenuSubItem
                                         v-for="item in companiesItems"
                                         :key="item.title"
+                                        class="relative"
                                     >
                                         <SidebarMenuSubButton
                                             as-child
@@ -437,6 +449,12 @@ const isUserSectionActive = computed(
                                                 <span>{{ item.title }}</span>
                                             </Link>
                                         </SidebarMenuSubButton>
+                                        <span
+                                            v-if="item.badge && item.badge > 0"
+                                            class="pointer-events-none absolute right-0 top-1/2 z-10 inline-flex h-5 min-w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--orange)] px-1.5 text-[10px] font-semibold text-white shadow-sm group-data-[collapsible=icon]:hidden"
+                                        >
+                                            {{ item.badge > 99 ? '99+' : item.badge }}
+                                        </span>
                                     </SidebarMenuSubItem>
                                 </SidebarMenuSub>
                             </CollapsibleContent>

@@ -7,11 +7,13 @@ type Settings = {
     image_url: string | null;
 };
 
+type Point = { title?: string; description?: string };
+
 type Data = {
     heading?: string;
     primary_label?: string;
     primary_url?: string;
-    points?: string[];
+    points?: Point[];
     image_alt?: string;
 };
 
@@ -19,7 +21,7 @@ defineProps<{ settings: Settings; data: Data }>();
 </script>
 
 <template>
-    <section class="mv-ctabanner">
+    <section v-reveal class="mv-ctabanner">
         <img
             v-if="settings.image_url"
             :src="settings.image_url"
@@ -46,10 +48,26 @@ defineProps<{ settings: Settings; data: Data }>();
                 </div>
             </div>
 
-            <ul v-if="data.points?.length" class="mv-ctabanner-points">
-                <li v-for="(point, i) in data.points" :key="i">
-                    <CircleCheck class="size-5" />
-                    <span>{{ point }}</span>
+            <ul v-if="data.points?.length" class="mv-ctabanner-points space-y-5">
+                <li
+                    v-for="(point, i) in data.points"
+                    :key="i"
+                    class="flex items-start gap-3"
+                >
+                    <CircleCheck class="mt-1 size-5 shrink-0 text-[var(--orange)]" />
+                    <span>
+                        <span
+                            v-if="point.title"
+                            class="block font-semibold text-[var(--midnight)]"
+                        >
+                            {{ point.title }}
+                        </span>
+                        <div
+                            v-if="point.description"
+                            class="mv-rte block text-[15px] leading-relaxed text-[var(--slate)]"
+                            v-html="point.description"
+                        />
+                    </span>
                 </li>
             </ul>
         </div>

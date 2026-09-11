@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Blog\CategoryController as AdminBlogCategoryContr
 use App\Http\Controllers\Admin\Blog\PostController as AdminBlogPostController;
 use App\Http\Controllers\Admin\Blog\TagController as AdminBlogTagController;
 use App\Http\Controllers\Admin\Companies\CompanyController as AdminCompanyController;
+use App\Http\Controllers\Admin\CompanyApplications\CompanyApplicationController as AdminCompanyApplicationController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Directory\CityController as AdminCityController;
 use App\Http\Controllers\Admin\Directory\CountryController as AdminCountryController;
@@ -22,7 +23,10 @@ use App\Http\Controllers\Admin\Navigation\MenuController as AdminMenuController;
 use App\Http\Controllers\Admin\Navigation\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Admin\Page\CategoryController as AdminPageCategoryController;
 use App\Http\Controllers\Admin\Page\PageController as AdminPageController;
-use App\Http\Controllers\Admin\Page\PageWidgetController as AdminPageWidgetController;
+use App\Http\Controllers\Admin\Page\PageImportController as AdminPageImportController;
+use App\Http\Controllers\Admin\PlanChangeRequests\PlanChangeRequestController as AdminPlanChangeRequestController;
+use App\Http\Controllers\Admin\Plans\PlanController as AdminPlanController;
+use App\Http\Controllers\Admin\Reviews\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SearchController as AdminSearchController;
 use App\Http\Controllers\Admin\Service\CategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Admin\Service\ParentCategoryController as AdminServiceParentCategoryController;
@@ -39,11 +43,23 @@ use App\Http\Controllers\Admin\User\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 use App\Http\Controllers\Frontend\CompanyController as FrontendCompanyController;
+use App\Http\Controllers\Frontend\CompanyReviewController as FrontendCompanyReviewController;
 use App\Http\Controllers\Frontend\CookieConsentController as FrontendCookieConsentController;
+use App\Http\Controllers\Frontend\LocationSearchController as FrontendLocationSearchController;
 use App\Http\Controllers\Frontend\PageController as FrontendPageController;
 use App\Http\Controllers\Frontend\PlaceSearchController;
 use App\Http\Controllers\Frontend\RobotsController;
 use App\Http\Controllers\Frontend\SitemapController;
+use App\Http\Controllers\Partner\Auth\ForgotPasswordController as PartnerForgotPasswordController;
+use App\Http\Controllers\Partner\Auth\LoginController as PartnerLoginController;
+use App\Http\Controllers\Partner\Auth\LogoutController as PartnerLogoutController;
+use App\Http\Controllers\Partner\Auth\RegisterController as PartnerRegisterController;
+use App\Http\Controllers\Partner\Auth\ResetPasswordController as PartnerResetPasswordController;
+use App\Http\Controllers\Partner\DashboardController as PartnerDashboardController;
+use App\Http\Controllers\Partner\NotificationController as PartnerNotificationController;
+use App\Http\Controllers\Partner\Plans\PlanController as PartnerPlanController;
+use App\Http\Controllers\Partner\ReviewController as PartnerReviewController;
+use App\Http\Controllers\Portal\CompanyProfileController as PortalCompanyProfileController;
 use App\Http\Controllers\StorageFallbackController;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +83,15 @@ Route::middleware('throttle:60,1')->group(function (): void {
         ->name('places.resolve');
 });
 
+Route::middleware('throttle:60,1')->group(function (): void {
+    Route::get('location-search/suggest', [FrontendLocationSearchController::class, 'suggest'])
+        ->name('location-search.suggest');
+    Route::get('location-search/resolve', [FrontendLocationSearchController::class, 'resolve'])
+        ->name('location-search.resolve');
+    Route::get('location-search/go', [FrontendLocationSearchController::class, 'redirect'])
+        ->name('location-search.go');
+});
+
 // Default-locale (DE) routes live at the root with no /de prefix.
 Route::middleware('locale')->group(function (): void {
     Route::get('/', [FrontendPageController::class, 'home'])->name('home');
@@ -82,6 +107,20 @@ Route::middleware('locale')->group(function (): void {
     Route::get('company/{permalink}', [FrontendCompanyController::class, 'show'])
         ->where('permalink', '[a-z0-9-]+')
         ->name('companies.show');
+    Route::get('company/{slug}/review', [FrontendCompanyReviewController::class, 'create'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('companies.review.create');
+    Route::post('company/{slug}/review', [FrontendCompanyReviewController::class, 'store'])
+        ->where('slug', '[a-z0-9-]+')
+        ->middleware('throttle:5,60')
+        ->name('companies.review.store');
+    Route::get('company/{slug}/review/thanks', [FrontendCompanyReviewController::class, 'thanks'])
+        ->where('slug', '[a-z0-9-]+')
+        ->name('companies.review.thanks');
+    Route::post('reviews/{review}/helpful', [FrontendCompanyReviewController::class, 'helpful'])
+        ->whereNumber('review')
+        ->middleware('throttle:60,1')
+        ->name('reviews.helpful');
 });
 
 // Non-default locales (EN, ...) keep the /{locale}/ prefix.
@@ -104,6 +143,20 @@ Route::prefix('{locale}')
         Route::get('company/{permalink}', [FrontendCompanyController::class, 'show'])
             ->where('permalink', '[a-z0-9-]+')
             ->name('companies.show');
+        Route::get('company/{slug}/review', [FrontendCompanyReviewController::class, 'create'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('companies.review.create');
+        Route::post('company/{slug}/review', [FrontendCompanyReviewController::class, 'store'])
+            ->where('slug', '[a-z0-9-]+')
+            ->middleware('throttle:5,60')
+            ->name('companies.review.store');
+        Route::get('company/{slug}/review/thanks', [FrontendCompanyReviewController::class, 'thanks'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('companies.review.thanks');
+        Route::post('reviews/{review}/helpful', [FrontendCompanyReviewController::class, 'helpful'])
+            ->whereNumber('review')
+            ->middleware('throttle:60,1')
+            ->name('reviews.helpful');
     });
 
 // Canonical: old /de/* URLs 301-redirect to the unprefixed root.
@@ -114,9 +167,6 @@ Route::get('/de/{rest?}', function (?string $rest = null) {
     return redirect($query !== null ? "{$target}?{$query}" : $target, 301);
 })->where('rest', '.*');
 
-// Public page show — must be registered AFTER all other named routes so it
-// doesn't shadow /blog, /admin, /login, etc. The slug regex blocks reserved
-// segments at the URL boundary.
 Route::middleware('locale')
     ->get('/{permalink}', [FrontendPageController::class, 'show'])
     ->where('permalink', '(?!admin|blog|companies|company|de|en|login|register|dashboard|forgot-password|reset-password|email|user|two-factor-challenge|logout|settings|_boost|storage|build)[a-z0-9-]+')
@@ -265,6 +315,53 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             Route::resource('companies', AdminCompanyController::class)
                 ->parameters(['companies' => 'company'])
                 ->except('show');
+            Route::get('reviews/{review}/proof', [AdminReviewController::class, 'downloadProof'])
+                ->whereNumber('review')
+                ->name('reviews.proof');
+            Route::post('reviews/{review}/reply', [AdminReviewController::class, 'reply'])
+                ->whereNumber('review')
+                ->name('reviews.reply');
+            Route::delete('reviews/{review}/reply', [AdminReviewController::class, 'destroyReply'])
+                ->whereNumber('review')
+                ->name('reviews.reply.destroy');
+            Route::post('reviews/{review}/status', [AdminReviewController::class, 'setStatus'])
+                ->whereNumber('review')
+                ->name('reviews.status');
+            Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])
+                ->whereNumber('review')
+                ->name('reviews.destroy');
+            Route::get('company-applications', [AdminCompanyApplicationController::class, 'index'])
+                ->name('applications.index');
+            Route::post('company-applications/{application}/approve', [AdminCompanyApplicationController::class, 'approve'])
+                ->whereNumber('application')
+                ->name('applications.approve');
+            Route::post('company-applications/{application}/reject', [AdminCompanyApplicationController::class, 'reject'])
+                ->whereNumber('application')
+                ->name('applications.reject');
+            Route::delete('company-applications/{application}', [AdminCompanyApplicationController::class, 'destroy'])
+                ->whereNumber('application')
+                ->name('applications.destroy');
+            Route::get('company-applications/{application}/doc/{index}', [AdminCompanyApplicationController::class, 'downloadDoc'])
+                ->whereNumber('application')
+                ->whereNumber('index')
+                ->name('applications.doc');
+            Route::post('plan-change-requests/{planRequest}/approve', [AdminPlanChangeRequestController::class, 'approve'])
+                ->whereNumber('planRequest')
+                ->name('plan-change-requests.approve');
+            Route::post('plan-change-requests/{planRequest}/reject', [AdminPlanChangeRequestController::class, 'reject'])
+                ->whereNumber('planRequest')
+                ->name('plan-change-requests.reject');
+            Route::get('plans', [AdminPlanController::class, 'index'])
+                ->middleware('permission:settings.site')
+                ->name('plans.index');
+            Route::get('plans/{plan}/edit', [AdminPlanController::class, 'edit'])
+                ->middleware('permission:settings.site')
+                ->where('plan', 'basic|premium|gold')
+                ->name('plans.edit');
+            Route::match(['put', 'patch'], 'plans/{plan}', [AdminPlanController::class, 'update'])
+                ->middleware('permission:settings.site')
+                ->where('plan', 'basic|premium|gold')
+                ->name('plans.update');
         });
 
         Route::prefix('pages')->name('pages.')->group(function (): void {
@@ -279,13 +376,16 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
             Route::post('bulk-action', [AdminPageController::class, 'bulkAction'])
                 ->name('bulk-action');
 
+            Route::get('import', [AdminPageImportController::class, 'show'])
+                ->name('import.show');
+            Route::post('import', [AdminPageImportController::class, 'import'])
+                ->name('import.store');
+            Route::get('import/template', [AdminPageImportController::class, 'template'])
+                ->name('import.template');
+
             Route::post('{page}/duplicate', [AdminPageController::class, 'duplicate'])
                 ->where('page', '[0-9]+')
                 ->name('duplicate');
-
-            Route::post('{page}/widgets', [AdminPageWidgetController::class, 'sync'])
-                ->where('page', '[0-9]+')
-                ->name('widgets.sync');
 
             Route::resource('/', AdminPageController::class)
                 ->parameters(['' => 'page'])
@@ -452,6 +552,148 @@ Route::middleware(['auth', 'verified', 'admin.locale'])->group(function (): void
         });
     });
 });
+
+Route::get('company-portal/{company}/{slug?}', [PortalCompanyProfileController::class, 'show'])
+    ->whereNumber('company')
+    ->where('slug', '[a-z0-9-]+')
+    ->middleware(['locale', 'auth:company', 'partner.owns.company'])
+    ->name('portal.company.profile');
+
+Route::middleware(['locale'])->prefix('partner')->name('partner.')->group(function (): void {
+    Route::get('register', [PartnerRegisterController::class, 'create'])
+        ->name('register');
+    Route::post('register', [PartnerRegisterController::class, 'store'])
+        ->middleware('throttle:20,10')
+        ->name('register.store');
+    Route::get('register/thanks', [PartnerRegisterController::class, 'thanks'])
+        ->name('register.thanks');
+    Route::get('plans', [PartnerPlanController::class, 'index'])
+        ->name('plans.index');
+
+    Route::middleware('guest:company')->group(function (): void {
+        Route::get('login', [PartnerLoginController::class, 'create'])
+            ->name('login');
+        Route::post('login', [PartnerLoginController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('login.store');
+
+        Route::get('forgot-password', [PartnerForgotPasswordController::class, 'create'])
+            ->name('password.request');
+        Route::post('forgot-password', [PartnerForgotPasswordController::class, 'store'])
+            ->middleware('throttle:10,10')
+            ->name('password.email');
+        Route::get('reset-password/{token}', [PartnerResetPasswordController::class, 'create'])
+            ->name('password.reset');
+
+        Route::post('reset-password', [PartnerResetPasswordController::class, 'store'])
+            ->middleware('throttle:20,10')
+            ->name('password.update');
+    });
+
+    Route::middleware('auth:company')->group(function (): void {
+        Route::get('dashboard', [PartnerDashboardController::class, 'index'])
+            ->name('dashboard');
+        Route::post('logout', PartnerLogoutController::class)
+            ->name('logout');
+        Route::post('plans/choose', [PartnerPlanController::class, 'choose'])
+            ->middleware('throttle:20,10')
+            ->name('plans.choose');
+        Route::delete('plans/request/{planRequest}', [PartnerPlanController::class, 'cancel'])
+            ->whereNumber('planRequest')
+            ->middleware('throttle:20,10')
+            ->name('plans.request.cancel');
+        Route::post('notifications/{notification}/read', [PartnerNotificationController::class, 'markRead'])
+            ->whereNumber('notification')
+            ->middleware('throttle:60,1')
+            ->name('notifications.read');
+        Route::post('notifications/read-all', [PartnerNotificationController::class, 'markAllRead'])
+            ->middleware('throttle:10,1')
+            ->name('notifications.read-all');
+        Route::post('reviews/{review}/reply', [PartnerReviewController::class, 'reply'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.reply');
+        Route::delete('reviews/{review}/reply', [PartnerReviewController::class, 'destroyReply'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.reply.destroy');
+        Route::post('reviews/{review}/hide', [PartnerReviewController::class, 'hide'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.hide');
+        Route::post('reviews/{review}/unhide', [PartnerReviewController::class, 'unhide'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.unhide');
+        Route::post('reviews/{review}/mark-spam', [PartnerReviewController::class, 'markSpam'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.mark-spam');
+        Route::post('reviews/{review}/unmark-spam', [PartnerReviewController::class, 'unmarkSpam'])
+            ->whereNumber('review')
+            ->middleware('throttle:30,1')
+            ->name('reviews.unmark-spam');
+        Route::delete('reviews/{review}', [PartnerReviewController::class, 'destroy'])
+            ->whereNumber('review')
+            ->middleware('throttle:10,1')
+            ->name('reviews.destroy');
+    });
+});
+
+Route::middleware(['locale', 'auth:company', 'partner.owns.company'])
+    ->whereNumber('company')
+    ->name('portal.company.')
+    ->group(function (): void {
+        Route::post('company-portal/{company}/name', [PortalCompanyProfileController::class, 'updateName'])
+            ->middleware('throttle:10,1')
+            ->name('update-name');
+        Route::post('company-portal/{company}/founded', [PortalCompanyProfileController::class, 'updateFounded'])
+            ->middleware('throttle:10,1')
+            ->name('update-founded');
+        Route::post('company-portal/{company}/employees', [PortalCompanyProfileController::class, 'updateEmployees'])
+            ->middleware('throttle:10,1')
+            ->name('update-employees');
+        Route::post('company-portal/{company}/website', [PortalCompanyProfileController::class, 'updateWebsite'])
+            ->middleware('throttle:10,1')
+            ->name('update-website');
+        Route::post('company-portal/{company}/trust', [PortalCompanyProfileController::class, 'updateTrust'])
+            ->middleware('throttle:10,1')
+            ->name('update-trust');
+        Route::post('company-portal/{company}/about', [PortalCompanyProfileController::class, 'updateAbout'])
+            ->middleware('throttle:10,1')
+            ->name('update-about');
+        Route::post('company-portal/{company}/short-description', [PortalCompanyProfileController::class, 'updateShortDescription'])
+            ->middleware('throttle:10,1')
+            ->name('update-short-description');
+        Route::post('company-portal/{company}/google', [PortalCompanyProfileController::class, 'updateGoogle'])
+            ->middleware('throttle:10,1')
+            ->name('update-google');
+        Route::post('company-portal/{company}/address', [PortalCompanyProfileController::class, 'updateAddress'])
+            ->middleware('throttle:10,1')
+            ->name('update-address');
+        Route::post('company-portal/{company}/contacts', [PortalCompanyProfileController::class, 'updateContacts'])
+            ->middleware('throttle:10,1')
+            ->name('update-contacts');
+        Route::post('company-portal/{company}/services', [PortalCompanyProfileController::class, 'updateServices'])
+            ->middleware('throttle:10,1')
+            ->name('update-services');
+        Route::post('company-portal/{company}/areas', [PortalCompanyProfileController::class, 'updateAreas'])
+            ->middleware('throttle:10,1')
+            ->name('update-areas');
+        Route::post('company-portal/{company}/faqs', [PortalCompanyProfileController::class, 'updateFaqs'])
+            ->middleware('throttle:10,1')
+            ->name('update-faqs');
+        Route::post('company-portal/{company}/branding', [PortalCompanyProfileController::class, 'updateBranding'])
+            ->middleware('throttle:10,1')
+            ->name('update-branding');
+        Route::post('company-portal/{company}/gallery', [PortalCompanyProfileController::class, 'addGalleryImage'])
+            ->middleware('throttle:20,1')
+            ->name('gallery-add');
+        Route::delete('company-portal/{company}/gallery/{media}', [PortalCompanyProfileController::class, 'deleteGalleryImage'])
+            ->whereNumber('media')
+            ->middleware('throttle:20,1')
+            ->name('gallery-delete');
+    });
 
 Route::middleware(['auth', 'verified', 'admin', 'admin.locale'])
     ->prefix('admin')

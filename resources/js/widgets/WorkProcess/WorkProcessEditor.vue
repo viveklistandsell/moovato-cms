@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import WidgetImageField from '@/widgets/shared/WidgetImageField.vue';
 
 type Item = {
@@ -68,7 +68,7 @@ function removeItem(index: number): void {
             </div>
             <div class="grid gap-2 md:col-span-2">
                 <Label>Description</Label>
-                <Textarea v-model="data.description" :rows="2" />
+                <RichTextEditor v-model="data.description" placeholder="Description" />
             </div>
             <div class="grid gap-2">
                 <Label>Step label</Label>

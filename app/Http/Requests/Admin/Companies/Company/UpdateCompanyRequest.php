@@ -32,7 +32,7 @@ final class UpdateCompanyRequest extends FormRequest
 
             'verified' => ['boolean'],
             'is_top_rated' => ['boolean'],
-            'plan_tier' => ['required', Rule::in(['free', 'silver', 'gold'])],
+            'plan_tier' => ['required', Rule::in(['basic', 'premium', 'gold'])],
             'rating_avg' => ['nullable', 'numeric', 'between:0,10'],
             'review_count' => ['nullable', 'integer', 'min:0'],
             'recommend_pct' => ['nullable', 'integer', 'between:0,100'],
@@ -48,6 +48,10 @@ final class UpdateCompanyRequest extends FormRequest
 
             'founded_year' => ['nullable', 'integer', 'min:1800', 'max:2100'],
             'employee_count' => ['nullable', 'integer', 'min:0'],
+            'opening_hours' => ['nullable', 'array'],
+            'opening_hours.*.closed' => ['boolean'],
+            'opening_hours.*.open' => ['nullable', 'string', 'date_format:H:i'],
+            'opening_hours.*.close' => ['nullable', 'string', 'date_format:H:i'],
 
             'status' => ['required', Rule::in(['published', 'draft', 'inactive'])],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'page_id', 'lang', 'title', 'permalink',
+    'meta_title', 'meta_description', 'schema', 'meta_image',
 ])]
 final class PageTranslation extends Model
 {
@@ -18,5 +19,12 @@ final class PageTranslation extends Model
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'schema' => 'array',
+        ];
     }
 }

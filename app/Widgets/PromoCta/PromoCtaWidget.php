@@ -35,12 +35,7 @@ final class PromoCtaWidget implements WidgetContract
     {
         return [
             'heading' => 'Warum Moovato?',
-            'features' => [
-                'Festpreisgarantie',
-                'Kostenlose Beratung',
-                'Versichert & geprüft',
-                'Erfahrene Umzugsprofis',
-            ],
+            'description' => '<ul><li><strong>Festpreisgarantie</strong> – Der vereinbarte Preis gilt – auch wenn der Umzugstag einmal länger dauert.</li><li><strong>Kostenlose Beratung</strong> – Wir besprechen Ihren Umzug unverbindlich und finden die passende Lösung.</li><li><strong>Versichert &amp; geprüft</strong> – Ihr Hab und Gut ist während des gesamten Transports abgesichert.</li><li><strong>Erfahrene Umzugsprofis</strong> – Unser Team packt, trägt und montiert mit jahrelanger Praxis.</li></ul>',
             'button_label' => 'Mehr erfahren',
             'button_url' => '#leistungen',
             'badge_number' => '24',
@@ -54,16 +49,15 @@ final class PromoCtaWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:160'],
-            'features' => ['nullable', 'array', 'max:8'],
-            'features.*' => ['nullable', 'string', 'max:120'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
-            'badge_number' => ['nullable', 'string', 'max:8'],
-            'badge_unit' => ['nullable', 'string', 'max:40'],
-            'badge_label' => ['nullable', 'string', 'max:40'],
-            'call_label' => ['nullable', 'string', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:60'],
+            'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'badge_number' => ['nullable', 'string'],
+            'badge_unit' => ['nullable', 'string'],
+            'badge_label' => ['nullable', 'string'],
+            'call_label' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string'],
         ];
     }
 }

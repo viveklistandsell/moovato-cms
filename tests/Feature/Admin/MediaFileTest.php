@@ -6,12 +6,15 @@ use App\Models\MediaFile;
 use App\Models\MediaFolder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    $this->admin = User::factory()->create(['is_admin' => true]);
-    $this->actingAs($this->admin);
+    $role = Role::findOrCreate(User::SUPER_ADMIN_ROLE, 'web');
+    $admin = User::factory()->create();
+    $admin->assignRole($role);
+    $this->actingAs($admin);
 });
 
 test('an admin can rename a file', function (): void {

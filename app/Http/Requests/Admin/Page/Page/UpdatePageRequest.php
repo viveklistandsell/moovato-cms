@@ -71,6 +71,10 @@ final class UpdatePageRequest extends FormRequest
 
             $rules["translations.{$code}.title"] = $titleRules;
             $rules["translations.{$code}.permalink"] = $permalinkRules;
+            $rules["translations.{$code}.meta_title"] = ['nullable', 'string', 'max:255'];
+            $rules["translations.{$code}.meta_description"] = ['nullable', 'string', 'max:1000'];
+            $rules["translations.{$code}.schema"] = ['nullable', 'string', 'max:65535'];
+            $rules["translations.{$code}.meta_image"] = ['nullable', 'string', 'max:255'];
         }
 
         return $rules + $this->widgetEnvelopeRules();

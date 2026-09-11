@@ -53,6 +53,8 @@ final class HowItWorksWidget implements WidgetContract
                 ['icon' => 'CalendarCheck', 'title' => 'Termin buchen', 'description' => 'Wählen Sie Ihren Wunschtermin – den Rest übernehmen wir für Sie.'],
                 ['icon' => 'Truck', 'title' => 'Umzug genießen', 'description' => 'Unser Team packt, transportiert und baut auf. Sie lehnen sich entspannt zurück.'],
             ],
+            'button_label' => 'Kostenloses Angebot anfordern',
+            'button_url' => '#angebot',
         ];
     }
 
@@ -70,12 +72,14 @@ final class HowItWorksWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:60'],
-            'heading' => ['nullable', 'string', 'max:160'],
-            'steps' => ['nullable', 'array', 'max:8'],
-            'steps.*.icon' => ['nullable', 'string', 'max:64'],
-            'steps.*.title' => ['nullable', 'string', 'max:120'],
-            'steps.*.description' => ['nullable', 'string', 'max:500'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'steps' => ['nullable', 'array'],
+            'steps.*.icon' => ['nullable', 'string'],
+            'steps.*.title' => ['nullable', 'string'],
+            'steps.*.description' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

@@ -18,7 +18,7 @@ import {
 } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import FlagImage from '@/components/common/FlagImage.vue';
-import { getDefaultLocale, localizedUrl } from '@/lib/localizedUrl';
+import { getDefaultLocale, localizedUrl, setDefaultLocale } from '@/lib/localizedUrl';
 
 const props = defineProps<{
     locale: string;
@@ -28,7 +28,6 @@ const page = usePage();
 const open = ref(false);
 
 const otherLocale = computed(() => (props.locale === 'de' ? 'en' : 'de'));
-const otherLocaleLabel = computed(() => (props.locale === 'de' ? 'EN' : 'DE'));
 type SharedLanguage = { code: string; native_name: string; flag: string | null };
 const sharedLanguages = computed<SharedLanguage[]>(
     () => (page.props.adminLanguages as SharedLanguage[] | undefined) ?? [],
@@ -36,27 +35,71 @@ const sharedLanguages = computed<SharedLanguage[]>(
 const currentLangFlag = computed<string | null>(
     () => sharedLanguages.value.find((l) => l.code === props.locale)?.flag ?? null,
 );
-const otherLangFlag = computed<string | null>(
-    () => sharedLanguages.value.find((l) => l.code === otherLocale.value)?.flag ?? null,
-);
 
-const switchHref = computed(() => {
+function hrefForLocale(target: string): string {
     const alternates = (page.props.localeAlternates as Record<string, string> | undefined) ?? null;
-    const target = alternates?.[otherLocale.value];
-    if (typeof target === 'string' && target.length > 0) {
+    const supplied = alternates?.[target];
+    if (typeof supplied === 'string' && supplied.length > 0) {
         const url = page.url ?? '/';
         const [, query = ''] = url.split('?');
 
-        return query !== '' ? `${target}?${query}` : target;
+        return query !== '' ? `${supplied}?${query}` : supplied;
     }
 
     const url = page.url ?? '/';
     const [pathOnly, query = ''] = url.split('?');
     const withoutPrefix = pathOnly.replace(/^\/(de|en)(?=\/|$)/, '') || '/';
-    const fallback = localizedUrl(otherLocale.value, withoutPrefix);
+    const fallback = localizedUrl(target, withoutPrefix);
 
     return query !== '' ? `${fallback}?${query}` : fallback;
+}
+
+
+/* -------------------- language dropdown -------------------- */
+
+type LocaleChoice = { code: string; short: string; label: string; flag: string | null };
+const availableLocales = computed<LocaleChoice[]>(() => {
+    const shared = sharedLanguages.value;
+    if (shared.length > 0) {
+        return shared.map((l) => ({
+            code: l.code,
+            short: l.code.toUpperCase(),
+            label: l.native_name,
+            flag: l.flag,
+        }));
+    }
+
+    return [
+        { code: 'de', short: 'DE', label: 'Deutsch', flag: null },
+        { code: 'en', short: 'EN', label: 'English', flag: null },
+    ];
 });
+const currentLocaleMeta = computed<LocaleChoice | undefined>(
+    () => availableLocales.value.find((l) => l.code === props.locale),
+);
+
+const langMenuOpen = ref(false);
+const langMenuRef = ref<HTMLDivElement | null>(null);
+const langMenuMobileRef = ref<HTMLDivElement | null>(null);
+
+function toggleLangMenu(): void {
+    langMenuOpen.value = !langMenuOpen.value;
+}
+function onLocaleClick(): void {
+    langMenuOpen.value = false;
+}
+
+function onDocClick(e: MouseEvent): void {
+    if (! langMenuOpen.value) return;
+    const target = e.target as Node;
+    const inDesktop = langMenuRef.value?.contains(target) ?? false;
+    const inMobile = langMenuMobileRef.value?.contains(target) ?? false;
+    if (! inDesktop && ! inMobile) {
+        langMenuOpen.value = false;
+    }
+}
+onMounted(() => document.addEventListener('click', onDocClick));
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick));
 
 const home = computed(() => localizedUrl(props.locale, '/'));
 
@@ -78,9 +121,6 @@ type NavLink = {
     children: NavLink[];
 };
 
-// Inertia shares the admin-managed header menu as `headerMenu`. When no menu
-// is configured we fall back to a sensible locale-aware default so the bar is
-// never empty.
 const headerMenu = computed<HeaderMenuItem[]>(
     () => (page.props.headerMenu as HeaderMenuItem[] | undefined) ?? [],
 );
@@ -125,13 +165,10 @@ const navItems = computed<NavLink[]>(() =>
         : fallbackNav.value,
 );
 
-// Inertia <Link> only handles same-origin SPA paths. Hash anchors, absolute
-// URLs and tel:/mailto: links must render as plain <a> tags instead.
 function isSpaLink(href: string): boolean {
     return href.startsWith('/') && !href.startsWith('//');
 }
 
-// Locale-aware chrome copy for the top bar, CTA and the offcanvas.
 const t = computed(() =>
     props.locale === 'de'
         ? {
@@ -270,7 +307,9 @@ function onKeydown(e: KeyboardEvent): void {
 // only pins itself once the user has scrolled past its own height, sliding
 // back into view. A spacer keeps the layout from jumping when it detaches.
 const headerEl = ref<HTMLElement | null>(null);
+const navEl = ref<HTMLElement | null>(null);
 const headerHeight = ref(0);
+const navHeight = ref(0);
 const isStuck = ref(false);
 
 function onScroll(): void {
@@ -285,6 +324,7 @@ function onScroll(): void {
 onMounted(() => {
     window.addEventListener('keydown', onKeydown);
     headerHeight.value = headerEl.value?.offsetHeight ?? 0;
+    navHeight.value = navEl.value?.offsetHeight ?? 0;
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 });
@@ -299,7 +339,7 @@ onBeforeUnmount(() => {
 // Keep the cached default locale in sync with whatever the server shares.
 const sharedDefault = (page.props as Record<string, unknown>).defaultLocale;
 if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
-    import('@/lib/localizedUrl').then((m) => m.setDefaultLocale(sharedDefault));
+    setDefaultLocale(sharedDefault);
 }
 </script>
 
@@ -308,15 +348,15 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     <header
         ref="headerEl"
         class="mv-header"
-        :class="{ 'is-stuck': isStuck }"
+        
     >
         <!-- ===== TOP BAR ===== -->
         <div class="topbar">
             <div
                 class="topbar-inner relative z-[1] container-xl flex flex-wrap items-center justify-between gap-6"
             >
-                <div class="topbar-welcome inline-flex items-center gap-2">
-                    <span class="ico"><Clock :size="12" /></span>
+                <div class="topbar-welcome inline-flex items-center gap-1">
+                    <span class="ico"><Clock :size="15" /></span>
                     <strong>{{ t.openingHours }}:</strong> {{ t.hours }}
                     <div class="topbar-socials">
                         <a
@@ -325,18 +365,18 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                             :href="s.href"
                             :aria-label="s.label"
                         >
-                            <component :is="s.icon" :size="12" />
+                            <component :is="s.icon" :size="15" />
                         </a>
                     </div>
                 </div>
                 <div class="topbar-contacts">
                     <div v-for="email in emails" :key="email" class="item">
-                        <span class="ico"><Mail :size="12" /></span>
+                        <span class="ico"><Mail :size="15" /></span>
                         {{ t.emailLabel }}:
                         <a :href="`mailto:${email}`">{{ email }}</a>
                     </div>
                     <div v-for="phone in phones" :key="phone.tel" class="item">
-                        <span class="ico"><Phone :size="12" /></span>
+                        <span class="ico"><Phone :size="15" /></span>
                         {{ t.callLabel }}:
                         <a :href="`tel:${phone.tel}`">{{ phone.display }}</a>
                     </div>
@@ -345,7 +385,11 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
         </div>
 
         <!-- ===== NAVIGATION (sticky) ===== -->
-        <nav class="border-b border-[rgba(15,23,42,0.06)] bg-white py-[12px]">
+        <nav
+            ref="navEl"
+            class="mv-header-nav border-b border-[rgba(15,23,42,0.06)] bg-white py-[10px]"
+            :class="{ 'is-stuck': isStuck }"
+        >
             <div class="container-xl flex items-center justify-between gap-8">
                 <Link :href="home" class="flex items-center no-underline">
                     <img
@@ -356,7 +400,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 </Link>
 
                 <ul
-                    class="hidden list-none gap-9 lg:flex lg:flex-1 lg:justify-center"
+                    class="hidden list-none gap-8 lg:flex lg:flex-1 lg:justify-center"
                 >
                     <li
                         v-for="item in navItems"
@@ -405,14 +449,46 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
                 </ul>
 
                 <div class="flex items-center gap-4">
-                    <Link
+                    <div
                         v-if="showLanguageSwitcher"
-                        :href="switchHref"
-                        class="mv-lang-switch hidden sm:inline-flex"
+                        ref="langMenuRef"
+                        class="mv-lang-dropdown hidden sm:inline-block"
                     >
-                        <FlagImage :code="otherLangFlag" size="sm" />
-                        <span>{{ otherLocaleLabel }}</span>
-                    </Link>
+                        <button
+                            type="button"
+                            class="mv-lang-switch"
+                            :aria-expanded="langMenuOpen"
+                            aria-haspopup="menu"
+                            @click.stop="toggleLangMenu"
+                        >
+                            <FlagImage :code="currentLangFlag" size="sm" />
+                            <span>{{ (currentLocaleMeta?.short) ?? props.locale.toUpperCase() }}</span>
+                            <ChevronDown
+                                :size="14"
+                                class="mv-lang-caret"
+                                :class="langMenuOpen ? 'is-open' : ''"
+                            />
+                        </button>
+                        <ul
+                            v-if="langMenuOpen"
+                            role="menu"
+                            class="mv-lang-menu"
+                        >
+                            <li v-for="l in availableLocales" :key="l.code" role="none">
+                                <Link
+                                    role="menuitem"
+                                    :href="hrefForLocale(l.code)"
+                                    class="mv-lang-menu__item"
+                                    :class="l.code === props.locale ? 'is-current' : ''"
+                                    @click="onLocaleClick"
+                                >
+                                    <FlagImage :code="l.flag" size="sm" />
+                                    <span class="mv-lang-menu__label">{{ l.label }}</span>
+                                    <span class="mv-lang-menu__short">{{ l.short }}</span>
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
                     <a
                         href="#angebot"
                         class="mv-header-cta hidden lg:inline-flex"
@@ -540,18 +616,23 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
 
                 <!-- Footer row: language switch + socials -->
                 <div class="mv-offcanvas__foot">
-                    <Link
+                    <div
                         v-if="showLanguageSwitcher"
-                        :href="switchHref"
-                        class="mv-offcanvas__lang"
-                        @click="open = false"
+                        ref="langMenuMobileRef"
+                        class="mv-offcanvas__langs"
                     >
-                        <FlagImage :code="currentLangFlag" size="sm" />
-                        <span>{{ props.locale.toUpperCase() }}</span>
-                        <span aria-hidden="true">/</span>
-                        <FlagImage :code="otherLangFlag" size="sm" />
-                        <span>{{ otherLocaleLabel }}</span>
-                    </Link>
+                        <Link
+                            v-for="l in availableLocales"
+                            :key="l.code"
+                            :href="hrefForLocale(l.code)"
+                            class="mv-offcanvas__lang"
+                            :class="l.code === props.locale ? 'is-current' : ''"
+                            @click="() => { onLocaleClick(); open = false; }"
+                        >
+                            <FlagImage :code="l.flag" size="sm" />
+                            <span>{{ l.short }}</span>
+                        </Link>
+                    </div>
                     <div class="mv-offcanvas__socials">
                         <a
                             v-for="s in socialLinks"
@@ -617,7 +698,7 @@ if (typeof sharedDefault === 'string' && sharedDefault !== getDefaultLocale()) {
     <div
         v-if="isStuck"
         class="mv-header-spacer"
-        :style="{ height: headerHeight + 'px' }"
+        :style="{ height: navHeight + 'px' }"
         aria-hidden="true"
     ></div>
     </div>

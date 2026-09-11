@@ -54,6 +54,7 @@ const crumbs = computed<Crumb[]>(() => {
 
 <template>
     <section
+        v-reveal
         class="mv-orbitbanner section-py"
         :class="{ 'is-dark': settings.theme === 'dark' }"
     >
@@ -112,30 +113,14 @@ const crumbs = computed<Crumb[]>(() => {
                 </nav>
 
                 <h1 class="mv-orbitbanner-title">
-                    <span
-                        v-if="data.highlight || settings.inline_image_url"
-                        class="flex flex-wrap items-center gap-3"
-                    >
-                        <img
-                            v-if="settings.inline_image_url"
-                            :src="settings.inline_image_url"
-                            :alt="data.inline_image_alt || ''"
-                            class="mv-orbitbanner-pill"
-                            loading="lazy"
-                            decoding="async"
-                        />
-                        <span class="mv-orbitbanner-highlight"
-                            ><span>{{ data.highlight }}</span></span
-                        >
-                    </span>
-                    <span class="block">{{ data.heading }}</span>
+                   {{ data.heading }}
                 </h1>
 
                 <div
                     v-if="data.description"
-                    class="mv-orbitbanner-desc mt-8 flex items-start gap-4"
+                    class="mv-orbitbanner-desc mt-8 flex items-start gap-2"
                 >
-                    <ArrowDown class="mt-1 size-4 shrink-0" />
+                    <ArrowDown class="mt-1 size-5 shrink-0" />
                     <div class="mv-rte" v-html="data.description" />
                 </div>
 
@@ -158,7 +143,6 @@ const crumbs = computed<Crumb[]>(() => {
                     loading="lazy"
                     decoding="async"
                 />
-                <span class="mv-orbitbanner-star" aria-hidden="true"></span>
             </div>
         </div>
 

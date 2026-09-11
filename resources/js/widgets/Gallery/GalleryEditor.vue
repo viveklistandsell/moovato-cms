@@ -2,6 +2,7 @@
 import { Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 import MediaPicker from '@/components/common/MediaPicker.vue';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ type Settings = {
 
 type Data = {
     heading: string;
+    description: string;
     // Per-caption per image index, keyed by string index for JSON-friendliness.
     captions: Record<string, string>;
 };
@@ -71,6 +73,13 @@ function setCaption(index: number, value: string): void {
             <div class="grid gap-2 md:col-span-4">
                 <Label>Heading</Label>
                 <Input v-model="data.heading" />
+            </div>
+            <div class="grid gap-2 md:col-span-4">
+                <Label>Description</Label>
+                <RichTextEditor
+                    v-model="data.description"
+                    placeholder="Beschreibung"
+                />
             </div>
             <div class="grid gap-2">
                 <Label>Layout</Label>

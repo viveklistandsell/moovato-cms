@@ -65,27 +65,27 @@ final class WorkProcessWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'bg_image_path' => ['nullable', 'string', 'max:1000'],
-            'bg_image_url' => ['nullable', 'string', 'max:2000'],
+            'bg_image_path' => ['nullable', 'string'],
+            'bg_image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:600'],
-            'step_label' => ['nullable', 'string', 'max:40'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2048'],
-            'items' => ['nullable', 'array', 'max:8'],
-            'items.*.title' => ['nullable', 'string', 'max:160'],
-            'items.*.url' => ['nullable', 'string', 'max:2048'],
-            'items.*.icon' => ['nullable', 'string', 'max:80'],
-            'items.*.image_alt' => ['nullable', 'string', 'max:160'],
-            'items.*.image_path' => ['nullable', 'string', 'max:1000'],
-            'items.*.image_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'step_label' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
+            'items' => ['nullable', 'array'],
+            'items.*.title' => ['nullable', 'string'],
+            'items.*.url' => ['nullable', 'string'],
+            'items.*.icon' => ['nullable', 'string'],
+            'items.*.image_alt' => ['nullable', 'string'],
+            'items.*.image_path' => ['nullable', 'string'],
+            'items.*.image_url' => ['nullable', 'string'],
         ];
     }
 }

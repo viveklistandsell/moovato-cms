@@ -59,8 +59,8 @@ final class HeroWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'alignment' => ['required', 'in:left,center,right'],
             'overlay' => ['boolean'],
             'height' => ['required', 'in:sm,md,lg,xl'],
@@ -70,14 +70,14 @@ final class HeroWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'title' => ['nullable', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:500'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'primary_label' => ['nullable', 'string', 'max:80'],
-            'primary_url' => ['nullable', 'string', 'max:2000'],
-            'secondary_label' => ['nullable', 'string', 'max:80'],
-            'secondary_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'title' => ['nullable', 'string'],
+            'subtitle' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'primary_label' => ['nullable', 'string'],
+            'primary_url' => ['nullable', 'string'],
+            'secondary_label' => ['nullable', 'string'],
+            'secondary_url' => ['nullable', 'string'],
         ];
     }
 }

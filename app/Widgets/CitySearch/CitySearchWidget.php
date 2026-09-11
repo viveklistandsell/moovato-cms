@@ -59,6 +59,7 @@ final class CitySearchWidget implements WidgetContract
         return [
             'title' => 'Finden Sie die besten Umzugsunternehmen in Ihrer Nähe',
             'subtitle' => 'Auf der Suche nach den besten Umzugsunternehmen in Deutschland? Suchen & vergleichen Sie ganz einfach Umzugsunternehmen in Ihrer Region, bevor Sie eine Wahl treffen.',
+            'description' => '',
             'card_prefix' => 'Top 10 Umzugsunternehmen in',
             'search_placeholder' => 'Stadt oder Umzugsfirma suchen',
             'search_url' => '#',
@@ -71,12 +72,12 @@ final class CitySearchWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'cities' => ['nullable', 'array', 'max:12'],
-            'cities.*.path' => ['nullable', 'string', 'max:1000'],
-            'cities.*.url' => ['nullable', 'string', 'max:2000'],
-            'cities.*.alt' => ['nullable', 'string', 'max:160'],
-            'cities.*.name' => ['nullable', 'string', 'max:120'],
-            'cities.*.link' => ['nullable', 'string', 'max:2000'],
+            'cities' => ['nullable', 'array'],
+            'cities.*.path' => ['nullable', 'string'],
+            'cities.*.url' => ['nullable', 'string'],
+            'cities.*.alt' => ['nullable', 'string'],
+            'cities.*.name' => ['nullable', 'string'],
+            'cities.*.link' => ['nullable', 'string'],
         ];
     }
 
@@ -86,11 +87,12 @@ final class CitySearchWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'title' => ['nullable', 'string', 'max:200'],
-            'subtitle' => ['nullable', 'string', 'max:500'],
-            'card_prefix' => ['nullable', 'string', 'max:120'],
-            'search_placeholder' => ['nullable', 'string', 'max:120'],
-            'search_url' => ['nullable', 'string', 'max:2000'],
+            'title' => ['nullable', 'string'],
+            'subtitle' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'card_prefix' => ['nullable', 'string'],
+            'search_placeholder' => ['nullable', 'string'],
+            'search_url' => ['nullable', 'string'],
         ];
     }
 }

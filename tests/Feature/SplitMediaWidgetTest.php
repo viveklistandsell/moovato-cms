@@ -9,13 +9,13 @@ test('split media is registered under the split_media slug', function (): void {
     expect(app(WidgetRegistry::class)->resolve('split_media'))->toBe(SplitMediaWidget::class);
 });
 
-test('split media defaults to a full-bleed image on the right with a checklist', function (): void {
+test('split media defaults to a full-bleed image on the right with a checklist body', function (): void {
     $settings = SplitMediaWidget::defaultSettings();
     $data = SplitMediaWidget::defaultData();
 
-    expect($settings)->toHaveKeys(['image_path', 'image_url', 'image_side', 'marker_style', 'heading_style'])
+    expect($settings)->toHaveKeys(['image_path', 'image_url', 'image_side'])
         ->and($settings['image_side'])->toBe('right')
-        ->and($data['points'])->toHaveCount(5);
+        ->and($data['body'])->toContain('<ul>');
 });
 
 test('split media exposes the picker metadata shape', function (): void {

@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Page\Page\BulkActionPagesRequest;
 use App\Http\Requests\Admin\Page\Page\StorePageRequest;
 use App\Http\Requests\Admin\Page\Page\UpdatePageRequest;
+use App\Models\CompanyTranslation;
 use App\Models\Language;
 use App\Models\Page;
 use App\Models\PageCategory;
@@ -23,7 +24,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -86,7 +86,6 @@ final class PageController extends Controller
 
         if ($langFilter !== 'any' && in_array($langFilter, [...$activeCodes, 'both'], true)) {
             if ($langFilter === 'both' && count($activeCodes) > 0) {
-                // Page must have a translation row for EVERY active language.
                 foreach ($activeCodes as $code) {
                     $query->whereHas('translations', fn (Builder $t) => $t->where('lang', $code));
                 }
@@ -113,6 +112,7 @@ final class PageController extends Controller
             'pages' => $pages,
             'languages' => fn (): array => $this->presentLanguages(),
             'categoryOptions' => fn (): array => $this->categoryOptions(),
+            'systemPages' => fn (): array => $this->systemPages(),
             'statusCounts' => fn (): array => $this->statusCounts($request->user()?->id),
             'filters' => [
                 'q' => $search,
@@ -190,6 +190,11 @@ final class PageController extends Controller
         $data['image'] = $request->file('image');
 
         $action->handle($page, $data);
+        if ($request->boolean('stay')) {
+            return redirect()
+                ->route('admin.pages.edit', $page)
+                ->with('toast', ['type' => 'success', 'message' => 'Page updated.']);
+        }
 
         return redirect()
             ->route('admin.pages.index')
@@ -228,14 +233,13 @@ final class PageController extends Controller
 
         $count = DB::transaction(function () use ($action, $ids): int {
             if ($action === 'delete') {
-                $pages = Page::query()->whereIn('id', $ids)->get(['id', 'image']);
+                $deletePage = app(DeletePage::class);
+                $pages = Page::query()->whereIn('id', $ids)->get();
                 foreach ($pages as $page) {
-                    if ($page->image !== null) {
-                        Storage::disk('public')->delete($page->image);
-                    }
+                    $deletePage->handle($page);
                 }
 
-                return Page::query()->whereIn('id', $ids)->delete();
+                return $pages->count();
             }
 
             $update = match ($action) {
@@ -321,7 +325,13 @@ final class PageController extends Controller
      */
     private function urlPrefixes(): array
     {
-        $base = mb_rtrim((string) config('app.url'), '/');
+        $request = request();
+        $base = mb_rtrim(
+            $request instanceof Request
+                ? $request->getSchemeAndHttpHost()
+                : (string) config('app.url'),
+            '/',
+        );
         $defaultCode = Language::query()
             ->where('lang_is_default', true)
             ->where('status', true)
@@ -412,6 +422,63 @@ final class PageController extends Controller
             ['value' => 'default', 'label' => 'Default'],
             ['value' => 'fullwidth', 'label' => 'Full width'],
             ['value' => 'nolayout', 'label' => 'No layout'],
+        ];
+    }
+
+    /**
+     * Shown on the Pages Index page as read-only "System Pages" cards
+     * so admins can click through and view / QA the live frontend
+     * without hunting for URLs.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function systemPages(): array
+    {
+        $sampleSlug = CompanyTranslation::query()
+            ->where('lang', 'de')
+            ->whereHas('company', fn (Builder $q) => $q->where('status', 'published'))
+            ->orderBy('id')
+            ->value('permalink');
+
+        $sampleUrl = fn (string $routeName) => $sampleSlug !== null
+            ? route($routeName, $routeName === 'companies.show'
+                ? ['permalink' => $sampleSlug]
+                : ['slug' => $sampleSlug])
+            : null;
+
+        return [
+            [
+                'id' => 'companies_index',
+                'title' => __('admin.system_pages.companies_index.title'),
+                'description' => __('admin.system_pages.companies_index.description'),
+                'url' => route('companies.index'),
+                'icon' => 'list',
+                'requires_sample' => false,
+            ],
+            [
+                'id' => 'company_show',
+                'title' => __('admin.system_pages.company_show.title'),
+                'description' => __('admin.system_pages.company_show.description'),
+                'url' => $sampleUrl('companies.show'),
+                'icon' => 'building',
+                'requires_sample' => true,
+            ],
+            [
+                'id' => 'company_review',
+                'title' => __('admin.system_pages.company_review.title'),
+                'description' => __('admin.system_pages.company_review.description'),
+                'url' => $sampleUrl('companies.review.create'),
+                'icon' => 'star',
+                'requires_sample' => true,
+            ],
+            [
+                'id' => 'company_review_thanks',
+                'title' => __('admin.system_pages.company_review_thanks.title'),
+                'description' => __('admin.system_pages.company_review_thanks.description'),
+                'url' => $sampleUrl('companies.review.thanks'),
+                'icon' => 'check',
+                'requires_sample' => true,
+            ],
         ];
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Company;
 use App\Models\EmailSetting;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Policies\CompanyPlanPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -113,11 +115,26 @@ final class AppServiceProvider extends ServiceProvider
      * Grant Super Admin role a free pass on every Gate / can() check. This
      * keeps fine-grained permission checks in controllers and policies clean
      * — we never have to special-case the super admin downstream.
+     *
+     * Also wires up the CompanyPlanPolicy so `Gate::authorize('portal.<x>',
+     * $company)` works from controllers without an explicit `->policy(...)`
+     * call each time.
      */
     private function configureAuthorization(): void
     {
-        Gate::before(static function (User $user, string $ability): ?bool {
-            return $user->isSuperAdmin() ? true : null;
+        // `mixed` on purpose — this closure fires for BOTH the
+        // admin `web` guard (App\Models\User) and the partner
+        // `company` guard (App\Models\CompanyUser). Only the
+        // admin has the super-admin role concept; partners fall
+        // through to the normal policy check.
+        Gate::before(static function (mixed $user, string $ability): ?bool {
+            if ($user instanceof User && $user->isSuperAdmin()) {
+                return true;
+            }
+
+            return null;
         });
+
+        Gate::policy(Company::class, CompanyPlanPolicy::class);
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'title', 'permalink', 'image', 'template',
     'is_home', 'user_id', 'status',
+    'nav_label', 'qa_score', 'brand_size',
 ])]
 final class Page extends Model
 {

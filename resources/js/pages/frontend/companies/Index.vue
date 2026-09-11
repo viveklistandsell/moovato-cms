@@ -34,6 +34,8 @@ type Company = {
     coverage_cities: string[];
     primary_services: string[];
     primary_phone: string | null;
+    can_claim: boolean;
+    claim_url: string | null;
 };
 
 type PaginationLink = { url: string | null; label: string; active: boolean };
@@ -50,7 +52,6 @@ const props = defineProps<{
     verifiedOnly: boolean;
     topRatedOnly: boolean;
     minRating: number;
-    minReviews: number;
     priceMin: number | null;
     priceMax: number | null;
     sort: string;
@@ -85,7 +86,6 @@ const t = computed(() => ({
     verified_only: props.locale === 'de' ? 'Nur verifiziert' : 'Verified only',
     top_rated_only: props.locale === 'de' ? 'Nur Top-bewertet' : 'Top-rated only',
     min_rating: props.locale === 'de' ? 'Mindestbewertung' : 'Min. rating',
-    min_reviews: props.locale === 'de' ? 'Mindestanzahl Bewertungen' : 'Min. reviews',
     price_range: props.locale === 'de' ? 'Preisspanne (€)' : 'Price range (€)',
     price_from: props.locale === 'de' ? 'ab' : 'from',
     price_to: props.locale === 'de' ? 'bis' : 'to',
@@ -98,6 +98,7 @@ const t = computed(() => ({
     sort_newest: props.locale === 'de' ? 'Neueste' : 'Newest',
     request_quote: props.locale === 'de' ? 'Angebot anfordern' : 'Request a quote',
     details: props.locale === 'de' ? 'Details' : 'Details',
+    claim_listing: props.locale === 'de' ? 'Ist das Ihr Unternehmen?' : 'Is this your business?',
     top_rated: props.locale === 'de' ? 'Top-bewertetes Umzugsunternehmen' : 'Top-rated moving company',
     top_rated_short: props.locale === 'de' ? 'Top bewertet' : 'Top rated',
     verified: props.locale === 'de' ? 'Verifiziert' : 'Verified',
@@ -119,7 +120,6 @@ const localServices = ref<number[]>([...props.activeServiceIds]);
 const localVerified = ref<boolean>(props.verifiedOnly);
 const localTopRated = ref<boolean>(props.topRatedOnly);
 const localMinRating = ref<number>(props.minRating);
-const localMinReviews = ref<number>(props.minReviews);
 const localPriceMin = ref<string>(props.priceMin !== null ? String(props.priceMin) : '');
 const localPriceMax = ref<string>(props.priceMax !== null ? String(props.priceMax) : '');
 const localSort = ref<string>(props.sort);
@@ -158,7 +158,6 @@ function applyFilters(): void {
     if (localVerified.value) params.verified = '1';
     if (localTopRated.value) params.top_rated = '1';
     if (localMinRating.value > 0) params.min_rating = localMinRating.value;
-    if (localMinReviews.value > 0) params.min_reviews = localMinReviews.value;
     const pMin = Number(localPriceMin.value);
     const pMax = Number(localPriceMax.value);
     if (localPriceMin.value !== '' && Number.isFinite(pMin) && pMin > 0) params.price_min = pMin;
@@ -186,7 +185,6 @@ function resetFilters(): void {
     localVerified.value = false;
     localTopRated.value = false;
     localMinRating.value = 0;
-    localMinReviews.value = 0;
     localPriceMin.value = '';
     localPriceMax.value = '';
     localSort.value = 'relevant';
@@ -201,7 +199,6 @@ const hasFilters = computed(
         localVerified.value ||
         localTopRated.value ||
         localMinRating.value > 0 ||
-        localMinReviews.value > 0 ||
         localPriceMin.value !== '' ||
         localPriceMax.value !== '' ||
         localSort.value !== 'relevant',
@@ -215,7 +212,6 @@ const activeFilterCount = computed(() => {
     if (localVerified.value) count++;
     if (localTopRated.value) count++;
     if (localMinRating.value > 0) count++;
-    if (localMinReviews.value > 0) count++;
     if (localPriceMin.value !== '') count++;
     if (localPriceMax.value !== '') count++;
     if (localSort.value !== 'relevant') count++;
@@ -294,11 +290,11 @@ onBeforeUnmount(() => {
                         <span aria-hidden="true" class="mv-ci-eyebrow-dot"></span>
                         {{ t.eyebrow }}
                     </span>
-                    <h1 class="mv-ci-title mt-5">
+                    <h1 class="mv-ci-title mt-2">
                         {{ t.heading_lead }}
                         <em>{{ t.heading_accent }}</em>
                     </h1>
-                    <p class="mt-5 max-w-xl text-base leading-relaxed text-[var(--slate)] md:text-lg">
+                    <p class="mt-3 max-w-xl text-base leading-relaxed text-[var(--slate)] md:text-lg">
                         {{ t.subheading }}
                     </p>
                 </div>
@@ -324,7 +320,7 @@ onBeforeUnmount(() => {
                     </li>
                 </ul>
             </header>
-            <div class="mt-12 grid gap-6 md:mt-16 lg:grid-cols-[300px_1fr] lg:gap-6">
+            <div class="mt-10 grid gap-6 md:mt-16 lg:grid-cols-[300px_1fr] lg:gap-6">
                 <aside class="mv-ci-rail self-start lg:sticky lg:top-24" data-mv-reveal>
                     <button
                         type="button"
@@ -422,25 +418,6 @@ onBeforeUnmount(() => {
                                         step="0.5"
                                         class="mv-ci-range mt-4"
                                         :style="{ '--mv-ci-progress': ratingProgress }"
-                                        @change="applyFilters"
-                                    />
-                                </div>
-
-                                <div>
-                                    <div class="flex items-baseline justify-between gap-3">
-                                        <label for="mv-ci-reviews" class="mv-ci-label mb-0">{{ t.min_reviews }}</label>
-                                        <span class="mv-ci-rating-chip">
-                                            {{ localMinReviews > 0 ? localMinReviews : '—' }}
-                                        </span>
-                                    </div>
-                                    <input
-                                        id="mv-ci-reviews"
-                                        v-model.number="localMinReviews"
-                                        type="range"
-                                        min="0"
-                                        max="500"
-                                        step="10"
-                                        class="mv-ci-range mt-4"
                                         @change="applyFilters"
                                     />
                                 </div>
@@ -693,6 +670,13 @@ onBeforeUnmount(() => {
                                     >
                                         {{ t.details }}
                                     </Link>
+                                    <a
+                                        v-if="c.can_claim && c.claim_url"
+                                        :href="c.claim_url"
+                                        class="mv-directory__claim"
+                                    >
+                                        {{ t.claim_listing }}
+                                    </a>
                                 </div>
                             </article>
                         </li>

@@ -38,7 +38,17 @@ export default defineConfig({
         }),
     ],
     build: {
-        rollupOptions: {
+        chunkSizeWarningLimit: 1600,
+        rolldownOptions: {
+            checks: {
+                pluginTimings: false,
+            },
+            onLog(level, log, defaultHandler) {
+                if (log.code === 'INVALID_ANNOTATION' && log.id?.includes('node_modules')) {
+                    return;
+                }
+                defaultHandler(level, log);
+            },
             output: {
                 manualChunks(id) {
                     if (id.includes('node_modules/vue/') || id.includes('node_modules/@vue/')) {

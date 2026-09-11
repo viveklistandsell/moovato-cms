@@ -61,12 +61,12 @@ final class FeaturesWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
-            'subheading' => ['nullable', 'string', 'max:500'],
-            'items' => ['nullable', 'array', 'max:12'],
-            'items.*.icon' => ['nullable', 'string', 'max:64'],
-            'items.*.title' => ['nullable', 'string', 'max:120'],
-            'items.*.description' => ['nullable', 'string', 'max:500'],
+            'heading' => ['nullable', 'string'],
+            'subheading' => ['nullable', 'string'],
+            'items' => ['nullable', 'array'],
+            'items.*.icon' => ['nullable', 'string'],
+            'items.*.title' => ['nullable', 'string'],
+            'items.*.description' => ['nullable', 'string'],
         ];
     }
 }

@@ -46,10 +46,10 @@ final class CtaBannerWidget implements WidgetContract
             'primary_label' => 'Kostenloses Angebot anfordern',
             'primary_url' => '#angebot',
             'points' => [
-                'Privat, Gewerbe, Fernumzug & Spezialtransport',
-                'Engagierter, zuverlässiger und stressfreier Service',
-                'Kundenorientiert mit transparenter Kommunikation',
-                'Für Privatkunden und Unternehmen mit Sorgfalt',
+                ['title' => 'Privat, Gewerbe, Fernumzug & Spezialtransport', 'description' => 'Wir decken jede Art von Umzug ab – ganz gleich, wie groß oder klein.'],
+                ['title' => 'Engagierter, zuverlässiger und stressfreier Service', 'description' => 'Unser Team sorgt dafür, dass Ihr Umzugstag entspannt und reibungslos verläuft.'],
+                ['title' => 'Kundenorientiert mit transparenter Kommunikation', 'description' => 'Sie erfahren jederzeit, was als Nächstes ansteht – ohne versteckte Überraschungen.'],
+                ['title' => 'Für Privatkunden und Unternehmen mit Sorgfalt', 'description' => 'Ob Wohnung oder Büro – wir behandeln jeden Auftrag mit derselben Sorgfalt.'],
             ],
             'image_alt' => 'Moovato Umzugsteam bei der Arbeit in Berlin',
         ];
@@ -58,20 +58,21 @@ final class CtaBannerWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
         ];
     }
 
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
-            'primary_label' => ['nullable', 'string', 'max:80'],
-            'primary_url' => ['nullable', 'string', 'max:2000'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:200'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
+            'heading' => ['nullable', 'string'],
+            'primary_label' => ['nullable', 'string'],
+            'primary_url' => ['nullable', 'string'],
+            'points' => ['nullable', 'array'],
+            'points.*.title' => ['nullable', 'string'],
+            'points.*.description' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
         ];
     }
 }

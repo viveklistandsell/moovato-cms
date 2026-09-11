@@ -37,9 +37,7 @@ final class MediaChecklistWidget implements WidgetContract
             'image_path' => null,
             'image_url' => null,
             'image_side' => 'left', // left | right
-            'marker_style' => 'check', // check | chevron
             'card' => true,
-            'heading_style' => 'bold', // bold | italic
             'bg' => 'none', // none | tinted | dark
         ];
     }
@@ -49,14 +47,8 @@ final class MediaChecklistWidget implements WidgetContract
         return [
             'eyebrow' => '',
             'heading' => 'Schritte zu einem stressfreien Umzug',
-            'body' => 'Persönliche Beratung und ein durchdachter Ablauf nehmen Ihnen den Stress – damit Sie Ihren Umzug in Berlin von Anfang bis Ende entspannt angehen.',
+            'body' => '<p>Persönliche Beratung und ein durchdachter Ablauf nehmen Ihnen den Stress – damit Sie Ihren Umzug in Berlin von Anfang bis Ende entspannt angehen.</p><ul><li><strong>Persönlicher Ansprechpartner für Ihren Umzug</strong> – Sie haben während des gesamten Umzugs eine feste Kontaktperson an Ihrer Seite.</li><li><strong>Termine, die zu Ihrem Zeitplan passen</strong> – Wir stimmen den Umzugstermin flexibel auf Ihre Bedürfnisse ab.</li><li><strong>Faire Festpreise, transparent kalkuliert</strong> – Ihr Angebot zeigt jede Position einzeln – klar und nachvollziehbar.</li><li><strong>Rücksichtsvolles, geschultes Team</strong> – Unsere Mitarbeiter gehen sorgfältig mit Ihrem Eigentum und Ihrer Wohnung um.</li></ul>',
             'image_alt' => 'Moovato Beraterin plant einen Umzug in Berlin',
-            'points' => [
-                'Persönlicher Ansprechpartner für Ihren Umzug',
-                'Termine, die zu Ihrem Zeitplan passen',
-                'Faire Festpreise, transparent kalkuliert',
-                'Rücksichtsvolles, geschultes Team',
-            ],
             'button_label' => 'Beratung anfragen',
             'button_url' => '#kontakt',
         ];
@@ -65,12 +57,10 @@ final class MediaChecklistWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'image_path' => ['nullable', 'string', 'max:1000'],
-            'image_url' => ['nullable', 'string', 'max:2000'],
+            'image_path' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'string'],
             'image_side' => ['required', 'in:left,right'],
-            'marker_style' => ['required', 'in:check,chevron'],
             'card' => ['boolean'],
-            'heading_style' => ['nullable', 'in:bold,italic'],
             'bg' => ['nullable', 'in:none,tinted,dark'],
         ];
     }
@@ -78,14 +68,12 @@ final class MediaChecklistWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'eyebrow' => ['nullable', 'string', 'max:120'],
-            'heading' => ['nullable', 'string', 'max:255'],
-            'body' => ['nullable', 'string', 'max:1200'],
-            'image_alt' => ['nullable', 'string', 'max:160'],
-            'points' => ['nullable', 'array', 'max:8'],
-            'points.*' => ['nullable', 'string', 'max:160'],
-            'button_label' => ['nullable', 'string', 'max:80'],
-            'button_url' => ['nullable', 'string', 'max:2000'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading' => ['nullable', 'string'],
+            'body' => ['nullable', 'string'],
+            'image_alt' => ['nullable', 'string'],
+            'button_label' => ['nullable', 'string'],
+            'button_url' => ['nullable', 'string'],
         ];
     }
 }

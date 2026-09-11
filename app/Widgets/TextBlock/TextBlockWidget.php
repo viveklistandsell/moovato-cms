@@ -60,7 +60,7 @@ final class TextBlockWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'heading' => ['nullable', 'string', 'max:255'],
+            'heading' => ['nullable', 'string'],
             'body' => ['nullable', 'string'],
         ];
     }

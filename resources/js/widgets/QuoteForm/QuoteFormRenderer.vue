@@ -104,7 +104,12 @@ function submit(): void {
 </script>
 
 <template>
-    <section ref="sectionRef" class="mv-quote section-py" id="angebot">
+    <section
+        ref="sectionRef"
+        v-reveal
+        class="mv-quote section-py"
+        id="angebot"
+    >
         <div
             class="container-xl grid grid-cols-1 items-start gap-y-9 lg:grid-cols-2 lg:gap-x-10"
         >
@@ -113,7 +118,7 @@ function submit(): void {
                 <span class="v7-eyebrow"
                     ><FileText :size="16" /> {{ data.eyebrow }}</span
                 >
-                <h2 class="mv-quote__h1">{{ data.heading }}</h2>
+                <h2 class="mv-quote__h1 mv-section-heading">{{ data.heading }}</h2>
                 <p class="lead">{{ data.lead }}</p>
                 <ul>
                     <li v-for="(b, i) in benefits" :key="i">

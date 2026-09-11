@@ -91,7 +91,7 @@ final class ContactWidget implements WidgetContract
     public static function settingsRules(): array
     {
         return [
-            'map_embed_url' => ['nullable', 'string', 'max:2000'],
+            'map_embed_url' => ['nullable', 'string'],
         ];
     }
 
@@ -101,28 +101,28 @@ final class ContactWidget implements WidgetContract
     public static function dataRules(): array
     {
         return [
-            'phone_title' => ['nullable', 'string', 'max:80'],
-            'phone' => ['nullable', 'string', 'max:80'],
-            'email_title' => ['nullable', 'string', 'max:80'],
-            'email' => ['nullable', 'string', 'max:160'],
-            'location_title' => ['nullable', 'string', 'max:80'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'address_url' => ['nullable', 'string', 'max:2048'],
-            'eyebrow' => ['nullable', 'string', 'max:80'],
-            'heading_lead' => ['nullable', 'string', 'max:120'],
-            'heading_highlight' => ['nullable', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'name_placeholder' => ['nullable', 'string', 'max:80'],
-            'email_placeholder' => ['nullable', 'string', 'max:80'],
-            'phone_placeholder' => ['nullable', 'string', 'max:80'],
-            'service_placeholder' => ['nullable', 'string', 'max:80'],
-            'services' => ['nullable', 'array', 'max:12'],
-            'services.*' => ['nullable', 'string', 'max:80'],
-            'message_placeholder' => ['nullable', 'string', 'max:160'],
-            'submit_label' => ['nullable', 'string', 'max:60'],
-            'success_title' => ['nullable', 'string', 'max:120'],
-            'success_text' => ['nullable', 'string', 'max:500'],
-            'watermark' => ['nullable', 'string', 'max:40'],
+            'phone_title' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string'],
+            'email_title' => ['nullable', 'string'],
+            'email' => ['nullable', 'string'],
+            'location_title' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+            'address_url' => ['nullable', 'string'],
+            'eyebrow' => ['nullable', 'string'],
+            'heading_lead' => ['nullable', 'string'],
+            'heading_highlight' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'name_placeholder' => ['nullable', 'string'],
+            'email_placeholder' => ['nullable', 'string'],
+            'phone_placeholder' => ['nullable', 'string'],
+            'service_placeholder' => ['nullable', 'string'],
+            'services' => ['nullable', 'array'],
+            'services.*' => ['nullable', 'string'],
+            'message_placeholder' => ['nullable', 'string'],
+            'submit_label' => ['nullable', 'string'],
+            'success_title' => ['nullable', 'string'],
+            'success_text' => ['nullable', 'string'],
+            'watermark' => ['nullable', 'string'],
         ];
     }
 }

@@ -44,6 +44,12 @@ type RelatedPost = {
     is_sticky: boolean;
     is_featured: boolean;
     categories: Category[];
+    seo?: {
+        meta_title: string | null;
+        meta_description: string | null;
+        schema: Record<string, unknown> | null;
+        meta_image_url: string | null;
+    };
 };
 
 const props = defineProps<{
@@ -73,7 +79,22 @@ const formattedDate = computed(() => {
     );
 });
 
-const documentTitle = computed(() => props.post.title);
+const documentTitle = computed(() => props.post.seo?.meta_title || props.post.title);
+const seoDescription = computed(
+    () => props.post.seo?.meta_description || props.post.excerpt || '',
+);
+const seoImage = computed(
+    () => props.post.seo?.meta_image_url || props.post.image_url || null,
+);
+const seoSchemaJson = computed<string | null>(() => {
+    const s = props.post.seo?.schema;
+    if (! s || typeof s !== 'object' || Object.keys(s).length === 0) return null;
+    try {
+        return JSON.stringify(s);
+    } catch {
+        return null;
+    }
+});
 
 const contentRef = ref<HTMLElement | null>(null);
 const toc = ref<TocEntry[]>([]);
@@ -193,19 +214,38 @@ onBeforeUnmount(() => observer?.disconnect());
     <Head>
         <title>{{ documentTitle }}</title>
         <meta
+            v-if="seoDescription"
+            head-key="description"
+            name="description"
+            :content="seoDescription"
+        />
+        <meta
             head-key="og:title"
             property="og:title"
             :content="documentTitle"
         />
         <meta
-            v-if="post.image_url"
+            v-if="seoDescription"
+            head-key="og:description"
+            property="og:description"
+            :content="seoDescription"
+        />
+        <meta
+            v-if="seoImage"
             head-key="og:image"
             property="og:image"
-            :content="post.image_url"
+            :content="seoImage"
+        />
+        <component
+            :is="'script'"
+            v-if="seoSchemaJson"
+            head-key="schema-ld"
+            type="application/ld+json"
+            v-html="seoSchemaJson"
         />
     </Head>
 
-    <div class="mx-auto max-w-7xl px-4 py-10">
+    <div class="container-xl section-py">
         <!-- Breadcrumb -->
         <nav class="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
             <Link
@@ -238,7 +278,7 @@ onBeforeUnmount(() => observer?.disconnect());
                     class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2"
                 >
                     <div
-                        class="mb-3 inline-flex items-center gap-2 text-base font-bold text-foreground"
+                        class="mb-3 inline-flex items-center gap-2 text-2xl font-extrabold text-foreground"
                     >
                         <List class="size-4 text-primary" />
                         {{ t.toc }}
@@ -274,7 +314,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Categories -->
                 <div
                     v-if="post.categories.length > 0"
-                    class="mb-3 flex flex-wrap gap-2 text-sm font-semibold tracking-wider text-rose-600 uppercase dark:text-rose-400"
+                    class="flex flex-wrap gap-2 text-sm font-extrabold tracking-wider  text-[var(--orange)] uppercase dark:text-[var(--orange)]"
                 >
                     <Link
                         v-for="cat in post.categories"
@@ -293,14 +333,14 @@ onBeforeUnmount(() => observer?.disconnect());
 
                 <!-- Title -->
                 <h1
-                    class="mb-4 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl md:text-5xl"
+                    class="mb-2 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl md:text-5xl"
                 >
                     {{ post.title }}
                 </h1>
 
                 <!-- Meta row -->
                 <div
-                    class="mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
+                    class="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
                 >
                     <span v-if="post.author">{{ t.by }} {{ post.author }}</span>
                     <span
@@ -326,7 +366,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Featured image -->
                 <div
                     v-if="post.image_url"
-                    class="mb-10 overflow-hidden rounded-xl bg-muted"
+                    class="mb-5 overflow-hidden rounded-xl bg-muted"
                 >
                     <img
                         :src="post.image_url"
@@ -354,7 +394,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 <!-- Tags -->
                 <div
                     v-if="post.tags.length > 0"
-                    class="mt-12 flex flex-wrap gap-2 border-t border-border/60 pt-6"
+                    class="mt-5 flex flex-wrap gap-2 border-t border-border/60 pt-6"
                 >
                     <Link
                         v-for="tag in post.tags"
@@ -387,11 +427,11 @@ onBeforeUnmount(() => observer?.disconnect());
         v-if="related.length > 0"
         class="border-t border-border/60 bg-muted/20"
     >
-        <div class="mx-auto max-w-6xl px-4 py-12">
-            <h2 class="mb-6 text-xl font-bold tracking-tight">
+        <div class="container-xl section-py">
+            <h2 class="mb-6 text-2xl font-extrabold tracking-tight">
                 {{ t.related }}
             </h2>
-            <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
                 <PostCard
                     v-for="rel in related"
                     :key="rel.id"

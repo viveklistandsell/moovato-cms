@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Companies;
 
+use App\Http\Controllers\Admin\Reviews\ReviewController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Companies\Company\BulkActionCompaniesRequest;
 use App\Http\Requests\Admin\Companies\Company\ReorderCompaniesRequest;
@@ -16,6 +17,7 @@ use App\Models\CompanyFaqTranslation;
 use App\Models\Country;
 use App\Models\District;
 use App\Models\Language;
+use App\Models\PlanChangeRequest;
 use App\Models\ServiceCategory;
 use App\Models\ServiceParentCategory;
 use App\Models\State;
@@ -27,15 +29,6 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Admin CRUD for the Companies (business-listing) entity.
- *
- * Companies are the glue between Services (what they do) and Locations
- * (where they work). Every listing page on the public site intersects
- * these three sets — so this controller keeps the pivots (services,
- * service_areas), the translation sidecar, and the per-company FAQ
- * repeater all consistent inside a single DB transaction.
- */
 final class CompanyController extends Controller
 {
     private const SORTABLE_COLUMNS = [
@@ -122,8 +115,16 @@ final class CompanyController extends Controller
 
         $paginated = $query->paginate($perPage)->withQueryString();
 
+        $companyIds = $paginated->getCollection()->pluck('id')->all();
+        $pendingByCompany = PlanChangeRequest::query()
+            ->pending()
+            ->whereIn('company_id', $companyIds)
+            ->latest('created_at')
+            ->get()
+            ->keyBy('company_id');
+
         $companies = $paginated->getCollection()
-            ->map(fn (Company $c): array => $this->presentCompany($c))
+            ->map(fn (Company $c): array => $this->presentCompany($c, $pendingByCompany->get($c->id)))
             ->values()
             ->all();
 
@@ -159,11 +160,6 @@ final class CompanyController extends Controller
         ]);
     }
 
-    /**
-     * Slim JSON list of companies for the `company_top_list` widget picker.
-     * Pass `q` to search by name, or `ids[]` to re-hydrate an existing pick
-     * (order is restored by the caller, not here).
-     */
     public function lookup(Request $request): JsonResponse
     {
         $search = mb_trim((string) $request->query('q', ''));
@@ -252,7 +248,7 @@ final class CompanyController extends Controller
             ->with('toast', ['type' => 'success', 'message' => __('admin.companies.company_created_toast')]);
     }
 
-    public function edit(Company $company): Response
+    public function edit(Request $request, Company $company): Response
     {
         $company->load([
             'primaryCity:id,state_id,name,permalink',
@@ -276,6 +272,7 @@ final class CompanyController extends Controller
             'parentCategories' => $this->presentParentCategories(),
             'serviceCategories' => $this->presentServiceCategories(),
             'nextSortOrder' => $company->sort_order,
+            'reviews' => fn (): array => ReviewController::paginateForCompany($request, (int) $company->id),
         ]);
     }
 
@@ -298,6 +295,11 @@ final class CompanyController extends Controller
             $this->syncMedia($company, $data['media'] ?? []);
             $this->syncFaqs($company, $data['faqs'] ?? []);
         });
+        if ($request->boolean('stay')) {
+            return redirect()
+                ->route('admin.companies.edit', $company)
+                ->with('toast', ['type' => 'success', 'message' => __('admin.companies.company_updated_toast')]);
+        }
 
         return redirect()
             ->route('admin.companies.index')
@@ -391,13 +393,21 @@ final class CompanyController extends Controller
      */
     private function companyAttributes(array $data): array
     {
-        return collect($data)->only([
+        $attrs = collect($data)->only([
             'primary_city_id', 'primary_district_id', 'street', 'postal_code',
             'logo', 'cover', 'verified', 'is_top_rated', 'plan_tier',
             'rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown',
             'google_rating', 'google_review_count',
-            'founded_year', 'employee_count', 'status', 'sort_order',
+            'founded_year', 'employee_count', 'opening_hours', 'status', 'sort_order',
         ])->all();
+
+        foreach (['rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown'] as $observed) {
+            if (array_key_exists($observed, $attrs) && $attrs[$observed] === null) {
+                unset($attrs[$observed]);
+            }
+        }
+
+        return $attrs;
     }
 
     /**
@@ -522,7 +532,7 @@ final class CompanyController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function presentCompany(Company $company): array
+    private function presentCompany(Company $company, ?PlanChangeRequest $pending = null): array
     {
         return [
             'id' => $company->id,
@@ -539,7 +549,17 @@ final class CompanyController extends Controller
             'cover' => $company->cover,
             'verified' => (bool) $company->verified,
             'is_top_rated' => (bool) $company->is_top_rated,
-            'plan_tier' => $company->plan_tier,
+            'plan_tier' => $company->tier()->value,
+            'plan_label' => $company->tier()->label(),
+            'pending_plan_request' => $pending === null ? null : [
+                'id' => (int) $pending->id,
+                'from_tier' => $pending->from_tier->value,
+                'from_label' => $pending->from_tier->label(),
+                'to_tier' => $pending->to_tier->value,
+                'to_label' => $pending->to_tier->label(),
+                'is_upgrade' => $pending->to_tier->isHigherThan($pending->from_tier),
+                'created_at' => $pending->created_at?->toIso8601String(),
+            ],
             'rating_avg' => (float) $company->rating_avg,
             'review_count' => (int) $company->review_count,
             'recommend_pct' => (int) $company->recommend_pct,
@@ -580,6 +600,7 @@ final class CompanyController extends Controller
             'google_review_count' => (int) $company->google_review_count,
             'founded_year' => $company->founded_year,
             'employee_count' => $company->employee_count,
+            'opening_hours' => $company->opening_hours,
             'status' => $company->status,
             'sort_order' => (int) $company->sort_order,
             'translations' => $company->translations->map(fn ($t): array => [

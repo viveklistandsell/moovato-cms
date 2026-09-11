@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import NextButton from '@/widgets/shared/NextButton.vue';
 import WidgetIcon from '@/widgets/shared/WidgetIcon.vue';
 
 type Step = { icon?: string; title?: string; description?: string };
@@ -8,6 +9,8 @@ type Data = {
     eyebrow?: string;
     heading?: string;
     steps?: Step[];
+    button_label?: string;
+    button_url?: string;
 };
 
 defineProps<{ settings: Record<string, unknown>; data: Data }>();
@@ -63,15 +66,21 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <section ref="root" class="mv-howitworks section-py">
+    <section ref="root" v-reveal class="mv-howitworks section-py">
         <div class="container-xl">
             <div class="flex flex-col items-center">
                 <span v-if="data.eyebrow" class="mv-howitworks__eyebrow">
                     {{ data.eyebrow }}
                 </span>
-                <h2 v-if="data.heading" class="mv-howitworks__heading">
+                <h2 v-if="data.heading" class="mv-howitworks__heading mv-section-heading">
                     {{ data.heading }}
                 </h2>
+                <NextButton
+                    v-if="data.button_label"
+                    class="mt-6"
+                    :label="data.button_label"
+                    :href="data.button_url || '#'"
+                />
             </div>
 
             <div class="mv-howitworks__timeline">
