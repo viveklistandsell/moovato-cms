@@ -41,6 +41,7 @@ return [
         'trust',
         'google',
         'lead',
+        'opening_hours',
         'reply_reviews',
     ],
 
@@ -67,6 +68,7 @@ return [
                 'trust' => false,
                 'google' => false,
                 'lead' => false,
+                'opening_hours' => false,
                 'reply_reviews' => false,
             ],
             'caps' => [
@@ -93,6 +95,7 @@ return [
                 'trust' => false,
                 'google' => true,
                 'lead' => false,
+                'opening_hours' => true,
                 'reply_reviews' => true,
             ],
             'caps' => [
@@ -119,6 +122,7 @@ return [
                 'trust' => true,
                 'google' => true,
                 'lead' => true,
+                'opening_hours' => true,
                 'reply_reviews' => true,
             ],
             'caps' => [

@@ -6,6 +6,7 @@ import {
     Building2,
     ChevronLeft,
     ChevronRight,
+    Clock,
     Globe,
     Loader2,
     Mail,
@@ -78,9 +79,14 @@ type Company = {
     service_areas: ServiceArea[];
     gallery: GalleryItem[];
     faqs: Faq[];
+    opening_hours: OpeningHours | null;
     can_claim: boolean;
     claim_url: string | null;
 };
+
+type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+type DayHours = { closed: boolean; open: string | null; close: string | null };
+type OpeningHours = Record<DayKey, DayHours>;
 
 type PublicReview = {
     id: number;
@@ -129,6 +135,11 @@ const t = computed(() => ({
     top_rated: props.locale === 'de' ? 'Top-bewertetes Umzugsunternehmen' : 'Top-rated moving company',
     verified: props.locale === 'de' ? 'Verifiziert' : 'Verified',
     section_services: props.locale === 'de' ? 'Leistungen' : 'Services',
+    section_opening_hours: props.locale === 'de' ? 'Öffnungszeiten' : 'Opening hours',
+    opening_hours_closed: props.locale === 'de' ? 'Geschlossen' : 'Closed',
+    day_names: (props.locale === 'de'
+        ? ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+        : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) as readonly string[],
     section_about: props.locale === 'de' ? 'Über uns' : 'About',
     section_gallery: props.locale === 'de' ? 'Galerie' : 'Gallery',
     section_areas: props.locale === 'de' ? 'Einsatzgebiete' : 'Service areas',
@@ -951,6 +962,36 @@ function markHelpful(review: PublicReview): void {
                                     <Phone class="size-4" />
                                     {{ t.request_quote }}
                                 </a>
+                            </div>
+                            <div
+                                v-if="company.opening_hours"
+                                class="mt-4 border-t border-[var(--linen)] pt-3"
+                            >
+                                <p class="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--slate)]">
+                                    <Clock class="size-3.5" />
+                                    {{ t.section_opening_hours }}
+                                </p>
+                                <ul class="space-y-1 text-xs">
+                                    <li
+                                        v-for="(day, i) in ['mon','tue','wed','thu','fri','sat','sun'] as const"
+                                        :key="day"
+                                        class="flex items-center justify-between gap-2"
+                                    >
+                                        <span class="text-[var(--slate)]">{{ t.day_names[i] }}</span>
+                                        <span
+                                            v-if="company.opening_hours[day]?.closed"
+                                            class="font-medium text-[var(--slate-light)]"
+                                        >
+                                            {{ t.opening_hours_closed }}
+                                        </span>
+                                        <span
+                                            v-else
+                                            class="font-medium text-[var(--midnight)]"
+                                        >
+                                            {{ company.opening_hours[day]?.open }}–{{ company.opening_hours[day]?.close }}
+                                        </span>
+                                    </li>
+                                </ul>
                             </div>
 
                             <!-- Facts -->

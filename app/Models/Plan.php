@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Cache;
 ])]
 final class Plan extends Model
 {
-    public const CACHE_KEY = 'plans.registry.v4';
+    public const CACHE_KEY = 'plans.registry.v5';
 
     public $incrementing = false;
 

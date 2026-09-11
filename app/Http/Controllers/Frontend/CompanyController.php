@@ -428,6 +428,9 @@ final class CompanyController extends Controller
             'google_review_count' => (int) $c->google_review_count,
             'founded_year' => $c->founded_year,
             'employee_count' => $c->employee_count,
+            'opening_hours' => (
+                $tierPlan && ! empty($tierPlan['features']['opening_hours'])
+            ) ? $c->opening_hours : null,
             'street' => $c->street,
             'postal_code' => $c->postal_code,
             'city_name' => $c->primaryCity?->name,

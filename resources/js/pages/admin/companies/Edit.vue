@@ -31,7 +31,6 @@ import InputError from '@/components/InputError.vue';
 import LocaleTabs from '@/components/common/LocaleTabs.vue';
 import MediaPicker from '@/components/common/MediaPicker.vue';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
-import { localizedUrl } from '@/lib/localizedUrl';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -113,6 +112,40 @@ type FaqEntry = {
     translations: { lang: string; question: string; answer: string }[];
 };
 
+type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+type DayHours = { closed: boolean; open: string | null; close: string | null };
+type OpeningHours = Record<DayKey, DayHours>;
+
+const DAY_KEYS: readonly DayKey[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+function makeDefaultOpeningHours(): OpeningHours {
+    return {
+        mon: { closed: false, open: '09:00', close: '18:00' },
+        tue: { closed: false, open: '09:00', close: '18:00' },
+        wed: { closed: false, open: '09:00', close: '18:00' },
+        thu: { closed: false, open: '09:00', close: '18:00' },
+        fri: { closed: false, open: '09:00', close: '18:00' },
+        sat: { closed: false, open: '10:00', close: '14:00' },
+        sun: { closed: true, open: null, close: null },
+    };
+}
+
+function normalizeOpeningHours(incoming: OpeningHours | null | undefined): OpeningHours {
+    const base = makeDefaultOpeningHours();
+    if (!incoming) return base;
+    for (const k of DAY_KEYS) {
+        const row = incoming[k];
+        if (row && typeof row === 'object') {
+            base[k] = {
+                closed: Boolean(row.closed),
+                open: row.closed ? null : (row.open ?? base[k].open),
+                close: row.closed ? null : (row.close ?? base[k].close),
+            };
+        }
+    }
+    return base;
+}
+
 type CompanyForEdit = {
     id: number;
     primary_city_id: number | null;
@@ -134,6 +167,7 @@ type CompanyForEdit = {
     google_review_count: number;
     founded_year: number | null;
     employee_count: number | null;
+    opening_hours: OpeningHours | null;
     status: string;
     sort_order: number;
     translations: Translation[];
@@ -158,18 +192,6 @@ const props = defineProps<{
 }>();
 
 const isEditing = computed(() => props.company !== null);
-
-const previewUrl = computed<string | null>(() => {
-    if (!props.company) return null;
-    const defaultLocale = props.languages.find((l) => l.is_default)?.code ?? 'de';
-    const slug =
-        props.company.translations.find((t) => t.lang === defaultLocale)?.permalink ??
-        props.company.translations[0]?.permalink ??
-        null;
-
-    return slug ? localizedUrl(defaultLocale, `/company/${slug}`) : null;
-});
-
 
 setBreadcrumbs(() => [
     { title: t('sidebar.dashboard'), href: '/dashboard' },
@@ -236,6 +258,7 @@ const form = useForm({
     google_review_count: props.company?.google_review_count ?? 0,
     founded_year: props.company?.founded_year ?? null,
     employee_count: props.company?.employee_count ?? null,
+    opening_hours: normalizeOpeningHours(props.company?.opening_hours ?? null),
     status: props.company?.status ?? 'published',
     sort_order: props.company?.sort_order ?? props.nextSortOrder,
     translations: seedTranslations(),
@@ -614,6 +637,34 @@ function submit(): void {
         });
     }
 }
+
+/**
+ * Save without leaving the editor. Uses `?stay=1` so the controller
+ * redirects back to `admin.companies.edit` instead of the index, and
+ * `preserveState: true` keeps the local form drafts across the redirect.
+ */
+function saveAndStay(): void {
+    if (!isEditing.value || !props.company) return;
+    form.put(`/admin/companies/${props.company.id}?stay=1`, {
+        preserveScroll: true,
+        preserveState: true,
+        onError: reportValidationErrors,
+    });
+}
+
+/**
+ * Full public URL for a given language tab — used by the clickable
+ * permalink preview below each URL field. Returns null when the tab has
+ * no permalink typed yet so we can render static text instead of a
+ * link-to-nowhere.
+ */
+function livePermalinkUrl(code: string): string | null {
+    const idx = form.translations.findIndex((t) => t.lang === code);
+    const slug = idx === -1 ? '' : (form.translations[idx].permalink ?? '');
+    if (!slug) return null;
+    const prefix = urlPrefixes.value[code] ?? '';
+    return `${prefix}${slug}`;
+}
 </script>
 
 <template>
@@ -706,8 +757,18 @@ function submit(): void {
                                     </div>
                                     <p class="text-xs text-muted-foreground">
                                         {{ t('companies.preview_label') }}:
-                                        <span class="text-primary">
-                                            {{ urlPrefixes[code] }}{{ form.translations[idx].permalink || t('companies.field_permalink_placeholder') }}
+                                        <a
+                                            v-if="livePermalinkUrl(code)"
+                                            :href="livePermalinkUrl(code)!"
+                                            target="_blank"
+                                            rel="noopener"
+                                            class="inline-flex items-center gap-1 font-medium text-[var(--orange)] underline underline-offset-4 hover:text-[color-mix(in_srgb,var(--orange)_80%,black)]"
+                                        >
+                                            {{ urlPrefixes[code] }}{{ form.translations[idx].permalink }}
+                                            <ExternalLink class="size-3" />
+                                        </a>
+                                        <span v-else class="text-[var(--orange)]">
+                                            {{ urlPrefixes[code] }}{{ t('companies.field_permalink_placeholder') }}
                                         </span>
                                     </p>
                                     <InputError :message="translationError(code, 'permalink') ?? undefined" />
@@ -811,6 +872,59 @@ function submit(): void {
                         <Trash2 class="size-4" />
                     </Button>
                 </div>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle>{{ t('companies.section_opening_hours') }}</CardTitle>
+                <CardDescription>{{ t('companies.section_opening_hours_desc') }}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div class="space-y-2">
+                    <div
+                        v-for="day in DAY_KEYS"
+                        :key="day"
+                        class="grid grid-cols-1 items-center gap-3 rounded-md border border-input bg-muted/30 p-3 sm:grid-cols-[110px_1fr_auto]"
+                    >
+                        <div class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                            {{ t(`companies.day_${day}`) }}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <Input
+                                v-model="form.opening_hours[day].open"
+                                type="time"
+                                :disabled="form.opening_hours[day].closed"
+                                class="w-32"
+                            />
+                            <span class="text-xs text-muted-foreground">—</span>
+                            <Input
+                                v-model="form.opening_hours[day].close"
+                                type="time"
+                                :disabled="form.opening_hours[day].closed"
+                                class="w-32"
+                            />
+                        </div>
+                        <label class="flex cursor-pointer items-center gap-2 text-xs font-medium">
+                            <Switch
+                                :model-value="form.opening_hours[day].closed"
+                                @update:model-value="(v) => {
+                                    form.opening_hours[day].closed = v;
+                                    if (v) {
+                                        form.opening_hours[day].open = null;
+                                        form.opening_hours[day].close = null;
+                                    } else {
+                                        form.opening_hours[day].open = form.opening_hours[day].open ?? '09:00';
+                                        form.opening_hours[day].close = form.opening_hours[day].close ?? '18:00';
+                                    }
+                                }"
+                            />
+                            {{ t('companies.opening_hours_closed') }}
+                        </label>
+                    </div>
+                </div>
+                <p class="mt-3 text-[11px] text-muted-foreground">
+                    {{ t('companies.opening_hours_hint') }}
+                </p>
             </CardContent>
         </Card>
 
@@ -1304,21 +1418,15 @@ function submit(): void {
                         {{ t('companies.save_exit') }}
                     </Button>
                     <Button
-                        v-if="previewUrl"
-                        as-child
+                        v-if="isEditing"
                         type="button"
-                        variant="default"
+                        variant="secondary"
+                        :disabled="form.processing"
                         class="w-full"
+                        @click="saveAndStay"
                     >
-                        <a
-                            :href="previewUrl"
-                            target="_blank"
-                            rel="noopener"
-                            class="flex-1"
-                        >
-                            <ExternalLink class="size-4" />
-                            {{ t('companies.preview_button') }}
-                        </a>
+                        <Save class="size-4" />
+                        {{ t('common.save') }}
                     </Button>
                     <Button
                         as-child

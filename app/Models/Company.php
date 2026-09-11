@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
     'logo', 'cover', 'verified', 'is_top_rated', 'plan_tier',
     'rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown',
     'google_rating', 'google_review_count',
-    'founded_year', 'employee_count', 'status', 'sort_order',
+    'founded_year', 'employee_count', 'opening_hours', 'status', 'sort_order',
 ])]
 final class Company extends Model
 {
@@ -33,6 +33,7 @@ final class Company extends Model
         'rating_avg' => 'decimal:1',
         'google_rating' => 'decimal:1',
         'rating_breakdown' => 'array',
+        'opening_hours' => 'array',
         'plan_tier' => PlanTier::class,
     ];
 
@@ -332,6 +333,9 @@ final class Company extends Model
                 Storage::disk('public')->delete((string) $this->cover);
             }
             $updates['cover'] = null;
+        }
+        if (! $tier->hasFeature('opening_hours') && $this->opening_hours !== null) {
+            $updates['opening_hours'] = null;
         }
 
         if ($updates !== []) {

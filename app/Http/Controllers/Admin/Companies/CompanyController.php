@@ -295,6 +295,11 @@ final class CompanyController extends Controller
             $this->syncMedia($company, $data['media'] ?? []);
             $this->syncFaqs($company, $data['faqs'] ?? []);
         });
+        if ($request->boolean('stay')) {
+            return redirect()
+                ->route('admin.companies.edit', $company)
+                ->with('toast', ['type' => 'success', 'message' => __('admin.companies.company_updated_toast')]);
+        }
 
         return redirect()
             ->route('admin.companies.index')
@@ -393,7 +398,7 @@ final class CompanyController extends Controller
             'logo', 'cover', 'verified', 'is_top_rated', 'plan_tier',
             'rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown',
             'google_rating', 'google_review_count',
-            'founded_year', 'employee_count', 'status', 'sort_order',
+            'founded_year', 'employee_count', 'opening_hours', 'status', 'sort_order',
         ])->all();
 
         foreach (['rating_avg', 'review_count', 'recommend_pct', 'rating_breakdown'] as $observed) {
@@ -595,6 +600,7 @@ final class CompanyController extends Controller
             'google_review_count' => (int) $company->google_review_count,
             'founded_year' => $company->founded_year,
             'employee_count' => $company->employee_count,
+            'opening_hours' => $company->opening_hours,
             'status' => $company->status,
             'sort_order' => (int) $company->sort_order,
             'translations' => $company->translations->map(fn ($t): array => [

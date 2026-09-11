@@ -41,7 +41,7 @@ function placementVariant(p: string): 'default' | 'secondary' | 'outline' {
 
 const FEATURE_KEYS = [
     'short_description', 'about', 'founded', 'employees',
-    'faqs', 'cover', 'trust', 'google', 'lead',
+    'faqs', 'cover', 'trust', 'google', 'lead', 'opening_hours',
 ] as const;
 
 const CAP_KEYS = ['contacts', 'services', 'areas', 'gallery', 'faqs', 'reply_reviews'] as const;

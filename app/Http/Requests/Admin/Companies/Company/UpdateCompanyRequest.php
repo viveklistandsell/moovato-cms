@@ -48,6 +48,10 @@ final class UpdateCompanyRequest extends FormRequest
 
             'founded_year' => ['nullable', 'integer', 'min:1800', 'max:2100'],
             'employee_count' => ['nullable', 'integer', 'min:0'],
+            'opening_hours' => ['nullable', 'array'],
+            'opening_hours.*.closed' => ['boolean'],
+            'opening_hours.*.open' => ['nullable', 'string', 'date_format:H:i'],
+            'opening_hours.*.close' => ['nullable', 'string', 'date_format:H:i'],
 
             'status' => ['required', Rule::in(['published', 'draft', 'inactive'])],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
